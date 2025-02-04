@@ -1,0 +1,598 @@
+{
+  "dataType": "basketball_team_standings",
+  "keywords": [],
+  "entityInfo": [
+    {
+      "category": "basketball",
+      "entityType": "player",
+      "entityName": "제일렌 브라운",
+      "leagueId": 0,
+      "teamId": 2,
+      "playerId": 75
+    }
+  ],
+  "data": {
+    "teamList": [
+      {
+        "statistics": {
+          "assists": 787,
+          "biggestLead": 0,
+          "blocks": 165,
+          "defReb": 1007,
+          "fastBreakPoints": 0,
+          "fga": 2746,
+          "fgm": 1246,
+          "fgp": "59.7",
+          "fta": 660,
+          "ftm": 528,
+          "ftp": "80.1",
+          "games": 30,
+          "longestRun": 0,
+          "offReb": 325,
+          "pFouls": 513,
+          "plusMinus": 297,
+          "points": 3588,
+          "pointsInPaint": 0,
+          "pointsOffTurnovers": 0,
+          "secondChancePoints": 0,
+          "steals": 235,
+          "totReb": 1332,
+          "tpa": 1544,
+          "tpm": 568,
+          "tpp": "37.0",
+          "turnovers": 365
+        },
+        "team": {
+          "allStar": false,
+          "city": "Boston",
+          "code": "BOS",
+          "id": 2,
+          "leagues": {
+            "sacramento": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "standard": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "utah": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "vegas": {
+              "conference": "summer",
+              "division": null
+            }
+          },
+          "logo": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/Celtics_de_Boston_logo.svg/1024px-Celtics_de_Boston_logo.svg.png",
+          "name": "Boston Celtics",
+          "nbaFranchise": true,
+          "nickname": "Celtics"
+        }
+      },
+      {
+        "statistics": {
+          "assists": 787,
+          "biggestLead": 0,
+          "blocks": 165,
+          "defReb": 1007,
+          "fastBreakPoints": 0,
+          "fga": 2746,
+          "fgm": 1246,
+          "fgp": "59.7",
+          "fta": 660,
+          "ftm": 528,
+          "ftp": "80.1",
+          "games": 30,
+          "longestRun": 0,
+          "offReb": 325,
+          "pFouls": 513,
+          "plusMinus": 297,
+          "points": 3588,
+          "pointsInPaint": 0,
+          "pointsOffTurnovers": 0,
+          "secondChancePoints": 0,
+          "steals": 235,
+          "totReb": 1332,
+          "tpa": 1544,
+          "tpm": 568,
+          "tpp": "37.0",
+          "turnovers": 365
+        },
+        "team": {
+          "allStar": false,
+          "city": "Boston",
+          "code": "BOS",
+          "id": 2,
+          "leagues": {
+            "sacramento": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "standard": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "utah": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "vegas": {
+              "conference": "summer",
+              "division": null
+            }
+          },
+          "logo": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/Celtics_de_Boston_logo.svg/1024px-Celtics_de_Boston_logo.svg.png",
+          "name": "Boston Celtics",
+          "nbaFranchise": true,
+          "nickname": "Celtics"
+        }
+      },
+      {
+        "statistics": {
+          "assists": 787,
+          "biggestLead": 0,
+          "blocks": 165,
+          "defReb": 1007,
+          "fastBreakPoints": 0,
+          "fga": 2746,
+          "fgm": 1246,
+          "fgp": "59.7",
+          "fta": 660,
+          "ftm": 528,
+          "ftp": "80.1",
+          "games": 30,
+          "longestRun": 0,
+          "offReb": 325,
+          "pFouls": 513,
+          "plusMinus": 297,
+          "points": 3588,
+          "pointsInPaint": 0,
+          "pointsOffTurnovers": 0,
+          "secondChancePoints": 0,
+          "steals": 235,
+          "totReb": 1332,
+          "tpa": 1544,
+          "tpm": 568,
+          "tpp": "37.0",
+          "turnovers": 365
+        },
+        "team": {
+          "allStar": false,
+          "city": "Boston",
+          "code": "BOS",
+          "id": 2,
+          "leagues": {
+            "sacramento": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "standard": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "utah": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "vegas": {
+              "conference": "summer",
+              "division": null
+            }
+          },
+          "logo": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/Celtics_de_Boston_logo.svg/1024px-Celtics_de_Boston_logo.svg.png",
+          "name": "Boston Celtics",
+          "nbaFranchise": true,
+          "nickname": "Celtics"
+        }
+      },
+      {
+        "statistics": {
+          "assists": 787,
+          "biggestLead": 0,
+          "blocks": 165,
+          "defReb": 1007,
+          "fastBreakPoints": 0,
+          "fga": 2746,
+          "fgm": 1246,
+          "fgp": "59.7",
+          "fta": 660,
+          "ftm": 528,
+          "ftp": "80.1",
+          "games": 30,
+          "longestRun": 0,
+          "offReb": 325,
+          "pFouls": 513,
+          "plusMinus": 297,
+          "points": 3588,
+          "pointsInPaint": 0,
+          "pointsOffTurnovers": 0,
+          "secondChancePoints": 0,
+          "steals": 235,
+          "totReb": 1332,
+          "tpa": 1544,
+          "tpm": 568,
+          "tpp": "37.0",
+          "turnovers": 365
+        },
+        "team": {
+          "allStar": false,
+          "city": "Boston",
+          "code": "BOS",
+          "id": 2,
+          "leagues": {
+            "sacramento": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "standard": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "utah": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "vegas": {
+              "conference": "summer",
+              "division": null
+            }
+          },
+          "logo": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/Celtics_de_Boston_logo.svg/1024px-Celtics_de_Boston_logo.svg.png",
+          "name": "Boston Celtics",
+          "nbaFranchise": true,
+          "nickname": "Celtics"
+        }
+      },
+      {
+        "statistics": {
+          "assists": 787,
+          "biggestLead": 0,
+          "blocks": 165,
+          "defReb": 1007,
+          "fastBreakPoints": 0,
+          "fga": 2746,
+          "fgm": 1246,
+          "fgp": "59.7",
+          "fta": 660,
+          "ftm": 528,
+          "ftp": "80.1",
+          "games": 30,
+          "longestRun": 0,
+          "offReb": 325,
+          "pFouls": 513,
+          "plusMinus": 297,
+          "points": 3588,
+          "pointsInPaint": 0,
+          "pointsOffTurnovers": 0,
+          "secondChancePoints": 0,
+          "steals": 235,
+          "totReb": 1332,
+          "tpa": 1544,
+          "tpm": 568,
+          "tpp": "37.0",
+          "turnovers": 365
+        },
+        "team": {
+          "allStar": false,
+          "city": "Boston",
+          "code": "BOS",
+          "id": 2,
+          "leagues": {
+            "sacramento": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "standard": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "utah": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "vegas": {
+              "conference": "summer",
+              "division": null
+            }
+          },
+          "logo": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/Celtics_de_Boston_logo.svg/1024px-Celtics_de_Boston_logo.svg.png",
+          "name": "Boston Celtics",
+          "nbaFranchise": true,
+          "nickname": "Celtics"
+        }
+      },
+      {
+        "statistics": {
+          "assists": 787,
+          "biggestLead": 0,
+          "blocks": 165,
+          "defReb": 1007,
+          "fastBreakPoints": 0,
+          "fga": 2746,
+          "fgm": 1246,
+          "fgp": "59.7",
+          "fta": 660,
+          "ftm": 528,
+          "ftp": "80.1",
+          "games": 30,
+          "longestRun": 0,
+          "offReb": 325,
+          "pFouls": 513,
+          "plusMinus": 297,
+          "points": 3588,
+          "pointsInPaint": 0,
+          "pointsOffTurnovers": 0,
+          "secondChancePoints": 0,
+          "steals": 235,
+          "totReb": 1332,
+          "tpa": 1544,
+          "tpm": 568,
+          "tpp": "37.0",
+          "turnovers": 365
+        },
+        "team": {
+          "allStar": false,
+          "city": "Boston",
+          "code": "BOS",
+          "id": 2,
+          "leagues": {
+            "sacramento": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "standard": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "utah": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "vegas": {
+              "conference": "summer",
+              "division": null
+            }
+          },
+          "logo": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/Celtics_de_Boston_logo.svg/1024px-Celtics_de_Boston_logo.svg.png",
+          "name": "Boston Celtics",
+          "nbaFranchise": true,
+          "nickname": "Celtics"
+        }
+      },
+      {
+        "statistics": {
+          "assists": 787,
+          "biggestLead": 0,
+          "blocks": 165,
+          "defReb": 1007,
+          "fastBreakPoints": 0,
+          "fga": 2746,
+          "fgm": 1246,
+          "fgp": "59.7",
+          "fta": 660,
+          "ftm": 528,
+          "ftp": "80.1",
+          "games": 30,
+          "longestRun": 0,
+          "offReb": 325,
+          "pFouls": 513,
+          "plusMinus": 297,
+          "points": 3588,
+          "pointsInPaint": 0,
+          "pointsOffTurnovers": 0,
+          "secondChancePoints": 0,
+          "steals": 235,
+          "totReb": 1332,
+          "tpa": 1544,
+          "tpm": 568,
+          "tpp": "37.0",
+          "turnovers": 365
+        },
+        "team": {
+          "allStar": false,
+          "city": "Boston",
+          "code": "BOS",
+          "id": 2,
+          "leagues": {
+            "sacramento": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "standard": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "utah": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "vegas": {
+              "conference": "summer",
+              "division": null
+            }
+          },
+          "logo": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/Celtics_de_Boston_logo.svg/1024px-Celtics_de_Boston_logo.svg.png",
+          "name": "Boston Celtics",
+          "nbaFranchise": true,
+          "nickname": "Celtics"
+        }
+      },
+      {
+        "statistics": {
+          "assists": 787,
+          "biggestLead": 0,
+          "blocks": 165,
+          "defReb": 1007,
+          "fastBreakPoints": 0,
+          "fga": 2746,
+          "fgm": 1246,
+          "fgp": "59.7",
+          "fta": 660,
+          "ftm": 528,
+          "ftp": "80.1",
+          "games": 30,
+          "longestRun": 0,
+          "offReb": 325,
+          "pFouls": 513,
+          "plusMinus": 297,
+          "points": 3588,
+          "pointsInPaint": 0,
+          "pointsOffTurnovers": 0,
+          "secondChancePoints": 0,
+          "steals": 235,
+          "totReb": 1332,
+          "tpa": 1544,
+          "tpm": 568,
+          "tpp": "37.0",
+          "turnovers": 365
+        },
+        "team": {
+          "allStar": false,
+          "city": "Boston",
+          "code": "BOS",
+          "id": 2,
+          "leagues": {
+            "sacramento": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "standard": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "utah": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "vegas": {
+              "conference": "summer",
+              "division": null
+            }
+          },
+          "logo": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/Celtics_de_Boston_logo.svg/1024px-Celtics_de_Boston_logo.svg.png",
+          "name": "Boston Celtics",
+          "nbaFranchise": true,
+          "nickname": "Celtics"
+        }
+      },
+      {
+        "statistics": {
+          "assists": 787,
+          "biggestLead": 0,
+          "blocks": 165,
+          "defReb": 1007,
+          "fastBreakPoints": 0,
+          "fga": 2746,
+          "fgm": 1246,
+          "fgp": "59.7",
+          "fta": 660,
+          "ftm": 528,
+          "ftp": "80.1",
+          "games": 30,
+          "longestRun": 0,
+          "offReb": 325,
+          "pFouls": 513,
+          "plusMinus": 297,
+          "points": 3588,
+          "pointsInPaint": 0,
+          "pointsOffTurnovers": 0,
+          "secondChancePoints": 0,
+          "steals": 235,
+          "totReb": 1332,
+          "tpa": 1544,
+          "tpm": 568,
+          "tpp": "37.0",
+          "turnovers": 365
+        },
+        "team": {
+          "allStar": false,
+          "city": "Boston",
+          "code": "BOS",
+          "id": 2,
+          "leagues": {
+            "sacramento": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "standard": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "utah": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "vegas": {
+              "conference": "summer",
+              "division": null
+            }
+          },
+          "logo": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/Celtics_de_Boston_logo.svg/1024px-Celtics_de_Boston_logo.svg.png",
+          "name": "Boston Celtics",
+          "nbaFranchise": true,
+          "nickname": "Celtics"
+        }
+      },
+      {
+        "statistics": {
+          "assists": 787,
+          "biggestLead": 0,
+          "blocks": 165,
+          "defReb": 1007,
+          "fastBreakPoints": 0,
+          "fga": 2746,
+          "fgm": 1246,
+          "fgp": "59.7",
+          "fta": 660,
+          "ftm": 528,
+          "ftp": "80.1",
+          "games": 30,
+          "longestRun": 0,
+          "offReb": 325,
+          "pFouls": 513,
+          "plusMinus": 297,
+          "points": 3588,
+          "pointsInPaint": 0,
+          "pointsOffTurnovers": 0,
+          "secondChancePoints": 0,
+          "steals": 235,
+          "totReb": 1332,
+          "tpa": 1544,
+          "tpm": 568,
+          "tpp": "37.0",
+          "turnovers": 365
+        },
+        "team": {
+          "allStar": false,
+          "city": "Boston",
+          "code": "BOS",
+          "id": 2,
+          "leagues": {
+            "sacramento": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "standard": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "utah": {
+              "conference": "East",
+              "division": "Atlantic"
+            },
+            "vegas": {
+              "conference": "summer",
+              "division": null
+            }
+          },
+          "logo": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/65/Celtics_de_Boston_logo.svg/1024px-Celtics_de_Boston_logo.svg.png",
+          "name": "Boston Celtics",
+          "nbaFranchise": true,
+          "nickname": "Celtics"
+        }
+      }
+    ]
+  }
+}

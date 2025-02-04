@@ -1,0 +1,74 @@
+[versions]
+kotlin = "2.1.10" # https://github.com/JetBrains/kotlin
+android-gradle-plugin = "8.7.3" # https://developer.android.com/build/releases/gradle-plugin?hl=ko&_gl=1*ldhhmm*_up*MQ..*_ga*NTg2MTkwMjIuMTczODYzNjQ4NQ..*_ga_6HH9YJMN9M*MTczODYzNjQ4NS4xLjAuMTczODYzNjQ4NS4wLjAuOTE0OTA5NTM.
+
+core = "1.15.0" # https://developer.android.com/jetpack/androidx/releases/core?hl=ko
+lifecycle = "2.8.7" # https://developer.android.com/jetpack/androidx/releases/lifecycle?hl=ko&_gl=1*7zmpwn*_up*MQ..*_ga*OTIzMjUzMzk5LjE3Mzg2MzY3ODQ.*_ga_6HH9YJMN9M*MTczODYzNjc4NC4xLjAuMTczODYzNjc4NC4wLjAuMTM3Mjk5NDE1OQ..
+activity = "1.10.0" # https://developer.android.com/jetpack/androidx/releases/activity?hl=ko&_gl=1*1uj3z72*_up*MQ..*_ga*OTIzMjUzMzk5LjE3Mzg2MzY3ODQ.*_ga_6HH9YJMN9M*MTczODYzNjc4NC4xLjAuMTczODYzNjc4NC4wLjAuMTM3Mjk5NDE1OQ..#1.9.3
+androidx-hilt = "1.2.0" # https://developer.android.com/jetpack/androidx/releases/hilt?hl=ko&_gl=1*81afjs*_up*MQ..*_ga*MTA3NTY3NDYwMy4xNzM4NjM3NDQ3*_ga_6HH9YJMN9M*MTczODYzNzQ0Ny4xLjAuMTczODYzNzQ0Ny4wLjAuODk3NzU1NTU1
+constraintlayout-compose = "1.1.0" # https://developer.android.com/jetpack/androidx/releases/constraintlayout?hl=ko&_gl=1*etgrfi*_up*MQ..*_ga*MjA0MDA1MjEwNi4xNzM4NjM3Nzg0*_ga_6HH9YJMN9M*MTczODYzNzc4NC4xLjAuMTczODYzNzc4NC4wLjAuMjA1MTUyMzIxMg..
+
+compose-ui = "1.7.7" # https://developer.android.com/jetpack/androidx/releases/compose-ui?hl=ko&_gl=1*u4nry5*_up*MQ..*_ga*MTMyNDQyNzc0NC4xNzM4NjM2ODM0*_ga_6HH9YJMN9M*MTczODYzNjgzNC4xLjAuMTczODYzNjgzNC4wLjAuODMzOTIyNzgy
+compose-material = "1.7.7" # https://developer.android.com/jetpack/androidx/releases/compose-material?hl=ko&_gl=1*1xercer*_up*MQ..*_ga*MTMyNDQyNzc0NC4xNzM4NjM2ODM0*_ga_6HH9YJMN9M*MTczODYzNjgzNC4xLjAuMTczODYzNjgzNC4wLjAuODMzOTIyNzgy
+
+hilt = "2.55" # https://github.com/google/dagger
+retrofit = "2.11.0" # https://github.com/square/retrofit
+aws = "2.78.0" # https://github.com/aws-amplify/aws-sdk-android
+coil = "3.0.4" # https://github.com/coil-kt/coil
+serialization = "1.8.0" # https://github.com/Kotlin/kotlinx.serialization
+datastore = "1.1.2" # https://developer.android.com/jetpack/androidx/releases/datastore?hl=ko
+ksp = "2.1.10-1.0.29" # https://github.com/google/ksp
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
+android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
+[libraries]
+# AndroidX
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
+hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "androidx-hilt" }
+constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
+datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+
+# Compose
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose-ui" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose-ui" }
+compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose-ui" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-ui" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose-ui" }
+compose-material = { module = "androidx.compose.material:material", version.ref = "compose-material" }
+
+# Hilt
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+
+# Retrofit
+retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+#retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+retrofit-kotlinx-serialization = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version = "1.0.0" }
+
+# AWS SDK
+aws-core = { module = "com.amazonaws:aws-android-sdk-core", version.ref = "aws" }
+aws-cognitoidentityprovider = { module = "com.amazonaws:aws-android-sdk-cognitoidentityprovider", version.ref = "aws" }
+aws-s3 = { module = "com.amazonaws:aws-android-sdk-s3", version.ref = "aws" }
+aws-translate = { module = "com.amazonaws:aws-android-sdk-translate", version.ref = "aws" }
+
+# Coil
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+
+# Serialization
+serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+
+# Testing
+junit = { module = "junit:junit", version = "4.13.2" }
+androidx-test-ext-junit = { module = "androidx.test.ext:junit", version = "1.2.1" }
+espresso-core = { module = "androidx.test.espresso:espresso-core", version = "3.6.1" }
+
