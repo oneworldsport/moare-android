@@ -19,6 +19,9 @@ serialization = "1.8.0" # https://github.com/Kotlin/kotlinx.serialization
 datastore = "1.1.2" # https://developer.android.com/jetpack/androidx/releases/datastore?hl=ko
 ksp = "2.1.10-1.0.29" # https://github.com/google/ksp
 
+app-version-code = "1"
+app-version-name = "1.0.0"
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
 android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
