@@ -64,6 +64,9 @@ class FBLeagueScheduleViewModel @Inject constructor(
     private val _isAllResultOpened = MutableStateFlow(false)
     val isAllResultOpened: StateFlow<Boolean> = _isAllResultOpened
 
+    private val _gameResultOpenedStateList = MutableStateFlow<Map<Int, Boolean>>(emptyMap())
+    val gameResultOpenedStateList: StateFlow<Map<Int, Boolean>> = _gameResultOpenedStateList
+
     /* ---------------------
        intent
        --------------------- */
@@ -71,6 +74,7 @@ class FBLeagueScheduleViewModel @Inject constructor(
         data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int) : Intent()
         data class SelectDay(val day: DayInfo, val selectedIndex: Int) : Intent()
         data object ToggleAllResult : Intent()
+        data class UpdateResultOpenedState(val fixtureId: Int, val isOpened: Boolean) : Intent()
     }
 
     override fun send(intent: Intent) {
@@ -79,6 +83,7 @@ class FBLeagueScheduleViewModel @Inject constructor(
                 is Intent.SelectYearMonth -> selectYearMonth(intent.yearMonth, intent.selectedIndex)
                 is Intent.SelectDay -> selectDay(intent.day, intent.selectedIndex)
                 is Intent.ToggleAllResult -> toggleAllResult()
+                is Intent.UpdateResultOpenedState -> updateResultOpenedState(intent.fixtureId, intent.isOpened)
             }
         }
     }
@@ -112,13 +117,16 @@ class FBLeagueScheduleViewModel @Inject constructor(
     }
 
     private suspend fun toggleAllResult() {
-        _isAllResultOpened.emit(!isAllResultOpened.value)
+        val newState = !isAllResultOpened.value
+        _isAllResultOpened.emit(newState)
+        _gameResultOpenedStateList.emit(gameResultOpenedStateList.value.mapValues { newState })
     }
 
     private suspend fun setDays() {
         // set filtered games to each day
         val month = selectedYearMonth.value.split("/").last().toInt()
         var days = CalendarUtil.getDaysInMonth(2024, month)
+        val isResultOpenedStateList = emptyMap<Int, Boolean>().toMutableMap()
 
         days = days.mapIndexedNotNull { index, day ->
             var newDay = day
@@ -127,9 +135,13 @@ class FBLeagueScheduleViewModel @Inject constructor(
                 CalendarUtil.isSameDate(game.fixture.date, selectedYearMonth.value, day.day)
             }
 
+            isResultOpenedStateList.putAll((games ?: emptyList()).associate { it.fixture.id to false })
+
             val newFilteredGames = filteredGames.value.toMutableMap()
             newFilteredGames[index] = games ?: emptyList()
             _filteredGames.emit(newFilteredGames)
+
+
 
             if (games?.isEmpty() == true) {
                 newDay.isDataEmpty = true
@@ -139,6 +151,9 @@ class FBLeagueScheduleViewModel @Inject constructor(
         }
 
         _days.emit(days)
+
+        // set default isOpened value as false to every games
+        _gameResultOpenedStateList.emit(isResultOpenedStateList)
 
         // set first day that has games as selected
         for ((index, day) in days.withIndex()) {
@@ -167,6 +182,12 @@ class FBLeagueScheduleViewModel @Inject constructor(
         } catch (e: Exception) {
             Log.e("dsdf", e.localizedMessage ?: "error")
         }
+    }
+
+    private suspend fun updateResultOpenedState(fixtureId: Int, isOpened: Boolean) {
+        val newMap = gameResultOpenedStateList.value.toMutableMap()
+        newMap[fixtureId] = isOpened
+        _gameResultOpenedStateList.emit(newMap)
     }
 }
 
