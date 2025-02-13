@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.search
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -117,8 +118,6 @@ fun AnimatingSearchBar(
     // after AniBar Animation make it invisible and change FocusState
     LaunchedEffect(firstOpenedValue) {
         if (firstOpenedValue) {
-            viewModel.send(SearchViewModel.Intent.UpdateTextFieldVisibleState(true))
-
             delay(1000)
 
             viewModel.send(SearchViewModel.Intent.ToggleFocusState)
@@ -174,7 +173,9 @@ fun AnimatingSearchBar(
                 BasicTextField(
                     value = query,
                     onValueChange = { newValue ->
-                        viewModel.send(SearchViewModel.Intent.UpdateTextField(newValue))
+                        if (newValue.text != query.text) { // prevents unnecessary triggers due to an unexpected behavior
+                            viewModel.send(SearchViewModel.Intent.UpdateTextField(newValue))
+                        }
                     },
                     singleLine = true,
                     textStyle = TextStyle(
