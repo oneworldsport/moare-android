@@ -137,9 +137,6 @@ class SearchViewModel @Inject constructor(
     private val _focusState = MutableStateFlow(false)
     val focusState: StateFlow<Boolean> = _focusState
 
-    private val _textFieldVisibleState = MutableStateFlow(false)
-    val textFieldVisibleState: StateFlow<Boolean> = _textFieldVisibleState
-
     private val _query = MutableStateFlow(TextFieldValue(""))
     val query: StateFlow<TextFieldValue> = _query
 
@@ -183,8 +180,6 @@ class SearchViewModel @Inject constructor(
         data object ToggleFocusState : Intent()
         data class UpdateTextField(val newValue: TextFieldValue, val updateAutoCompleteList: Boolean = true) : Intent()
 
-        data class UpdateTextFieldVisibleState(val isVisible: Boolean) : Intent()
-
         data object ToggleSearchBar : Intent()
 
         data class SelectFBGame(val game: FBGame) : Intent()
@@ -207,7 +202,6 @@ class SearchViewModel @Inject constructor(
                 }
                 is Intent.ToggleFocusState -> toggleFocusState()
                 is Intent.UpdateTextField -> updateTextField(intent.newValue, intent.updateAutoCompleteList)
-                is Intent.UpdateTextFieldVisibleState -> updateTextFieldVisibleState(intent.isVisible)
                 is Intent.ToggleSearchBar -> toggleSearchBar()
                 is Intent.SelectFBGame -> selectFBGame(intent.game)
                 is Intent.GoBack -> goBack()
@@ -227,7 +221,6 @@ class SearchViewModel @Inject constructor(
 
         try {
             _searchState.emit(true)
-            _textFieldVisibleState.emit(false)
             toggleFocusState()
 
             val dataFetchDeferred = viewModelScope.async {
@@ -359,16 +352,11 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateTextFieldVisibleState(isVisible: Boolean) {
-        _textFieldVisibleState.emit(isVisible)
-    }
-
     private suspend fun toggleSearchBar() {
         val currentSearchState = searchState.value
 
         if (currentSearchState) {
             _searchState.emit(false)
-            _textFieldVisibleState.emit(true)
             _resultVisibleState.emit(false)
             _searchDataState.emit(SearchDataState.Idle)
             updateTextField(query.value)
