@@ -4,19 +4,22 @@ import android.content.Context
 import com.moare.android.core.networking.ApiHelper
 import com.moare.android.features.search.models.DataModel
 import com.moare.android.features.search.models.AutoComplete
+import com.moare.android.features.search.models.TrendingKeyword
+
 //import com.moare.android.features.search.models.DataModelDeserializer
 
 class SearchClient(
     private val apiHelper: ApiHelper
 ) {
-    suspend fun fetchAutoCompleteData(): AutoComplete {
-        return apiHelper.autoCompleteApi.getAutoCompleteData()
-    }
-
     suspend fun fetchDataByQuery(context: Context, query: String): DataModel {
         val response = apiHelper.searchApi.searchByQuery(query)
         return DataModel.fromJson(response.string())
 //        return getJson(context, query)
+    }
+
+    suspend fun fetchDataByKeyword(keyword: TrendingKeyword): DataModel {
+        val response = apiHelper.searchApi.searchByKeyword(keyword)
+        return DataModel.fromJson(response.string())
     }
 
     suspend fun fetchLeagueSchedule(leagueId: String, yearMonth: String): DataModel {

@@ -2,7 +2,7 @@ package com.moare.android.core.networking
 
 import com.google.gson.GsonBuilder
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.moare.android.core.networking.apiendpoint.AutoCompleteApi
+import com.moare.android.core.networking.apiendpoint.KeywordsApi
 import com.moare.android.core.networking.apiendpoint.SearchApi
 import com.moare.android.features.search.models.DataModel
 import kotlinx.serialization.json.Json
@@ -31,11 +31,6 @@ class ApiHelper {
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
 
-    private val autoCompleteRetrofit = Retrofit.Builder()
-        .baseUrl("https://sport-search-engine-autocomplete-test.s3.ap-northeast-2.amazonaws.com/")
-        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-        .build()
-
     val searchApi: SearchApi = searchRetrofit.create(SearchApi::class.java)
-    val autoCompleteApi: AutoCompleteApi = autoCompleteRetrofit.create(AutoCompleteApi::class.java)
+    val keywordsApi: KeywordsApi = searchRetrofit.create(KeywordsApi::class.java)
 }

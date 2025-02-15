@@ -25,12 +25,12 @@ fun RoundedRectWithPathAni(
     height: Dp,
     cornerRadius: CornerRadius,
     strokeWidth: Float,
-    drawPath: State<Boolean>
+    drawPath: Boolean
 ) {
     val focusedColor = MaterialTheme.colors.primary
 
     val animatedProgress by animateFloatAsState(
-        targetValue = if (drawPath.value) 1f else 0f,
+        targetValue = if (drawPath) 1f else 0f,
         animationSpec = tween(
             durationMillis = 1000,
             easing = LinearOutSlowInEasing
@@ -206,7 +206,7 @@ fun RoundedRectWithPathAni(
             }
         }
 
-        if (drawPath.value) {
+        if (drawPath) {
             drawPath(
                 path = rightPath,
                 color = focusedColor,

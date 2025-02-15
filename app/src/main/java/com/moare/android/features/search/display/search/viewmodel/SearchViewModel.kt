@@ -6,17 +6,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.regions.Region
-import com.amazonaws.regions.Regions
-import com.amazonaws.services.translate.AmazonTranslateClient
-import com.amazonaws.services.translate.model.TranslateTextRequest
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.Trie
 import com.moare.android.core.util.getChosung
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SearchDataState
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.TrendingKeyword
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
@@ -33,7 +29,6 @@ import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStats
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
-import com.moare.android.features.search.models.AutoComplete
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
@@ -41,24 +36,24 @@ import com.moare.android.features.search.models.responsemodels.football.FBPlayer
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
+import com.moare.android.features.search.networking.KeywordsClient
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val searchClient: SearchClient,
+    private val keywordsClient: KeywordsClient,
     private val trieDeferred: CompletableDeferred<Trie>
 ) : MVIViewModel<SearchViewModel.Intent, Nothing>() {
     /* ---------------------
@@ -128,9 +123,15 @@ class SearchViewModel @Inject constructor(
     private val _autoCompleteList = MutableStateFlow<List<String>>(emptyList())
     val autoCompleteList: StateFlow<List<String>> = _autoCompleteList
 
+    private val _trendingKeywordList = MutableStateFlow<List<String>>(emptyList())
+    val trendingKeywordList: StateFlow<List<String>> = _trendingKeywordList
+
     /* ---------------------
        ui state
        --------------------- */
+    private val _firstOpened = MutableStateFlow(false)
+    val firstOpened: StateFlow<Boolean> = _firstOpened
+
     private val _focusRequester = MutableStateFlow(FocusRequester())
     val focusRequester: StateFlow<FocusRequester> = _focusRequester
 
@@ -146,6 +147,9 @@ class SearchViewModel @Inject constructor(
     private val _resultVisibleState = MutableStateFlow(false)
     val resultVisibleState: StateFlow<Boolean> = _resultVisibleState
 
+    private val _autoCompleteListVisibleState = MutableStateFlow(false)
+    val autoCompleteListVisibleState: StateFlow<Boolean> = _autoCompleteListVisibleState
+
     /* ---------------------
        etc
        --------------------- */
@@ -157,6 +161,8 @@ class SearchViewModel @Inject constructor(
 
     private val _viewStack = MutableStateFlow<List<SportDecodableModel>>(emptyList())
     val viewStack: StateFlow<List<SportDecodableModel>> = _viewStack
+
+    private var trendingKeywords: List<TrendingKeyword> = emptyList()
 
     /* ---------------------
        init
@@ -170,17 +176,21 @@ class SearchViewModel @Inject constructor(
 //            val data = DataModel.fromJson(jsonContent).data as SportDecodableModel.FBPlayerStandings
 //            _fbPlayerStandingsData.emit(data.displayModel)
         }
+
+        fetchTrendingKeywords()
     }
 
     /* ---------------------
        intent
        --------------------- */
     sealed class Intent {
-        data class PerformSearch(val aniDuration: Long = 0) : Intent()
+        data object FirstOpen : Intent()
+        data class PerformSearch(val searchType: SearchType = SearchType.QUERY, val aniDuration: Long = 0) : Intent()
         data object ToggleFocusState : Intent()
         data class UpdateTextField(val newValue: TextFieldValue, val updateAutoCompleteList: Boolean = true) : Intent()
 
         data object ToggleSearchBar : Intent()
+        data object ToggleAutoCompleteListVisibleState : Intent()
 
         data class SelectFBGame(val game: FBGame) : Intent()
 
@@ -191,16 +201,28 @@ class SearchViewModel @Inject constructor(
         data class ShowGameStats(val from: String, val dd: String) : Intent()
     }
 
+    enum class SearchType {
+        QUERY, KEYWORD
+    }
+
     override fun send(intent: Intent) {
         // TODO: 비동기를 여기서 실행할지, 각 implements에서 실행할지 고민필요
         viewModelScope.launch {
             when (intent) {
+                is Intent.FirstOpen -> firstOpen()
                 is Intent.PerformSearch -> {
-                    if (query.value.text.isNotBlank()) {
-                        performSearch(intent.aniDuration)
+                    if (query.value.text.isBlank()) {
+                        val firstTrendingKeyword = trendingKeywordList.value.firstOrNull()
+                        if (!firstTrendingKeyword.isNullOrBlank()) {
+                            updateTextField(TextFieldValue(firstTrendingKeyword), false)
+                            performSearch(intent.searchType, intent.aniDuration)
+                        }
+                    } else {
+                        performSearch(intent.searchType, intent.aniDuration)
                     }
                 }
                 is Intent.ToggleFocusState -> toggleFocusState()
+                is Intent.ToggleAutoCompleteListVisibleState -> toggleAutoCompleteListVisibleState()
                 is Intent.UpdateTextField -> updateTextField(intent.newValue, intent.updateAutoCompleteList)
                 is Intent.ToggleSearchBar -> toggleSearchBar()
                 is Intent.SelectFBGame -> selectFBGame(intent.game)
@@ -215,7 +237,22 @@ class SearchViewModel @Inject constructor(
     /* ---------------------
        implements
        --------------------- */
-    private suspend fun performSearch(aniDuration: Long) {
+    private suspend fun firstOpen() {
+        _firstOpened.emit(true)
+    }
+
+    private fun fetchTrendingKeywords() {
+        viewModelScope.launch {
+            try {
+                trendingKeywords = keywordsClient.fetchTrendingKeywords()
+                _trendingKeywordList.emit(trendingKeywords.map { it.keyword })
+            } catch (e: Exception) {
+                Log.e("dsdf", e.localizedMessage ?: "trendingKeywords error")
+            }
+        }
+    }
+
+    private suspend fun performSearch(searchType: SearchType, aniDuration: Long) {
         // animation/search start time
         val startTime = System.currentTimeMillis()
 
@@ -225,7 +262,15 @@ class SearchViewModel @Inject constructor(
 
             val dataFetchDeferred = viewModelScope.async {
 //                delay(5000) // test for fetching delay
-                searchClient.fetchDataByQuery(context, query.value.text)
+                when (searchType) {
+                    SearchType.QUERY -> searchClient.fetchDataByQuery(context, query.value.text)
+                    SearchType.KEYWORD -> {
+                        val keyword = trendingKeywords.firstOrNull { it.keyword == query.value.text }
+                        keyword?.let {
+                            searchClient.fetchDataByKeyword(keyword)
+                        }
+                    }
+                }
             }
 
             // delay for animation duration in case the data fetched before animation ends
@@ -233,6 +278,7 @@ class SearchViewModel @Inject constructor(
 
             // reset autocomplete list
             _autoCompleteList.emit(emptyList())
+            _autoCompleteListVisibleState.emit(false)
 
             // if data is still fetching after the animation duration, show loading
             if (!dataFetchDeferred.isCompleted) {
@@ -254,7 +300,7 @@ class SearchViewModel @Inject constructor(
             _fbLeagueScheduleData.emit(null)
             _fbGameStatsData.emit(null)
 
-            when (val data = data.data) {
+            when (val data = data?.data) {
                 is SportDecodableModel.FBPlayerInfo -> {
                     fbPlayerInfoResponseModel = data.responseModel
 
@@ -323,6 +369,10 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    private suspend fun toggleAutoCompleteListVisibleState() {
+        _autoCompleteListVisibleState.emit(!autoCompleteListVisibleState.value)
+    }
+
     private suspend fun updateTextField(newValue: TextFieldValue, updateAutoCompleteList: Boolean = true) {
         _query.emit(newValue)
 
@@ -330,6 +380,7 @@ class SearchViewModel @Inject constructor(
         if (updateAutoCompleteList) {
             if (newValue.text.isBlank()) {
                 _autoCompleteList.emit(emptyList())
+                _autoCompleteListVisibleState.emit(false)
             } else {
 //                val result = mutableSetOf<String>()
 //                result.addAll(trie.search(newValue.text))
@@ -348,6 +399,7 @@ class SearchViewModel @Inject constructor(
                 }
 
                 _autoCompleteList.emit(result)
+                _autoCompleteListVisibleState.emit(true)
             }
         }
     }
