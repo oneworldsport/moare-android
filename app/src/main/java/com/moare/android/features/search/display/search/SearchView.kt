@@ -62,6 +62,7 @@ import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SearchDataState
 import com.moare.android.ui.theme.MoareAndroidTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun SearchView(
@@ -70,8 +71,9 @@ fun SearchView(
     /* ---------------------
        ui state
        --------------------- */
-    var isInfoVisible by remember { mutableStateOf(true) }
+    var isInfoVisible by remember { mutableStateOf(false) }
     var isInfoOpened by remember { mutableStateOf(false) }
+    var isSearchBarOpened by remember { mutableStateOf(false) }
 
     /* ---------------------
        viewmodel state
@@ -79,6 +81,7 @@ fun SearchView(
     val searchDataState by searchViewModel.searchDataState.collectAsState()
     val showResult by searchViewModel.resultVisibleState.collectAsState()
     val searchState by searchViewModel.searchState.collectAsState()
+    val firstOpened by searchViewModel.firstOpened.collectAsState()
 
     // football
     val fbPlayerInfoData by searchViewModel.fbPlayerInfoData.collectAsState()
@@ -93,6 +96,7 @@ fun SearchView(
 
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
+    val autoCompleteListVisibleState by searchViewModel.autoCompleteListVisibleState.collectAsState()
 
     /* ---------------------
        animation
@@ -112,7 +116,19 @@ fun SearchView(
         isInfoVisible = if (searchState) {
             false
         } else {
-            autoCompleteList.isEmpty()
+            if (firstOpened) {
+                autoCompleteList.isEmpty()
+            } else {
+                false
+            }
+        }
+    }
+
+    LaunchedEffect(firstOpened) {
+        if (firstOpened) {
+            delay(1000)
+            isSearchBarOpened = true
+            isInfoVisible = true
         }
     }
 
@@ -130,7 +146,7 @@ fun SearchView(
             modifier = Modifier
                 .size(width = 250.dp, height = 140.dp)
                 .align(Alignment.CenterEnd)
-                .offset(x = (-20).dp, y = (-98).dp)
+                .offset(x = (-20).dp, y = (-126).dp)
                 .zIndex(1f),
             enter = fadeIn(),
             exit = fadeOut()
@@ -216,21 +232,41 @@ fun SearchView(
         ) {
             AnimatingSearchBar(
                 modifier = Modifier
-                    .padding(top = 10.dp)
+//                    .padding(top = 10.dp)
             )
+
+            // trending keywords
+            AnimatedVisibility(
+                visible = if (searchState) {
+                    false
+                } else {
+                    if (isSearchBarOpened) {
+                        autoCompleteList.isEmpty()
+                    } else {
+                        false
+                    }
+                },
+                exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
+            ) {
+                TrendingKeywords { keyword ->
+                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(keyword), false))
+                    searchViewModel.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.KEYWORD, aniDuration = 1000))
+                }
+            }
 
             // NOTE: didn't wrap with box because of AnimatedVisibility
             // autoComplete list
             AnimatedVisibility(
-                visible = autoCompleteList.isNotEmpty(),
-                enter = fadeIn() + expandVertically(tween(durationMillis = 1000))
+                visible = autoCompleteListVisibleState,
+                enter = fadeIn() + expandVertically(tween(durationMillis = 1000)),
+                exit = fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000))
             ) {
 //            key(System.currentTimeMillis()) {
                 key(autoCompleteList) { // redraw the composable with its initial state
                     AutoCompleteList(
                         onItemSelected = { query ->
                             searchViewModel.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(query), false))
-                            searchViewModel.send(SearchViewModel.Intent.PerformSearch(2000))
+                            searchViewModel.send(SearchViewModel.Intent.PerformSearch(aniDuration = 2000))
                         }
                     )
                 }

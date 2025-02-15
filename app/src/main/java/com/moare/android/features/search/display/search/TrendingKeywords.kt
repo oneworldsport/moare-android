@@ -1,0 +1,91 @@
+package com.moare.android.features.search.display.search
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.ui.common.components.HCapsuleBar
+
+@Composable
+fun TrendingKeywords(
+    searchViewModel: SearchViewModel = hiltViewModel(),
+    onItemSelected: (String) -> Unit
+) {
+    val trendingKeywordList by searchViewModel.trendingKeywordList.collectAsState()
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp)
+            .padding(top = 10.dp)
+    ) {
+        for ((index, value) in trendingKeywordList.withIndex()) {
+            if (index != 0) {
+                KeywordBox(value) {
+                    onItemSelected(value)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun KeywordBox(
+    keyword: String,
+    onItemSelected: () -> Unit
+) {
+    var isHovered by remember { mutableStateOf(false) }
+
+    Box(
+        Modifier
+            .border(
+                BorderStroke(2.dp, if (isHovered) MaterialTheme.colors.primary else Color.Transparent),
+                RoundedCornerShape(20.dp)
+            )
+            .padding(horizontal = 10.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = {
+                            isHovered = true
+                            tryAwaitRelease()
+                            onItemSelected()
+                        }
+                    )
+                }
+        ) {
+            Text(
+                text = keyword,
+                modifier = Modifier.padding(vertical = 6.dp)
+            )
+
+            HCapsuleBar(color = Color.Gray)
+        }
+    }
+}

@@ -1,21 +1,13 @@
 package com.moare.android.features.search.display.search
 
-import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -48,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -61,7 +51,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun AnimatingSearchBar(
-    viewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel = hiltViewModel(),
     modifier: Modifier
 ) {
     /* ---------------------
@@ -78,9 +68,7 @@ fun AnimatingSearchBar(
     /* ---------------------
        ui state
        --------------------- */
-    val firstOpened = remember { mutableStateOf(false) }
-    var firstOpenedValue by firstOpened
-    var aniBarVisibleState by remember { mutableStateOf(true) }
+    var aniBarVisibleState by remember { mutableStateOf(true) } // always false after first open(animation)
 
     var textSize by remember { mutableStateOf(IntSize.Zero) }
     val textWidthDp = convertPxToDp(pxValue = textSize.width.toFloat())
@@ -88,10 +76,13 @@ fun AnimatingSearchBar(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val focusRequester by viewModel.focusRequester.collectAsState()
-    val focusState by viewModel.focusState.collectAsState()
-    val query by viewModel.query.collectAsState()
-    val searchState by viewModel.searchState.collectAsState()
+    val firstOpened by searchViewModel.firstOpened.collectAsState()
+    val focusRequester by searchViewModel.focusRequester.collectAsState()
+    val focusState by searchViewModel.focusState.collectAsState()
+    val query by searchViewModel.query.collectAsState()
+    val searchState by searchViewModel.searchState.collectAsState()
+    val trendingKeywordList by searchViewModel.trendingKeywordList.collectAsState()
+    val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
 
     /* ---------------------
        animation
@@ -100,7 +91,7 @@ fun AnimatingSearchBar(
         targetValue = if (searchState) {
             textWidthDp
         } else {
-            if (firstOpenedValue) {
+            if (firstOpened) {
                 screenWidthDp() - (16 * 4 + 24 + 10).dp
             } else {
                 0.dp
@@ -116,11 +107,11 @@ fun AnimatingSearchBar(
        LaunchedEffect
        --------------------- */
     // after AniBar Animation make it invisible and change FocusState
-    LaunchedEffect(firstOpenedValue) {
-        if (firstOpenedValue) {
+    LaunchedEffect(firstOpened) {
+        if (firstOpened) {
             delay(1000)
 
-            viewModel.send(SearchViewModel.Intent.ToggleFocusState)
+            searchViewModel.send(SearchViewModel.Intent.ToggleFocusState)
             aniBarVisibleState = false
         }
     }
@@ -154,7 +145,9 @@ fun AnimatingSearchBar(
                 }
                 .padding(horizontal = 16.dp)
         ) {
-            Box {
+            Box(
+                contentAlignment = Alignment.CenterStart
+            ) {
                 Text(
                     text = query.text,
                     style = TextStyle(
@@ -164,7 +157,6 @@ fun AnimatingSearchBar(
                     ),
                     modifier = Modifier
                         .alpha(0f)
-                        .background(Color.Red)
                         .onGloballyPositioned { coordinates ->
                             textSize = coordinates.size
                         }
@@ -174,7 +166,7 @@ fun AnimatingSearchBar(
                     value = query,
                     onValueChange = { newValue ->
                         if (newValue.text != query.text) { // prevents unnecessary triggers due to an unexpected behavior
-                            viewModel.send(SearchViewModel.Intent.UpdateTextField(newValue))
+                            searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue))
                         }
                     },
                     singleLine = true,
@@ -188,22 +180,38 @@ fun AnimatingSearchBar(
                         .width(textFieldWidthState)
                         .focusRequester(focusRequester)
                 )
+
+                if (!aniBarVisibleState) {
+                    if (query.text.isEmpty()) {
+                        Text(
+                            text = " ${trendingKeywordList.firstOrNull() ?: ""}",
+                            color = Color.LightGray,
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Normal,
+                                fontFamily = FontFamily.Default
+                            ),
+                            modifier = Modifier
+                        )
+                    }
+                }
             }
 
             Icon(
                 painter = painterResource(id = R.drawable.ic_search_24),
                 contentDescription = "ic_search_24",
                 modifier = Modifier
-                    .padding(start = if (firstOpenedValue) 10.dp else 0.dp)
+                    .padding(start = if (firstOpened) 10.dp else 0.dp)
                     .size(24.dp)
                     .clickable {
-                        if (!firstOpenedValue) {
-                            firstOpenedValue = true
+                        if (!firstOpened) {
+                            searchViewModel.send(SearchViewModel.Intent.FirstOpen)
                         } else {
                             if (searchState) {
-                                viewModel.send(SearchViewModel.Intent.ToggleSearchBar)
+                                searchViewModel.send(SearchViewModel.Intent.ToggleSearchBar)
                             } else {
-                                viewModel.send(SearchViewModel.Intent.PerformSearch())
+                                searchViewModel.send(SearchViewModel.Intent.ToggleAutoCompleteListVisibleState)
+                                searchViewModel.send(SearchViewModel.Intent.PerformSearch(aniDuration = 1000))
                             }
                         }
                     }

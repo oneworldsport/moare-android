@@ -1,6 +1,7 @@
 package com.moare.android.core.di
 
 import com.moare.android.core.networking.ApiHelper
+import com.moare.android.features.search.networking.KeywordsClient
 import com.moare.android.features.search.networking.SearchClient
 import dagger.Module
 import dagger.Provides
@@ -18,4 +19,8 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideSearchClient(apiHelper: ApiHelper): SearchClient = SearchClient(apiHelper)
+
+    @Provides
+    @Singleton
+    fun provideKeywordsClient(apiHelper: ApiHelper): KeywordsClient = KeywordsClient(apiHelper)
 }
