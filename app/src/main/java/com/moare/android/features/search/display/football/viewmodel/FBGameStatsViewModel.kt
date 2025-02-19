@@ -3,7 +3,9 @@ package com.moare.android.features.search.display.football.viewmodel
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBGameLineups
 import com.moare.android.features.search.models.models.football.FBGamePlayerStats
@@ -21,19 +23,13 @@ class FBGameStatsViewModel @Inject constructor(
        constants
        --------------------- */
     val dataItemHeight = 40.dp
-    val categoryItemHeight = 30.dp
+    val categoryItemHeight = 34.dp
     val firstItemWidth = 120.dp
     val teamButtonWidth = 100.dp
     val itemWidth = 70.dp
     val barWidth = 2.dp
     val categoryFontSize = 14.sp
     val dataFontSize = 14.sp
-    val firstCategory = "선수 이름"
-    val firstCategoryList = listOf("공격지표", "수비지표", "공통지표")
-    val secondCategoryList = listOf("득점", "어시스트", "공격포인트", "슈팅", "유효슈팅", "태클", "패스", "파울", "경고", "퇴장")
-    val attackCategoryList = listOf("득점", "어시스트", "공격포인트", "슈팅", "유효슈팅")
-    val defendCategoryList = listOf("태클", "패스")
-    val commonCategoryList = listOf("파울", "경고", "퇴장")
 
     /* ---------------------
        variables
@@ -115,10 +111,13 @@ class FBGameStatsViewModel @Inject constructor(
     private suspend fun selectFirstCategory(index: Int) {
         shouldScrollCategory = true
 
+        val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
+        val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
+
         when (index) {
             0 -> _secondSelectedIndex.emit(0)
-            1 -> _secondSelectedIndex.emit(attackCategoryList.size)
-            2 -> _secondSelectedIndex.emit(attackCategoryList.size + defendCategoryList.size)
+            1 -> _secondSelectedIndex.emit(attackCategoriesSize)
+            2 -> _secondSelectedIndex.emit(attackCategoriesSize + defendCategoriesSize)
         }
 
         _firstSelectedIndex.emit(index)
@@ -130,9 +129,12 @@ class FBGameStatsViewModel @Inject constructor(
         shouldScrollCategory = false
         _secondSelectedIndex.emit(index)
 
+        val attackCategories = StringConstants.Football.gameStatsAttackCategories
+        val defendCategories = StringConstants.Football.gameStatsDefendCategories
+
         when (index) {
-            in attackCategoryList.indices -> _firstSelectedIndex.emit(0)
-            in attackCategoryList.size until attackCategoryList.size + defendCategoryList.size -> _firstSelectedIndex.emit(1)
+            in attackCategories.indices -> _firstSelectedIndex.emit(0)
+            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstSelectedIndex.emit(1)
             else -> _firstSelectedIndex.emit(2)
         }
 
@@ -165,17 +167,33 @@ class FBGameStatsViewModel @Inject constructor(
 
         when (secondSelectedIndex.value) {
             0 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.total ?: 0 }
-            1 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.assists ?: 0 }
-            2 -> playerStats.sortByDescending {
-                (it.statistics.firstOrNull()?.goals?.total ?: 0) + (it.statistics.firstOrNull()?.goals?.assists ?: 0)
-            }
+            1 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.penalty?.scored ?: 0 }
+            2 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.assists ?: 0 }
             3 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.shots?.total ?: 0 }
             4 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.shots?.on ?: 0 }
-            5 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.passes?.total ?: 0 }
-            6 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.tackles?.total ?: 0 }
-            7 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.fouls?.committed ?: 0 }
-            8 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.yellow ?: 0 }
-            9 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.red ?: 0 }
+            5 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.passes?.key ?: 0 }
+            6 -> if (playerStats.all { it.statistics.firstOrNull() != null }) {
+                playerStats.sortByDescending {
+                    val stats = it.statistics.firstOrNull()!!
+                    stats.dribbles.success.percentageOf(stats.dribbles.attempts, 1)
+                }
+            }
+            7 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.offsides ?: 0 }
+            8 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.tackles?.total ?: 0 }
+            9 -> if (playerStats.all { it.statistics.firstOrNull() != null }) {
+                playerStats.sortByDescending {
+                    val stats = it.statistics.firstOrNull()!!
+                    stats.duels.won.percentageOf(stats.duels.total, 1)
+                }
+            }
+            10 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.tackles?.interceptions ?: 0 }
+            11 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.passes?.total ?: 0 }
+            12 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.fouls?.drawn ?: 0 }
+            13 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.fouls?.committed ?: 0 }
+            14 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.yellow ?: 0 }
+            15 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.red ?: 0 }
+            16 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.games?.minutes ?: 0 }
+            17 -> {}
         }
 
         _playersStats.emit(playerStats)

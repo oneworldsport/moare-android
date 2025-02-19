@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +35,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.EnNameTranslationUtils
+import com.moare.android.core.util.TranslationType
+import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
@@ -68,9 +74,12 @@ fun FBPlayerStandingsView(
        etc
        --------------------- */
     val secondSelectedCategoryPosition = with(LocalDensity.current) {
-        if (secondSelectedIndex in 0 until fbPlayerStandingsViewModel.attackCategoryList.size) {
+        val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
+        val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+
+        if (secondSelectedIndex in 0 until attackCategoriesSize) {
             (fbPlayerStandingsViewModel.itemWidth * secondSelectedIndex).toPx()
-        } else if (secondSelectedIndex in fbPlayerStandingsViewModel.attackCategoryList.size until fbPlayerStandingsViewModel.attackCategoryList.size + fbPlayerStandingsViewModel.defendCategoryList.size) {
+        } else if (secondSelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
             ((fbPlayerStandingsViewModel.itemWidth * secondSelectedIndex) + fbPlayerStandingsViewModel.barWidth).toPx()
         } else {
             ((fbPlayerStandingsViewModel.itemWidth * secondSelectedIndex) + (fbPlayerStandingsViewModel.barWidth * 2)).toPx()
@@ -162,7 +171,7 @@ fun FBPlayerStandingsFirstCategoryItem(
             .height(fbPlayerStandingsViewModel.categoryItemHeight * 2)
     ) {
         Text(
-            text = fbPlayerStandingsViewModel.firstCategory,
+            text = StringConstants.Football.standingsFirstCategory,
             fontSize = fbPlayerStandingsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -178,6 +187,13 @@ fun FBPlayerStandingsFirstCategoryList(
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
 ) {
     /* ---------------------
+       constants
+       --------------------- */
+    val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
+    val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+    val etcCategoriesSize = StringConstants.Football.playerStandingsEtcCategories.size
+
+    /* ---------------------
        viewmodel state
        --------------------- */
     val selectedIndex by fbPlayerStandingsViewModel.firstSelectedIndex.collectAsState()
@@ -191,17 +207,17 @@ fun FBPlayerStandingsFirstCategoryList(
     val barOffset by animateDpAsState(
         targetValue = if (selectedIndex == 0) {
             getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * 5,
+                itemWidth = itemWidth * attackCategoriesSize,
                 barWidth = 80.dp
             )
         } else if (selectedIndex == 1) {
-            (itemWidth * 5) + barWidth + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * 2,
+            (itemWidth * attackCategoriesSize) + barWidth + getOffsetOfAniCapsuleBar(
+                itemWidth = itemWidth * defendCategoriesSize,
                 barWidth = 80.dp
             )
         } else {
-            (itemWidth * 5) + (barWidth * 2) + (itemWidth * 2) + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * 4,
+            (itemWidth * attackCategoriesSize) + (barWidth * 2) + (itemWidth * defendCategoriesSize) + getOffsetOfAniCapsuleBar(
+                itemWidth = itemWidth * etcCategoriesSize,
                 barWidth = 80.dp
             )
         },
@@ -217,13 +233,13 @@ fun FBPlayerStandingsFirstCategoryList(
             modifier = Modifier
                 .height(fbPlayerStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in fbPlayerStandingsViewModel.firstCategoryList.withIndex()) {
+            for ((index, value) in StringConstants.Football.statsFirstCategories.withIndex()) {
                 FBPlayerStandingsFirstCategoryListItem(
                     category = value,
                     index = index
                 )
 
-                if (index != fbPlayerStandingsViewModel.firstCategoryList.size - 1) {
+                if (index != StringConstants.Football.statsFirstCategories.size - 1) {
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
                 }
             }
@@ -248,7 +264,15 @@ fun FBPlayerStandingsFirstCategoryListItem(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(if (index == 0) (itemWidth * 5) else if (index == 1) (itemWidth * 2) else (itemWidth * 4))
+            .width(
+                if (index == 0) {
+                    (itemWidth * StringConstants.Football.playerStandingsAttackCategories.size)
+                } else if (index == 1) {
+                    (itemWidth * StringConstants.Football.playerStandingsDefendCategories.size)
+                } else {
+                    (itemWidth * StringConstants.Football.playerStandingsEtcCategories.size)
+                }
+            )
             .clickable {
                 fbPlayerStandingsViewModel.send(
                     FBPlayerStandingsViewModel.Intent.SelectFirstCategory(
@@ -271,6 +295,13 @@ fun FBPlayerStandingsSecondCategoryList(
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
 ) {
     /* ---------------------
+       constants
+       --------------------- */
+    val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
+    val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+    val etcCategoriesSize = StringConstants.Football.playerStandingsEtcCategories.size
+
+    /* ---------------------
        viewmodel state
        --------------------- */
     val selectedIndex by fbPlayerStandingsViewModel.secondSelectedIndex.collectAsState()
@@ -279,9 +310,9 @@ fun FBPlayerStandingsSecondCategoryList(
        animation
        --------------------- */
     val barOffset by animateDpAsState(
-        targetValue = if (selectedIndex in 0 until fbPlayerStandingsViewModel.attackCategoryList.size) {
+        targetValue = if (selectedIndex in 0 until attackCategoriesSize) {
             getOffsetOfAniCapsuleBar(itemWidth = fbPlayerStandingsViewModel.itemWidth, index = selectedIndex)
-        } else if (selectedIndex in fbPlayerStandingsViewModel.attackCategoryList.size until fbPlayerStandingsViewModel.attackCategoryList.size + fbPlayerStandingsViewModel.defendCategoryList.size) {
+        } else if (selectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
             getOffsetOfAniCapsuleBar(itemWidth = fbPlayerStandingsViewModel.itemWidth, index = selectedIndex) + fbPlayerStandingsViewModel.barWidth
         } else {
             getOffsetOfAniCapsuleBar(itemWidth = fbPlayerStandingsViewModel.itemWidth, index = selectedIndex) + (fbPlayerStandingsViewModel.barWidth * 2)
@@ -298,13 +329,13 @@ fun FBPlayerStandingsSecondCategoryList(
             modifier = Modifier
                 .height(fbPlayerStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in fbPlayerStandingsViewModel.secondCategoryList.withIndex()) {
+            for ((index, value) in StringConstants.Football.playerStandingsSecondCategories.withIndex()) {
                 FBPlayerStandingsSecondCategoryListItem(
                     category = value,
                     index = index
                 )
 
-                if (index == fbPlayerStandingsViewModel.attackCategoryList.size - 1 || index == (fbPlayerStandingsViewModel.attackCategoryList.size + fbPlayerStandingsViewModel.defendCategoryList.size - 1)) {
+                if (index == attackCategoriesSize - 1 || index == (attackCategoriesSize + defendCategoriesSize - 1)) {
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
                 }
             }
@@ -323,10 +354,15 @@ fun FBPlayerStandingsSecondCategoryListItem(
     category: String,
     index: Int
 ) {
+    val fontSize = when (index) {
+        6, 9, 17 -> 13.sp
+        else -> fbPlayerStandingsViewModel.categoryFontSize
+    }
+
     Text(
         text = category,
         textAlign = TextAlign.Center,
-        fontSize = fbPlayerStandingsViewModel.categoryFontSize,
+        fontSize = fontSize,
         fontWeight = FontWeight.Medium,
         modifier = Modifier
             .width(fbPlayerStandingsViewModel.itemWidth)
@@ -362,6 +398,12 @@ fun FBPlayerStandingsFirstDataListItem(
     rank: Int,
     data: FBPlayerStandingsDisplay
 ) {
+    var teamKrName by remember { mutableStateOf("") }
+
+    LaunchedEffect(data) {
+        teamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(data.stats.team.name))
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -369,7 +411,12 @@ fun FBPlayerStandingsFirstDataListItem(
             .padding(start = 10.dp)
             .height(fbPlayerStandingsViewModel.dataItemHeight)
             .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(from = "standings", playerId = data.player.id))
+                searchViewModel.send(
+                    SearchViewModel.Intent.ShowPlayerStats(
+                        from = "standings",
+                        playerId = data.player.id
+                    )
+                )
             }
     ) {
         Text(
@@ -386,14 +433,31 @@ fun FBPlayerStandingsFirstDataListItem(
             modifier = Modifier.padding(end = 4.dp)
         )
 
-        Text(
-            text = data.player.krname,
-            fontSize = 12.sp,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .weight(1f)
-        )
+        Row(
+            // added to make VCapsuleBar visible
+            modifier = Modifier.weight(1f)
+        ) {
+            Column {
+                Text(
+                    text = data.player.krname,
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(bottom = 2.dp)
+                )
+
+                Text(
+                    text = teamKrName,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Light,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                )
+            }
+        }
 
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
     }
@@ -403,6 +467,12 @@ fun FBPlayerStandingsFirstDataListItem(
 fun FBPlayerStandingsDataList(
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
 ) {
+    /* ---------------------
+       constants
+       --------------------- */
+    val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
+    val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+
     val standings by fbPlayerStandingsViewModel.standings.collectAsState()
 //    VSequentialListAni(
 //        items = dataList
@@ -425,13 +495,13 @@ fun FBPlayerStandingsDataList(
                 modifier = Modifier
                     .height(fbPlayerStandingsViewModel.dataItemHeight)
             ) {
-                for (index in 0 until fbPlayerStandingsViewModel.secondCategoryList.size) {
+                for (index in 0 until StringConstants.Football.playerStandingsSecondCategories.size) {
                     FBPlayerStandingsDataListItem(
                         data = value,
                         index = index
                     )
 
-                    if (index == fbPlayerStandingsViewModel.attackCategoryList.size - 1 || index == (fbPlayerStandingsViewModel.attackCategoryList.size + fbPlayerStandingsViewModel.defendCategoryList.size - 1)) {
+                    if (index == attackCategoriesSize - 1 || index == (attackCategoriesSize + defendCategoriesSize - 1)) {
                         VCapsuleBar(modifier = Modifier.alpha(0f))
                     }
                 }
@@ -452,12 +522,20 @@ fun FBPlayerStandingsDataListItem(
         2 -> "${(data.stats.goals.total) + (data.stats.goals.assists)}"
         3 -> "${data.stats.shots.total}"
         4 -> "${data.stats.shots.on}"
-        5 -> "${data.stats.tackles.total}"
-        6 -> "${data.stats.passes.total}"
-        7 -> "${data.stats.fouls.committed}"
-        8 -> "${data.stats.cards.yellow}"
-        9 -> "${data.stats.cards.red}"
-        10 -> "${data.stats.games.appearences}"
+        5 -> "${data.stats.passes.key}"
+        6 -> "${data.stats.dribbles.success}"
+        7 -> "${data.stats.penalty.scored}"
+        8 -> "${data.stats.tackles.total}"
+        9 -> "${data.stats.duels.won}"
+        10 -> "${data.stats.passes.total}"
+        11 -> "${data.stats.fouls.committed}"
+        12 -> "${data.stats.cards.yellow}"
+        13 -> "${data.stats.cards.red}"
+        14 -> "${data.stats.games.appearences}"
+        15 -> "${data.stats.games.lineups}"
+        16 -> "${data.stats.substitutes.substituteIn}"
+        17 -> "${data.stats.games.minutes}"
+        18 -> "${data.stats.games.rating.toDoubleOrNull()?.rounded(2) ?: 0.0}"
         else -> ""
     }
 
