@@ -3,6 +3,7 @@ package com.moare.android.features.search.display.football.viewmodel
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
@@ -25,12 +26,6 @@ class FBPlayerStandingsViewModel @Inject constructor(
     val barWidth = 2.dp
     val categoryFontSize = 15.sp
     val dataFontSize = 15.sp
-    val firstCategory = "선수 순위"
-    val firstCategoryList = listOf("공격지표", "수비지표", "공통지표")
-    val secondCategoryList = listOf("득점", "어시스트", "공격포인트", "슈팅", "유효슈팅", "태클", "패스", "파울", "경고", "퇴장", "경기수")
-    val attackCategoryList = listOf("득점", "어시스트", "공격포인트", "슈팅", "유효슈팅")
-    val defendCategoryList = listOf("태클", "패스")
-    val commonCategoryList = listOf("파울", "경고", "퇴장", "경기수")
 
     /* ---------------------
        data state
@@ -87,7 +82,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
 
             val keywords = displayModel.keywords
             if (keywords.isNotEmpty()) {
-                val index = secondCategoryList.indexOfFirst { category ->
+                val index = StringConstants.Football.playerStandingsSecondCategories.indexOfFirst { category ->
                     val keyword = keywords.find { it.keyword == category }
                     keyword != null
                 }
@@ -108,10 +103,13 @@ class FBPlayerStandingsViewModel @Inject constructor(
     private suspend fun selectFirstCategory(index: Int) {
         shouldScrollCategory = true
 
+        val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
+        val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+
         when (index) {
             0 -> _secondSelectedIndex.emit(0)
-            1 -> _secondSelectedIndex.emit(attackCategoryList.size)
-            2 -> _secondSelectedIndex.emit(attackCategoryList.size + defendCategoryList.size)
+            1 -> _secondSelectedIndex.emit(attackCategoriesSize)
+            2 -> _secondSelectedIndex.emit(attackCategoriesSize + defendCategoriesSize)
         }
 
         _firstSelectedIndex.emit(index)
@@ -123,9 +121,12 @@ class FBPlayerStandingsViewModel @Inject constructor(
         shouldScrollCategory = false
         _secondSelectedIndex.emit(index)
 
+        val attackCategories = StringConstants.Football.playerStandingsAttackCategories
+        val defendCategories = StringConstants.Football.playerStandingsDefendCategories
+
         when (index) {
-            in attackCategoryList.indices -> _firstSelectedIndex.emit(0)
-            in attackCategoryList.size until attackCategoryList.size + defendCategoryList.size -> _firstSelectedIndex.emit(1)
+            in attackCategories.indices -> _firstSelectedIndex.emit(0)
+            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstSelectedIndex.emit(1)
             else -> _firstSelectedIndex.emit(2)
         }
 
@@ -141,12 +142,20 @@ class FBPlayerStandingsViewModel @Inject constructor(
             2 -> standings.sortByDescending { it.stats.goals.total + it.stats.goals.assists }
             3 -> standings.sortByDescending { it.stats.shots.total }
             4 -> standings.sortByDescending { it.stats.shots.on }
-            5 -> standings.sortByDescending { it.stats.tackles.total }
-            6 -> standings.sortByDescending { it.stats.passes.total }
-            7 -> standings.sortByDescending { it.stats.fouls.committed }
-            8 -> standings.sortByDescending { it.stats.cards.yellow }
-            9 -> standings.sortByDescending { it.stats.cards.red }
-            10 -> standings.sortByDescending { it.stats.games.appearences }
+            5 -> standings.sortByDescending { it.stats.passes.key }
+            6 -> standings.sortByDescending { it.stats.dribbles.success }
+            7 -> standings.sortByDescending { it.stats.penalty.scored }
+            8 -> standings.sortByDescending { it.stats.tackles.total }
+            9 -> standings.sortByDescending { it.stats.duels.won }
+            10 -> standings.sortByDescending { it.stats.passes.total }
+            11 -> standings.sortByDescending { it.stats.fouls.committed }
+            12 -> standings.sortByDescending { it.stats.cards.yellow }
+            13 -> standings.sortByDescending { it.stats.cards.red }
+            14 -> standings.sortByDescending { it.stats.games.appearences }
+            15 -> standings.sortByDescending { it.stats.games.lineups }
+            16 -> standings.sortByDescending { it.stats.substitutes.substituteIn }
+            17 -> standings.sortByDescending { it.stats.games.minutes }
+            18 -> standings.sortByDescending { it.stats.games.rating.toDoubleOrNull() ?: 0.0 }
         }
 
         _standings.emit(standings.take(20))

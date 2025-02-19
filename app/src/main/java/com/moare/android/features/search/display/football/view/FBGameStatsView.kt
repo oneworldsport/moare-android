@@ -41,10 +41,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.TranslationType
+import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
@@ -89,9 +91,12 @@ fun FBGameStatsView(
        etc
        --------------------- */
     val secondSelectedCategoryPosition = with(LocalDensity.current) {
-        if (secondSelectedIndex in 0 until fbGameStatsViewModel.attackCategoryList.size) {
+        val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
+        val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
+
+        if (secondSelectedIndex in 0 until attackCategoriesSize) {
             (fbGameStatsViewModel.itemWidth * secondSelectedIndex).toPx()
-        } else if (secondSelectedIndex in fbGameStatsViewModel.attackCategoryList.size until fbGameStatsViewModel.attackCategoryList.size + fbGameStatsViewModel.defendCategoryList.size) {
+        } else if (secondSelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
             ((fbGameStatsViewModel.itemWidth * secondSelectedIndex) + fbGameStatsViewModel.barWidth).toPx()
         } else {
             ((fbGameStatsViewModel.itemWidth * secondSelectedIndex) + (fbGameStatsViewModel.barWidth * 2)).toPx()
@@ -331,7 +336,7 @@ fun FBGameStatsFirstCategoryItem(
             .height(fbGameStatsViewModel.categoryItemHeight * 2)
     ) {
         Text(
-            text = fbGameStatsViewModel.firstCategory,
+            text = StringConstants.Football.gameStatsFirstCategory,
             fontSize = fbGameStatsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -347,6 +352,13 @@ fun FBGameStatsFirstCategoryList(
     fbGameStatsViewModel: FBGameStatsViewModel = hiltViewModel()
 ) {
     /* ---------------------
+       constants
+       --------------------- */
+    val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
+    val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
+    val etcCategoriesSize = StringConstants.Football.gameStatsEtcCategories.size
+
+    /* ---------------------
        viewmodel state
        --------------------- */
     val selectedIndex by fbGameStatsViewModel.firstSelectedIndex.collectAsState()
@@ -360,17 +372,17 @@ fun FBGameStatsFirstCategoryList(
     val barOffset by animateDpAsState(
         targetValue = if (selectedIndex == 0) {
             getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * 5,
+                itemWidth = itemWidth * attackCategoriesSize,
                 barWidth = 80.dp
             )
         } else if (selectedIndex == 1) {
-            (itemWidth * 5) + barWidth + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * 2,
+            (itemWidth * attackCategoriesSize) + barWidth + getOffsetOfAniCapsuleBar(
+                itemWidth = itemWidth * defendCategoriesSize,
                 barWidth = 80.dp
             )
         } else {
-            (itemWidth * 5) + (barWidth * 2) + (itemWidth * 2) + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * 3,
+            (itemWidth * attackCategoriesSize) + (barWidth * 2) + (itemWidth * defendCategoriesSize) + getOffsetOfAniCapsuleBar(
+                itemWidth = itemWidth * etcCategoriesSize,
                 barWidth = 80.dp
             )
         },
@@ -385,13 +397,13 @@ fun FBGameStatsFirstCategoryList(
         modifier = Modifier
             .height(fbGameStatsViewModel.categoryItemHeight - 2.dp)
     ) {
-        for ((index, value) in fbGameStatsViewModel.firstCategoryList.withIndex()) {
+        for ((index, value) in StringConstants.Football.statsFirstCategories.withIndex()) {
             FBGameStatsFirstCategoryListItem(
                 category = value,
                 index = index
             )
 
-            if (index != fbGameStatsViewModel.firstCategoryList.size - 1) {
+            if (index != StringConstants.Football.statsFirstCategories.size - 1) {
                 VCapsuleBar(modifier = Modifier.alpha(0.5f))
             }
         }
@@ -418,7 +430,15 @@ fun FBGameStatsFirstCategoryListItem(
         fontWeight = FontWeight.Medium,
         textAlign = TextAlign.Center,
         modifier = Modifier
-            .width(if (index == 0) (itemWidth * 5) else if (index == 1) (itemWidth * 2) else (itemWidth * 3))
+            .width(
+                if (index == 0) {
+                    (itemWidth * StringConstants.Football.gameStatsAttackCategories.size)
+                } else if (index == 1) {
+                    (itemWidth * StringConstants.Football.gameStatsDefendCategories.size)
+                } else {
+                    (itemWidth * StringConstants.Football.gameStatsEtcCategories.size)
+                }
+            )
             .clickable {
                 fbGameStatsViewModel.send(
                     FBGameStatsViewModel.Intent.SelectFirstCategory(index)
@@ -433,6 +453,12 @@ fun FBGameStatsSecondCategoryList(
     fbGameStatsViewModel: FBGameStatsViewModel = hiltViewModel()
 ) {
     /* ---------------------
+       constants
+       --------------------- */
+    val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
+    val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
+
+    /* ---------------------
        viewmodel state
        --------------------- */
     val selectedIndex by fbGameStatsViewModel.secondSelectedIndex.collectAsState()
@@ -441,9 +467,9 @@ fun FBGameStatsSecondCategoryList(
        animation
        --------------------- */
     val barOffset by animateDpAsState(
-        targetValue = if (selectedIndex in 0 until fbGameStatsViewModel.attackCategoryList.size) {
+        targetValue = if (selectedIndex in 0 until attackCategoriesSize) {
             getOffsetOfAniCapsuleBar(itemWidth = fbGameStatsViewModel.itemWidth, index = selectedIndex)
-        } else if (selectedIndex in fbGameStatsViewModel.attackCategoryList.size until fbGameStatsViewModel.attackCategoryList.size + fbGameStatsViewModel.defendCategoryList.size) {
+        } else if (selectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
             getOffsetOfAniCapsuleBar(itemWidth = fbGameStatsViewModel.itemWidth, index = selectedIndex) + fbGameStatsViewModel.barWidth
         } else {
             getOffsetOfAniCapsuleBar(itemWidth = fbGameStatsViewModel.itemWidth, index = selectedIndex) + (fbGameStatsViewModel.barWidth * 2)
@@ -459,13 +485,13 @@ fun FBGameStatsSecondCategoryList(
         modifier = Modifier
             .height(fbGameStatsViewModel.categoryItemHeight - 2.dp)
     ) {
-        for ((index, value) in fbGameStatsViewModel.secondCategoryList.withIndex()) {
+        for ((index, value) in StringConstants.Football.gameStatsSecondCategories.withIndex()) {
             FBGameStatsSecondCategoryListItem(
                 category = value,
                 index = index
             )
 
-            if (index == fbGameStatsViewModel.attackCategoryList.size - 1 || index == (fbGameStatsViewModel.attackCategoryList.size + fbGameStatsViewModel.defendCategoryList.size - 1)) {
+            if (index == attackCategoriesSize - 1 || index == (attackCategoriesSize + defendCategoriesSize - 1)) {
                 VCapsuleBar(modifier = Modifier.alpha(0.5f))
             }
         }
@@ -483,11 +509,18 @@ fun FBGameStatsSecondCategoryListItem(
     category: String,
     index: Int
 ) {
+    val fontSize = when (index) {
+        6, 9 -> 11.sp
+        16 -> 12.sp
+        else -> fbGameStatsViewModel.dataFontSize
+    }
+
     Text(
         text = category,
         textAlign = TextAlign.Center,
-        fontSize = fbGameStatsViewModel.categoryFontSize,
+        fontSize = fontSize,
         fontWeight = FontWeight.Medium,
+        maxLines = 2,
         modifier = Modifier
             .width(fbGameStatsViewModel.itemWidth)
             .clickable {
@@ -619,6 +652,12 @@ fun FBGameStatsDataList(
     fbGameStatsViewModel: FBGameStatsViewModel = hiltViewModel()
 ) {
     /* ---------------------
+       constants
+       --------------------- */
+    val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
+    val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
+
+    /* ---------------------
        viewmodel state
        --------------------- */
     val playerStats by fbGameStatsViewModel.playerStats.collectAsState()
@@ -630,7 +669,7 @@ fun FBGameStatsDataList(
                 modifier = Modifier
                     .height(fbGameStatsViewModel.dataItemHeight)
             ) {
-                for (index in 0 until fbGameStatsViewModel.secondCategoryList.size) {
+                for (index in 0 until StringConstants.Football.gameStatsSecondCategories.size) {
                     value.statistics.first().let {
                         FBGameStatsDataListItem(
                             data = it,
@@ -638,7 +677,7 @@ fun FBGameStatsDataList(
                         )
                     }
 
-                    if (index == fbGameStatsViewModel.attackCategoryList.size - 1 || index == (fbGameStatsViewModel.attackCategoryList.size + fbGameStatsViewModel.defendCategoryList.size)) {
+                    if (index == attackCategoriesSize - 1 || index == (attackCategoriesSize + defendCategoriesSize)) {
                         VCapsuleBar(modifier = Modifier.alpha(0f))
                     }
                 }
@@ -655,22 +694,36 @@ fun FBGameStatsDataListItem(
 ) {
     val intDataText = when (index) {
         0 -> "${data.goals.total}"
-        1 -> "${data.goals.assists}"
-        2 -> "${(data.goals.total) + (data.goals.assists)}"
+        1 -> "${data.penalty.scored}"
+        2 -> "${data.goals.assists}"
         3 -> "${data.shots.total}"
         4 -> "${data.shots.on}"
-        5 -> "${data.passes.total}"
-        6 ->  "${data.tackles.total}"
-        7 -> "${data.fouls.committed}"
-        8 -> "${data.cards.yellow}"
-        9 -> "${data.cards.red}"
+        5 -> "${data.passes.key}"
+        6 ->  "${data.dribbles.success}/${data.dribbles.attempts}(${data.dribbles.success.percentageOf(data.dribbles.attempts, 1)}%)"
+        7 -> "${data.offsides}"
+        8 -> "${data.tackles.total}"
+        9 -> "${data.duels.won}/${data.duels.total}(${data.duels.won.percentageOf(data.duels.total, 1)}%)"
+        10 -> "${data.tackles.interceptions}"
+        11 -> "${data.passes.total}"
+        12 -> "${data.fouls.drawn}"
+        13 -> "${data.fouls.committed}"
+        14 -> "${data.cards.yellow}"
+        15 -> "${data.cards.red}"
+        16 ->  "${data.games.minutes}"
+        17 -> data.games.rating
         else -> ""
+    }
+
+    val fontSize = when (index) {
+        6, 9 -> 11.sp
+        else -> fbGameStatsViewModel.dataFontSize
     }
 
     Text(
         text = intDataText,
         textAlign = TextAlign.Center,
-        fontSize = fbGameStatsViewModel.dataFontSize,
+        fontSize = fontSize,
+        maxLines = 2,
         modifier = Modifier
             .width(fbGameStatsViewModel.itemWidth)
     )

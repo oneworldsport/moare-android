@@ -213,7 +213,7 @@ data class FBGamePlayerStatsGames(
         get() = _position ?: ""
 
     val rating: String
-        get() = _rating ?: ""
+        get() = _rating ?: "0"
 
     val captain: Boolean
         get() = _captain ?: false
