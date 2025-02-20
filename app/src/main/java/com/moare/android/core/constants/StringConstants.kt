@@ -4,11 +4,26 @@ object StringConstants {
     object Football {
         const val resultOpen = "결과 보기"
         const val resultHide = "결과 숨기기"
-        const val gameNotStarted = "경기 전"
-        const val gameFirstHalf = "전반전"
-        const val gameHalftime = "전반 종료"
-        const val gameSecondHalf = "후반전"
-        const val gameFinished = "경기 종료"
+        const val gameNotStartedStr = "경기 전"
+        const val gameFirstHalfStr = "전반전"
+        const val gameHalftimeStr = "전반 종료"
+        const val gameSecondHalfStr = "후반전"
+        const val gameFinishedStr = "경기 종료"
+
+        const val gameNotStarted = "NS"
+        const val gameFirstHalf = "1H"
+        const val gameHalftime = "HT"
+        const val gameSecondHalf = "2H"
+        const val gameExtraTime = "ET" // 연장전
+        const val gameBreakTime = "BT" // 연장전 전반 후 휴식시간
+        const val gamePenaltyShootout = "P" // 승부차기
+        const val gameFinished = "FT"
+        const val gameFinishedAfterExtraTime = "AET" // 승부차기 없이 연장전 후 경기 종료
+        const val gameFinishedAfterPenaltyShootout = "PET" // 승부차기 후 경기 종료
+        const val gamePostponed = "PST"
+        const val gameCancelled = "CANC"
+        val gameLiveList = listOf(gameFirstHalf, gameHalftime, gameSecondHalf, gameExtraTime, gameBreakTime, gamePenaltyShootout)
+        val gameFinishedList = listOf(gameFinished, gameFinishedAfterExtraTime, gameFinishedAfterPenaltyShootout)
 
         const val standingsFirstCategory = "순위"
         val statsFirstCategories = listOf("공격 지표", "수비 지표", "공통 지표")

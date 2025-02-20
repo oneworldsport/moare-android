@@ -215,7 +215,7 @@ class SearchViewModel @Inject constructor(
                         val firstTrendingKeyword = trendingKeywordList.value.firstOrNull()
                         if (!firstTrendingKeyword.isNullOrBlank()) {
                             updateTextField(TextFieldValue(firstTrendingKeyword), false)
-                            performSearch(intent.searchType, intent.aniDuration)
+                            performSearch(SearchType.KEYWORD, intent.aniDuration)
                         }
                     } else {
                         performSearch(intent.searchType, intent.aniDuration)
