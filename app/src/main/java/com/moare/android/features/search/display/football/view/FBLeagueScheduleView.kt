@@ -1,7 +1,5 @@
 package com.moare.android.features.search.display.football.view
 
-import android.provider.Contacts.Intents.UI
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -217,11 +215,11 @@ fun FBLeagueScheduleListItem(
        --------------------- */
     val gameStatusText = if (isResultOpened) {
         when (data.fixture.status.short) {
-            "NS" -> StringConstants.Football.gameNotStarted
-            "1H" -> StringConstants.Football.gameFirstHalf
-            "HT" -> StringConstants.Football.gameHalftime
-            "2H" -> StringConstants.Football.gameSecondHalf
-            "FT", "AET", "PEN" -> StringConstants.Football.gameFinished
+            StringConstants.Football.gameNotStarted -> StringConstants.Football.gameNotStartedStr
+            StringConstants.Football.gameFirstHalf -> StringConstants.Football.gameFirstHalfStr
+            StringConstants.Football.gameHalftime -> StringConstants.Football.gameHalftimeStr
+            StringConstants.Football.gameSecondHalf -> StringConstants.Football.gameSecondHalfStr
+            in StringConstants.Football.gameFinishedList -> StringConstants.Football.gameFinishedStr
             else -> ""
         }
     } else {
@@ -230,7 +228,7 @@ fun FBLeagueScheduleListItem(
 
     val gameStatusColor = if (isResultOpened) {
         when (data.fixture.status.short) {
-            "1H", "HT", "2H" -> MaterialTheme.colors.primary
+            in StringConstants.Football.gameLiveList -> MaterialTheme.colors.primary
             else -> Color.Gray
         }
     } else {
@@ -241,18 +239,24 @@ fun FBLeagueScheduleListItem(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
+        if (StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)) {
+            isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
+        } else {
+            isResultOpened = true
+        }
 
         homeTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(data.teams.home.name))
         awayTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(data.teams.away.name))
+    }
+    LaunchedEffect(gameResultOpenedStateList) {
+        if (StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)) {
+            isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
+        }
     }
     LaunchedEffect(fbGameStatsData) {
         if (fbGameStatsData != null) {
             isResultOpened = true
         }
-    }
-    LaunchedEffect(gameResultOpenedStateList) {
-        isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
     }
 
     /* ---------------------
@@ -300,7 +304,8 @@ fun FBLeagueScheduleListItem(
         Spacer(Modifier.weight(1f))
 
         // score
-        if (isResultOpened && data.fixture.status.short == "FT") {
+        if (StringConstants.Football.gameLiveList.contains(data.fixture.status.short) ||
+            StringConstants.Football.gameFinishedList.contains(data.fixture.status.short) && isResultOpened) {
             Text(
                 text = data.goals.home.toString(),
                 textAlign = TextAlign.Center,
@@ -321,7 +326,8 @@ fun FBLeagueScheduleListItem(
             // game status
             CapsuleButton(
                 text = gameStatusText,
-                color = gameStatusColor
+                color = gameStatusColor,
+                isDisabled = fbGameStatsData != null || !StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)
             ) {
                 fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.UpdateResultOpenedState(data.fixture.id, !isResultOpened))
             }
@@ -362,7 +368,8 @@ fun FBLeagueScheduleListItem(
         Spacer(Modifier.weight(1f))
 
         // score
-        if (isResultOpened && data.fixture.status.short == "FT") {
+        if (StringConstants.Football.gameLiveList.contains(data.fixture.status.short) ||
+            StringConstants.Football.gameFinishedList.contains(data.fixture.status.short) && isResultOpened) {
             Text(
                 text = data.goals.away.toString(),
                 textAlign = TextAlign.Center,
