@@ -175,6 +175,8 @@ fun FBTeamScheduleListItem(
     var isResultOpened by remember { mutableStateOf(false) }
     var homeTeamKrName by remember { mutableStateOf("") }
     var awayTeamKrName by remember { mutableStateOf("") }
+    var venueKrName by remember { mutableStateOf("") }
+    var refereeKrName by remember { mutableStateOf("") }
 
     /* ---------------------
        viewmodel state
@@ -201,7 +203,7 @@ fun FBTeamScheduleListItem(
 
     val gameStatusColor = if (isResultOpened) {
         when (data.fixture.status.short) {
-            "1H", "HT", "2H" -> MaterialTheme.colors.primary
+            in StringConstants.Football.gameLiveList -> MaterialTheme.colors.primary
             else -> Color.Gray
         }
     } else {
@@ -227,8 +229,11 @@ fun FBTeamScheduleListItem(
         }
     }
     LaunchedEffect(fbGameStatsData) {
-        if (fbGameStatsData != null) {
+        fbGameStatsData?.let {
             isResultOpened = true
+
+            venueKrName = EnNameTranslationUtils.translateByAWS(it.game.fixture.venue.name)
+            refereeKrName = EnNameTranslationUtils.translateByAWS(it.game.fixture.referee)
         }
     }
 
@@ -330,7 +335,7 @@ fun FBTeamScheduleListItem(
             // venue
             fbGameStatsData?.let {
                 Text(
-                    text = "장소: " + it.game.fixture.venue.name,
+                    text = "장소: $venueKrName",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Light,
                     maxLines = 1,
@@ -341,12 +346,13 @@ fun FBTeamScheduleListItem(
             // game type or referee
             Text(
                 text = if (fbGameStatsData != null) {
-                    "심판: " + fbGameStatsData!!.game.fixture.referee
+                    "심판: $refereeKrName"
                 } else {
                     MatchDescriptionConverter.convert(data.league.round)
                 },
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Light
+                fontWeight = FontWeight.Light,
+                maxLines = 1,
             )
         }
 
