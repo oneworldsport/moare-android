@@ -269,6 +269,7 @@ fun FBLeagueScheduleListItem(
             .fillMaxWidth()
             .clickable(enabled = fbGameStatsData == null) {
                 searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data))
+
                 // set selected game's isOpened true
                 fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.UpdateResultOpenedState(data.fixture.id, true))
             }
