@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,10 +38,11 @@ fun TrendingKeywords(
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.Bottom,
         modifier = Modifier
             .horizontalScroll(rememberScrollState())
+            .height(40.dp)
             .padding(horizontal = 16.dp)
-            .padding(top = 10.dp)
     ) {
         for ((index, value) in trendingKeywordList.withIndex()) {
             if (index != 0) {

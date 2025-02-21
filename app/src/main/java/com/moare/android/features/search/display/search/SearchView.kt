@@ -3,26 +3,26 @@ package com.moare.android.features.search.display.search
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -36,16 +36,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
@@ -71,8 +70,8 @@ fun SearchView(
     /* ---------------------
        ui state
        --------------------- */
-    var isInfoVisible by remember { mutableStateOf(false) }
-    var isInfoOpened by remember { mutableStateOf(false) }
+    var isNoticeVisible by remember { mutableStateOf(false) }
+    var isNoticeOpened by remember { mutableStateOf(false) }
     var isSearchBarOpened by remember { mutableStateOf(false) }
 
     /* ---------------------
@@ -102,6 +101,13 @@ fun SearchView(
        animation
        --------------------- */
     val dataContainerCenter = remember { mutableStateOf(Offset.Zero) }
+    val noticeAlpha by animateFloatAsState(
+        targetValue = if (isNoticeOpened) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = LinearOutSlowInEasing
+        )
+    )
 
     /* ---------------------
        etc
@@ -113,11 +119,17 @@ fun SearchView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(searchState, autoCompleteList) {
-        isInfoVisible = if (searchState) {
+        isNoticeVisible = if (searchState) {
+            isNoticeOpened = false
             false
         } else {
             if (firstOpened) {
-                autoCompleteList.isEmpty()
+                if (autoCompleteList.isEmpty()) {
+                    true
+                } else {
+                    isNoticeOpened = false
+                    false
+                }
             } else {
                 false
             }
@@ -128,7 +140,7 @@ fun SearchView(
         if (firstOpened) {
             delay(1000)
             isSearchBarOpened = true
-            isInfoVisible = true
+            isNoticeVisible = true
         }
     }
 
@@ -139,79 +151,43 @@ fun SearchView(
     /* ---------------------
        ui
        --------------------- */
-    Box {
-        // info about currently providing data
+    Box(
+        contentAlignment = Alignment.Center
+    ) {
+        /* ---------------------
+           notice
+           - info about providing data
+           --------------------- */
         AnimatedVisibility(
-            visible = isInfoVisible,
+            visible = isNoticeVisible,
             modifier = Modifier
-                .size(width = 250.dp, height = 140.dp)
-                .align(Alignment.CenterEnd)
-                .offset(x = (-20).dp, y = (-126).dp)
-                .zIndex(1f),
+                .zIndex(1f)
+                .offset(x = (-12).dp, y = (-113).dp), // y: 전체 박스 높이(100 + 20 + 4) / 2 + (검색창 높이(50) + 트렌딩 키워드 높이(40)) / 2 + 추가 패딩 6,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                AnimatedVisibility(
-                    visible = isInfoOpened,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    // wrapped with box because border's fadeOut animation is not applied if it is in AnimatedVisibility's modifier
-                    Box(
-                        Modifier
-                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(UIConstants.CornerRadius.small))
-                    ) {
-                        Column(
-                            Modifier
-                                .verticalScroll(rememberScrollState())
-                                .padding(10.dp)
-                        ) {
-                            Text(
-                                text = "현재 제공중인 스포츠 데이터:",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = "• 프리미어리그 24/25",
-                                fontSize = 12.sp,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = "\n제공 예정 스포츠 데이터:",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = "• 라리가 24/25" +
-                                        "\n• 분데스리가 24/25" +
-                                        "\n• 리그 1 24/25" +
-                                        "\n• 챔피언스리그 24/25",
-                                fontSize = 12.sp,
-                                color = Color.Gray
-                            )
-                        }
-                    }
-                }
+            Row {
+                Spacer(Modifier.weight(1f))
 
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_info_24),
-                    contentDescription = "ic_info_24",
-                    tint = Color.Gray,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(top = UIConstants.Padding.defalutVPadding)
-                        .clickable {
-                            isInfoOpened = !isInfoOpened
-                        }
-                )
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
+                    NoticeBox(
+                        modifier = Modifier.alpha(noticeAlpha)
+                    )
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_info_24),
+                        contentDescription = "ic_info_24",
+                        tint = Color.Gray,
+                        modifier = Modifier
+                            .padding(top = UIConstants.Padding.defalutVPadding)
+                            .size(20.dp)
+                            .clickable {
+                                isNoticeOpened = !isNoticeOpened
+                            }
+                    )
+                }
             }
         }
 
@@ -223,7 +199,11 @@ fun SearchView(
                     interactionSource = noRippleInteractionSource,
                     indication = null,
                     onClick = {
-                        focusManager.clearFocus()
+                        if (isNoticeOpened) {
+                            isNoticeOpened = false
+                        } else {
+                            focusManager.clearFocus()
+                        }
                     }
                 )
             ,
