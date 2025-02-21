@@ -152,7 +152,7 @@ fun FBGameStatsView(
                     )
 
                     Text(
-                        text = " - " + MatchDescriptionConverter.convert(game.league.round),
+                        text = " - " + MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = game.league.round),
                         fontSize = 14.sp
                     )
                 }

@@ -99,7 +99,9 @@ fun FBTeamScheduleView(
                 )
 
                 Text(
-                    text = " - " + if (fbGameStatsData?.game?.league?.round != null) MatchDescriptionConverter.convert(fbGameStatsData?.game?.league?.round!!) else "",
+                    text = " - " + if (fbGameStatsData?.game?.league?.round != null) {
+                        MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = fbGameStatsData?.game?.league?.round!!)
+                    } else { "" },
                     fontSize = 14.sp
                 )
             }
@@ -349,7 +351,7 @@ fun FBTeamScheduleListItem(
                 text = if (fbGameStatsData != null) {
                     "심판: $refereeKrName"
                 } else {
-                    MatchDescriptionConverter.convert(data.league.round)
+                    MatchDescriptionConverter.convert(input = data.league.round)
                 },
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light,
