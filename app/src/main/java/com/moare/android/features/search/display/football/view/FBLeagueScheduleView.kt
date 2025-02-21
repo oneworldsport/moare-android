@@ -316,7 +316,8 @@ fun FBLeagueScheduleListItem(
                 text = data.goals.home.toString(),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .width(20.dp)
+                    .width(20.dp),
+                color = if (data.goals.home >= data.goals.away) MaterialTheme.colors.primary else Color.Black
             )
         }
 
@@ -381,7 +382,8 @@ fun FBLeagueScheduleListItem(
                 text = data.goals.away.toString(),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .width(20.dp)
+                    .width(20.dp),
+                color = if (data.goals.away >= data.goals.home) MaterialTheme.colors.primary else Color.Black
             )
         }
 
