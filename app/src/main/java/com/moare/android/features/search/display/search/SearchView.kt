@@ -199,7 +199,11 @@ fun SearchView(
                     interactionSource = noRippleInteractionSource,
                     indication = null,
                     onClick = {
-                        focusManager.clearFocus()
+                        if (isNoticeOpened) {
+                            isNoticeOpened = false
+                        } else {
+                            focusManager.clearFocus()
+                        }
                     }
                 )
             ,
