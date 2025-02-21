@@ -3,6 +3,8 @@ package com.moare.android.features.search.display.search
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -99,6 +101,13 @@ fun SearchView(
        animation
        --------------------- */
     val dataContainerCenter = remember { mutableStateOf(Offset.Zero) }
+    val noticeAlpha by animateFloatAsState(
+        targetValue = if (isNoticeOpened) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = LinearOutSlowInEasing
+        )
+    )
 
     /* ---------------------
        etc
@@ -111,10 +120,16 @@ fun SearchView(
        --------------------- */
     LaunchedEffect(searchState, autoCompleteList) {
         isNoticeVisible = if (searchState) {
+            isNoticeOpened = false
             false
         } else {
             if (firstOpened) {
-                autoCompleteList.isEmpty()
+                if (autoCompleteList.isEmpty()) {
+                    true
+                } else {
+                    isNoticeOpened = false
+                    false
+                }
             } else {
                 false
             }
@@ -158,7 +173,7 @@ fun SearchView(
                     horizontalAlignment = Alignment.End
                 ) {
                     NoticeBox(
-                        modifier = Modifier.alpha(if (isNoticeOpened) 1f else 0f)
+                        modifier = Modifier.alpha(noticeAlpha)
                     )
 
                     Icon(
