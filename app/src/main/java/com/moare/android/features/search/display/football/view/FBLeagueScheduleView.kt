@@ -106,7 +106,7 @@ fun FBLeagueScheduleView(
                 )
 
                 Text(
-                    text = " - " + MatchDescriptionConverter.convert(it.game.league.round),
+                    text = " - " + MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = it.game.league.round),
                     fontSize = 14.sp
                 )
             }
@@ -362,7 +362,7 @@ fun FBLeagueScheduleListItem(
                 text = if (fbGameStatsData != null) {
                     "심판: $refereeKrName"
                 } else {
-                    MatchDescriptionConverter.convert(data.league.round)
+                    MatchDescriptionConverter.convert(input = data.league.round)
                 },
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light,
