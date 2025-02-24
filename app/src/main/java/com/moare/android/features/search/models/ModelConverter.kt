@@ -134,8 +134,10 @@ class ModelConverter(
     }
 
     fun fbLeagueScheduleConverter(response: FBGameScheduleResponseModel): FBLeagueScheduleDisplayModel {
-        // TODO: temporary yearMonth list. Has to develop servie
-        val yearMonthList = listOf("24/08", "24/09", "24/10", "24/11", "24/12", "25/01", "25/02", "25/03", "25/04", "25/05")
+        val yearMonthList = response.scheduledMonths.map {
+            val (year, month) = it.split("-")
+            "${year.takeLast(2)}/$month"
+        }
 
         return FBLeagueScheduleDisplayModel(yearMonthList, response.schedule)
     }

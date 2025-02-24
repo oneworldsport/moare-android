@@ -69,7 +69,8 @@ fun FBLeagueScheduleView(
     val days by fbLeagueScheduleViewModel.days.collectAsState()
     val selectedYearMonthIndex by fbLeagueScheduleViewModel.selectedYearMonthIndex.collectAsState()
     val selectedDayIndex by fbLeagueScheduleViewModel.selectedDayIndex.collectAsState()
-    val calendarScrollTrigger by fbLeagueScheduleViewModel.calendarScrollTrigger.collectAsState()
+    val yearMonthCalendarScrollTrigger by fbLeagueScheduleViewModel.yearMonthCalendarScrollTrigger.collectAsState()
+    val dayCalendarScrollTrigger by fbLeagueScheduleViewModel.dayCalendarScrollTrigger.collectAsState()
     val isAllResultOpened by fbLeagueScheduleViewModel.isAllResultOpened.collectAsState()
 
     val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
@@ -117,11 +118,11 @@ fun FBLeagueScheduleView(
            - hides when game selected
            --------------------- */
         if (fbGameStatsData == null) {
-            CalendarList(yearMonthList, CalendarType.YEARMONTH, selectedYearMonthIndex) { yearMonth, index ->
+            CalendarList(yearMonthList, CalendarType.YEARMONTH, selectedYearMonthIndex, yearMonthCalendarScrollTrigger) { yearMonth, index ->
                 fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.SelectYearMonth(yearMonth, index))
             }
 
-            CalendarList(days, CalendarType.DAY, selectedDayIndex, calendarScrollTrigger) { day, index ->
+            CalendarList(days, CalendarType.DAY, selectedDayIndex, dayCalendarScrollTrigger) { day, index ->
                 fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.SelectDay(day, index))
             }
         }
