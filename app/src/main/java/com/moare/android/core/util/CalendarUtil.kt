@@ -94,8 +94,8 @@ object CalendarUtil {
         return zonedDateTime.format(formatter)
     }
 
-    fun getDefaultDay(yearMonthList: List<String>, dayList: List<DayInfo>): Pair<Int, DayInfo>? {
-        val defaultYearMonthType = getDefaultYearMonthType(yearMonthList)
+    fun getDefaultDay(yearMonth: String, dayList: List<DayInfo>): Pair<Int, DayInfo>? {
+        val defaultYearMonthType = getDefaultYearMonthType(yearMonth)
 
         when (defaultYearMonthType) {
             DefaultYearMonthType.CURRENT_YEARMONTH -> {
@@ -137,33 +137,20 @@ object CalendarUtil {
         }
     }
 
-    private fun getDefaultYearMonthType(yearMonthList: List<String>): DefaultYearMonthType {
+    private fun getDefaultYearMonthType(yearMonth: String): DefaultYearMonthType {
         Locale.setDefault(Locale.KOREAN)
 
         val currentDate = LocalDate.now()
         val currentYear = currentDate.year % 100
         val currentMonth = currentDate.monthValue
-//        val currentYearMonth = "%02d/%02d".format(currentYear, currentMonth)
-//        val currentYearMonth = "${currentYear.toString().padStart(2, '0')}/${currentMonth.toString().padStart(2, '0')}"
+        val totalCurrentYearMonth = currentYear * 12 + currentMonth
 
-        val sortedList = yearMonthList.map {
-            val (year, month) = it.split("/").map { it.toInt() }
-            year to month
-        }.sortedWith(compareBy({ it.first }, { it.second })) // 연도 -> 월 순으로 정렬
-
-        // 현재 날짜와 일치하는 값 찾기
-        val currentDateMatch = sortedList.firstOrNull { (year, month) ->
-            year == currentYear && month == currentMonth
-        }
-
-        // 현재 날짜보다 큰 값 찾기
-        val futureDate = sortedList.firstOrNull { (year, month) ->
-            (year > currentYear) || (year == currentYear && month >= currentMonth)
-        }
+        val (year, month) = yearMonth.split("/")
+        val totalYearMonth = year.toInt() * 12 + month.toInt()
 
         return when {
-            currentDateMatch != null -> DefaultYearMonthType.CURRENT_YEARMONTH
-            futureDate != null -> DefaultYearMonthType.NEXT_YEARMONTH
+            totalYearMonth == totalCurrentYearMonth -> DefaultYearMonthType.CURRENT_YEARMONTH
+            totalYearMonth > totalCurrentYearMonth -> DefaultYearMonthType.NEXT_YEARMONTH
             else -> DefaultYearMonthType.PREVIOUS_YEARMONTH
         }
     }

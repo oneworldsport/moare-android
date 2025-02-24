@@ -171,7 +171,7 @@ class FBLeagueScheduleViewModel @Inject constructor(
             _gameResultOpenedStateList.emit(isResultOpenedStateList)
 
             if (isInit) {
-                val defaultDay = CalendarUtil.getDefaultDay(yearMonthList.value, days)
+                val defaultDay = CalendarUtil.getDefaultDay(selectedYearMonth.value, days)
                 defaultDay?.let {
                     _selectedDay.emit(defaultDay.second)
                     _selectedDayIndex.emit(defaultDay.first)
