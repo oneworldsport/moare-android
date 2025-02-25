@@ -177,8 +177,8 @@ fun SearchView(
                     )
 
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_info_24),
-                        contentDescription = "ic_info_24",
+                        painter = painterResource(id = R.drawable.ic_rounded_info_24),
+                        contentDescription = null,
                         tint = Color.Gray,
                         modifier = Modifier
                             .padding(top = UIConstants.Padding.defalutVPadding)
