@@ -26,7 +26,15 @@ interface SearchApi {
 
     @GET("search/schedule")
     suspend fun getLeagueSchedule(
-        @Query("leagueId") leagueId: String,
+        @Query("leagueId") leagueId: Int,
         @Query("yearMonth") yearMonth: String
+    ): ResponseBody
+
+    @GET("search/game")
+    suspend fun fetchGameInfo(
+        @Query("category") category: String,
+        @Query("date") date: String,
+        @Query("leagueId") leagueId: Int,
+        @Query("fixtureId") fixtureId: Int,
     ): ResponseBody
 }

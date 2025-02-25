@@ -22,8 +22,13 @@ class SearchClient(
         return DataModel.fromJson(response.string())
     }
 
-    suspend fun fetchLeagueSchedule(leagueId: String, yearMonth: String): DataModel {
+    suspend fun fetchLeagueSchedule(leagueId: Int, yearMonth: String): DataModel {
         val response = apiHelper.searchApi.getLeagueSchedule(leagueId, yearMonth)
+        return DataModel.fromJson(response.string())
+    }
+
+    suspend fun fetchGameInfo(category: String, date: String, leagueId: Int, fixtureId: Int): DataModel {
+        val response = apiHelper.searchApi.fetchGameInfo(category, date, leagueId, fixtureId)
         return DataModel.fromJson(response.string())
     }
 

@@ -3,7 +3,9 @@ package com.moare.android.features.search.display.football.view
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,10 +18,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -36,11 +40,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.R
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.EnNameTranslationUtils
@@ -252,6 +258,7 @@ fun FBGameStatsView(
 
 @Composable
 fun FBGameStatsTeamButtonContainer(
+    searchViewModel: SearchViewModel = hiltViewModel(),
     fbGameStatsViewModel: FBGameStatsViewModel = hiltViewModel()
 ) {
     /* ---------------------
@@ -284,25 +291,52 @@ fun FBGameStatsTeamButtonContainer(
             awayTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(it.game.teams.away.name))
         }
 
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(50.dp)
-            ) {
-                // home
-                FBGameStatsTeamButton(team = homeTeamKrName, index = 0)
+        Box(
+            contentAlignment = Alignment.Center
+        ) {
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.height(50.dp)
+                ) {
+                    // home
+                    FBGameStatsTeamButton(team = homeTeamKrName, index = 0)
 
-                VCapsuleBar(modifier = Modifier.alpha(0.5f))
+                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
 
-                // away
-                FBGameStatsTeamButton(team = awayTeamKrName, index = 1)
+                    // away
+                    FBGameStatsTeamButton(team = awayTeamKrName, index = 1)
+                }
+
+
+                HCapsuleBar(
+                    modifier = Modifier.offset(x = barOffset),
+                    size = HCapsuleBarSize.MEDIUM
+                )
             }
 
+            // refresh button
+            Row {
+                Spacer(Modifier.weight(1f))
 
-            HCapsuleBar(
-                modifier = Modifier.offset(x = barOffset),
-                size = HCapsuleBarSize.MEDIUM
-            )
+                Box(
+                    Modifier
+                        .padding(end = UIConstants.Padding.defaultHPadding)
+                        .alpha(0.6f)
+                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
+                        .padding(2.dp)
+                        .clickable {
+                            searchViewModel.send(SearchViewModel.Intent.RefreshGame)
+                        }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_round_refresh_24),
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
         }
     }
 

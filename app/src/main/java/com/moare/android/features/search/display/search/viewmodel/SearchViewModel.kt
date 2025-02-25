@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.Trie
 import com.moare.android.core.util.getChosung
+import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel.Intent
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SearchDataState
 import com.moare.android.features.search.models.SportDecodableModel
@@ -199,6 +200,8 @@ class SearchViewModel @Inject constructor(
         data class ShowPlayerStats(val from: String, val playerId: Int = 0) : Intent()
         data class ShowTeamStats(val from: String, val teamId: Int = 0) : Intent()
         data class ShowGameStats(val from: String, val dd: String) : Intent()
+
+        data object RefreshGame : Intent()
     }
 
     enum class SearchType {
@@ -230,6 +233,7 @@ class SearchViewModel @Inject constructor(
                 is Intent.ShowPlayerStats -> showPlayerStats(intent.from, intent.playerId)
                 is Intent.ShowTeamStats -> showTeamStats(intent.from, intent.teamId)
                 is Intent.ShowGameStats -> showGameStats(intent.from, intent.dd)
+                is Intent.RefreshGame -> refreshGame()
             }
         }
     }
@@ -633,5 +637,21 @@ class SearchViewModel @Inject constructor(
         _viewStack.emit(stack)
 
         _resultVisibleState.emit(true)
+    }
+
+    private suspend fun refreshGame() {
+        try {
+            val game = fbGameStatsData.value?.game
+            game?.let {
+                val result = searchClient.fetchGameInfo("football", it.fixture.date, it.league.id, it.fixture.id)
+
+                if (result.data is SportDecodableModel.FBGameStats) {
+                    val data = result.data
+                    _fbGameStatsData.emit(data.displayModel)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("dsdf", e.localizedMessage ?: "error")
+        }
     }
 }
