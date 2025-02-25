@@ -423,7 +423,7 @@ class SearchViewModel @Inject constructor(
         _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game))
 
         val dataModel = SportDecodableModel.FBGameStats(
-            responseModel = FBGameStatsResponseModel(stats = game),
+            responseModel = FBGameStatsResponseModel(game = game),
             displayModel = FBGameStatsDisplayModel(game = game)
         )
 

@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FBGameStatsResponseModel(
-    val stats: FBGame? = null
+    val game: FBGame? = null
 )

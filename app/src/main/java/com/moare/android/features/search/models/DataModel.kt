@@ -135,7 +135,7 @@ data class DataModel(
                 "football_game_stats" -> {
                     val responseModel: FBGameStatsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
 
-                    if (responseModel.stats == null) {
+                    if (responseModel.game == null) {
                         SportDecodableModel.NoResult
                     } else {
                         val displayModel = modelConverter.fbGameStatsConverter(responseModel)

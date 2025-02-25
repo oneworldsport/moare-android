@@ -143,7 +143,7 @@ class ModelConverter(
     }
 
     fun fbGameStatsConverter(response: FBGameStatsResponseModel): FBGameStatsDisplayModel {
-        return FBGameStatsDisplayModel(response.stats!!)
+        return FBGameStatsDisplayModel(response.game!!)
     }
 
     /* ---------------------
