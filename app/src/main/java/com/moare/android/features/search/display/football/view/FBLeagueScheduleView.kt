@@ -39,6 +39,7 @@ import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.ui.common.components.CalendarList
@@ -52,7 +53,7 @@ import com.moare.android.ui.common.components.URLImageSize
 fun FBLeagueScheduleView(
     searchViewModel: SearchViewModel = hiltViewModel(),
     fbLeagueScheduleViewModel: FBLeagueScheduleViewModel = hiltViewModel(),
-    data: FBLeagueScheduleDisplayModel
+    data: FBLeagueScheduleDisplayModel,
 ) {
     /* ---------------------
        constants
@@ -75,6 +76,9 @@ fun FBLeagueScheduleView(
 
     val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
 
+    val viewStack by searchViewModel.viewStack.collectAsState()
+    val poppedView by searchViewModel.poppedView.collectAsState()
+
     /* ---------------------
        etc
        --------------------- */
@@ -84,6 +88,21 @@ fun FBLeagueScheduleView(
        --------------------- */
     LaunchedEffect(data) {
         fbLeagueScheduleViewModel.initData(data)
+    }
+
+    LaunchedEffect(viewStack) {
+        // update games data after refreshing in FBGameStatsView
+        if (viewStack.isNotEmpty() && viewStack.last() is SportDecodableModel.FBLeagueSchedule) {
+            val fbLeagueSchedule = viewStack.last() as SportDecodableModel.FBLeagueSchedule
+
+            poppedView?.let {
+                if (it is SportDecodableModel.FBGameStats) {
+                    fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.UpdateGamesData(fbLeagueSchedule, it) { data ->
+                        searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
+                    })
+                }
+            }
+        }
     }
 
     /* ---------------------
@@ -119,7 +138,10 @@ fun FBLeagueScheduleView(
            --------------------- */
         if (fbGameStatsData == null) {
             CalendarList(yearMonthList, CalendarType.YEARMONTH, selectedYearMonthIndex, yearMonthCalendarScrollTrigger) { yearMonth, index ->
-                fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.SelectYearMonth(yearMonth, index))
+                fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.SelectYearMonth(yearMonth, index) { data ->
+                    // 현재 구조 콜백 수정 필요?
+                    searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
+                })
             }
 
             CalendarList(days, CalendarType.DAY, selectedDayIndex, dayCalendarScrollTrigger) { day, index ->
@@ -291,10 +313,10 @@ fun FBLeagueScheduleListItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .width(110.dp)
-                .clickable(enabled = fbGameStatsData != null) {
-                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue = TextFieldValue(text = "토트넘")))
-                    searchViewModel.send(SearchViewModel.Intent.PerformSearch())
-                }
+//                .clickable(enabled = fbGameStatsData != null) {
+//                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue = TextFieldValue(text = "토트넘")))
+//                    searchViewModel.send(SearchViewModel.Intent.PerformSearch())
+//                }
         ) {
             URLImage(
                 url = data.teams.home.logo,

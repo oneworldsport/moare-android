@@ -120,6 +120,10 @@ fun FBGameStatsView(
         coachKrName = EnNameTranslationUtils.translateByAWS(coach?.name)
     }
 
+    LaunchedEffect(Unit) {
+        searchViewModel.send(SearchViewModel.Intent.RefreshGame)
+    }
+
     // scroll to category that matches with the keyword,
     // and when first category list's item is selected by click
     LaunchedEffect(firstSelectedIndex) {

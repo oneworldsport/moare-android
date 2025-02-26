@@ -266,7 +266,7 @@ sealed class SportDecodableModel {
     @Serializable
     data class FBGameStats(
         val responseModel: FBGameStatsResponseModel,
-        val displayModel: FBGameStatsDisplayModel
+        var displayModel: FBGameStatsDisplayModel
     ) : SportDecodableModel()
 
     // nba
