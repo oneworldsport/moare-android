@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.Trie
 import com.moare.android.core.util.getChosung
+import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel.Intent
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SearchDataState
 import com.moare.android.features.search.models.SportDecodableModel
@@ -90,6 +91,7 @@ class SearchViewModel @Inject constructor(
 
     private val _fbLeagueScheduleData = MutableStateFlow<FBLeagueScheduleDisplayModel?>(null)
     val fbLeagueScheduleData: StateFlow<FBLeagueScheduleDisplayModel?> = _fbLeagueScheduleData
+    private var initialFbLeagueScheduleData: FBLeagueScheduleDisplayModel? = null // NOTE: Used when go back from FBGameStatsView and reopen FBLeagueScheduleView. Has to think about structure.
 
     private val _fbGameStatsData = MutableStateFlow<FBGameStatsDisplayModel?>(null)
     val fbGameStatsData: StateFlow<FBGameStatsDisplayModel?> = _fbGameStatsData
@@ -159,8 +161,12 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    // NOTE: viewStack should always be up to date
     private val _viewStack = MutableStateFlow<List<SportDecodableModel>>(emptyList())
     val viewStack: StateFlow<List<SportDecodableModel>> = _viewStack
+
+    private val _poppedView = MutableStateFlow<SportDecodableModel?>(null)
+    val poppedView: StateFlow<SportDecodableModel?> = _poppedView
 
     private var trendingKeywords: List<TrendingKeyword> = emptyList()
 
@@ -199,6 +205,9 @@ class SearchViewModel @Inject constructor(
         data class ShowPlayerStats(val from: String, val playerId: Int = 0) : Intent()
         data class ShowTeamStats(val from: String, val teamId: Int = 0) : Intent()
         data class ShowGameStats(val from: String, val dd: String) : Intent()
+
+        data object RefreshGame : Intent()
+        data class UpdateLastViewStack(val data: SportDecodableModel) : Intent()
     }
 
     enum class SearchType {
@@ -230,6 +239,8 @@ class SearchViewModel @Inject constructor(
                 is Intent.ShowPlayerStats -> showPlayerStats(intent.from, intent.playerId)
                 is Intent.ShowTeamStats -> showTeamStats(intent.from, intent.teamId)
                 is Intent.ShowGameStats -> showGameStats(intent.from, intent.dd)
+                is Intent.RefreshGame -> refreshGame()
+                is Intent.UpdateLastViewStack -> updateLastViewStack(intent.data)
             }
         }
     }
@@ -332,6 +343,7 @@ class SearchViewModel @Inject constructor(
                 }
                 is SportDecodableModel.FBLeagueSchedule -> {
                     _fbLeagueScheduleData.emit(data.displayModel)
+                    initialFbLeagueScheduleData = data.displayModel
                 }
                 is SportDecodableModel.FBGameStats -> {
                     _fbGameStatsData.emit(data.displayModel)
@@ -420,26 +432,27 @@ class SearchViewModel @Inject constructor(
     }
 
     private suspend fun selectFBGame(game: FBGame) {
-        _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game))
-
         val dataModel = SportDecodableModel.FBGameStats(
-            responseModel = FBGameStatsResponseModel(stats = game),
+            responseModel = FBGameStatsResponseModel(game = game),
             displayModel = FBGameStatsDisplayModel(game = game)
         )
 
+        // add stack before emiting _fbGameStatsData to ensure the last stack(SportDecodableModel.FBGameStats in this case) can be up to date after refreshing game data when opening FBGameStatsView
         val stack = viewStack.value.toMutableList()
         stack.add(dataModel)
         _viewStack.emit(stack)
+
+        _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game))
     }
 
     private suspend fun goBack() {
         val stack = viewStack.value.toMutableList()
         val lastView = stack.removeLastOrNull()
-        _viewStack.emit(stack)
+        _poppedView.emit(lastView)
 
         val viewToShow = stack.lastOrNull()
 
-        lastView?.let {
+        lastView?.let { lastView ->
             _resultVisibleState.emit(false)
 
             if (viewToShow == null) {
@@ -480,7 +493,11 @@ class SearchViewModel @Inject constructor(
                         _fbTeamScheduleData.emit(viewToShow.displayModel)
                     }
                     is SportDecodableModel.FBLeagueSchedule -> {
-                        _fbLeagueScheduleData.emit(viewToShow.displayModel)
+                        if (lastView is SportDecodableModel.FBGameStats) {
+                            _fbLeagueScheduleData.emit(initialFbLeagueScheduleData)
+                        } else {
+                            _fbLeagueScheduleData.emit(viewToShow.displayModel)
+                        }
                     }
                     is SportDecodableModel.FBGameStats -> {
                         _fbGameStatsData.emit(viewToShow.displayModel)
@@ -490,6 +507,8 @@ class SearchViewModel @Inject constructor(
 
                 _resultVisibleState.emit(true)
             }
+
+            _viewStack.emit(stack)
         }
     }
 
@@ -634,4 +653,43 @@ class SearchViewModel @Inject constructor(
 
         _resultVisibleState.emit(true)
     }
+
+    private suspend fun refreshGame() {
+        try {
+            val game = fbGameStatsData.value?.game
+            game?.let {
+                val result = searchClient.fetchGameInfo("football", it.fixture.date, it.league.id, it.fixture.id)
+
+                if (result.data is SportDecodableModel.FBGameStats) {
+                    val data = result.data
+                    _fbGameStatsData.emit(data.displayModel)
+
+                    updateLastViewStack(data)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("dsdf", e.localizedMessage ?: "error")
+        }
+    }
+
+    private suspend fun updateLastViewStack(data: SportDecodableModel) {
+        val stack = viewStack.value.dropLast(1).toMutableList()
+        stack.add(data)
+        _viewStack.emit(stack)
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

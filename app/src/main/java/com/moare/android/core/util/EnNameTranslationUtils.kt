@@ -51,7 +51,7 @@ object EnNameTranslationUtils {
     }
 
     suspend fun translateByAWS(text: String?): String {
-        text?.let {
+        if (!text.isNullOrBlank()) {
             val translatedText = withContext(Dispatchers.IO) {
                 val translateRequest = TranslateTextRequest()
                     .withText(text)

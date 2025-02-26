@@ -198,8 +198,8 @@ fun AnimatingSearchBar(
             }
 
             Icon(
-                painter = painterResource(id = R.drawable.ic_search_24),
-                contentDescription = "ic_search_24",
+                painter = painterResource(id = R.drawable.ic_rounded_search_24),
+                contentDescription = null,
                 modifier = Modifier
                     .padding(start = if (firstOpened) 10.dp else 0.dp)
                     .size(24.dp)
