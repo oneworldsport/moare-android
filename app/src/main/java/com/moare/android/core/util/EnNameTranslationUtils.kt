@@ -51,20 +51,24 @@ object EnNameTranslationUtils {
     }
 
     suspend fun translateByAWS(text: String?): String {
-        if (!text.isNullOrBlank()) {
-            val translatedText = withContext(Dispatchers.IO) {
-                val translateRequest = TranslateTextRequest()
-                    .withText(text)
-                    .withSourceLanguageCode("en")
-                    .withTargetLanguageCode("ko")
+        try {
+            if (!text.isNullOrBlank()) {
+                val translatedText = withContext(Dispatchers.IO) {
+                    val translateRequest = TranslateTextRequest()
+                        .withText(text)
+                        .withSourceLanguageCode("en")
+                        .withTargetLanguageCode("ko")
 
-                val translateResult = translateClient.translateText(translateRequest)
-                translateResult.translatedText
+                    val translateResult = translateClient.translateText(translateRequest)
+                    translateResult.translatedText
+                }
+
+                return translatedText
             }
 
-            return translatedText
+            return text ?: ""
+        } catch (e: Exception) {
+            return text ?: ""
         }
-
-        return ""
     }
 }

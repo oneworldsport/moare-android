@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.Trie
 import com.moare.android.core.util.getChosung
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel.Intent
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SearchDataState
 import com.moare.android.features.search.models.SportDecodableModel
@@ -91,7 +90,7 @@ class SearchViewModel @Inject constructor(
 
     private val _fbLeagueScheduleData = MutableStateFlow<FBLeagueScheduleDisplayModel?>(null)
     val fbLeagueScheduleData: StateFlow<FBLeagueScheduleDisplayModel?> = _fbLeagueScheduleData
-    private var initialFbLeagueScheduleData: FBLeagueScheduleDisplayModel? = null // NOTE: Used when go back from FBGameStatsView and reopen FBLeagueScheduleView. Has to think about structure.
+    private var initialFBLeagueScheduleData: FBLeagueScheduleDisplayModel? = null // NOTE: Used when go back from FBGameStatsView and reopen FBLeagueScheduleView. Has to think about structure.
 
     private val _fbGameStatsData = MutableStateFlow<FBGameStatsDisplayModel?>(null)
     val fbGameStatsData: StateFlow<FBGameStatsDisplayModel?> = _fbGameStatsData
@@ -343,7 +342,7 @@ class SearchViewModel @Inject constructor(
                 }
                 is SportDecodableModel.FBLeagueSchedule -> {
                     _fbLeagueScheduleData.emit(data.displayModel)
-                    initialFbLeagueScheduleData = data.displayModel
+                    initialFBLeagueScheduleData = data.displayModel
                 }
                 is SportDecodableModel.FBGameStats -> {
                     _fbGameStatsData.emit(data.displayModel)
@@ -494,7 +493,7 @@ class SearchViewModel @Inject constructor(
                     }
                     is SportDecodableModel.FBLeagueSchedule -> {
                         if (lastView is SportDecodableModel.FBGameStats) {
-                            _fbLeagueScheduleData.emit(initialFbLeagueScheduleData)
+                            _fbLeagueScheduleData.emit(initialFBLeagueScheduleData)
                         } else {
                             _fbLeagueScheduleData.emit(viewToShow.displayModel)
                         }
