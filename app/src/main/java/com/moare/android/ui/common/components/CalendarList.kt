@@ -184,7 +184,8 @@ fun <T> CalendarItem(
         if (calendarType == CalendarType.DAY) {
             Box(
                 contentAlignment = Alignment.BottomEnd,
-                modifier = Modifier.height(24.dp)
+                modifier = Modifier.height(22.dp)
+//                modifier = Modifier.height(24.dp)
             ) {
                 Text(
                     text = dayOfWeek,
