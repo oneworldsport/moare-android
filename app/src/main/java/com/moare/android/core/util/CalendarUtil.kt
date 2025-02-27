@@ -34,6 +34,16 @@ object CalendarUtil {
         val yearMonth = YearMonth.of(year, month)
         val daysInMonth = yearMonth.lengthOfMonth()
 
+        val koreanDaysOfWeek = mapOf(
+            DayOfWeek.MONDAY to "월",
+            DayOfWeek.TUESDAY to "화",
+            DayOfWeek.WEDNESDAY to "수",
+            DayOfWeek.THURSDAY to "목",
+            DayOfWeek.FRIDAY to "금",
+            DayOfWeek.SATURDAY to "토",
+            DayOfWeek.SUNDAY to "일"
+        )
+
         return (1..daysInMonth).map { day ->
             val date = yearMonth.atDay(day)
             val dayOfWeek = date.dayOfWeek
@@ -41,7 +51,7 @@ object CalendarUtil {
             DayInfo(
                 day = day,
                 dayOfWeek = dayOfWeek,
-                displayName = dayOfWeek.getDisplayName(TextStyle.FULL, locale)
+                displayName = koreanDaysOfWeek[dayOfWeek] ?: dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
             )
         }
     }
