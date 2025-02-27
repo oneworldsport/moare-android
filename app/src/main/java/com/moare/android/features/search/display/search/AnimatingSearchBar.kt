@@ -3,6 +3,7 @@ package com.moare.android.features.search.display.search
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -176,6 +177,7 @@ fun AnimatingSearchBar(
                         fontFamily = FontFamily.Default
                     ),
                     enabled = if (searchState) false else true,
+                    readOnly = aniBarVisibleState, // to prevent focusing while first open animation
                     modifier = Modifier
                         .width(textFieldWidthState)
                         .focusRequester(focusRequester)
