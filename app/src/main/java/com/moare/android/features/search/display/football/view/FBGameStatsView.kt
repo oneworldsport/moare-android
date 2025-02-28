@@ -56,8 +56,19 @@ import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
+import com.moare.android.features.search.models.models.football.FBGamePlayerStats
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
+import com.moare.android.features.search.models.models.football.FBGamePlayerStatsGames
 import com.moare.android.features.search.models.models.football.FBPerson
+import com.moare.android.features.search.models.models.football.FBPlayerStatsCards
+import com.moare.android.features.search.models.models.football.FBPlayerStatsDribbles
+import com.moare.android.features.search.models.models.football.FBPlayerStatsDuels
+import com.moare.android.features.search.models.models.football.FBPlayerStatsFouls
+import com.moare.android.features.search.models.models.football.FBPlayerStatsGoals
+import com.moare.android.features.search.models.models.football.FBPlayerStatsPasses
+import com.moare.android.features.search.models.models.football.FBPlayerStatsPenalty
+import com.moare.android.features.search.models.models.football.FBPlayerStatsShots
+import com.moare.android.features.search.models.models.football.FBPlayerStatsTackles
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.LeagueTitle
@@ -580,6 +591,25 @@ fun FBGameStatsFirstDataList(
         for (value in playerStats) {
             FBGameStatsFirstDataListItem(data = value.player)
         }
+
+        // team total stats
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .width(132.dp)
+                .height(fbGameStatsViewModel.dataItemHeight)
+        ) {
+            Text(
+                text = "팀 총합", // 팀 기록?
+                fontSize = 12.sp,
+                maxLines = 2,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
+
+            VCapsuleBar(modifier = Modifier.alpha(0.5f))
+        }
     }
 }
 
@@ -699,6 +729,7 @@ fun FBGameStatsDataList(
        viewmodel state
        --------------------- */
     val playerStats by fbGameStatsViewModel.playerStats.collectAsState()
+    val playersTotalStats by fbGameStatsViewModel.playersTotalStats.collectAsState()
 
     Column {
         for (value in playerStats) {
@@ -721,6 +752,27 @@ fun FBGameStatsDataList(
                 }
             }
         }
+
+        // team total stats
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .height(fbGameStatsViewModel.dataItemHeight)
+        ) {
+            for (index in 0 until StringConstants.Football.gameStatsSecondCategories.size) {
+                playersTotalStats?.let {
+                    FBGameStatsDataListItem(
+                        data = it,
+                        index = index,
+                        isTotalStats = true
+                    )
+                }
+
+                if (index == attackCategoriesSize - 1 || index == (attackCategoriesSize + defendCategoriesSize)) {
+                    VCapsuleBar(modifier = Modifier.alpha(0f))
+                }
+            }
+        }
     }
 }
 
@@ -728,7 +780,8 @@ fun FBGameStatsDataList(
 fun FBGameStatsDataListItem(
     fbGameStatsViewModel: FBGameStatsViewModel = hiltViewModel(),
     data: FBGamePlayerStatsDetail,
-    index: Int
+    index: Int,
+    isTotalStats: Boolean = false
 ) {
     val intDataText = when (index) {
         0 -> "${data.goals.total}"
@@ -747,8 +800,8 @@ fun FBGameStatsDataListItem(
         13 -> "${data.fouls.committed}"
         14 -> "${data.cards.yellow}"
         15 -> "${data.cards.red}"
-        16 ->  "${data.games.minutes}"
-        17 -> data.games.rating
+        16 ->  if (isTotalStats) "" else "${data.games.minutes}"
+        17 -> if (isTotalStats) "" else data.games.rating
         else -> ""
     }
 
