@@ -46,8 +46,10 @@ import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
+import com.moare.android.ui.theme.Moare
 
 @Composable
 fun FBLeagueScheduleView(
@@ -328,6 +330,17 @@ fun FBLeagueScheduleListItem(
                 fontSize = 13.sp,
                 maxLines = 2
             )
+
+            fbGameStatsData?.let {
+                RoundedBorderText(
+                    text = "홈",
+                    fontSize = 11.sp,
+                    radius = 4.dp,
+                    textColor = Moare,
+                    borderColor = Moare,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
         }
 
         Spacer(Modifier.weight(1f))
@@ -428,6 +441,17 @@ fun FBLeagueScheduleListItem(
                 fontSize = 13.sp,
                 maxLines = 2
             )
+
+            fbGameStatsData?.let {
+                RoundedBorderText(
+                    text = "원정",
+                    fontSize = 11.sp,
+                    radius = 4.dp,
+                    textColor = Color.Gray,
+                    borderColor = Color.Gray,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
         }
     }
 }
