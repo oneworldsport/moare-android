@@ -10,7 +10,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -230,7 +229,7 @@ fun SearchView(
             ) {
                 TrendingKeywords { keyword ->
                     searchViewModel.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(keyword), false))
-                    searchViewModel.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.KEYWORD, aniDuration = 1000))
+                    searchViewModel.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.TRENDING_KEYWORD, aniDuration = 1000))
                 }
             }
 
@@ -246,7 +245,7 @@ fun SearchView(
                     AutoCompleteList(
                         onItemSelected = { query ->
                             searchViewModel.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(query), false))
-                            searchViewModel.send(SearchViewModel.Intent.PerformSearch(aniDuration = 2000))
+                            searchViewModel.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.AUTO_COMPLETE, aniDuration = 2000))
                         }
                     )
                 }

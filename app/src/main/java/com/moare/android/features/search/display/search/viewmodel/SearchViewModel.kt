@@ -12,7 +12,7 @@ import com.moare.android.core.util.getChosung
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SearchDataState
 import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.TrendingKeyword
+import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
@@ -54,7 +54,7 @@ class SearchViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val searchClient: SearchClient,
     private val keywordsClient: KeywordsClient,
-    private val trieDeferred: CompletableDeferred<Trie>
+    private val trieDeferred: CompletableDeferred<Pair<Trie, List<KeywordInfo>>>
 ) : MVIViewModel<SearchViewModel.Intent, Nothing>() {
     /* ---------------------
        data state
@@ -155,8 +155,12 @@ class SearchViewModel @Inject constructor(
        etc
        --------------------- */
     private val trie: Trie by lazy {
+        runBlocking { trieDeferred.await().first }
+    }
+
+    private val autoCompleteDataMap: Map<String, KeywordInfo> by lazy {
         runBlocking {
-            trieDeferred.await()
+            trieDeferred.await().second.associateBy { it.keyword }
         }
     }
 
@@ -167,7 +171,7 @@ class SearchViewModel @Inject constructor(
     private val _poppedView = MutableStateFlow<SportDecodableModel?>(null)
     val poppedView: StateFlow<SportDecodableModel?> = _poppedView
 
-    private var trendingKeywords: List<TrendingKeyword> = emptyList()
+    private var trendingKeywords: Map<String, KeywordInfo> = emptyMap()
 
     /* ---------------------
        init
@@ -210,7 +214,7 @@ class SearchViewModel @Inject constructor(
     }
 
     enum class SearchType {
-        QUERY, KEYWORD
+        QUERY, TRENDING_KEYWORD, AUTO_COMPLETE
     }
 
     override fun send(intent: Intent) {
@@ -223,7 +227,7 @@ class SearchViewModel @Inject constructor(
                         val firstTrendingKeyword = trendingKeywordList.value.firstOrNull()
                         if (!firstTrendingKeyword.isNullOrBlank()) {
                             updateTextField(TextFieldValue(firstTrendingKeyword), false)
-                            performSearch(SearchType.KEYWORD, intent.aniDuration)
+                            performSearch(SearchType.TRENDING_KEYWORD, intent.aniDuration)
                         }
                     } else {
                         performSearch(intent.searchType, intent.aniDuration)
@@ -254,8 +258,8 @@ class SearchViewModel @Inject constructor(
     private fun fetchTrendingKeywords() {
         viewModelScope.launch {
             try {
-                trendingKeywords = keywordsClient.fetchTrendingKeywords()
-                _trendingKeywordList.emit(trendingKeywords.map { it.keyword })
+                trendingKeywords = keywordsClient.fetchTrendingKeywords().associateBy { it.keyword }
+                _trendingKeywordList.emit(trendingKeywords.keys.toList())
             } catch (e: Exception) {
                 Log.e("dsdf", e.localizedMessage ?: "trendingKeywords error")
             }
@@ -274,10 +278,17 @@ class SearchViewModel @Inject constructor(
 //                delay(5000) // test for fetching delay
                 when (searchType) {
                     SearchType.QUERY -> searchClient.fetchDataByQuery(context, query.value.text)
-                    SearchType.KEYWORD -> {
-                        val keyword = trendingKeywords.firstOrNull { it.keyword == query.value.text }
+                    SearchType.TRENDING_KEYWORD -> {
+                        val keyword = trendingKeywords[query.value.text]
                         keyword?.let {
                             searchClient.fetchDataByKeyword(keyword)
+                        }
+                    }
+                    SearchType.AUTO_COMPLETE -> {
+                        val keywordInfo = autoCompleteDataMap[query.value.text]
+                        keywordInfo?.let {
+                            keywordInfo.weight = null // To exclude field "weight" in the request body
+                            searchClient.fetchDataByKeyword(keywordInfo)
                         }
                     }
                 }

@@ -6,6 +6,7 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.translate.AmazonTranslateClient
 import com.moare.android.core.util.Trie
+import com.moare.android.features.search.models.KeywordInfo
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
@@ -18,7 +19,7 @@ interface EntryPoint {
     fun getS3Client(): AmazonS3Client
     fun getTransferUtility(): TransferUtility
 
-    fun getTrieDeferred(): CompletableDeferred<Trie>
+    fun getTrieDeferred(): CompletableDeferred<Pair<Trie, List<KeywordInfo>>>
 
     fun getDataStore(): DataStore<Preferences>
 }
