@@ -1,16 +1,13 @@
 package com.moare.android.core.util
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.moare.android.core.di.EntryPoint
-import com.moare.android.features.search.models.AutoComplete
+import com.moare.android.features.search.models.KeywordInfo
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -19,8 +16,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 import java.io.File
 import java.lang.Exception
 
@@ -97,17 +92,17 @@ object AWSUtils {
                 prettyPrint = true
             }
 
-            val autoCompleteData: List<AutoComplete> = json.decodeFromJsonElement(jsonElement)
+            val autoCompleteData: List<KeywordInfo> = json.decodeFromJsonElement(jsonElement)
 
             val trie = Trie()
             for (autoComplete in autoCompleteData) {
-                trie.insert(autoComplete.word)
-                trie.insert(getChosung(autoComplete.word), autoComplete.word, autoComplete.weight)
+                trie.insert(autoComplete.keyword)
+                trie.insert(getChosung(autoComplete.keyword), autoComplete.keyword, autoComplete.weight!!)
             }
 
-            trieDeferred.complete(trie)
+            trieDeferred.complete(Pair(trie, autoCompleteData))
         } else {
-            trieDeferred.complete(Trie())
+            trieDeferred.complete(Pair(Trie(), emptyList()))
         }
     }
 }

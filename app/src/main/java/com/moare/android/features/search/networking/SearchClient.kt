@@ -3,8 +3,7 @@ package com.moare.android.features.search.networking
 import android.content.Context
 import com.moare.android.core.networking.ApiHelper
 import com.moare.android.features.search.models.DataModel
-import com.moare.android.features.search.models.AutoComplete
-import com.moare.android.features.search.models.TrendingKeyword
+import com.moare.android.features.search.models.KeywordInfo
 
 //import com.moare.android.features.search.models.DataModelDeserializer
 
@@ -17,7 +16,7 @@ class SearchClient(
 //        return getJson(context, query)
     }
 
-    suspend fun fetchDataByKeyword(keyword: TrendingKeyword): DataModel {
+    suspend fun fetchDataByKeyword(keyword: KeywordInfo): DataModel {
         val response = apiHelper.searchApi.searchByKeyword(keyword)
         return DataModel.fromJson(response.string())
     }

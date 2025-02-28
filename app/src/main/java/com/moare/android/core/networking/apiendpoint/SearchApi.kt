@@ -1,7 +1,6 @@
 package com.moare.android.core.networking.apiendpoint
 
-import com.moare.android.features.search.models.DataModel
-import com.moare.android.features.search.models.TrendingKeyword
+import com.moare.android.features.search.models.KeywordInfo
 import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -21,7 +20,7 @@ interface SearchApi {
 
     @POST("search/keyword")
     suspend fun searchByKeyword(
-        @Body request: TrendingKeyword
+        @Body request: KeywordInfo
     ): ResponseBody
 
     @GET("search/schedule")
