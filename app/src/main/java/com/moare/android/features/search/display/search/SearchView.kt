@@ -1,6 +1,9 @@
 package com.moare.android.features.search.display.search
 
+import android.graphics.Rect
+import android.view.ViewTreeObserver
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -26,7 +29,9 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -39,7 +44,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,6 +66,7 @@ import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SearchDataState
 import com.moare.android.ui.theme.MoareAndroidTheme
+import com.moare.android.ui.util.rememberKeyboardVisibility
 import kotlinx.coroutines.delay
 
 @Composable
@@ -79,7 +86,8 @@ fun SearchView(
     val searchDataState by searchViewModel.searchDataState.collectAsState()
     val showResult by searchViewModel.resultVisibleState.collectAsState()
     val searchState by searchViewModel.searchState.collectAsState()
-    val firstOpened by searchViewModel.firstOpened.collectAsState()
+    val barFirstOpened by searchViewModel.barFirstOpened.collectAsState()
+    val focusState by searchViewModel.focusState.collectAsState()
 
     // football
     val fbPlayerInfoData by searchViewModel.fbPlayerInfoData.collectAsState()
@@ -111,8 +119,9 @@ fun SearchView(
     /* ---------------------
        etc
        --------------------- */
-    val focusManager = LocalFocusManager.current
+    val keyboardVisibleState by rememberKeyboardVisibility()
     val noRippleInteractionSource = remember { MutableInteractionSource() }
+    val activity = LocalActivity.current
 
     /* ---------------------
        LaunchedEffect
@@ -122,7 +131,7 @@ fun SearchView(
             isNoticeOpened = false
             false
         } else {
-            if (firstOpened) {
+            if (barFirstOpened) {
                 if (autoCompleteList.isEmpty()) {
                     true
                 } else {
@@ -135,16 +144,23 @@ fun SearchView(
         }
     }
 
-    LaunchedEffect(firstOpened) {
-        if (firstOpened) {
+    LaunchedEffect(barFirstOpened) {
+        if (barFirstOpened) {
             delay(1000)
             isSearchBarOpened = true
             isNoticeVisible = true
         }
     }
 
+    LaunchedEffect(keyboardVisibleState) {
+        // NOTE: barFirstOpened prevents executing at first launch
+        if (barFirstOpened && !keyboardVisibleState && focusState) {
+            searchViewModel.send(SearchViewModel.Intent.ToggleFocusState(false))
+        }
+    }
+
     BackHandler {
-        searchViewModel.send(SearchViewModel.Intent.GoBack)
+        searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
     }
 
     /* ---------------------
@@ -201,7 +217,7 @@ fun SearchView(
                         if (isNoticeOpened) {
                             isNoticeOpened = false
                         } else {
-                            focusManager.clearFocus()
+                            searchViewModel.send(SearchViewModel.Intent.ToggleFocusState(false))
                         }
                     }
                 )

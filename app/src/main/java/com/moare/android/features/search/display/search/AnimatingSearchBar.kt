@@ -3,7 +3,6 @@ package com.moare.android.features.search.display.search
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -27,12 +26,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -70,6 +72,8 @@ fun AnimatingSearchBar(
        ui state
        --------------------- */
     var aniBarVisibleState by remember { mutableStateOf(true) } // always false after first open(animation)
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
 
     var textSize by remember { mutableStateOf(IntSize.Zero) }
     val textWidthDp = convertPxToDp(pxValue = textSize.width.toFloat())
@@ -77,8 +81,7 @@ fun AnimatingSearchBar(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val firstOpened by searchViewModel.firstOpened.collectAsState()
-    val focusRequester by searchViewModel.focusRequester.collectAsState()
+    val barFirstOpened by searchViewModel.barFirstOpened.collectAsState()
     val focusState by searchViewModel.focusState.collectAsState()
     val query by searchViewModel.query.collectAsState()
     val searchState by searchViewModel.searchState.collectAsState()
@@ -92,7 +95,7 @@ fun AnimatingSearchBar(
         targetValue = if (searchState) {
             textWidthDp
         } else {
-            if (firstOpened) {
+            if (barFirstOpened) {
                 screenWidthDp() - (16 * 4 + 24 + 10).dp
             } else {
                 0.dp
@@ -108,12 +111,20 @@ fun AnimatingSearchBar(
        LaunchedEffect
        --------------------- */
     // after AniBar Animation make it invisible and change FocusState
-    LaunchedEffect(firstOpened) {
-        if (firstOpened) {
+    LaunchedEffect(barFirstOpened) {
+        if (barFirstOpened) {
             delay(1000)
 
-            searchViewModel.send(SearchViewModel.Intent.ToggleFocusState)
+            searchViewModel.send(SearchViewModel.Intent.ToggleFocusState(true))
             aniBarVisibleState = false
+        }
+    }
+
+    LaunchedEffect(focusState) {
+        if (focusState) {
+            focusRequester.requestFocus()
+        } else {
+            focusManager.clearFocus()
         }
     }
 
@@ -181,6 +192,11 @@ fun AnimatingSearchBar(
                     modifier = Modifier
                         .width(textFieldWidthState)
                         .focusRequester(focusRequester)
+                        .onFocusChanged { state ->
+                            if (focusState != state.isFocused) {
+                                searchViewModel.send(SearchViewModel.Intent.ToggleFocusState(state.isFocused))
+                            }
+                        }
                 )
 
                 if (!aniBarVisibleState) {
@@ -203,17 +219,21 @@ fun AnimatingSearchBar(
                 painter = painterResource(id = R.drawable.ic_rounded_search_24),
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(start = if (firstOpened) 10.dp else 0.dp)
+                    .padding(start = if (barFirstOpened) 10.dp else 0.dp)
                     .size(24.dp)
                     .clickable {
-                        if (!firstOpened) {
-                            searchViewModel.send(SearchViewModel.Intent.FirstOpen)
+                        if (!barFirstOpened) {
+                            searchViewModel.send(SearchViewModel.Intent.BarFirstOpen)
                         } else {
                             if (searchState) {
                                 searchViewModel.send(SearchViewModel.Intent.ToggleSearchBar)
                             } else {
                                 searchViewModel.send(SearchViewModel.Intent.ToggleAutoCompleteListVisibleState)
-                                searchViewModel.send(SearchViewModel.Intent.PerformSearch(aniDuration = 1000))
+                                searchViewModel.send(
+                                    SearchViewModel.Intent.PerformSearch(
+                                        aniDuration = 1000
+                                    )
+                                )
                             }
                         }
                     }
@@ -227,7 +247,7 @@ fun AnimatingSearchBar(
                 height = barHeight,
                 cornerRadius = cornerRadius,
                 strokeWidth = strokeWidth,
-                drawPath = firstOpened
+                drawPath = barFirstOpened
             )
         }
     }
