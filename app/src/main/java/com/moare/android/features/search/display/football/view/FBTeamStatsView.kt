@@ -200,12 +200,6 @@ fun FBTeamStatsTeamInfoItem(
         val team = it.team
         val venue = it.venue
 
-        var teamKrName by remember { mutableStateOf("") }
-
-        LaunchedEffect(displayModel) {
-            teamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, team.krname)
-        }
-
         /* ---------------------
            ui
            --------------------- */
@@ -224,7 +218,7 @@ fun FBTeamStatsTeamInfoItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = teamKrName,
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, team.name),
                     fontWeight = FontWeight.Medium
                 )
 
@@ -382,12 +376,6 @@ fun FBTeamStatsItem(
     stats: FBTeamStats,
     aniContentsAlpha: Float = 1f
 ) {
-    var teamKrName by remember { mutableStateOf("") }
-
-    LaunchedEffect(stats) {
-        teamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(stats.team.name))
-    }
-
     /* ---------------------
        ui
        --------------------- */
@@ -417,7 +405,7 @@ fun FBTeamStatsItem(
         )
 
         Text(
-            text = teamKrName,
+            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, stats.team.name),
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(start = 4.dp)
         )

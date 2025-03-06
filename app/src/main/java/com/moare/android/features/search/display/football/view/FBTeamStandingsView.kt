@@ -260,12 +260,6 @@ fun FBTeamStandingsFirstDataListItem(
     rank: Int,
     data: FBTeamStandingsDisplay,
 ) {
-    var teamKrName by remember { mutableStateOf("") }
-
-    LaunchedEffect(data) {
-        teamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(data.team.name))
-    }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -291,7 +285,7 @@ fun FBTeamStandingsFirstDataListItem(
         )
 
         Text(
-            text = teamKrName,
+            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.team.name),
             fontSize = 12.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,

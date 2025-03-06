@@ -20,10 +20,27 @@ object EnNameTranslationUtils {
         "England" to "영국"
     )
 
-    // NOTE: if the structure changes to translating teamName in the app, this dictionary should change to english-korean dictionary.
-    // now is temporary dictionary.
     private val teamNameTranslationDic = mapOf(
-        "늑대" to "울버햄튼"
+        "Manchester United" to "맨체스터 유나이티드",
+        "Newcastle" to "뉴캐슬 유나이티드",
+        "Bournemouth" to "AFC 본머스",
+        "Fulham" to "풀럼",
+        "Wolves" to "울버햄프턴 원더러스",
+        "Liverpool" to "리버풀",
+        "Southampton" to "사우샘프턴",
+        "Arsenal" to "아스널",
+        "Everton" to "에버턴",
+        "Leicester" to "레스터 시티",
+        "Tottenham" to "토트넘 홋스퍼",
+        "West Ham" to "웨스트햄 유나이티드",
+        "Chelsea" to "첼시",
+        "Manchester City" to "맨체스터 시티",
+        "Brighton" to "브라이턴 & 호브 앨비언",
+        "Crystal Palace" to "크리스털 팰리스",
+        "Brentford" to "브렌트퍼드",
+        "Ipswich" to "입스위치 타운",
+        "Nottingham Forest" to "노팅엄 포레스트",
+        "Aston Villa" to "애스턴 빌라"
     )
 
     fun init(context: Context) {
