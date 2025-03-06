@@ -1,21 +1,29 @@
 package com.moare.android.features.search.display.football.view
 
+import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,7 +56,11 @@ import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.theme.Moare
+import com.moare.android.ui.util.convertDpToPx
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
+import kotlinx.coroutines.delay
+import java.util.UUID
 
 @Composable
 fun FBPlayerStandingsView(
@@ -59,6 +71,8 @@ fun FBPlayerStandingsView(
        ui state
        --------------------- */
     val horizontalScrollState = rememberScrollState()
+    val verticalScrollState = rememberScrollState()
+    var isFirstOpen by remember { mutableStateOf(true) }
 
     /* ---------------------
        viewmodel state
@@ -67,6 +81,7 @@ fun FBPlayerStandingsView(
     val firstSelectedIndex by fbPlayerStandingsViewModel.firstSelectedIndex.collectAsState()
     val secondSelectedIndex by fbPlayerStandingsViewModel.secondSelectedIndex.collectAsState()
     val isKeyword by fbPlayerStandingsViewModel.isKeyword.collectAsState()
+    val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
 
     val league = displayModel?.standings?.first()?.stats?.league
 
@@ -86,6 +101,9 @@ fun FBPlayerStandingsView(
         }
     }.toInt()
 
+    val previousScrollPosition = convertDpToPx(fbPlayerStandingsViewModel.dataItemHeight * 10).toInt()
+    val firstScrollPosition = convertDpToPx(fbPlayerStandingsViewModel.dataItemHeight).toInt()
+
     /* ---------------------
        LaunchedEffect
        --------------------- */
@@ -104,6 +122,32 @@ fun FBPlayerStandingsView(
                     easing = LinearOutSlowInEasing
                 )
             )
+        }
+    }
+
+    LaunchedEffect(verticalScrollState.value) {
+        // prevent executing at first open
+        if (isFirstOpen) {
+            isFirstOpen = false
+            return@LaunchedEffect
+        }
+
+        when (verticalScrollState.value) {
+            0 -> {
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.ShowMoreStandings(true))
+            }
+            verticalScrollState.maxValue -> {
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.ShowMoreStandings(false))
+            }
+        }
+    }
+
+    LaunchedEffect(filteredStandings) {
+        if (filteredStandings.size == 20) {
+            verticalScrollState.scrollTo(firstScrollPosition)
+        } else if (filteredStandings.size > 20 && verticalScrollState.value == 0) {
+            delay(100)
+            verticalScrollState.scrollTo(previousScrollPosition)
         }
     }
 
@@ -145,7 +189,7 @@ fun FBPlayerStandingsView(
             Column(
                 modifier = Modifier
                     .padding(top = fbPlayerStandingsViewModel.categoryItemHeight * 2)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(verticalScrollState)
             ) {
                 Row {
                     FBPlayerStandingsFirstDataList()
@@ -368,7 +412,7 @@ fun FBPlayerStandingsSecondCategoryListItem(
             .width(fbPlayerStandingsViewModel.itemWidth)
             .clickable {
                 fbPlayerStandingsViewModel.send(
-                    FBPlayerStandingsViewModel.Intent.SelectSecondCategory(index)
+                    FBPlayerStandingsViewModel.Intent.SelectSecondCategory(index, category)
                 )
             }
     )
@@ -378,15 +422,39 @@ fun FBPlayerStandingsSecondCategoryListItem(
 fun FBPlayerStandingsFirstDataList(
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
 ) {
-    val standings by fbPlayerStandingsViewModel.standings.collectAsState()
+    val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
+    val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
+    val filterStandingsStartIndex by fbPlayerStandingsViewModel.filterStandingsStartIndex.collectAsState()
 //    VSequentialListAni(
 //        items = dataList
 //    ) { index, item ->
 //        FBTeamStandingsFirstDataItem(rank = index + 1, data = item, itemHeight = itemHeight)
 //    }
-    Column {
-        for ((index, value) in standings.withIndex()) {
-            FBPlayerStandingsFirstDataListItem(rank = index + 1, data = value)
+    Column (
+        modifier = Modifier.width(fbPlayerStandingsViewModel.firstCategoryItemWidth)
+    ) {
+        for ((index, value) in filteredStandings.withIndex()) {
+            val standingsIndex = (filterStandingsStartIndex ?: 0) + index
+
+            if (entityIndex != null && entityIndex == standingsIndex) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Moare)
+                )
+            }
+
+            FBPlayerStandingsFirstDataListItem(rank = standingsIndex + 1, data = value)
+
+            if (entityIndex != null && entityIndex == standingsIndex) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Moare)
+                )
+            }
         }
     }
 }
@@ -407,7 +475,6 @@ fun FBPlayerStandingsFirstDataListItem(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .width(fbPlayerStandingsViewModel.firstCategoryItemWidth)
             .padding(start = 10.dp)
             .height(fbPlayerStandingsViewModel.dataItemHeight)
             .clickable {
@@ -473,7 +540,9 @@ fun FBPlayerStandingsDataList(
     val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
     val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
 
-    val standings by fbPlayerStandingsViewModel.standings.collectAsState()
+    val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
+    val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
+    val filterStandingsStartIndex by fbPlayerStandingsViewModel.filterStandingsStartIndex.collectAsState()
 //    VSequentialListAni(
 //        items = dataList
 //    ) { _, item ->
@@ -489,13 +558,26 @@ fun FBPlayerStandingsDataList(
 //        }
 //    }
     Column {
-        for (value in standings) {
+        for ((index, value) in filteredStandings.withIndex()) {
+            val standingsIndex = (filterStandingsStartIndex ?: 0) + index
+            val categorySize = StringConstants.Football.playerStandingsSecondCategories.size
+            val highlightWidth = (fbPlayerStandingsViewModel.itemWidth * categorySize) + (2.dp * 2)
+
+            if (entityIndex != null && entityIndex == standingsIndex) {
+                Box(
+                    Modifier
+                        .width(highlightWidth)
+                        .height(1.dp)
+                        .background(Moare)
+                )
+            }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .height(fbPlayerStandingsViewModel.dataItemHeight)
             ) {
-                for (index in 0 until StringConstants.Football.playerStandingsSecondCategories.size) {
+                for (index in 0 until categorySize) {
                     FBPlayerStandingsDataListItem(
                         data = value,
                         index = index
@@ -505,6 +587,15 @@ fun FBPlayerStandingsDataList(
                         VCapsuleBar(modifier = Modifier.alpha(0f))
                     }
                 }
+            }
+
+            if (entityIndex != null && entityIndex == standingsIndex) {
+                Box(
+                    Modifier
+                        .width(highlightWidth)
+                        .height(1.dp)
+                        .background(Moare)
+                )
             }
         }
     }

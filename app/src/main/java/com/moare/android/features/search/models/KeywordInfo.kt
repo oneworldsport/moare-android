@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class KeywordInfo(
-    val keyword: String,
+    var keyword: String, // searching keyword
     var weight: Int? = null,
-    val keywords: List<Keyword>,
-    val entities: List<EntityInfo>
+    var keywords: List<Keyword>, // keyword list that are in searching keyword
+    var entities: List<EntityInfo>
 )
