@@ -74,7 +74,7 @@ class ModelConverter(
             null
         }
 
-        return FBPlayerStandingsDisplayModel(keywords, standings)
+        return FBPlayerStandingsDisplayModel(keywords, entityInfo, standings)
     }
 
     fun fbTeamInfoConverter(response: FBTeamInfoResponseModel): FBTeamInfoDisplayModel {
