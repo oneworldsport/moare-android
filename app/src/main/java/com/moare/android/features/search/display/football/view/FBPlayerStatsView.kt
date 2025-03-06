@@ -207,11 +207,9 @@ fun FBPlayerStatsPlayerInfoItem(
         val team = it.team
 
         var nationalityKrName by remember { mutableStateOf("") }
-        var teamKrName by remember { mutableStateOf("") }
 
         LaunchedEffect(displayModel) {
             nationalityKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, player.nationality)
-            teamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(team?.name))
         }
 
         /* ---------------------
@@ -276,7 +274,7 @@ fun FBPlayerStatsPlayerInfoItem(
                         )
 
                         Text(
-                            text = teamKrName,
+                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, team.name),
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -393,12 +391,6 @@ fun FBPlayerStatsItem(
     stats: FBPlayerStats,
     aniContentsAlpha: Float = 1f
 ) {
-    var teamKrName by remember { mutableStateOf("") }
-
-    LaunchedEffect(stats) {
-        teamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(stats.team.name))
-    }
-
     /* ---------------------
        ui
        --------------------- */
@@ -428,7 +420,7 @@ fun FBPlayerStatsItem(
         )
 
         Text(
-            text = teamKrName,
+            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, stats.team.name),
             fontWeight = FontWeight.Medium
         )
     }

@@ -23,7 +23,6 @@ data class FBPerson(
 data class FBTeamInfo(
     @SerialName("id") private val _id: Int? = null,
     @SerialName("name") private val _name: String? = null,
-    @SerialName("krname") private val _krname: String? = null,
     @SerialName("logo") private val _logo: String? = null,
     @SerialName("winner") private val _winner: Boolean? = null,
     @SerialName("update") private val _update: String? = null,
@@ -38,9 +37,6 @@ data class FBTeamInfo(
 
     val name: String
         get() = _name ?: ""
-
-    val krname: String
-        get() = _krname ?: ""
 
     val logo: String
         get() = _logo ?: ""

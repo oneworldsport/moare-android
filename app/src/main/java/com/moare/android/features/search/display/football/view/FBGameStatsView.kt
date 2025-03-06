@@ -298,14 +298,6 @@ fun FBGameStatsTeamButtonContainer(
     )
 
     displayModel?.let {
-        var homeTeamKrName by remember { mutableStateOf("") }
-        var awayTeamKrName by remember { mutableStateOf("") }
-
-        LaunchedEffect(it) {
-            homeTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(it.game.teams.home.name))
-            awayTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(it.game.teams.away.name))
-        }
-
         Box(
             contentAlignment = Alignment.Center
         ) {
@@ -315,12 +307,12 @@ fun FBGameStatsTeamButtonContainer(
                     modifier = Modifier.height(50.dp)
                 ) {
                     // home
-                    FBGameStatsTeamButton(team = homeTeamKrName, index = 0)
+                    FBGameStatsTeamButton(team = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, it.game.teams.home.name), index = 0)
 
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
 
                     // away
-                    FBGameStatsTeamButton(team = awayTeamKrName, index = 1)
+                    FBGameStatsTeamButton(team = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, it.game.teams.away.name), index = 1)
                 }
 
 

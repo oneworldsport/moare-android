@@ -574,12 +574,6 @@ fun FBPlayerInfoFourthItem(
         val team = stats?.team
         val league = stats?.league
 
-        var teamKrName by remember { mutableStateOf("") }
-
-        LaunchedEffect(team) {
-            teamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(team?.name))
-        }
-
         /* ---------------------
            ui
            --------------------- */
@@ -619,7 +613,7 @@ fun FBPlayerInfoFourthItem(
                         )
 
                         Text(
-                            text = teamKrName,
+                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, team.name),
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -658,14 +652,6 @@ fun FBPlayerInfoFifthItem(
         val lastGame = it.lastGame
         val lastGamePlayerStats = it.lastGamePlayerStats
 
-        var homeTeamKrName by remember { mutableStateOf("") }
-        var awayTeamKrName by remember { mutableStateOf("") }
-
-        LaunchedEffect(lastGame) {
-            homeTeamKrName = EnNameTranslationUtils.translateByAWS(lastGame?.teams?.home?.name)
-            awayTeamKrName = EnNameTranslationUtils.translateByAWS(lastGame?.teams?.away?.name)
-        }
-
         /* ---------------------
            ui
            --------------------- */
@@ -692,7 +678,7 @@ fun FBPlayerInfoFifthItem(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, homeTeamKrName),
+                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, lastGame.teams.home.name),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Light,
                             maxLines = 1
@@ -718,7 +704,7 @@ fun FBPlayerInfoFifthItem(
                         )
 
                         Text(
-                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, awayTeamKrName),
+                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, lastGame.teams.away.name),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Light,
                             maxLines = 1
@@ -774,14 +760,6 @@ fun FBPlayerInfoSixthItem(
     displayModel?.let {
         val nextGame = it.nextGame
 
-        var homeTeamKrName by remember { mutableStateOf("") }
-        var awayTeamKrName by remember { mutableStateOf("") }
-
-        LaunchedEffect(nextGame) {
-            homeTeamKrName = EnNameTranslationUtils.translateByAWS(nextGame?.teams?.home?.name)
-            awayTeamKrName = EnNameTranslationUtils.translateByAWS(nextGame?.teams?.away?.name)
-        }
-
         /* ---------------------
            ui
            --------------------- */
@@ -800,7 +778,7 @@ fun FBPlayerInfoSixthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, homeTeamKrName),
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, nextGame.teams.home.name),
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.End,
                     modifier = Modifier.weight(1f)
@@ -815,7 +793,7 @@ fun FBPlayerInfoSixthItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, awayTeamKrName),
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, nextGame.teams.away.name),
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Start,
                     modifier = Modifier.weight(1f)

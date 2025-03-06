@@ -175,8 +175,6 @@ fun FBTeamScheduleListItem(
        ui state
        --------------------- */
     var isResultOpened by remember { mutableStateOf(false) }
-    var homeTeamKrName by remember { mutableStateOf("") }
-    var awayTeamKrName by remember { mutableStateOf("") }
     var venueKrName by remember { mutableStateOf("") }
     var refereeKrName by remember { mutableStateOf("") }
 
@@ -221,9 +219,6 @@ fun FBTeamScheduleListItem(
         } else {
             isResultOpened = true
         }
-
-        homeTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(data.teams.home.name))
-        awayTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(data.teams.away.name))
     }
     LaunchedEffect(gameResultOpenedStateList) {
         if (StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)) {
@@ -276,7 +271,7 @@ fun FBTeamScheduleListItem(
             )
 
             Text(
-                text = homeTeamKrName,
+                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.teams.home.name),
                 fontSize = 13.sp,
                 maxLines = 2
             )
@@ -390,7 +385,7 @@ fun FBTeamScheduleListItem(
             )
 
             Text(
-                text = awayTeamKrName,
+                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.teams.away.name),
                 fontSize = 13.sp,
                 maxLines = 2
             )

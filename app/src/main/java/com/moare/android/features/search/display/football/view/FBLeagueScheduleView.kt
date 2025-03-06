@@ -225,8 +225,6 @@ fun FBLeagueScheduleListItem(
 //    var isResultOpened by remember(data.fixture.id) { mutableStateOf(false) }
     var isResultOpened by remember { mutableStateOf(false) }
     val noRippleInteractionSource = remember { MutableInteractionSource() }
-    var homeTeamKrName by remember { mutableStateOf("") }
-    var awayTeamKrName by remember { mutableStateOf("") }
     var venueKrName by remember { mutableStateOf("") }
     var refereeKrName by remember { mutableStateOf("") }
 
@@ -271,9 +269,6 @@ fun FBLeagueScheduleListItem(
         } else {
             isResultOpened = true
         }
-
-        homeTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(data.teams.home.name))
-        awayTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(data.teams.away.name))
     }
     LaunchedEffect(gameResultOpenedStateList) {
         if (StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)) {
@@ -326,7 +321,7 @@ fun FBLeagueScheduleListItem(
             )
 
             Text(
-                text = homeTeamKrName,
+                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.teams.home.name),
                 fontSize = 13.sp,
                 maxLines = 2
             )
@@ -437,7 +432,7 @@ fun FBLeagueScheduleListItem(
             )
 
             Text(
-                text = awayTeamKrName,
+                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.teams.away.name),
                 fontSize = 13.sp,
                 maxLines = 2
             )
