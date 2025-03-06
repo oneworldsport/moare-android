@@ -1,8 +1,8 @@
 package com.moare.android.features.search.display.search.viewmodel
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
@@ -130,11 +130,11 @@ class SearchViewModel @Inject constructor(
     /* ---------------------
        ui state
        --------------------- */
-    private val _firstOpened = MutableStateFlow(false)
-    val firstOpened: StateFlow<Boolean> = _firstOpened
+    private val _barFirstOpened = MutableStateFlow(false)
+    val barFirstOpened: StateFlow<Boolean> = _barFirstOpened
 
-    private val _focusRequester = MutableStateFlow(FocusRequester())
-    val focusRequester: StateFlow<FocusRequester> = _focusRequester
+//    private val _focusRequester = MutableStateFlow(FocusRequester())
+//    val focusRequester: StateFlow<FocusRequester> = _focusRequester
 
     private val _focusState = MutableStateFlow(false)
     val focusState: StateFlow<Boolean> = _focusState
@@ -193,9 +193,9 @@ class SearchViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
-        data object FirstOpen : Intent()
+        data object BarFirstOpen : Intent()
         data class PerformSearch(val searchType: SearchType = SearchType.QUERY, val aniDuration: Long = 0) : Intent()
-        data object ToggleFocusState : Intent()
+        data class ToggleFocusState(val isFocused: Boolean) : Intent()
         data class UpdateTextField(val newValue: TextFieldValue, val updateAutoCompleteList: Boolean = true) : Intent()
 
         data object ToggleSearchBar : Intent()
@@ -203,7 +203,7 @@ class SearchViewModel @Inject constructor(
 
         data class SelectFBGame(val game: FBGame) : Intent()
 
-        data object GoBack : Intent()
+        data class GoBack(val activity: Activity?) : Intent()
 
         data class ShowPlayerStats(val from: String, val playerId: Int = 0) : Intent()
         data class ShowTeamStats(val from: String, val teamId: Int = 0) : Intent()
@@ -221,7 +221,7 @@ class SearchViewModel @Inject constructor(
         // TODO: 비동기를 여기서 실행할지, 각 implements에서 실행할지 고민필요
         viewModelScope.launch {
             when (intent) {
-                is Intent.FirstOpen -> firstOpen()
+                is Intent.BarFirstOpen -> barFirstOpen()
                 is Intent.PerformSearch -> {
                     if (query.value.text.isBlank()) {
                         val firstTrendingKeyword = trendingKeywordList.value.firstOrNull()
@@ -233,12 +233,12 @@ class SearchViewModel @Inject constructor(
                         performSearch(intent.searchType, intent.aniDuration)
                     }
                 }
-                is Intent.ToggleFocusState -> toggleFocusState()
+                is Intent.ToggleFocusState -> toggleFocusState(intent.isFocused)
                 is Intent.ToggleAutoCompleteListVisibleState -> toggleAutoCompleteListVisibleState()
                 is Intent.UpdateTextField -> updateTextField(intent.newValue, intent.updateAutoCompleteList)
                 is Intent.ToggleSearchBar -> toggleSearchBar()
                 is Intent.SelectFBGame -> selectFBGame(intent.game)
-                is Intent.GoBack -> goBack()
+                is Intent.GoBack -> goBack(intent.activity)
                 is Intent.ShowPlayerStats -> showPlayerStats(intent.from, intent.playerId)
                 is Intent.ShowTeamStats -> showTeamStats(intent.from, intent.teamId)
                 is Intent.ShowGameStats -> showGameStats(intent.from, intent.dd)
@@ -251,8 +251,8 @@ class SearchViewModel @Inject constructor(
     /* ---------------------
        implements
        --------------------- */
-    private suspend fun firstOpen() {
-        _firstOpened.emit(true)
+    private suspend fun barFirstOpen() {
+        _barFirstOpened.emit(true)
     }
 
     private fun fetchTrendingKeywords() {
@@ -272,7 +272,7 @@ class SearchViewModel @Inject constructor(
 
         try {
             _searchState.emit(true)
-            toggleFocusState()
+            toggleFocusState(false)
 
             val dataFetchDeferred = viewModelScope.async {
 //                delay(5000) // test for fetching delay
@@ -375,19 +375,15 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun toggleFocusState() {
-        val currentFocusState = focusState.value
-
-        if (currentFocusState) {
-            _focusRequester.value.freeFocus()
-            _focusState.emit(false)
-        } else {
+    private suspend fun toggleFocusState(isFocused: Boolean) {
+        if (isFocused) {
             // move textfield's cursor to the end of the query
             _query.emit(query.value.copy(
                 selection = TextRange(query.value.text.length)
             ))
-            _focusRequester.value.requestFocus()
             _focusState.emit(true)
+        } else {
+            _focusState.emit(false)
         }
     }
 
@@ -435,9 +431,18 @@ class SearchViewModel @Inject constructor(
             _searchDataState.emit(SearchDataState.Idle)
             updateTextField(query.value)
             delay(1000)
-            toggleFocusState()
+            toggleFocusState(true)
         } else {
+            // TODO: toggleSearchBar를 openSearchBar로 바꾸고, 여기 액션은 goBack() 에서만 쓰이기 때문에 goBack()으로 옮기는게 나을듯?
             _searchState.emit(true)
+
+            // reset autocomplete list
+            _autoCompleteList.emit(emptyList())
+            _autoCompleteListVisibleState.emit(false)
+
+            _searchDataState.emit(SearchDataState.Success)
+
+            _resultVisibleState.emit(true)
         }
     }
 
@@ -455,20 +460,29 @@ class SearchViewModel @Inject constructor(
         _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game))
     }
 
-    private suspend fun goBack() {
+    private suspend fun goBack(activity: Activity?) {
         val stack = viewStack.value.toMutableList()
-        val lastView = stack.removeLastOrNull()
-        _poppedView.emit(lastView)
 
-        val viewToShow = stack.lastOrNull()
+        if (!searchState.value) {
+            val lastView = stack.lastOrNull()
 
-        lastView?.let { lastView ->
-            _resultVisibleState.emit(false)
-
-            if (viewToShow == null) {
+            if (lastView != null) {
                 toggleSearchBar()
             } else {
-                delay(1000)
+                // close app
+                activity?.finishAffinity()
+            }
+        } else {
+            val lastView = stack.removeLastOrNull()
+            _poppedView.emit(lastView)
+
+            val viewToShow = stack.lastOrNull()
+
+            if (lastView == null) {
+                // close app
+                activity?.finishAffinity()
+            } else {
+                _resultVisibleState.emit(false)
 
                 _fbPlayerInfoData.emit(null)
                 _fbPlayerStatsData.emit(null)
@@ -480,45 +494,51 @@ class SearchViewModel @Inject constructor(
                 _fbGameStatsData.emit(null)
                 _fbTeamStatsData.emit(null)
 
-                when (viewToShow) {
-                    is SportDecodableModel.FBPlayerInfo -> {
-                        _fbPlayerInfoData.emit(viewToShow.displayModel)
-                    }
-                    is SportDecodableModel.FBPlayerStats -> {
-                        _fbPlayerStatsData.emit(viewToShow.displayModel)
-                    }
-                    is SportDecodableModel.FBPlayerStandings -> {
-                        _fbPlayerStandingsData.emit(viewToShow.displayModel)
-                    }
-                    is SportDecodableModel.FBTeamInfo -> {
-                        _fbTeamInfoData.emit(viewToShow.displayModel)
-                    }
-                    is SportDecodableModel.FBTeamStats -> {
-                        _fbTeamStatsData.emit(viewToShow.displayModel)
-                    }
-                    is SportDecodableModel.FBTeamStandings -> {
-                        _fbTeamStandingsData.emit(viewToShow.displayModel)
-                    }
-                    is SportDecodableModel.FBTeamSchedule -> {
-                        _fbTeamScheduleData.emit(viewToShow.displayModel)
-                    }
-                    is SportDecodableModel.FBLeagueSchedule -> {
-                        if (lastView is SportDecodableModel.FBGameStats) {
-                            _fbLeagueScheduleData.emit(initialFBLeagueScheduleData)
-                        } else {
-                            _fbLeagueScheduleData.emit(viewToShow.displayModel)
+                if (viewToShow == null) {
+                    toggleSearchBar()
+                } else {
+                    delay(1000)
+
+                    when (viewToShow) {
+                        is SportDecodableModel.FBPlayerInfo -> {
+                            _fbPlayerInfoData.emit(viewToShow.displayModel)
                         }
+                        is SportDecodableModel.FBPlayerStats -> {
+                            _fbPlayerStatsData.emit(viewToShow.displayModel)
+                        }
+                        is SportDecodableModel.FBPlayerStandings -> {
+                            _fbPlayerStandingsData.emit(viewToShow.displayModel)
+                        }
+                        is SportDecodableModel.FBTeamInfo -> {
+                            _fbTeamInfoData.emit(viewToShow.displayModel)
+                        }
+                        is SportDecodableModel.FBTeamStats -> {
+                            _fbTeamStatsData.emit(viewToShow.displayModel)
+                        }
+                        is SportDecodableModel.FBTeamStandings -> {
+                            _fbTeamStandingsData.emit(viewToShow.displayModel)
+                        }
+                        is SportDecodableModel.FBTeamSchedule -> {
+                            _fbTeamScheduleData.emit(viewToShow.displayModel)
+                        }
+                        is SportDecodableModel.FBLeagueSchedule -> {
+                            if (lastView is SportDecodableModel.FBGameStats) {
+                                _fbLeagueScheduleData.emit(initialFBLeagueScheduleData)
+                            } else {
+                                _fbLeagueScheduleData.emit(viewToShow.displayModel)
+                            }
+                        }
+                        is SportDecodableModel.FBGameStats -> {
+                            _fbGameStatsData.emit(viewToShow.displayModel)
+                        }
+                        else -> {}
                     }
-                    is SportDecodableModel.FBGameStats -> {
-                        _fbGameStatsData.emit(viewToShow.displayModel)
-                    }
-                    else -> {}
+
+                    _resultVisibleState.emit(true)
                 }
 
-                _resultVisibleState.emit(true)
+                _viewStack.emit(stack)
             }
-
-            _viewStack.emit(stack)
         }
     }
 
