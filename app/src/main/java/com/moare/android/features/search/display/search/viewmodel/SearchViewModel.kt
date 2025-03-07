@@ -484,20 +484,21 @@ class SearchViewModel @Inject constructor(
             } else {
                 _resultVisibleState.emit(false)
 
-                _fbPlayerInfoData.emit(null)
-                _fbPlayerStatsData.emit(null)
-                _fbPlayerStandingsData.emit(null)
-                _fbTeamInfoData.emit(null)
-                _fbTeamStandingsData.emit(null)
-                _fbTeamScheduleData.emit(null)
-                _fbLeagueScheduleData.emit(null)
-                _fbGameStatsData.emit(null)
-                _fbTeamStatsData.emit(null)
-
                 if (viewToShow == null) {
+                    // doesn't have to initialize data states(putting all null) because its action is done in performSearch()
                     toggleSearchBar()
                 } else {
                     delay(1000)
+
+                    _fbPlayerInfoData.emit(null)
+                    _fbPlayerStatsData.emit(null)
+                    _fbPlayerStandingsData.emit(null)
+                    _fbTeamInfoData.emit(null)
+                    _fbTeamStandingsData.emit(null)
+                    _fbTeamScheduleData.emit(null)
+                    _fbLeagueScheduleData.emit(null)
+                    _fbGameStatsData.emit(null)
+                    _fbTeamStatsData.emit(null)
 
                     when (viewToShow) {
                         is SportDecodableModel.FBPlayerInfo -> {
