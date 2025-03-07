@@ -1,12 +1,16 @@
 package com.moare.android.features.search.display.football.view
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,11 +53,13 @@ import com.moare.android.core.util.TranslationType
 import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
@@ -78,6 +84,7 @@ fun FBPlayerStandingsView(
        viewmodel state
        --------------------- */
     val displayModel by fbPlayerStandingsViewModel.displayModel.collectAsState()
+    val displayDataState by fbPlayerStandingsViewModel.displayDataState.collectAsState()
     val firstSelectedIndex by fbPlayerStandingsViewModel.firstSelectedIndex.collectAsState()
     val secondSelectedIndex by fbPlayerStandingsViewModel.secondSelectedIndex.collectAsState()
     val isKeyword by fbPlayerStandingsViewModel.isKeyword.collectAsState()
@@ -185,19 +192,37 @@ fun FBPlayerStandingsView(
                 }
             }
 
-            // standings data
-            Column(
-                modifier = Modifier
-                    .padding(top = fbPlayerStandingsViewModel.categoryItemHeight * 2)
-                    .verticalScroll(verticalScrollState)
+            // loading
+            this@Column.AnimatedVisibility(
+                visible = displayDataState == ApiFetchState.Fetching,
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                Row {
-                    FBPlayerStandingsFirstDataList()
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    ProgressIndicator()
+                }
+            }
 
-                    Row(
-                        Modifier.horizontalScroll(horizontalScrollState)
-                    ) {
-                        FBPlayerStandingsDataList()
+            // standings data
+            this@Column.AnimatedVisibility(
+                visible = displayDataState == ApiFetchState.Success
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(top = fbPlayerStandingsViewModel.categoryItemHeight * 2)
+                        .verticalScroll(verticalScrollState)
+                ) {
+                    Row {
+                        FBPlayerStandingsFirstDataList()
+
+                        Row(
+                            Modifier.horizontalScroll(horizontalScrollState)
+                        ) {
+                            FBPlayerStandingsDataList()
+                        }
                     }
                 }
             }

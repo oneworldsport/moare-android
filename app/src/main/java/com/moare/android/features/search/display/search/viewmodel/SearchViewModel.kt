@@ -10,7 +10,7 @@ import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.Trie
 import com.moare.android.core.util.getChosung
 import com.moare.android.features.search.models.ModelConverter
-import com.moare.android.features.search.models.SearchDataState
+import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
@@ -59,8 +59,8 @@ class SearchViewModel @Inject constructor(
     /* ---------------------
        data state
        --------------------- */
-    private val _searchDataState = MutableStateFlow<SearchDataState>(SearchDataState.Idle)
-    val searchDataState: StateFlow<SearchDataState> = _searchDataState
+    private val _searchDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
+    val searchDataState: StateFlow<ApiFetchState> = _searchDataState
 
     // football
     private val _fbPlayerInfoData = MutableStateFlow<FBPlayerInfoDisplayModel?>(null)
@@ -303,13 +303,13 @@ class SearchViewModel @Inject constructor(
 
             // if data is still fetching after the animation duration, show loading
             if (!dataFetchDeferred.isCompleted) {
-                _searchDataState.emit(SearchDataState.Fetching)
+                _searchDataState.emit(ApiFetchState.Fetching)
             }
 
             val data = dataFetchDeferred.await()
 
             // hide loading first before showing data
-            _searchDataState.emit(SearchDataState.Success)
+            _searchDataState.emit(ApiFetchState.Success)
 
             _fbPlayerInfoData.emit(null)
             _fbPlayerStatsData.emit(null)
@@ -370,7 +370,7 @@ class SearchViewModel @Inject constructor(
 
             _resultVisibleState.emit(true)
         } catch (e: Exception) {
-            _searchDataState.emit(SearchDataState.Error("검색 결과가 없습니다."))
+            _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
             Log.e("dsdf", e.localizedMessage ?: "data type error")
         }
     }
@@ -428,7 +428,7 @@ class SearchViewModel @Inject constructor(
         if (currentSearchState) {
             _searchState.emit(false)
             _resultVisibleState.emit(false)
-            _searchDataState.emit(SearchDataState.Idle)
+            _searchDataState.emit(ApiFetchState.Idle)
             updateTextField(query.value)
             delay(1000)
             toggleFocusState(true)
@@ -440,7 +440,7 @@ class SearchViewModel @Inject constructor(
             _autoCompleteList.emit(emptyList())
             _autoCompleteListVisibleState.emit(false)
 
-            _searchDataState.emit(SearchDataState.Success)
+            _searchDataState.emit(ApiFetchState.Success)
 
             _resultVisibleState.emit(true)
         }

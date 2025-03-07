@@ -7,6 +7,7 @@ import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
@@ -32,6 +33,9 @@ class FBLeagueScheduleViewModel @Inject constructor(
        --------------------- */
     private val _displayModel = MutableStateFlow<FBLeagueScheduleDisplayModel?>(null)
     val displayModel: StateFlow<FBLeagueScheduleDisplayModel?> = _displayModel
+
+    private val _displayDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
+    val displayDataState: StateFlow<ApiFetchState> = _displayDataState
 
     private val _yearMonthList = MutableStateFlow<List<String>>(emptyList())
     val yearMonthList: StateFlow<List<String>> = _yearMonthList
@@ -104,12 +108,13 @@ class FBLeagueScheduleViewModel @Inject constructor(
             _displayModel.emit(displayModel)
             _yearMonthList.emit(displayModel.yearMonthList)
 
+            // select default yearMonth
             displayModel.games.firstOrNull()?.fixture?.date?.let {
                 val defaultYearMonth = CalendarUtil.formatDate(it, TimeFormatType.YEAR_MONTH)
                 val defaultYearMonthIndex = yearMonthList.value.withIndex().first{ (_, value) -> value == defaultYearMonth }
                 _selectedYearMonth.emit(defaultYearMonth)
                 _selectedYearMonthIndex.emit(defaultYearMonthIndex.index)
-                _dayCalendarScrollTrigger.emit(UUID.randomUUID().toString())
+                _yearMonthCalendarScrollTrigger.emit(UUID.randomUUID().toString())
             }
 
             setDays(true)
@@ -169,34 +174,50 @@ class FBLeagueScheduleViewModel @Inject constructor(
                 newDay
             }
 
-            _filteredGames.emit(newFilteredGames)
-            _days.emit(days)
-
-            // set default isOpened value as false to every games
+            // ui operation order
+            // 1. Set default 'isOpened' value as false to every games, before 'filteredGames' show.
             _gameResultOpenedStateList.emit(isResultOpenedStateList)
 
+            // 2. Set days to days calendar.
+            _days.emit(days)
+
+            // 3. Move bar and scroll the days calendar.
             if (isInit) {
+                // select default day
                 val defaultDay = CalendarUtil.getDefaultDay(selectedYearMonth.value, days)
                 defaultDay?.let {
                     _selectedDay.emit(defaultDay.second)
                     _selectedDayIndex.emit(defaultDay.first)
-                    _yearMonthCalendarScrollTrigger.emit(UUID.randomUUID().toString())
+                    _dayCalendarScrollTrigger.emit(UUID.randomUUID().toString())
                 }
             } else {
-                // set first day that has games as selected
+                // select first day that has games
                 for ((index, day) in days.withIndex()) {
                     if (!day.isDataEmpty) {
                         _selectedDay.emit(day)
                         _selectedDayIndex.emit(index)
-                        _yearMonthCalendarScrollTrigger.emit(UUID.randomUUID().toString())
+                        _dayCalendarScrollTrigger.emit(UUID.randomUUID().toString())
                         break
                     }
                 }
             }
+
+            // 4. Remove loading.
+            _displayDataState.emit(ApiFetchState.Success)
+
+            // 5. Show 'filteredGames'
+            _filteredGames.emit(newFilteredGames)
+        } // month?.let
+
+        // added to prevent any gaps
+        if (displayDataState.value != ApiFetchState.Success) {
+            _displayDataState.emit(ApiFetchState.Success)
         }
     }
 
     private suspend fun fetchGames(updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) {
+        _displayDataState.emit(ApiFetchState.Fetching)
+
         try {
             val selectedYearMonth = selectedYearMonth.value.split("/")
             val yearMonth = selectedYearMonth[0] + selectedYearMonth[1]
@@ -211,6 +232,7 @@ class FBLeagueScheduleViewModel @Inject constructor(
                 setDays()
             }
         } catch (e: Exception) {
+            _displayDataState.emit(ApiFetchState.Error("데이터를 불러오는데 실패하였습니다."))
             Log.e("dsdf", e.localizedMessage ?: "error")
         }
     }

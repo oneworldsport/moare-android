@@ -1,7 +1,5 @@
 package com.moare.android.features.search.display.search
 
-import android.graphics.Rect
-import android.view.ViewTreeObserver
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -29,9 +27,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -44,8 +40,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,7 +58,8 @@ import com.moare.android.features.search.display.football.view.FBTeamScheduleVie
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SearchDataState
+import com.moare.android.features.search.models.ApiFetchState
+import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.theme.MoareAndroidTheme
 import com.moare.android.ui.util.rememberKeyboardVisibility
 import kotlinx.coroutines.delay
@@ -269,9 +264,9 @@ fun SearchView(
 
             // loading
             AnimatedVisibility(
-                visible = searchDataState == SearchDataState.Fetching
+                visible = searchDataState == ApiFetchState.Fetching
             ) {
-                CircularProgressIndicator()
+                ProgressIndicator()
             }
 
             // search result
@@ -376,10 +371,10 @@ fun SearchView(
 
             // no result / error
             AnimatedVisibility(
-                visible = searchDataState is SearchDataState.Error,
+                visible = searchDataState is ApiFetchState.Error,
                 enter = fadeIn()
             ) {
-                val error = searchDataState as? SearchDataState.Error
+                val error = searchDataState as? ApiFetchState.Error
                 error?.let {
                     Text(error.message)
                 }

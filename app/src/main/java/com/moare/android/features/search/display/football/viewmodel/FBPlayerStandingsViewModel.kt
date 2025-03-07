@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.KeywordInfo
@@ -39,6 +40,9 @@ class FBPlayerStandingsViewModel @Inject constructor(
        --------------------- */
     private var _displayModel = MutableStateFlow<FBPlayerStandingsDisplayModel?>(null)
     val displayModel: StateFlow<FBPlayerStandingsDisplayModel?> = _displayModel
+
+    private val _displayDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
+    val displayDataState: StateFlow<ApiFetchState> = _displayDataState
 
     private var _filteredStandings = MutableStateFlow<List<FBPlayerStandingsDisplay>>(emptyList())
     val filteredStandings: StateFlow<List<FBPlayerStandingsDisplay>> = _filteredStandings
@@ -185,6 +189,11 @@ class FBPlayerStandingsViewModel @Inject constructor(
 
         filterStandingsEndIndex = endIndex
         _filterStandingsStartIndex.emit(startIndex)
+
+        // remove loading
+        _displayDataState.emit(ApiFetchState.Success)
+
+        // show 'filteredStandings'
         _filteredStandings.emit(newStandings)
     }
 
@@ -216,6 +225,8 @@ class FBPlayerStandingsViewModel @Inject constructor(
     }
 
     private suspend fun fetchStandings(category: String) {
+        _displayDataState.emit(ApiFetchState.Fetching)
+
         try {
             // TODO: Structure should be updated(Temporary code)
             val standingsKeyword = displayModel.value?.keywords?.first { it.id == "standings" }
@@ -235,6 +246,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
                 filterStandings()
             }
         } catch (e: Exception) {
+            _displayDataState.emit(ApiFetchState.Error("데이터를 불러오는데 실패하였습니다."))
             Log.e("dsdf", e.localizedMessage ?: "error")
         }
     }
