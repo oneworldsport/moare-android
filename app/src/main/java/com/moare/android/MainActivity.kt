@@ -36,13 +36,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    if (isSplashFinished) {
+//                    if (isSplashFinished) {
                         SearchView()
-                    } else {
-                        SplashView {
-                            isSplashFinished = true
-                        }
-                    }
+//                    } else {
+//                        SplashView {
+//                            isSplashFinished = true
+//                        }
+//                    }
                 }
             }
         }
