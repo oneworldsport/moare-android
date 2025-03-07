@@ -510,7 +510,7 @@ fun FBPlayerStandingsFirstDataListItem(
             fontWeight = FontWeight.Medium,
             fontSize = fbPlayerStandingsViewModel.dataFontSize,
             modifier = Modifier
-                .width(22.dp)
+                .width(26.dp)
         )
 
         URLImage(
