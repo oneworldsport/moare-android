@@ -62,16 +62,16 @@ class FBPlayerStandingsViewModel @Inject constructor(
     private var _entityIndex = MutableStateFlow<Int?>(null)
     val entityIndex: StateFlow<Int?> = _entityIndex
 
-    private var _filterStandingsStartIndex = MutableStateFlow(0)
-    val filterStandingsStartIndex: StateFlow<Int?> = _filterStandingsStartIndex
+    private var _filteredStandingsStartIndex = MutableStateFlow(0)
+    val filteredStandingsStartIndex: StateFlow<Int?> = _filteredStandingsStartIndex
 
     /* ---------------------
        etc
        --------------------- */
     var shouldScrollCategory = true
     var standings: List<FBPlayerStandingsDisplay> = emptyList()
-    var selectedEntity: EntityInfo? = null
-    var filterStandingsEndIndex = 0 // NOTE: one bigger then actual showing end item's index. Because of subList.
+    private var selectedEntity: EntityInfo? = null
+    private var filteredStandingsEndIndex = 0 // NOTE: one bigger then actual showing end item's index. Because of subList.
 
     /* ---------------------
        intent
@@ -187,8 +187,8 @@ class FBPlayerStandingsViewModel @Inject constructor(
 
         val newStandings = standings.subList(startIndex, endIndex)
 
-        filterStandingsEndIndex = endIndex
-        _filterStandingsStartIndex.emit(startIndex)
+        filteredStandingsEndIndex = endIndex
+        _filteredStandingsStartIndex.emit(startIndex)
 
         // remove loading
         _displayDataState.emit(ApiFetchState.Success)
@@ -200,26 +200,26 @@ class FBPlayerStandingsViewModel @Inject constructor(
     private suspend fun addStandings(isUp: Boolean) {
         // get 10 more standings
         if (isUp) {
-            val newStartIndex = maxOf(0, (filterStandingsStartIndex.value ?: 0) - 10)
+            val newStartIndex = maxOf(0, (filteredStandingsStartIndex.value ?: 0) - 10)
 
-            if (newStartIndex == filterStandingsStartIndex.value) {
+            if (newStartIndex == filteredStandingsStartIndex.value) {
                 return
             }
 
-            val newStandings = standings.subList(newStartIndex, filterStandingsEndIndex)
+            val newStandings = standings.subList(newStartIndex, filteredStandingsEndIndex)
 
-            _filterStandingsStartIndex.emit(newStartIndex)
+            _filteredStandingsStartIndex.emit(newStartIndex)
             _filteredStandings.emit(newStandings)
         } else {
-            val newEndIndex = minOf(standings.size, filterStandingsEndIndex + 10)
+            val newEndIndex = minOf(standings.size, filteredStandingsEndIndex + 10)
 
-            if (newEndIndex == filterStandingsEndIndex) {
+            if (newEndIndex == filteredStandingsEndIndex) {
                 return
             }
 
-            val newStandings = standings.subList(filterStandingsStartIndex.value ?: 0, newEndIndex)
+            val newStandings = standings.subList(filteredStandingsStartIndex.value ?: 0, newEndIndex)
 
-            filterStandingsEndIndex = newEndIndex
+            filteredStandingsEndIndex = newEndIndex
             _filteredStandings.emit(newStandings)
         }
     }
