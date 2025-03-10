@@ -190,7 +190,8 @@ fun <T> CalendarItem(
                 Text(
                     text = dayOfWeek,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Light
+                    fontWeight = FontWeight.Light,
+                    color = if (isDisabled) Color.Gray else Color.Black
                 )
             }
         }
