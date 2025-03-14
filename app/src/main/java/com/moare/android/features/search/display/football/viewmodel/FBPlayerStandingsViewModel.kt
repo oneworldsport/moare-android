@@ -63,7 +63,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
     val entityIndex: StateFlow<Int?> = _entityIndex
 
     private var _filteredStandingsStartIndex = MutableStateFlow(0)
-    val filteredStandingsStartIndex: StateFlow<Int?> = _filteredStandingsStartIndex
+    val filteredStandingsStartIndex: StateFlow<Int> = _filteredStandingsStartIndex
 
     /* ---------------------
        etc
@@ -168,6 +168,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
     }
 
     private suspend fun filterStandings() {
+        // Get the first entity(player) matching with the standings.(Checking in the order of standings)
         val index = standings.indexOfFirst { player ->
             val entity = displayModel.value?.entityInfo?.find { it.playerId == player.player.id }
             entity?.let {
@@ -200,7 +201,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
     private suspend fun addStandings(isUp: Boolean) {
         // get 10 more standings
         if (isUp) {
-            val newStartIndex = maxOf(0, (filteredStandingsStartIndex.value ?: 0) - 10)
+            val newStartIndex = maxOf(0, filteredStandingsStartIndex.value - 10)
 
             if (newStartIndex == filteredStandingsStartIndex.value) {
                 return
@@ -217,7 +218,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
                 return
             }
 
-            val newStandings = standings.subList(filteredStandingsStartIndex.value ?: 0, newEndIndex)
+            val newStandings = standings.subList(filteredStandingsStartIndex.value, newEndIndex)
 
             filteredStandingsEndIndex = newEndIndex
             _filteredStandings.emit(newStandings)

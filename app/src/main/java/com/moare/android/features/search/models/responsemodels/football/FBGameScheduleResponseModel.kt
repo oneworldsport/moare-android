@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FBGameScheduleResponseModel(
-    @SerialName("scheduled_months") val scheduledMonths: List<String> = emptyList(),
+    @SerialName("scheduledMonths") val scheduledMonths: List<String> = emptyList(),
     val schedule: List<FBGame> = emptyList()
 )

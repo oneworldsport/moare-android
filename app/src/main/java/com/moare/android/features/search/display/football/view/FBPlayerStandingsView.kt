@@ -450,7 +450,7 @@ fun FBPlayerStandingsFirstDataList(
         modifier = Modifier.width(fbPlayerStandingsViewModel.firstCategoryItemWidth)
     ) {
         for ((index, value) in filteredStandings.withIndex()) {
-            val standingsIndex = (filterStandingsStartIndex ?: 0) + index
+            val standingsIndex = filterStandingsStartIndex + index
 
             if (entityIndex != null && entityIndex == standingsIndex) {
                 Box(
@@ -569,7 +569,7 @@ fun FBPlayerStandingsDataList(
 //    }
     Column {
         for ((index, value) in filteredStandings.withIndex()) {
-            val standingsIndex = (filteredStandingsStartIndex ?: 0) + index
+            val standingsIndex = filteredStandingsStartIndex + index
             val categorySize = StringConstants.Football.playerStandingsSecondCategories.size
             val highlightWidth = (fbPlayerStandingsViewModel.itemWidth * categorySize) + (2.dp * 2)
 
