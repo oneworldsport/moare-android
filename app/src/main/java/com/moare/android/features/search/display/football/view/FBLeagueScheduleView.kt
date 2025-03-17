@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -350,7 +351,7 @@ fun FBLeagueScheduleListItem(
            home
            --------------------- */
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .width(110.dp)
@@ -376,8 +377,7 @@ fun FBLeagueScheduleListItem(
                     fontSize = 11.sp,
                     radius = 4.dp,
                     textColor = Moare,
-                    borderColor = Moare,
-                    modifier = Modifier.padding(top = 2.dp)
+                    borderColor = Moare
                 )
             }
         }
@@ -465,7 +465,7 @@ fun FBLeagueScheduleListItem(
         Spacer(Modifier.weight(1f))
 
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .width(110.dp)
@@ -487,8 +487,7 @@ fun FBLeagueScheduleListItem(
                     fontSize = 11.sp,
                     radius = 4.dp,
                     textColor = Color.Gray,
-                    borderColor = Color.Gray,
-                    modifier = Modifier.padding(top = 2.dp)
+                    borderColor = Color.Gray
                 )
             }
         }

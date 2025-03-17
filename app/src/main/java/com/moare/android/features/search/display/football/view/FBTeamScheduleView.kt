@@ -258,7 +258,7 @@ fun FBTeamScheduleListItem(
            home
            --------------------- */
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .width(110.dp)
@@ -284,8 +284,7 @@ fun FBTeamScheduleListItem(
                     fontSize = 11.sp,
                     radius = 4.dp,
                     textColor = Moare,
-                    borderColor = Moare,
-                    modifier = Modifier.padding(top = 2.dp)
+                    borderColor = Moare
                 )
             }
         }
@@ -387,7 +386,7 @@ fun FBTeamScheduleListItem(
         Spacer(Modifier.weight(1f))
 
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .width(110.dp)
@@ -409,8 +408,7 @@ fun FBTeamScheduleListItem(
                     fontSize = 11.sp,
                     radius = 4.dp,
                     textColor = Color.Gray,
-                    borderColor = Color.Gray,
-                    modifier = Modifier.padding(top = 2.dp)
+                    borderColor = Color.Gray
                 )
             }
         }
