@@ -39,7 +39,10 @@ fun NoticeBox(
                 color = Color.Gray
             )
             Text(
-                text = "• 프리미어리그 24/25",
+                text = "• 프리미어리그 24/25" +
+                        "\n• 라리가 24/25" +
+                        "\n• 분데스리가 24/25" +
+                        "\n• 리그 1 24/25",
                 fontSize = 12.sp,
                 color = Color.Gray
             )
@@ -50,10 +53,9 @@ fun NoticeBox(
                 color = Color.Gray
             )
             Text(
-                text = "• 라리가 24/25" +
-                        "\n• 분데스리가 24/25" +
-                        "\n• 리그 1 24/25" +
-                        "\n• 챔피언스리그 24/25",
+                text = "• 챔피언스리그 24/25" +
+                        "\n• KBO 리그 2025" +
+                        "\n• MLB 2025",
                 fontSize = 12.sp,
                 color = Color.Gray
             )
