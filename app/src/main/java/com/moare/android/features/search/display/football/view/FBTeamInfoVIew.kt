@@ -446,7 +446,7 @@ fun FBTeamInfoFirstItem(
         )
 
         Text(
-            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, team.name),
+            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, false, team.name),
             fontWeight = FontWeight.Medium,
             modifier = Modifier.alpha(contentsAlpha)
         )
@@ -475,7 +475,7 @@ fun FBTeamInfoSecondItem(
         var countryKrName by remember { mutableStateOf("") }
 
         LaunchedEffect(team) {
-            countryKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, team.country)
+            countryKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, input = team.country)
         }
 
         /* ---------------------
@@ -675,7 +675,7 @@ fun FBTeamInfoFifthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, lastGame.teams.home.name),
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = lastGame.teams.home.name),
                     fontSize = 15.sp,
                     maxLines = 1
                 )
@@ -701,7 +701,7 @@ fun FBTeamInfoFifthItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, lastGame.teams.away.name),
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = lastGame.teams.away.name),
                     fontSize = 15.sp,
                     maxLines = 1
                 )
@@ -745,7 +745,7 @@ fun FBTeamInfoSixthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, nextGame.teams.home.name),
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = nextGame.teams.home.name),
                     fontSize = 15.sp,
                     textAlign = TextAlign.End,
                     maxLines = 1,
@@ -762,7 +762,7 @@ fun FBTeamInfoSixthItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, nextGame.teams.away.name),
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = nextGame.teams.away.name),
                     fontSize = 15.sp,
                     textAlign = TextAlign.Start,
                     maxLines = 1,

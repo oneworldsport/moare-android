@@ -43,8 +43,10 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamSch
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
+import com.moare.android.ui.theme.Moare
 
 @Composable
 fun FBTeamScheduleView(
@@ -260,10 +262,10 @@ fun FBTeamScheduleListItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .width(110.dp)
-                .clickable(enabled = fbGameStatsData != null) {
-                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue = TextFieldValue(text = "토트넘")))
-                    searchViewModel.send(SearchViewModel.Intent.PerformSearch())
-                }
+//                .clickable(enabled = fbGameStatsData != null) {
+//                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue = TextFieldValue(text = "토트넘")))
+//                    searchViewModel.send(SearchViewModel.Intent.PerformSearch())
+//                }
         ) {
             URLImage(
                 url = data.teams.home.logo,
@@ -271,10 +273,21 @@ fun FBTeamScheduleListItem(
             )
 
             Text(
-                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.teams.home.name),
+                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.teams.home.name),
                 fontSize = 13.sp,
                 maxLines = 2
             )
+
+            fbGameStatsData?.let {
+                RoundedBorderText(
+                    text = "홈",
+                    fontSize = 11.sp,
+                    radius = 4.dp,
+                    textColor = Moare,
+                    borderColor = Moare,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
         }
 
         Spacer(Modifier.weight(1f))
@@ -385,10 +398,21 @@ fun FBTeamScheduleListItem(
             )
 
             Text(
-                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.teams.away.name),
+                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.teams.away.name),
                 fontSize = 13.sp,
                 maxLines = 2
             )
+
+            fbGameStatsData?.let {
+                RoundedBorderText(
+                    text = "원정",
+                    fontSize = 11.sp,
+                    radius = 4.dp,
+                    textColor = Color.Gray,
+                    borderColor = Color.Gray,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
         }
     }
 }

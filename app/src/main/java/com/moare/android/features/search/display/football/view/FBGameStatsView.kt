@@ -307,12 +307,12 @@ fun FBGameStatsTeamButtonContainer(
                     modifier = Modifier.height(50.dp)
                 ) {
                     // home
-                    FBGameStatsTeamButton(team = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, it.game.teams.home.name), index = 0)
+                    FBGameStatsTeamButton(team = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = it.game.teams.home.name), index = 0)
 
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
 
                     // away
-                    FBGameStatsTeamButton(team = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, it.game.teams.away.name), index = 1)
+                    FBGameStatsTeamButton(team = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = it.game.teams.away.name), index = 1)
                 }
 
 

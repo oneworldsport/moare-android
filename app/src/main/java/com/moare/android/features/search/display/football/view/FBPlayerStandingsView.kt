@@ -525,7 +525,7 @@ fun FBPlayerStandingsFirstDataListItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.stats.team.name),
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.stats.team.name),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Light,
                     color = Color.Gray,

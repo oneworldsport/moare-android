@@ -365,7 +365,7 @@ fun FBLeagueScheduleListItem(
             )
 
             Text(
-                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.teams.home.name),
+                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.teams.home.name),
                 fontSize = 13.sp,
                 maxLines = 2
             )
@@ -476,7 +476,7 @@ fun FBLeagueScheduleListItem(
             )
 
             Text(
-                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.teams.away.name),
+                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.teams.away.name),
                 fontSize = 13.sp,
                 maxLines = 2
             )
