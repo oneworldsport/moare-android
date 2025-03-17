@@ -218,7 +218,7 @@ fun FBTeamStatsTeamInfoItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, team.name),
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM,false, team.name),
                     fontWeight = FontWeight.Medium
                 )
 
@@ -394,21 +394,21 @@ fun FBTeamStatsItem(
             leagueSeason = stats.league.season
         )
 
-        Text(
-            text = " - ",
-            fontWeight = FontWeight.Medium
-        )
-
-        URLImage(
-            url = stats.team.logo,
-            customSize = 24.dp
-        )
-
-        Text(
-            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, stats.team.name),
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(start = 4.dp)
-        )
+//        Text(
+//            text = " - ",
+//            fontWeight = FontWeight.Medium
+//        )
+//
+//        URLImage(
+//            url = stats.team.logo,
+//            customSize = 24.dp
+//        )
+//
+//        Text(
+//            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = stats.team.name),
+//            fontWeight = FontWeight.Medium,
+//            modifier = Modifier.padding(start = 4.dp)
+//        )
     }
 
     // stats

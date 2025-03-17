@@ -209,7 +209,7 @@ fun FBPlayerStatsPlayerInfoItem(
         var nationalityKrName by remember { mutableStateOf("") }
 
         LaunchedEffect(displayModel) {
-            nationalityKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, player.nationality)
+            nationalityKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, input = player.nationality)
         }
 
         /* ---------------------
@@ -274,7 +274,7 @@ fun FBPlayerStatsPlayerInfoItem(
                         )
 
                         Text(
-                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, team.name),
+                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = team.name),
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -420,7 +420,7 @@ fun FBPlayerStatsItem(
         )
 
         Text(
-            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, stats.team.name),
+            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = stats.team.name),
             fontWeight = FontWeight.Medium
         )
     }

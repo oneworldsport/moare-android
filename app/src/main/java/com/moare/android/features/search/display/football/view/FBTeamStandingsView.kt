@@ -285,7 +285,7 @@ fun FBTeamStandingsFirstDataListItem(
         )
 
         Text(
-            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, data.team.name),
+            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.team.name),
             fontSize = 12.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
