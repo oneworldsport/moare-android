@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.football.view
 
+import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -37,6 +38,7 @@ import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
@@ -47,6 +49,7 @@ import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 
 @Composable
 fun FBTeamStandingsView(
+    searchViewModel: SearchViewModel = hiltViewModel(),
     fbTeamStandingsViewModel: FBTeamStandingsViewModel = hiltViewModel(),
     data: FBTeamStandingsDisplayModel
 ) {
@@ -63,6 +66,8 @@ fun FBTeamStandingsView(
     val isKeyword by fbTeamStandingsViewModel.isKeyword.collectAsState()
 
     val league = displayModel?.league
+
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        etc
@@ -81,7 +86,9 @@ fun FBTeamStandingsView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbTeamStandingsViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBTeamStandings) {
+            fbTeamStandingsViewModel.send(FBTeamStandingsViewModel.Intent.InitData(data))
+        }
     }
 
     // scroll to category that matches with the keyword

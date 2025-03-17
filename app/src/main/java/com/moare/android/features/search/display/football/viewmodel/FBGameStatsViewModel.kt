@@ -83,6 +83,7 @@ class FBGameStatsViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
+        data class InitData(val displayModel: FBGameStatsDisplayModel) : Intent()
         data class SelectFirstCategory(val index: Int) : Intent()
         data class SelectSecondCategory(val index: Int) : Intent()
         data class SelectTeam(val index: Int) : Intent()
@@ -91,6 +92,7 @@ class FBGameStatsViewModel @Inject constructor(
     override fun send(intent: Intent) {
         viewModelScope.launch {
             when (intent) {
+                is Intent.InitData -> initData(intent.displayModel)
                 is Intent.SelectFirstCategory -> selectFirstCategory(intent.index)
                 is Intent.SelectSecondCategory -> selectSecondCategory(intent.index)
                 is Intent.SelectTeam -> selectTeam(intent.index)
@@ -103,6 +105,17 @@ class FBGameStatsViewModel @Inject constructor(
        --------------------- */
     override fun initData(displayModel: FBGameStatsDisplayModel) {
         viewModelScope.launch {
+            // init with default value
+            _playersStats.emit(emptyList())
+            _playersTotalStats.emit(null)
+            _lineups.emit(null)
+            _coach.emit(null)
+            _firstSelectedIndex.emit(0)
+            _secondSelectedIndex.emit(0)
+            _selectedTeamIndex.emit(0)
+            shouldScrollCategory = false
+
+            // init data
             _displayModel.emit(displayModel)
 
             // set current(home) team's players stats

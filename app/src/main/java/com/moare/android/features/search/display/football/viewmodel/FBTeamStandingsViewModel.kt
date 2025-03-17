@@ -53,6 +53,7 @@ class FBTeamStandingsViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
+        data class InitData(val displayModel: FBTeamStandingsDisplayModel) : Intent()
         data class SelectCagetory(val index: Int) : Intent()
         data object SortStandings : Intent()
     }
@@ -60,6 +61,7 @@ class FBTeamStandingsViewModel @Inject constructor(
     override fun send(intent: Intent) {
         viewModelScope.launch {
             when (intent) {
+                is Intent.InitData -> initData(intent.displayModel)
                 is Intent.SelectCagetory -> selectCategory(intent.index)
                 is Intent.SortStandings -> sortStandings()
             }
@@ -71,6 +73,11 @@ class FBTeamStandingsViewModel @Inject constructor(
        --------------------- */
     override fun initData(displayModel: FBTeamStandingsDisplayModel) {
         viewModelScope.launch {
+            // init with default value
+            _selectedIndex.emit(0)
+            _isKeyword.emit(false)
+
+            // init data
             _displayModel.emit(displayModel)
             _standings.emit(displayModel.standings)
 

@@ -27,26 +27,26 @@ class FBTeamInfoViewModel @Inject constructor(
        --------------------- */
 
     /* ---------------------
+       intent
+       --------------------- */
+    sealed class Intent {
+        data class InitData(val displayModel: FBTeamInfoDisplayModel) : Intent()
+    }
+
+    override fun send(intent: Intent) {
+        viewModelScope.launch {
+            when (intent) {
+                is Intent.InitData -> initData(intent.displayModel)
+            }
+        }
+    }
+
+    /* ---------------------
        init
        --------------------- */
     override fun initData(displayModel: FBTeamInfoDisplayModel) {
         viewModelScope.launch {
             _displayModel.emit(displayModel)
-        }
-    }
-
-    /* ---------------------
-       intent
-       --------------------- */
-    sealed class Intent {
-
-    }
-
-    override fun send(intent: Intent) {
-        viewModelScope.launch {
-//            when (intent) {
-//
-//            }
         }
     }
 

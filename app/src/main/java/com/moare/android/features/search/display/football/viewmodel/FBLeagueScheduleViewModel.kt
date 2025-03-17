@@ -77,6 +77,7 @@ class FBLeagueScheduleViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
+        data class InitData(val displayModel: FBLeagueScheduleDisplayModel) : Intent()
         data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int, val updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) : Intent()
         data class SelectDay(val day: DayInfo, val selectedIndex: Int) : Intent()
         data object ToggleAllResult : Intent()
@@ -91,6 +92,7 @@ class FBLeagueScheduleViewModel @Inject constructor(
     override fun send(intent: Intent) {
         viewModelScope.launch {
             when (intent) {
+                is Intent.InitData -> initData(intent.displayModel)
                 is Intent.SelectYearMonth -> selectYearMonth(intent.yearMonth, intent.selectedIndex, intent.updateViewStack)
                 is Intent.SelectDay -> selectDay(intent.day, intent.selectedIndex)
                 is Intent.ToggleAllResult -> toggleAllResult()
@@ -105,6 +107,20 @@ class FBLeagueScheduleViewModel @Inject constructor(
        --------------------- */
     override fun initData(displayModel: FBLeagueScheduleDisplayModel) {
         viewModelScope.launch {
+            // init with default value
+            _displayModel.emit(null)
+            _displayDataState.emit(ApiFetchState.Idle)
+            _yearMonthList.emit(emptyList())
+            _days.emit(emptyList())
+            _filteredGames.emit(emptyMap())
+            _selectedYearMonth.emit("")
+            _selectedDay.emit(null)
+            _selectedYearMonthIndex.emit(0)
+            _selectedDayIndex.emit(0)
+            _isAllResultOpened.emit(false)
+            _gameResultOpenedStateList.emit(emptyMap())
+
+            // init data
             _displayModel.emit(displayModel)
             _yearMonthList.emit(displayModel.yearMonthList)
 

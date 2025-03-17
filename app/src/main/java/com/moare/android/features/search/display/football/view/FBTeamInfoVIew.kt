@@ -44,6 +44,7 @@ import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.football.FBLeague
@@ -72,6 +73,7 @@ fun FBTeamInfoView(
     /* ---------------------
        viewmodel state
        --------------------- */
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        animation
@@ -92,7 +94,9 @@ fun FBTeamInfoView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbTeamInfoViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBTeamInfo) {
+            fbTeamInfoViewModel.send(FBTeamInfoViewModel.Intent.InitData(data))
+        }
     }
 
     LaunchedEffect(itemPositions) {

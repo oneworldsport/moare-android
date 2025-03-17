@@ -46,6 +46,7 @@ import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
@@ -61,6 +62,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun FBPlayerStandingsView(
+    searchViewModel: SearchViewModel = hiltViewModel(),
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel(),
     data: FBPlayerStandingsDisplayModel
 ) {
@@ -82,6 +84,8 @@ fun FBPlayerStandingsView(
     val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
 
     val league = displayModel?.standings?.first()?.stats?.league
+
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        etc
@@ -106,7 +110,9 @@ fun FBPlayerStandingsView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbPlayerStandingsViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBPlayerStandings) {
+            fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.InitData(data))
+        }
     }
 
     // scroll to category that matches with the keyword,

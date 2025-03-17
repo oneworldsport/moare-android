@@ -367,6 +367,7 @@ class SearchViewModel @Inject constructor(
             val stack = viewStack.value.toMutableList()
             stack.add(data.data)
             _viewStack.emit(stack)
+            _poppedView.emit(null)
 
             _resultVisibleState.emit(true)
         } catch (e: Exception) {
@@ -456,6 +457,7 @@ class SearchViewModel @Inject constructor(
         val stack = viewStack.value.toMutableList()
         stack.add(dataModel)
         _viewStack.emit(stack)
+        _poppedView.emit(null)
 
         _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game))
     }
@@ -588,6 +590,7 @@ class SearchViewModel @Inject constructor(
         val stack = viewStack.value.toMutableList()
         stack.add(dataModel)
         _viewStack.emit(stack)
+        _poppedView.emit(null)
 
         _resultVisibleState.emit(true)
     }
@@ -637,6 +640,7 @@ class SearchViewModel @Inject constructor(
         val stack = viewStack.value.toMutableList()
         stack.add(dataModel)
         _viewStack.emit(stack)
+        _poppedView.emit(null)
 
         _resultVisibleState.emit(true)
     }
@@ -681,6 +685,7 @@ class SearchViewModel @Inject constructor(
         val stack = viewStack.value.toMutableList()
         stack.add(dataModel)
         _viewStack.emit(stack)
+        _poppedView.emit(null)
 
         _resultVisibleState.emit(true)
     }
