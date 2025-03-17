@@ -39,6 +39,7 @@ import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleViewModel
 import com.moare.android.features.search.display.football.viewmodel.FBTeamScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.ui.common.components.CapsuleButton
@@ -68,6 +69,7 @@ fun FBTeamScheduleView(
     val isAllResultOpened by fbTeamScheduleViewModel.isAllResultOpened.collectAsState()
 
     val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        etc
@@ -77,7 +79,9 @@ fun FBTeamScheduleView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbTeamScheduleViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBTeamSchedule) {
+            fbTeamScheduleViewModel.send(FBTeamScheduleViewModel.Intent.InitData(data))
+        }
     }
 
     /* ---------------------

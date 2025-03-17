@@ -40,6 +40,7 @@ import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBPlayerStats
 import com.moare.android.ui.common.components.HCapsuleBar
@@ -52,6 +53,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun FBPlayerStatsView(
+    searchViewModel: SearchViewModel = hiltViewModel(),
     fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
     data: FBPlayerStatsDisplayModel,
     center: State<Offset>
@@ -66,6 +68,8 @@ fun FBPlayerStatsView(
     val displayModel by fbPlayerStatsViewModel.displayModel.collectAsState()
 
     val statsList = displayModel?.stats
+
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        animation
@@ -87,7 +91,9 @@ fun FBPlayerStatsView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbPlayerStatsViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBPlayerStats) {
+            fbPlayerStatsViewModel.send(FBPlayerStatsViewModel.Intent.InitData(data))
+        }
     }
 
     LaunchedEffect(itemPositions) {

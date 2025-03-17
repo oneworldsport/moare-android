@@ -47,6 +47,7 @@ import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.LeagueTitle
@@ -70,6 +71,7 @@ fun FBPlayerInfoView(
     /* ---------------------
        viewmodel state
        --------------------- */
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        animation
@@ -90,7 +92,9 @@ fun FBPlayerInfoView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbPlayerInfoViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBPlayerInfo) {
+            fbPlayerInfoViewModel.send(FBPlayerInfoViewModel.Intent.InitData(data))
+        }
     }
 
     LaunchedEffect(itemPositions) {

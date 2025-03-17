@@ -46,6 +46,7 @@ class FBTeamScheduleViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
+        data class InitData(val displayModel: FBTeamScheduleDisplayModel) : Intent()
         data object ToggleAllResult : Intent()
         data class UpdateResultOpenedState(val fixtureId: Int, val isOpened: Boolean) : Intent()
     }
@@ -53,6 +54,7 @@ class FBTeamScheduleViewModel @Inject constructor(
     override fun send(intent: Intent) {
         viewModelScope.launch {
             when (intent) {
+                is Intent.InitData -> initData(intent.displayModel)
                 is Intent.ToggleAllResult -> toggleAllResult()
                 is Intent.UpdateResultOpenedState -> updateResultOpenedState(intent.fixtureId, intent.isOpened)
             }
@@ -64,6 +66,10 @@ class FBTeamScheduleViewModel @Inject constructor(
        --------------------- */
     override fun initData(displayModel: FBTeamScheduleDisplayModel) {
         viewModelScope.launch {
+            // init with default value
+            _isAllResultOpened.emit(false)
+
+            // init data
             _displayModel.emit(displayModel)
             _games.emit(displayModel.games)
 

@@ -43,14 +43,14 @@ class FBPlayerInfoViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
-
+        data class InitData(val displayModel: FBPlayerInfoDisplayModel) : Intent()
     }
 
     override fun send(intent: Intent) {
         viewModelScope.launch {
-//            when (intent) {
-//
-//            }
+            when (intent) {
+                is Intent.InitData -> initData(intent.displayModel)
+            }
         }
     }
 

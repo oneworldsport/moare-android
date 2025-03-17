@@ -101,7 +101,9 @@ fun FBLeagueScheduleView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbLeagueScheduleViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBLeagueSchedule) {
+            fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.InitData(data))
+        }
     }
 
     LaunchedEffect(viewStack) {

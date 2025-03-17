@@ -77,6 +77,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
+        data class InitData(val displayModel: FBPlayerStandingsDisplayModel) : Intent()
         data class SelectFirstCategory(val index: Int) : Intent()
         data class SelectSecondCategory(val index: Int, val category: String) : Intent()
         data object SortStandings : Intent()
@@ -86,6 +87,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
     override fun send(intent: Intent) {
         viewModelScope.launch {
             when (intent) {
+                is Intent.InitData -> initData(intent.displayModel)
                 is Intent.SelectFirstCategory -> selectFirstCategory(intent.index)
                 is Intent.SelectSecondCategory -> selectSecondCategory(intent.index, intent.category)
                 is Intent.SortStandings -> sortStandings()
@@ -99,6 +101,21 @@ class FBPlayerStandingsViewModel @Inject constructor(
        --------------------- */
     override fun initData(displayModel: FBPlayerStandingsDisplayModel) {
         viewModelScope.launch {
+            // init with default value
+            _displayModel.emit(null)
+            _displayDataState.emit(ApiFetchState.Idle)
+            _filteredStandings.emit(emptyList())
+            _firstSelectedIndex.emit(0)
+            _secondSelectedIndex.emit(0)
+            _isKeyword.emit(false)
+            _entityIndex.emit(null)
+            _filteredStandingsStartIndex.emit(0)
+            shouldScrollCategory = true
+            standings = emptyList()
+            selectedEntity = null
+            filteredStandingsEndIndex = 0
+
+            // init data
             _displayModel.emit(displayModel)
             standings = displayModel.standings
 

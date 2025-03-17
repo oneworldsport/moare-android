@@ -55,6 +55,7 @@ import com.moare.android.core.util.TranslationType
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBGamePlayerStats
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
@@ -103,6 +104,7 @@ fun FBGameStatsView(
 
     val fbLeagueScheduleData by searchViewModel.fbLeagueScheduleData.collectAsState()
     val fbTeamScheduleData by searchViewModel.fbTeamScheduleData.collectAsState()
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        etc
@@ -124,7 +126,9 @@ fun FBGameStatsView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbGameStatsViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBGameStats) {
+            fbGameStatsViewModel.send(FBGameStatsViewModel.Intent.InitData(data))
+        }
     }
 
     LaunchedEffect(coach) {
