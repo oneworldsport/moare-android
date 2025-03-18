@@ -136,7 +136,7 @@ fun FBGameStatsView(
     }
 
     LaunchedEffect(Unit) {
-        searchViewModel.send(SearchViewModel.Intent.RefreshGame)
+        searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
     }
 
     // scroll to category that matches with the keyword,
@@ -337,7 +337,7 @@ fun FBGameStatsTeamButtonContainer(
                         .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
                         .padding(2.dp)
                         .clickable {
-                            searchViewModel.send(SearchViewModel.Intent.RefreshGame)
+                            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
                         }
                 ) {
                     Icon(

@@ -494,7 +494,7 @@ fun FBPlayerStandingsFirstDataListItem(
             .padding(start = 10.dp)
             .height(fbPlayerStandingsViewModel.dataItemHeight)
             .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(playerId = data.player.id))
+                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(category = "football", playerId = data.player.id))
             }
     ) {
         Text(

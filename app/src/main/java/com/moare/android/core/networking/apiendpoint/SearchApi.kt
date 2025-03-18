@@ -29,11 +29,12 @@ interface SearchApi {
         @Query("yearMonth") yearMonth: String
     ): ResponseBody
 
-    @GET("search/game")
-    suspend fun fetchGameInfo(
+    @GET("search/id")
+    suspend fun searchById(
         @Query("category") category: String,
-        @Query("date") date: String,
+        @Query("date") date: String?,
+        @Query("dataType") dataType: String,
         @Query("leagueId") leagueId: Int,
-        @Query("fixtureId") fixtureId: Int,
+        @Query("id") id: Int,
     ): ResponseBody
 }
