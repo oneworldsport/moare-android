@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -46,15 +45,9 @@ import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoVi
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
-import com.moare.android.features.search.models.models.football.FBGame
-import com.moare.android.features.search.models.models.football.FBLeague
-import com.moare.android.features.search.models.models.football.FBTeamInfo
-import com.moare.android.features.search.models.models.football.FBTeamStats
-import com.moare.android.features.search.models.models.football.FBVenue
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
-import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.util.screenWidthDp
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
@@ -73,6 +66,8 @@ fun FBTeamInfoView(
     /* ---------------------
        viewmodel state
        --------------------- */
+    val displayModel by fbTeamInfoViewModel.displayModel.collectAsState()
+
     val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
@@ -369,7 +364,9 @@ fun FBTeamInfoView(
                 )
             }
             .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(from = "info"))
+                displayModel?.let {
+                    searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
+                }
             }
     ) {
         FBTeamInfoFourthItem(contentsAlpha = contentsAlpha)
@@ -388,12 +385,7 @@ fun FBTeamInfoView(
                 )
             }
             .clickable {
-                searchViewModel.send(
-                    SearchViewModel.Intent.ShowGameStats(
-                        from = "team",
-                        dd = "previous"
-                    )
-                )
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
             }
     ) {
         FBTeamInfoFifthItem(contentsAlpha = contentsAlpha)
@@ -412,12 +404,7 @@ fun FBTeamInfoView(
                 )
             }
             .clickable {
-                searchViewModel.send(
-                    SearchViewModel.Intent.ShowGameStats(
-                        from = "team",
-                        dd = "next"
-                    )
-                )
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
             }
     ) {
         FBTeamInfoSixthItem(contentsAlpha = contentsAlpha)

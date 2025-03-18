@@ -4,7 +4,6 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -40,7 +38,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
@@ -54,7 +51,6 @@ import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import kotlinx.coroutines.delay
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 @Composable
@@ -71,6 +67,8 @@ fun FBPlayerInfoView(
     /* ---------------------
        viewmodel state
        --------------------- */
+    val displayModel by fbPlayerInfoViewModel.displayModel.collectAsState()
+
     val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
@@ -355,7 +353,9 @@ fun FBPlayerInfoView(
                 )
             }
             .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(from = "info"))
+                displayModel?.let {
+                    searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(playerId = it.info.id))
+                }
             }
     ) {
         FBPlayerInfoFourthItem(contentsAlpha = contentsAlpha)
@@ -373,7 +373,7 @@ fun FBPlayerInfoView(
                 )
             }
             .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(from = "player", dd = "previous"))
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
             }
     ) {
         FBPlayerInfoFifthItem(contentsAlpha = contentsAlpha)
@@ -391,7 +391,7 @@ fun FBPlayerInfoView(
                 )
             }
             .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(from = "player", dd = "next"))
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
             }
     ) {
         FBPlayerInfoSixthItem(contentsAlpha = contentsAlpha)
