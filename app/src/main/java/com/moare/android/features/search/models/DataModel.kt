@@ -223,8 +223,8 @@ sealed class SportDecodableModel {
 
     @Serializable
     data class FBPlayerStats(
-        val responseModel: FBPlayerInfoResponseModel,
-        val displayModel: FBPlayerStatsDisplayModel
+        var responseModel: FBPlayerInfoResponseModel,
+        var displayModel: FBPlayerStatsDisplayModel
     ) : SportDecodableModel()
 
     @Serializable

@@ -201,11 +201,11 @@ class SearchViewModel @Inject constructor(
 
         data class GoBack(val activity: Activity?) : Intent()
 
-        data class ShowPlayerStats(val playerId: Int) : Intent()
+        data class ShowPlayerStats(val category: String? = null, val playerId: Int) : Intent()
         data class ShowTeamStats(val teamId: Int) : Intent()
         data class ShowGameStats(val gameType: String) : Intent()
 
-        data object RefreshGame : Intent()
+        data class RefreshGame(val category: String) : Intent()
         data class UpdateLastViewStack(val data: SportDecodableModel) : Intent()
     }
 
@@ -235,10 +235,10 @@ class SearchViewModel @Inject constructor(
                 is Intent.ToggleSearchBar -> toggleSearchBar()
                 is Intent.SelectFBGame -> selectFBGame(intent.game)
                 is Intent.GoBack -> goBack(intent.activity)
-                is Intent.ShowPlayerStats -> showPlayerStats(intent.playerId)
+                is Intent.ShowPlayerStats -> showPlayerStats(intent.category, intent.playerId)
                 is Intent.ShowTeamStats -> showTeamStats(intent.teamId)
                 is Intent.ShowGameStats -> showGameStats(intent.gameType)
-                is Intent.RefreshGame -> refreshGame()
+                is Intent.RefreshGame -> refreshGame(intent.category)
                 is Intent.UpdateLastViewStack -> updateLastViewStack(intent.data)
             }
         }
@@ -533,26 +533,50 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun showPlayerStats(playerId: Int) {
+    private suspend fun showPlayerStats(category: String?, playerId: Int) {
         val modelConverter = ModelConverter()
 
-        val playerInfoResponseModel: FBPlayerInfoResponseModel
-        val stats: FBPlayerStatsDisplayModel
+//        val playerInfoResponseModel: FBPlayerInfoResponseModel
+//        val stats: FBPlayerStatsDisplayModel
+
+        val dataModel: SportDecodableModel.FBPlayerStats
 
         when (val lastView = viewStack.value.lastOrNull()) {
             is SportDecodableModel.FBPlayerStandings -> {
-                val player = lastView.responseModel.standings.find { player ->
-                    player.player.id == playerId
+                if (category == null) {
+                    val player = lastView.responseModel.standings.find { player ->
+                        player.player.id == playerId
+                    }
+
+                    val responseModel = FBPlayerInfoResponseModel(info = player)
+                    dataModel = SportDecodableModel.FBPlayerStats(
+                        responseModel = responseModel,
+                        displayModel = modelConverter.fbPlayerStatsConverter(responseModel)
+                    )
+                } else {
+                    val leagueId = lastView.responseModel.standings.firstOrNull()?.statistics?.firstOrNull()?.league?.id ?: 39
+
+                    // TODO: Has to add loading
+                    val result = searchClient.fetchById(
+                        category = category,
+                        dataType = "${category}_player_stats",
+                        leagueId = leagueId,
+                        id = playerId
+                    )
+
+                    if (result.data is SportDecodableModel.FBPlayerStats) {
+                        dataModel = result.data
+                    } else {
+                        return
+                    }
                 }
-
-                playerInfoResponseModel = FBPlayerInfoResponseModel(info = player)
-
-                stats = modelConverter.fbPlayerStatsConverter(playerInfoResponseModel)
             }
 
             is SportDecodableModel.FBPlayerInfo -> {
-                playerInfoResponseModel = lastView.responseModel
-                stats = modelConverter.fbPlayerStatsConverter(playerInfoResponseModel)
+                dataModel = SportDecodableModel.FBPlayerStats(
+                    responseModel = lastView.responseModel,
+                    displayModel = modelConverter.fbPlayerStatsConverter(lastView.responseModel)
+                )
             }
 
              else -> return // Make it do nothing
@@ -569,12 +593,7 @@ class SearchViewModel @Inject constructor(
         _fbTeamScheduleData.emit(null)
         _fbLeagueScheduleData.emit(null)
         _fbGameStatsData.emit(null)
-        _fbPlayerStatsData.emit(stats)
-
-        val dataModel = SportDecodableModel.FBPlayerStats(
-            responseModel = playerInfoResponseModel!!,
-            displayModel = stats
-        )
+        _fbPlayerStatsData.emit(dataModel.displayModel)
 
         val stack = viewStack.value.toMutableList()
         stack.add(dataModel)
@@ -681,11 +700,18 @@ class SearchViewModel @Inject constructor(
         _resultVisibleState.emit(true)
     }
 
-    private suspend fun refreshGame() {
+    private suspend fun refreshGame(category: String) {
         try {
             val game = fbGameStatsData.value?.game
             game?.let {
-                val result = searchClient.fetchGameInfo("football", it.fixture.date, it.league.id, it.fixture.id)
+                // TODO: Has to add loading
+                val result = searchClient.fetchById(
+                    category = category,
+                    date = it.fixture.date,
+                    dataType = "${category}_game_stats",
+                    leagueId = it.league.id,
+                    id = it.fixture.id
+                )
 
                 if (result.data is SportDecodableModel.FBGameStats) {
                     val data = result.data
