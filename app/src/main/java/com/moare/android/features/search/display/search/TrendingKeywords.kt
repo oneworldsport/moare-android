@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.ui.common.components.HCapsuleBar
+import com.moare.android.ui.util.clickableCapsuleRippleEffect
 
 @Composable
 fun TrendingKeywords(
@@ -61,33 +62,16 @@ fun KeywordBox(
 ) {
     var isHovered by remember { mutableStateOf(false) }
 
-    Box(
-        Modifier
-            .border(
-                BorderStroke(2.dp, if (isHovered) MaterialTheme.colors.primary else Color.Transparent),
-                RoundedCornerShape(20.dp)
-            )
-            .padding(horizontal = 10.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clickableCapsuleRippleEffect(onClick = onItemSelected)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = {
-                            isHovered = true
-                            tryAwaitRelease()
-                            onItemSelected()
-                        }
-                    )
-                }
-        ) {
-            Text(
-                text = keyword,
-                modifier = Modifier.padding(vertical = 6.dp)
-            )
+        Text(
+            text = keyword,
+            modifier = Modifier.padding(vertical = 6.dp)
+        )
 
-            HCapsuleBar(color = Color.Gray)
-        }
+        HCapsuleBar(color = Color.Gray)
     }
 }
