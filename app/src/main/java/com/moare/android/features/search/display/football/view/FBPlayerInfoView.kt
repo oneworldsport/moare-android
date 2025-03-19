@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -32,9 +33,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,6 +54,8 @@ import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
+import com.moare.android.ui.util.convertPxToDp
+import com.moare.android.ui.util.screenWidthDp
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -63,6 +69,8 @@ fun FBPlayerInfoView(
     /* ---------------------
        ui state
        --------------------- */
+    val density = LocalDensity.current
+    var itemSizes = remember { mutableStateMapOf<Int, DpSize>() }
 
     /* ---------------------
        viewmodel state
@@ -138,6 +146,9 @@ fun FBPlayerInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[0] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[0] = Offset(centerX - center.value.x, centerY - center.value.y)
                     }
                     .widthIn(max = 130.dp)
@@ -160,6 +171,9 @@ fun FBPlayerInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[1] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[1] = Offset(centerX - center.value.x, centerY - center.value.y)
                     }
                     .widthIn(max = 130.dp)
@@ -182,6 +196,9 @@ fun FBPlayerInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[2] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[2] = Offset(centerX - center.value.x, centerY - center.value.y)
                     }
                     .widthIn(max = 130.dp)
@@ -207,6 +224,9 @@ fun FBPlayerInfoView(
                     val centerX = relativeX + itemSize.width / 2f
                     val centerY = relativeY + itemSize.height / 2f
 
+                    itemSizes[3] = with(density) {
+                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                    }
                     itemPositions[3] = Offset(centerX - center.value.x, centerY - center.value.y)
                 }
         ) {
@@ -230,6 +250,9 @@ fun FBPlayerInfoView(
                     val centerX = relativeX + itemSize.width / 2f
                     val centerY = relativeY + itemSize.height / 2f
 
+                    itemSizes[4] = with(density) {
+                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                    }
                     itemPositions[4] = Offset(centerX - center.value.x, centerY - center.value.y)
                 }
         ) {
@@ -253,6 +276,9 @@ fun FBPlayerInfoView(
                     val centerX = relativeX + itemSize.width / 2f
                     val centerY = relativeY + itemSize.height / 2f
 
+                    itemSizes[5] = with(density) {
+                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                    }
                     itemPositions[5] = Offset(centerX - center.value.x, centerY - center.value.y)
                 }
         ) {
@@ -300,7 +326,7 @@ fun FBPlayerInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .widthIn(max = 130.dp)
+            .size(itemSizes[0] ?: DpSize(width = 130.dp, height = 150.dp))
             .offset {
                 IntOffset(
                     firstAnimatedPosition.x.roundToInt(),
@@ -315,7 +341,7 @@ fun FBPlayerInfoView(
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .widthIn(max = 130.dp)
+            .size(itemSizes[1] ?: DpSize(width = 130.dp, height = 150.dp))
             .offset {
                 IntOffset(
                     secondAnimatedPosition.x.roundToInt(),
@@ -330,7 +356,7 @@ fun FBPlayerInfoView(
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .widthIn(max = 130.dp)
+            .size(itemSizes[2] ?: DpSize(width = 130.dp, height = 150.dp))
             .offset {
                 IntOffset(
                     thirdAnimatedPosition.x.roundToInt(),
@@ -346,6 +372,7 @@ fun FBPlayerInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .size(itemSizes[3] ?: DpSize(width = screenWidthDp(), height = 150.dp))
             .offset {
                 IntOffset(
                     fourthAnimatedPosition.x.roundToInt(),
@@ -366,6 +393,7 @@ fun FBPlayerInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .size(itemSizes[4] ?: DpSize(width = screenWidthDp(), height = 150.dp))
             .offset {
                 IntOffset(
                     fifthAnimatedPosition.x.roundToInt(),
@@ -384,6 +412,7 @@ fun FBPlayerInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .size(itemSizes[5] ?: DpSize(width = screenWidthDp(), height = 150.dp))
             .offset {
                 IntOffset(
                     sixthAnimatedPosition.x.roundToInt(),
