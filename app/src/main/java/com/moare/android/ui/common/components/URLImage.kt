@@ -31,6 +31,6 @@ fun URLImage(
         contentDescription = null,
         modifier = modifier
             .size(imageSize),
-        contentScale = ContentScale.Crop
+        contentScale = ContentScale.Fit
     )
 }
