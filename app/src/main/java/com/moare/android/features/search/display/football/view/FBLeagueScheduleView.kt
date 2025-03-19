@@ -1,6 +1,8 @@
 package com.moare.android.features.search.display.football.view
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
@@ -32,11 +35,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
@@ -283,6 +289,18 @@ fun FBLeagueScheduleListItem(
     val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
 
     /* ---------------------
+       animation
+       --------------------- */
+    val scoreAlpha by animateFloatAsState(
+        targetValue = if (StringConstants.Football.gameLiveList.contains(data.fixture.status.short) ||
+            StringConstants.Football.gameFinishedList.contains(data.fixture.status.short) && isResultOpened) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+    /* ---------------------
        constants
        --------------------- */
     val gameStatusText = if (isResultOpened) {
@@ -356,7 +374,7 @@ fun FBLeagueScheduleListItem(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .width(110.dp)
+                .weight(1f)
 //                .clickable(enabled = fbGameStatsData != null) {
 //                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue = TextFieldValue(text = "토트넘")))
 //                    searchViewModel.send(SearchViewModel.Intent.PerformSearch())
@@ -384,21 +402,20 @@ fun FBLeagueScheduleListItem(
             }
         }
 
-        Spacer(Modifier.weight(1f))
+        // Add space to both sides of each score to place the score in the middle
+        Spacer(Modifier.weight(0.3f))
 
         // score
-        if (StringConstants.Football.gameLiveList.contains(data.fixture.status.short) ||
-            StringConstants.Football.gameFinishedList.contains(data.fixture.status.short) && isResultOpened) {
-            Text(
-                text = data.goals.home.toString(),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .width(20.dp),
-                color = if (data.goals.home >= data.goals.away) MaterialTheme.colors.primary else Color.Black
-            )
-        }
+        Text(
+            text = data.goals.home.toString(),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .width(20.dp)
+                .alpha(scoreAlpha),
+            color = if (data.goals.home >= data.goals.away) MaterialTheme.colors.primary else Color.Black
+        )
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.weight(0.3f))
 
         /* ---------------------
            game info
@@ -450,27 +467,25 @@ fun FBLeagueScheduleListItem(
         /* ---------------------
            away
            --------------------- */
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.weight(0.3f))
 
         // score
-        if (StringConstants.Football.gameLiveList.contains(data.fixture.status.short) ||
-            StringConstants.Football.gameFinishedList.contains(data.fixture.status.short) && isResultOpened) {
-            Text(
-                text = data.goals.away.toString(),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .width(20.dp),
-                color = if (data.goals.away >= data.goals.home) MaterialTheme.colors.primary else Color.Black
-            )
-        }
+        Text(
+            text = data.goals.away.toString(),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .width(20.dp)
+                .alpha(scoreAlpha),
+            color = if (data.goals.away >= data.goals.home) MaterialTheme.colors.primary else Color.Black
+        )
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.weight(0.3f))
 
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .width(110.dp)
+                .weight(1f)
         ) {
             URLImage(
                 url = data.teams.away.logo,

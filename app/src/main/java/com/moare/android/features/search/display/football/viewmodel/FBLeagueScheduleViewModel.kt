@@ -177,11 +177,9 @@ class FBLeagueScheduleViewModel @Inject constructor(
                     CalendarUtil.isSameDate(game.fixture.date, selectedYearMonth.value, day.day)
                 }
 
-                isResultOpenedStateList.putAll((games ?: emptyList()).associate { it.fixture.id to false })
+                isResultOpenedStateList.putAll((games ?: emptyList()).associate { it.fixture.id to isAllResultOpened.value })
 
-//                val newFilteredGames = filteredGames.value.toMutableMap()
                 newFilteredGames[index] = games ?: emptyList()
-//                _filteredGames.emit(newFilteredGames)
 
                 if (games?.isEmpty() == true) {
                     newDay.isDataEmpty = true
