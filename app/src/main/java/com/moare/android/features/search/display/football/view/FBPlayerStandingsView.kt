@@ -1,14 +1,19 @@
 package com.moare.android.features.search.display.football.view
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -26,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,19 +39,30 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.EnNameTranslationUtils
+import com.moare.android.core.util.TranslationType
+import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.ApiFetchState
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.theme.Moare
+import com.moare.android.ui.util.convertDpToPx
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
+import kotlinx.coroutines.delay
 
 @Composable
 fun FBPlayerStandingsView(
+    searchViewModel: SearchViewModel = hiltViewModel(),
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel(),
     data: FBPlayerStandingsDisplayModel
 ) {
@@ -53,35 +70,49 @@ fun FBPlayerStandingsView(
        ui state
        --------------------- */
     val horizontalScrollState = rememberScrollState()
+    val verticalScrollState = rememberScrollState()
+    var isFirstOpen by remember { mutableStateOf(true) }
 
     /* ---------------------
        viewmodel state
        --------------------- */
     val displayModel by fbPlayerStandingsViewModel.displayModel.collectAsState()
+    val displayDataState by fbPlayerStandingsViewModel.displayDataState.collectAsState()
     val firstSelectedIndex by fbPlayerStandingsViewModel.firstSelectedIndex.collectAsState()
     val secondSelectedIndex by fbPlayerStandingsViewModel.secondSelectedIndex.collectAsState()
     val isKeyword by fbPlayerStandingsViewModel.isKeyword.collectAsState()
+    val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
 
     val league = displayModel?.standings?.first()?.stats?.league
+
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        etc
        --------------------- */
     val secondSelectedCategoryPosition = with(LocalDensity.current) {
-        if (secondSelectedIndex in 0 until fbPlayerStandingsViewModel.attackCategoryList.size) {
+        val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
+        val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+
+        if (secondSelectedIndex in 0 until attackCategoriesSize) {
             (fbPlayerStandingsViewModel.itemWidth * secondSelectedIndex).toPx()
-        } else if (secondSelectedIndex in fbPlayerStandingsViewModel.attackCategoryList.size until fbPlayerStandingsViewModel.attackCategoryList.size + fbPlayerStandingsViewModel.defendCategoryList.size) {
+        } else if (secondSelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
             ((fbPlayerStandingsViewModel.itemWidth * secondSelectedIndex) + fbPlayerStandingsViewModel.barWidth).toPx()
         } else {
             ((fbPlayerStandingsViewModel.itemWidth * secondSelectedIndex) + (fbPlayerStandingsViewModel.barWidth * 2)).toPx()
         }
     }.toInt()
 
+    val previousScrollPosition = convertDpToPx(fbPlayerStandingsViewModel.dataItemHeight * 10).toInt()
+    val firstScrollPosition = convertDpToPx(fbPlayerStandingsViewModel.dataItemHeight).toInt()
+
     /* ---------------------
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbPlayerStandingsViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBPlayerStandings) {
+            fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.InitData(data))
+        }
     }
 
     // scroll to category that matches with the keyword,
@@ -95,6 +126,32 @@ fun FBPlayerStandingsView(
                     easing = LinearOutSlowInEasing
                 )
             )
+        }
+    }
+
+    LaunchedEffect(verticalScrollState.value) {
+        // prevent executing at first open
+        if (isFirstOpen) {
+            isFirstOpen = false
+            return@LaunchedEffect
+        }
+
+        when (verticalScrollState.value) {
+            0 -> {
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.ShowMoreStandings(true))
+            }
+            verticalScrollState.maxValue -> {
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.ShowMoreStandings(false))
+            }
+        }
+    }
+
+    LaunchedEffect(filteredStandings) {
+        if (filteredStandings.size == 20) {
+            verticalScrollState.scrollTo(firstScrollPosition)
+        } else if (filteredStandings.size > 20 && verticalScrollState.value == 0) {
+            delay(100)
+            verticalScrollState.scrollTo(previousScrollPosition)
         }
     }
 
@@ -132,19 +189,37 @@ fun FBPlayerStandingsView(
                 }
             }
 
-            // standings data
-            Column(
-                modifier = Modifier
-                    .padding(top = fbPlayerStandingsViewModel.categoryItemHeight * 2)
-                    .verticalScroll(rememberScrollState())
+            // loading
+            this@Column.AnimatedVisibility(
+                visible = displayDataState == ApiFetchState.Fetching,
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                Row {
-                    FBPlayerStandingsFirstDataList()
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    ProgressIndicator()
+                }
+            }
 
-                    Row(
-                        Modifier.horizontalScroll(horizontalScrollState)
-                    ) {
-                        FBPlayerStandingsDataList()
+            // standings data
+            this@Column.AnimatedVisibility(
+                visible = displayDataState == ApiFetchState.Success
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(top = fbPlayerStandingsViewModel.categoryItemHeight * 2)
+                        .verticalScroll(verticalScrollState)
+                ) {
+                    Row {
+                        FBPlayerStandingsFirstDataList()
+
+                        Row(
+                            Modifier.horizontalScroll(horizontalScrollState)
+                        ) {
+                            FBPlayerStandingsDataList()
+                        }
                     }
                 }
             }
@@ -162,7 +237,7 @@ fun FBPlayerStandingsFirstCategoryItem(
             .height(fbPlayerStandingsViewModel.categoryItemHeight * 2)
     ) {
         Text(
-            text = fbPlayerStandingsViewModel.firstCategory,
+            text = StringConstants.Football.standingsFirstCategory,
             fontSize = fbPlayerStandingsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -178,6 +253,13 @@ fun FBPlayerStandingsFirstCategoryList(
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
 ) {
     /* ---------------------
+       constants
+       --------------------- */
+    val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
+    val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+    val etcCategoriesSize = StringConstants.Football.playerStandingsEtcCategories.size
+
+    /* ---------------------
        viewmodel state
        --------------------- */
     val selectedIndex by fbPlayerStandingsViewModel.firstSelectedIndex.collectAsState()
@@ -191,17 +273,17 @@ fun FBPlayerStandingsFirstCategoryList(
     val barOffset by animateDpAsState(
         targetValue = if (selectedIndex == 0) {
             getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * 5,
+                itemWidth = itemWidth * attackCategoriesSize,
                 barWidth = 80.dp
             )
         } else if (selectedIndex == 1) {
-            (itemWidth * 5) + barWidth + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * 2,
+            (itemWidth * attackCategoriesSize) + barWidth + getOffsetOfAniCapsuleBar(
+                itemWidth = itemWidth * defendCategoriesSize,
                 barWidth = 80.dp
             )
         } else {
-            (itemWidth * 5) + (barWidth * 2) + (itemWidth * 2) + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * 4,
+            (itemWidth * attackCategoriesSize) + (barWidth * 2) + (itemWidth * defendCategoriesSize) + getOffsetOfAniCapsuleBar(
+                itemWidth = itemWidth * etcCategoriesSize,
                 barWidth = 80.dp
             )
         },
@@ -217,13 +299,13 @@ fun FBPlayerStandingsFirstCategoryList(
             modifier = Modifier
                 .height(fbPlayerStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in fbPlayerStandingsViewModel.firstCategoryList.withIndex()) {
+            for ((index, value) in StringConstants.Football.statsFirstCategories.withIndex()) {
                 FBPlayerStandingsFirstCategoryListItem(
                     category = value,
                     index = index
                 )
 
-                if (index != fbPlayerStandingsViewModel.firstCategoryList.size - 1) {
+                if (index != StringConstants.Football.statsFirstCategories.size - 1) {
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
                 }
             }
@@ -248,7 +330,15 @@ fun FBPlayerStandingsFirstCategoryListItem(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(if (index == 0) (itemWidth * 5) else if (index == 1) (itemWidth * 2) else (itemWidth * 4))
+            .width(
+                if (index == 0) {
+                    (itemWidth * StringConstants.Football.playerStandingsAttackCategories.size)
+                } else if (index == 1) {
+                    (itemWidth * StringConstants.Football.playerStandingsDefendCategories.size)
+                } else {
+                    (itemWidth * StringConstants.Football.playerStandingsEtcCategories.size)
+                }
+            )
             .clickable {
                 fbPlayerStandingsViewModel.send(
                     FBPlayerStandingsViewModel.Intent.SelectFirstCategory(
@@ -271,6 +361,13 @@ fun FBPlayerStandingsSecondCategoryList(
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
 ) {
     /* ---------------------
+       constants
+       --------------------- */
+    val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
+    val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+    val etcCategoriesSize = StringConstants.Football.playerStandingsEtcCategories.size
+
+    /* ---------------------
        viewmodel state
        --------------------- */
     val selectedIndex by fbPlayerStandingsViewModel.secondSelectedIndex.collectAsState()
@@ -279,9 +376,9 @@ fun FBPlayerStandingsSecondCategoryList(
        animation
        --------------------- */
     val barOffset by animateDpAsState(
-        targetValue = if (selectedIndex in 0 until fbPlayerStandingsViewModel.attackCategoryList.size) {
+        targetValue = if (selectedIndex in 0 until attackCategoriesSize) {
             getOffsetOfAniCapsuleBar(itemWidth = fbPlayerStandingsViewModel.itemWidth, index = selectedIndex)
-        } else if (selectedIndex in fbPlayerStandingsViewModel.attackCategoryList.size until fbPlayerStandingsViewModel.attackCategoryList.size + fbPlayerStandingsViewModel.defendCategoryList.size) {
+        } else if (selectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
             getOffsetOfAniCapsuleBar(itemWidth = fbPlayerStandingsViewModel.itemWidth, index = selectedIndex) + fbPlayerStandingsViewModel.barWidth
         } else {
             getOffsetOfAniCapsuleBar(itemWidth = fbPlayerStandingsViewModel.itemWidth, index = selectedIndex) + (fbPlayerStandingsViewModel.barWidth * 2)
@@ -298,13 +395,13 @@ fun FBPlayerStandingsSecondCategoryList(
             modifier = Modifier
                 .height(fbPlayerStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in fbPlayerStandingsViewModel.secondCategoryList.withIndex()) {
+            for ((index, value) in StringConstants.Football.playerStandingsSecondCategories.withIndex()) {
                 FBPlayerStandingsSecondCategoryListItem(
                     category = value,
                     index = index
                 )
 
-                if (index == fbPlayerStandingsViewModel.attackCategoryList.size - 1 || index == (fbPlayerStandingsViewModel.attackCategoryList.size + fbPlayerStandingsViewModel.defendCategoryList.size - 1)) {
+                if (index == attackCategoriesSize - 1 || index == (attackCategoriesSize + defendCategoriesSize - 1)) {
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
                 }
             }
@@ -323,16 +420,21 @@ fun FBPlayerStandingsSecondCategoryListItem(
     category: String,
     index: Int
 ) {
+    val fontSize = when (index) {
+        6, 9, 17 -> 13.sp
+        else -> fbPlayerStandingsViewModel.categoryFontSize
+    }
+
     Text(
         text = category,
         textAlign = TextAlign.Center,
-        fontSize = fbPlayerStandingsViewModel.categoryFontSize,
+        fontSize = fontSize,
         fontWeight = FontWeight.Medium,
         modifier = Modifier
             .width(fbPlayerStandingsViewModel.itemWidth)
             .clickable {
                 fbPlayerStandingsViewModel.send(
-                    FBPlayerStandingsViewModel.Intent.SelectSecondCategory(index)
+                    FBPlayerStandingsViewModel.Intent.SelectSecondCategory(index, category)
                 )
             }
     )
@@ -342,15 +444,39 @@ fun FBPlayerStandingsSecondCategoryListItem(
 fun FBPlayerStandingsFirstDataList(
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
 ) {
-    val standings by fbPlayerStandingsViewModel.standings.collectAsState()
+    val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
+    val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
+    val filterStandingsStartIndex by fbPlayerStandingsViewModel.filteredStandingsStartIndex.collectAsState()
 //    VSequentialListAni(
 //        items = dataList
 //    ) { index, item ->
 //        FBTeamStandingsFirstDataItem(rank = index + 1, data = item, itemHeight = itemHeight)
 //    }
-    Column {
-        for ((index, value) in standings.withIndex()) {
-            FBPlayerStandingsFirstDataListItem(rank = index + 1, data = value)
+    Column (
+        modifier = Modifier.width(fbPlayerStandingsViewModel.firstCategoryItemWidth)
+    ) {
+        for ((index, value) in filteredStandings.withIndex()) {
+            val standingsIndex = filterStandingsStartIndex + index
+
+            if (entityIndex != null && entityIndex == standingsIndex) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Moare)
+                )
+            }
+
+            FBPlayerStandingsFirstDataListItem(rank = standingsIndex + 1, data = value)
+
+            if (entityIndex != null && entityIndex == standingsIndex) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Moare)
+                )
+            }
         }
     }
 }
@@ -365,11 +491,10 @@ fun FBPlayerStandingsFirstDataListItem(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .width(fbPlayerStandingsViewModel.firstCategoryItemWidth)
             .padding(start = 10.dp)
             .height(fbPlayerStandingsViewModel.dataItemHeight)
             .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(from = "standings", playerId = data.player.id))
+                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(category = "football", playerId = data.player.id))
             }
     ) {
         Text(
@@ -377,7 +502,7 @@ fun FBPlayerStandingsFirstDataListItem(
             fontWeight = FontWeight.Medium,
             fontSize = fbPlayerStandingsViewModel.dataFontSize,
             modifier = Modifier
-                .width(22.dp)
+                .width(26.dp)
         )
 
         URLImage(
@@ -386,14 +511,31 @@ fun FBPlayerStandingsFirstDataListItem(
             modifier = Modifier.padding(end = 4.dp)
         )
 
-        Text(
-            text = data.player.krname,
-            fontSize = 12.sp,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .weight(1f)
-        )
+        Row(
+            // added to make VCapsuleBar visible
+            modifier = Modifier.weight(1f)
+        ) {
+            Column {
+                Text(
+                    text = data.player.krname,
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(bottom = 2.dp)
+                )
+
+                Text(
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.stats.team.name),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Light,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                )
+            }
+        }
 
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
     }
@@ -403,7 +545,15 @@ fun FBPlayerStandingsFirstDataListItem(
 fun FBPlayerStandingsDataList(
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
 ) {
-    val standings by fbPlayerStandingsViewModel.standings.collectAsState()
+    /* ---------------------
+       constants
+       --------------------- */
+    val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
+    val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+
+    val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
+    val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
+    val filteredStandingsStartIndex by fbPlayerStandingsViewModel.filteredStandingsStartIndex.collectAsState()
 //    VSequentialListAni(
 //        items = dataList
 //    ) { _, item ->
@@ -419,22 +569,44 @@ fun FBPlayerStandingsDataList(
 //        }
 //    }
     Column {
-        for (value in standings) {
+        for ((index, value) in filteredStandings.withIndex()) {
+            val standingsIndex = filteredStandingsStartIndex + index
+            val categorySize = StringConstants.Football.playerStandingsSecondCategories.size
+            val highlightWidth = (fbPlayerStandingsViewModel.itemWidth * categorySize) + (2.dp * 2)
+
+            if (entityIndex != null && entityIndex == standingsIndex) {
+                Box(
+                    Modifier
+                        .width(highlightWidth)
+                        .height(1.dp)
+                        .background(Moare)
+                )
+            }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .height(fbPlayerStandingsViewModel.dataItemHeight)
             ) {
-                for (index in 0 until fbPlayerStandingsViewModel.secondCategoryList.size) {
+                for (index in 0 until categorySize) {
                     FBPlayerStandingsDataListItem(
                         data = value,
                         index = index
                     )
 
-                    if (index == fbPlayerStandingsViewModel.attackCategoryList.size - 1 || index == (fbPlayerStandingsViewModel.attackCategoryList.size + fbPlayerStandingsViewModel.defendCategoryList.size - 1)) {
+                    if (index == attackCategoriesSize - 1 || index == (attackCategoriesSize + defendCategoriesSize - 1)) {
                         VCapsuleBar(modifier = Modifier.alpha(0f))
                     }
                 }
+            }
+
+            if (entityIndex != null && entityIndex == standingsIndex) {
+                Box(
+                    Modifier
+                        .width(highlightWidth)
+                        .height(1.dp)
+                        .background(Moare)
+                )
             }
         }
     }
@@ -452,12 +624,20 @@ fun FBPlayerStandingsDataListItem(
         2 -> "${(data.stats.goals.total) + (data.stats.goals.assists)}"
         3 -> "${data.stats.shots.total}"
         4 -> "${data.stats.shots.on}"
-        5 -> "${data.stats.tackles.total}"
-        6 -> "${data.stats.passes.total}"
-        7 -> "${data.stats.fouls.committed}"
-        8 -> "${data.stats.cards.yellow}"
-        9 -> "${data.stats.cards.red}"
-        10 -> "${data.stats.games.appearences}"
+        5 -> "${data.stats.passes.key}"
+        6 -> "${data.stats.dribbles.success}"
+        7 -> "${data.stats.penalty.scored}"
+        8 -> "${data.stats.tackles.total}"
+        9 -> "${data.stats.duels.won}"
+        10 -> "${data.stats.passes.total}"
+        11 -> "${data.stats.fouls.committed}"
+        12 -> "${data.stats.cards.yellow}"
+        13 -> "${data.stats.cards.red}"
+        14 -> "${data.stats.games.appearences}"
+        15 -> "${data.stats.games.lineups}"
+        16 -> "${data.stats.substitutes.substituteIn}"
+        17 -> "${data.stats.games.minutes}"
+        18 -> "${data.stats.games.rating.toDoubleOrNull()?.rounded(2) ?: 0.0}"
         else -> ""
     }
 

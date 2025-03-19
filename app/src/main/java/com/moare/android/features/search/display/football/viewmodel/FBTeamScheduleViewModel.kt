@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
+import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleViewModel.Intent
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,17 +39,24 @@ class FBTeamScheduleViewModel @Inject constructor(
     private val _isAllResultOpened = MutableStateFlow(false)
     val isAllResultOpened: StateFlow<Boolean> = _isAllResultOpened
 
+    private val _gameResultOpenedStateList = MutableStateFlow<Map<Int, Boolean>>(emptyMap())
+    val gameResultOpenedStateList: StateFlow<Map<Int, Boolean>> = _gameResultOpenedStateList
+
     /* ---------------------
        intent
        --------------------- */
     sealed class Intent {
+        data class InitData(val displayModel: FBTeamScheduleDisplayModel) : Intent()
         data object ToggleAllResult : Intent()
+        data class UpdateResultOpenedState(val fixtureId: Int, val isOpened: Boolean) : Intent()
     }
 
     override fun send(intent: Intent) {
         viewModelScope.launch {
             when (intent) {
+                is Intent.InitData -> initData(intent.displayModel)
                 is Intent.ToggleAllResult -> toggleAllResult()
+                is Intent.UpdateResultOpenedState -> updateResultOpenedState(intent.fixtureId, intent.isOpened)
             }
         }
     }
@@ -58,8 +66,17 @@ class FBTeamScheduleViewModel @Inject constructor(
        --------------------- */
     override fun initData(displayModel: FBTeamScheduleDisplayModel) {
         viewModelScope.launch {
+            // init with default value
+            _isAllResultOpened.emit(false)
+
+            // init data
             _displayModel.emit(displayModel)
             _games.emit(displayModel.games)
+
+            val gameResultOpenedStateList = games.value.associate {
+                it.fixture.id to false
+            }
+            _gameResultOpenedStateList.emit(gameResultOpenedStateList)
         }
     }
 
@@ -67,6 +84,14 @@ class FBTeamScheduleViewModel @Inject constructor(
        implements
        --------------------- */
     private suspend fun toggleAllResult() {
-        _isAllResultOpened.emit(!isAllResultOpened.value)
+        val newState = !isAllResultOpened.value
+        _isAllResultOpened.emit(newState)
+        _gameResultOpenedStateList.emit(gameResultOpenedStateList.value.mapValues { newState })
+    }
+
+    private suspend fun updateResultOpenedState(fixtureId: Int, isOpened: Boolean) {
+        val newMap = gameResultOpenedStateList.value.toMutableMap()
+        newMap[fixtureId] = isOpened
+        _gameResultOpenedStateList.emit(newMap)
     }
 }

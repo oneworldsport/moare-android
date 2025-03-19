@@ -1,28 +1,28 @@
 package com.moare.android.features.search.display.search
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -36,16 +36,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
@@ -60,8 +58,11 @@ import com.moare.android.features.search.display.football.view.FBTeamScheduleVie
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SearchDataState
+import com.moare.android.features.search.models.ApiFetchState
+import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.theme.MoareAndroidTheme
+import com.moare.android.ui.util.rememberKeyboardVisibility
+import kotlinx.coroutines.delay
 
 @Composable
 fun SearchView(
@@ -70,8 +71,9 @@ fun SearchView(
     /* ---------------------
        ui state
        --------------------- */
-    var isInfoVisible by remember { mutableStateOf(true) }
-    var isInfoOpened by remember { mutableStateOf(false) }
+    var isNoticeVisible by remember { mutableStateOf(false) }
+    var isNoticeOpened by remember { mutableStateOf(false) }
+    var isSearchBarOpened by remember { mutableStateOf(false) }
 
     /* ---------------------
        viewmodel state
@@ -79,6 +81,8 @@ fun SearchView(
     val searchDataState by searchViewModel.searchDataState.collectAsState()
     val showResult by searchViewModel.resultVisibleState.collectAsState()
     val searchState by searchViewModel.searchState.collectAsState()
+    val barFirstOpened by searchViewModel.barFirstOpened.collectAsState()
+    val focusState by searchViewModel.focusState.collectAsState()
 
     // football
     val fbPlayerInfoData by searchViewModel.fbPlayerInfoData.collectAsState()
@@ -93,109 +97,107 @@ fun SearchView(
 
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
+    val autoCompleteListVisibleState by searchViewModel.autoCompleteListVisibleState.collectAsState()
 
     /* ---------------------
        animation
        --------------------- */
     val dataContainerCenter = remember { mutableStateOf(Offset.Zero) }
+    val noticeAlpha by animateFloatAsState(
+        targetValue = if (isNoticeOpened) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = LinearOutSlowInEasing
+        )
+    )
 
     /* ---------------------
        etc
        --------------------- */
-    val focusManager = LocalFocusManager.current
+    val keyboardVisibleState by rememberKeyboardVisibility()
     val noRippleInteractionSource = remember { MutableInteractionSource() }
+    val activity = LocalActivity.current
 
     /* ---------------------
        LaunchedEffect
        --------------------- */
     LaunchedEffect(searchState, autoCompleteList) {
-        isInfoVisible = if (searchState) {
+        isNoticeVisible = if (searchState) {
+            isNoticeOpened = false
             false
         } else {
-            autoCompleteList.isEmpty()
+            if (barFirstOpened) {
+                if (autoCompleteList.isEmpty()) {
+                    true
+                } else {
+                    isNoticeOpened = false
+                    false
+                }
+            } else {
+                false
+            }
+        }
+    }
+
+    LaunchedEffect(barFirstOpened) {
+        if (barFirstOpened) {
+            delay(1000)
+            isSearchBarOpened = true
+            isNoticeVisible = true
+        }
+    }
+
+    LaunchedEffect(keyboardVisibleState) {
+        // NOTE: barFirstOpened prevents executing at first launch
+        if (barFirstOpened && !keyboardVisibleState && focusState) {
+            searchViewModel.send(SearchViewModel.Intent.ToggleFocusState(false))
         }
     }
 
     BackHandler {
-        searchViewModel.send(SearchViewModel.Intent.GoBack)
+        searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
     }
 
     /* ---------------------
        ui
        --------------------- */
-    Box {
-        // info about currently providing data
+    Box(
+        contentAlignment = Alignment.Center
+    ) {
+        /* ---------------------
+           notice
+           - info about providing data
+           --------------------- */
         AnimatedVisibility(
-            visible = isInfoVisible,
+            visible = isNoticeVisible,
             modifier = Modifier
-                .size(width = 250.dp, height = 140.dp)
-                .align(Alignment.CenterEnd)
-                .offset(x = (-20).dp, y = (-98).dp)
-                .zIndex(1f),
+                .zIndex(1f)
+                .offset(x = (-12).dp, y = (-113).dp), // y: 전체 박스 높이(100 + 20 + 4) / 2 + (검색창 높이(50) + 트렌딩 키워드 높이(40)) / 2 + 추가 패딩 6,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                AnimatedVisibility(
-                    visible = isInfoOpened,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    // wrapped with box because border's fadeOut animation is not applied if it is in AnimatedVisibility's modifier
-                    Box(
-                        Modifier
-                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(UIConstants.CornerRadius.small))
-                    ) {
-                        Column(
-                            Modifier
-                                .verticalScroll(rememberScrollState())
-                                .padding(10.dp)
-                        ) {
-                            Text(
-                                text = "현재 제공중인 스포츠 데이터:",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = "• 프리미어리그 24/25",
-                                fontSize = 12.sp,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = "\n제공 예정 스포츠 데이터:",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = "• 라리가 24/25" +
-                                        "\n• 분데스리가 24/25" +
-                                        "\n• 리그 1 24/25" +
-                                        "\n• 챔피언스리그 24/25",
-                                fontSize = 12.sp,
-                                color = Color.Gray
-                            )
-                        }
-                    }
-                }
+            Row {
+                Spacer(Modifier.weight(1f))
 
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_info_24),
-                    contentDescription = "ic_info_24",
-                    tint = Color.Gray,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(top = UIConstants.Padding.defalutVPadding)
-                        .clickable {
-                            isInfoOpened = !isInfoOpened
-                        }
-                )
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
+                    NoticeBox(
+                        modifier = Modifier.alpha(noticeAlpha)
+                    )
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_rounded_info_24),
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier
+                            .padding(top = UIConstants.Padding.defalutVPadding)
+                            .size(20.dp)
+                            .clickable {
+                                isNoticeOpened = !isNoticeOpened
+                            }
+                    )
+                }
             }
         }
 
@@ -207,7 +209,11 @@ fun SearchView(
                     interactionSource = noRippleInteractionSource,
                     indication = null,
                     onClick = {
-                        focusManager.clearFocus()
+                        if (isNoticeOpened) {
+                            isNoticeOpened = false
+                        } else {
+                            searchViewModel.send(SearchViewModel.Intent.ToggleFocusState(false))
+                        }
                     }
                 )
             ,
@@ -216,21 +222,41 @@ fun SearchView(
         ) {
             AnimatingSearchBar(
                 modifier = Modifier
-                    .padding(top = 10.dp)
+//                    .padding(top = 10.dp)
             )
+
+            // trending keywords
+            AnimatedVisibility(
+                visible = if (searchState) {
+                    false
+                } else {
+                    if (isSearchBarOpened) {
+                        autoCompleteList.isEmpty()
+                    } else {
+                        false
+                    }
+                },
+                exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
+            ) {
+                TrendingKeywords { keyword ->
+                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(keyword), false))
+                    searchViewModel.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.TRENDING_KEYWORD, aniDuration = 1000))
+                }
+            }
 
             // NOTE: didn't wrap with box because of AnimatedVisibility
             // autoComplete list
             AnimatedVisibility(
-                visible = autoCompleteList.isNotEmpty(),
-                enter = fadeIn() + expandVertically(tween(durationMillis = 1000))
+                visible = autoCompleteListVisibleState,
+                enter = fadeIn() + expandVertically(tween(durationMillis = 1000)),
+                exit = fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000))
             ) {
 //            key(System.currentTimeMillis()) {
                 key(autoCompleteList) { // redraw the composable with its initial state
                     AutoCompleteList(
                         onItemSelected = { query ->
                             searchViewModel.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(query), false))
-                            searchViewModel.send(SearchViewModel.Intent.PerformSearch(2000))
+                            searchViewModel.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.AUTO_COMPLETE, aniDuration = 2000))
                         }
                     )
                 }
@@ -238,9 +264,9 @@ fun SearchView(
 
             // loading
             AnimatedVisibility(
-                visible = searchDataState == SearchDataState.Fetching
+                visible = searchDataState == ApiFetchState.Fetching
             ) {
-                CircularProgressIndicator()
+                ProgressIndicator()
             }
 
             // search result
@@ -345,10 +371,10 @@ fun SearchView(
 
             // no result / error
             AnimatedVisibility(
-                visible = searchDataState is SearchDataState.Error,
+                visible = searchDataState is ApiFetchState.Error,
                 enter = fadeIn()
             ) {
-                val error = searchDataState as? SearchDataState.Error
+                val error = searchDataState as? ApiFetchState.Error
                 error?.let {
                     Text(error.message)
                 }

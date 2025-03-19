@@ -1,6 +1,7 @@
 package com.moare.android.core.di
 
 import com.moare.android.core.util.Trie
+import com.moare.android.features.search.models.KeywordInfo
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,7 +14,7 @@ import javax.inject.Singleton
 object TrieModule {
     @Provides
     @Singleton
-    fun provideTrie(): CompletableDeferred<Trie> {
+    fun provideTrie(): CompletableDeferred<Pair<Trie, List<KeywordInfo>>> {
         return CompletableDeferred()
     }
 }

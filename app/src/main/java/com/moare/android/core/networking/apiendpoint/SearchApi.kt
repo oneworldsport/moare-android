@@ -1,8 +1,10 @@
 package com.moare.android.core.networking.apiendpoint
 
-import com.moare.android.features.search.models.DataModel
+import com.moare.android.features.search.models.KeywordInfo
 import okhttp3.ResponseBody
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface SearchApi {
@@ -16,9 +18,23 @@ interface SearchApi {
         @Query("query") query: String
     ): ResponseBody
 
+    @POST("search/keyword")
+    suspend fun searchByKeyword(
+        @Body request: KeywordInfo
+    ): ResponseBody
+
     @GET("search/schedule")
     suspend fun getLeagueSchedule(
-        @Query("leagueId") leagueId: String,
+        @Query("leagueId") leagueId: Int,
         @Query("yearMonth") yearMonth: String
+    ): ResponseBody
+
+    @GET("search/id")
+    suspend fun searchById(
+        @Query("category") category: String,
+        @Query("date") date: String?,
+        @Query("dataType") dataType: String,
+        @Query("leagueId") leagueId: Int,
+        @Query("id") id: Int,
     ): ResponseBody
 }

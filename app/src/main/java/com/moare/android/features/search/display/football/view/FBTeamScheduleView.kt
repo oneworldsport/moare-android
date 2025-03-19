@@ -1,7 +1,6 @@
 package com.moare.android.features.search.display.football.view
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -39,16 +36,18 @@ import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.TranslationType
+import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleViewModel
 import com.moare.android.features.search.display.football.viewmodel.FBTeamScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
-import com.moare.android.ui.common.components.CalendarList
-import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
+import com.moare.android.ui.theme.Moare
 
 @Composable
 fun FBTeamScheduleView(
@@ -70,6 +69,7 @@ fun FBTeamScheduleView(
     val isAllResultOpened by fbTeamScheduleViewModel.isAllResultOpened.collectAsState()
 
     val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        etc
@@ -79,7 +79,9 @@ fun FBTeamScheduleView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbTeamScheduleViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBTeamSchedule) {
+            fbTeamScheduleViewModel.send(FBTeamScheduleViewModel.Intent.InitData(data))
+        }
     }
 
     /* ---------------------
@@ -103,7 +105,9 @@ fun FBTeamScheduleView(
                 )
 
                 Text(
-                    text = " - " + if (fbGameStatsData?.game?.league?.round != null) MatchDescriptionConverter.convert(fbGameStatsData?.game?.league?.round!!) else "",
+                    text = " - " + if (fbGameStatsData?.game?.league?.round != null) {
+                        MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = fbGameStatsData?.game?.league?.round!!)
+                    } else { "" },
                     fontSize = 14.sp
                 )
             }
@@ -177,13 +181,13 @@ fun FBTeamScheduleListItem(
        ui state
        --------------------- */
     var isResultOpened by remember { mutableStateOf(false) }
-    var homeTeamKrName by remember { mutableStateOf("") }
-    var awayTeamKrName by remember { mutableStateOf("") }
+    var venueKrName by remember { mutableStateOf("") }
+    var refereeKrName by remember { mutableStateOf("") }
 
     /* ---------------------
        viewmodel state
        --------------------- */
-    val isAllResultOpened by fbTeamScheduleViewModel.isAllResultOpened.collectAsState()
+    val gameResultOpenedStateList by fbTeamScheduleViewModel.gameResultOpenedStateList.collectAsState()
 
     val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
 
@@ -192,11 +196,11 @@ fun FBTeamScheduleListItem(
        --------------------- */
     val gameStatusText = if (isResultOpened) {
         when (data.fixture.status.short) {
-            "NS" -> StringConstants.Football.gameNotStarted
-            "1H" -> StringConstants.Football.gameFirstHalf
-            "HT" -> StringConstants.Football.gameHalftime
-            "2H" -> StringConstants.Football.gameSecondHalf
-            "FT", "AET", "PEN" -> StringConstants.Football.gameFinished
+            StringConstants.Football.gameNotStarted -> StringConstants.Football.gameNotStartedStr
+            StringConstants.Football.gameFirstHalf -> StringConstants.Football.gameFirstHalfStr
+            StringConstants.Football.gameHalftime -> StringConstants.Football.gameHalftimeStr
+            StringConstants.Football.gameSecondHalf -> StringConstants.Football.gameSecondHalfStr
+            in StringConstants.Football.gameFinishedList -> StringConstants.Football.gameFinishedStr
             else -> ""
         }
     } else {
@@ -205,7 +209,7 @@ fun FBTeamScheduleListItem(
 
     val gameStatusColor = if (isResultOpened) {
         when (data.fixture.status.short) {
-            "1H", "HT", "2H" -> MaterialTheme.colors.primary
+            in StringConstants.Football.gameLiveList -> MaterialTheme.colors.primary
             else -> Color.Gray
         }
     } else {
@@ -216,15 +220,23 @@ fun FBTeamScheduleListItem(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        homeTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(data.teams.home.name))
-        awayTeamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(data.teams.away.name))
+        if (StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)) {
+            isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
+        } else {
+            isResultOpened = true
+        }
     }
-    LaunchedEffect(isAllResultOpened) {
-        isResultOpened = isAllResultOpened
+    LaunchedEffect(gameResultOpenedStateList) {
+        if (StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)) {
+            isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
+        }
     }
     LaunchedEffect(fbGameStatsData) {
-        if (fbGameStatsData != null) {
+        fbGameStatsData?.let {
             isResultOpened = true
+
+            venueKrName = EnNameTranslationUtils.translateByAWS(it.game.fixture.venue.name)
+            refereeKrName = EnNameTranslationUtils.translateByAWS(it.game.fixture.referee)
         }
     }
 
@@ -238,6 +250,9 @@ fun FBTeamScheduleListItem(
             .fillMaxWidth()
             .clickable(enabled = fbGameStatsData == null) {
                 searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data))
+
+                // set selected game's isOpened true
+                fbTeamScheduleViewModel.send(FBTeamScheduleViewModel.Intent.UpdateResultOpenedState(data.fixture.id, true))
             }
             .padding(vertical = 8.dp)
             .padding(horizontal = UIConstants.Padding.defaultHPadding)
@@ -247,14 +262,14 @@ fun FBTeamScheduleListItem(
            home
            --------------------- */
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .width(110.dp)
-                .clickable(enabled = fbGameStatsData != null) {
-                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue = TextFieldValue(text = "토트넘")))
-                    searchViewModel.send(SearchViewModel.Intent.PerformSearch())
-                }
+//                .clickable(enabled = fbGameStatsData != null) {
+//                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue = TextFieldValue(text = "토트넘")))
+//                    searchViewModel.send(SearchViewModel.Intent.PerformSearch())
+//                }
         ) {
             URLImage(
                 url = data.teams.home.logo,
@@ -262,21 +277,33 @@ fun FBTeamScheduleListItem(
             )
 
             Text(
-                text = homeTeamKrName,
+                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.teams.home.name),
                 fontSize = 13.sp,
                 maxLines = 2
             )
+
+            fbGameStatsData?.let {
+                RoundedBorderText(
+                    text = "홈",
+                    fontSize = 11.sp,
+                    radius = 4.dp,
+                    textColor = Moare,
+                    borderColor = Moare
+                )
+            }
         }
 
         Spacer(Modifier.weight(1f))
 
         // score
-        if (isResultOpened && data.fixture.status.short == "FT") {
+        if (StringConstants.Football.gameLiveList.contains(data.fixture.status.short) ||
+            StringConstants.Football.gameFinishedList.contains(data.fixture.status.short) && isResultOpened) {
             Text(
                 text = data.goals.home.toString(),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .width(20.dp)
+                    .width(20.dp),
+                color = if (data.goals.home >= data.goals.away) MaterialTheme.colors.primary else Color.Black
             )
         }
 
@@ -292,9 +319,10 @@ fun FBTeamScheduleListItem(
             // game status
             CapsuleButton(
                 text = gameStatusText,
-                color = gameStatusColor
+                color = gameStatusColor,
+                isDisabled = fbGameStatsData != null || !StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)
             ) {
-                isResultOpened = !isResultOpened
+                fbTeamScheduleViewModel.send(FBTeamScheduleViewModel.Intent.UpdateResultOpenedState(data.fixture.id, !isResultOpened))
             }
 
             // game date
@@ -321,7 +349,7 @@ fun FBTeamScheduleListItem(
             // venue
             fbGameStatsData?.let {
                 Text(
-                    text = "장소: " + it.game.fixture.venue.name,
+                    text = "장소: $venueKrName",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Light,
                     maxLines = 1,
@@ -332,12 +360,13 @@ fun FBTeamScheduleListItem(
             // game type or referee
             Text(
                 text = if (fbGameStatsData != null) {
-                    "심판: " + fbGameStatsData!!.game.fixture.referee
+                    "심판: $refereeKrName"
                 } else {
-                    MatchDescriptionConverter.convert(data.league.round)
+                    MatchDescriptionConverter.convert(input = data.league.round)
                 },
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Light
+                fontWeight = FontWeight.Light,
+                maxLines = 1,
             )
         }
 
@@ -347,19 +376,21 @@ fun FBTeamScheduleListItem(
         Spacer(Modifier.weight(1f))
 
         // score
-        if (isResultOpened && data.fixture.status.short == "FT") {
+        if (StringConstants.Football.gameLiveList.contains(data.fixture.status.short) ||
+            StringConstants.Football.gameFinishedList.contains(data.fixture.status.short) && isResultOpened) {
             Text(
                 text = data.goals.away.toString(),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .width(20.dp)
+                    .width(20.dp),
+                color = if (data.goals.away >= data.goals.home) MaterialTheme.colors.primary else Color.Black
             )
         }
 
         Spacer(Modifier.weight(1f))
 
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .width(110.dp)
@@ -370,10 +401,20 @@ fun FBTeamScheduleListItem(
             )
 
             Text(
-                text = awayTeamKrName,
+                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.teams.away.name),
                 fontSize = 13.sp,
                 maxLines = 2
             )
+
+            fbGameStatsData?.let {
+                RoundedBorderText(
+                    text = "원정",
+                    fontSize = 11.sp,
+                    radius = 4.dp,
+                    textColor = Color.Gray,
+                    borderColor = Color.Gray
+                )
+            }
         }
     }
 }

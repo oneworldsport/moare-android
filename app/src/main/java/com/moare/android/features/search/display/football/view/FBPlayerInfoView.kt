@@ -4,7 +4,6 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -34,26 +33,30 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
+import com.moare.android.ui.util.convertPxToDp
+import com.moare.android.ui.util.screenWidthDp
 import kotlinx.coroutines.delay
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 @Composable
@@ -66,10 +69,15 @@ fun FBPlayerInfoView(
     /* ---------------------
        ui state
        --------------------- */
+    val density = LocalDensity.current
+    var itemSizes = remember { mutableStateMapOf<Int, DpSize>() }
 
     /* ---------------------
        viewmodel state
        --------------------- */
+    val displayModel by fbPlayerInfoViewModel.displayModel.collectAsState()
+
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        animation
@@ -90,7 +98,9 @@ fun FBPlayerInfoView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbPlayerInfoViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBPlayerInfo) {
+            fbPlayerInfoViewModel.send(FBPlayerInfoViewModel.Intent.InitData(data))
+        }
     }
 
     LaunchedEffect(itemPositions) {
@@ -136,6 +146,9 @@ fun FBPlayerInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[0] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[0] = Offset(centerX - center.value.x, centerY - center.value.y)
                     }
                     .widthIn(max = 130.dp)
@@ -158,6 +171,9 @@ fun FBPlayerInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[1] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[1] = Offset(centerX - center.value.x, centerY - center.value.y)
                     }
                     .widthIn(max = 130.dp)
@@ -180,6 +196,9 @@ fun FBPlayerInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[2] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[2] = Offset(centerX - center.value.x, centerY - center.value.y)
                     }
                     .widthIn(max = 130.dp)
@@ -205,6 +224,9 @@ fun FBPlayerInfoView(
                     val centerX = relativeX + itemSize.width / 2f
                     val centerY = relativeY + itemSize.height / 2f
 
+                    itemSizes[3] = with(density) {
+                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                    }
                     itemPositions[3] = Offset(centerX - center.value.x, centerY - center.value.y)
                 }
         ) {
@@ -228,6 +250,9 @@ fun FBPlayerInfoView(
                     val centerX = relativeX + itemSize.width / 2f
                     val centerY = relativeY + itemSize.height / 2f
 
+                    itemSizes[4] = with(density) {
+                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                    }
                     itemPositions[4] = Offset(centerX - center.value.x, centerY - center.value.y)
                 }
         ) {
@@ -251,6 +276,9 @@ fun FBPlayerInfoView(
                     val centerX = relativeX + itemSize.width / 2f
                     val centerY = relativeY + itemSize.height / 2f
 
+                    itemSizes[5] = with(density) {
+                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                    }
                     itemPositions[5] = Offset(centerX - center.value.x, centerY - center.value.y)
                 }
         ) {
@@ -298,7 +326,7 @@ fun FBPlayerInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .widthIn(max = 130.dp)
+            .size(itemSizes[0] ?: DpSize(width = 130.dp, height = 150.dp))
             .offset {
                 IntOffset(
                     firstAnimatedPosition.x.roundToInt(),
@@ -313,7 +341,7 @@ fun FBPlayerInfoView(
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .widthIn(max = 130.dp)
+            .size(itemSizes[1] ?: DpSize(width = 130.dp, height = 150.dp))
             .offset {
                 IntOffset(
                     secondAnimatedPosition.x.roundToInt(),
@@ -328,7 +356,7 @@ fun FBPlayerInfoView(
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .widthIn(max = 130.dp)
+            .size(itemSizes[2] ?: DpSize(width = 130.dp, height = 150.dp))
             .offset {
                 IntOffset(
                     thirdAnimatedPosition.x.roundToInt(),
@@ -344,6 +372,7 @@ fun FBPlayerInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .size(itemSizes[3] ?: DpSize(width = screenWidthDp(), height = 150.dp))
             .offset {
                 IntOffset(
                     fourthAnimatedPosition.x.roundToInt(),
@@ -351,7 +380,9 @@ fun FBPlayerInfoView(
                 )
             }
             .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(from = "info"))
+                displayModel?.let {
+                    searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(playerId = it.info.id))
+                }
             }
     ) {
         FBPlayerInfoFourthItem(contentsAlpha = contentsAlpha)
@@ -362,6 +393,7 @@ fun FBPlayerInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .size(itemSizes[4] ?: DpSize(width = screenWidthDp(), height = 150.dp))
             .offset {
                 IntOffset(
                     fifthAnimatedPosition.x.roundToInt(),
@@ -369,7 +401,7 @@ fun FBPlayerInfoView(
                 )
             }
             .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(from = "player", dd = "previous"))
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
             }
     ) {
         FBPlayerInfoFifthItem(contentsAlpha = contentsAlpha)
@@ -380,6 +412,7 @@ fun FBPlayerInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .size(itemSizes[5] ?: DpSize(width = screenWidthDp(), height = 150.dp))
             .offset {
                 IntOffset(
                     sixthAnimatedPosition.x.roundToInt(),
@@ -387,7 +420,7 @@ fun FBPlayerInfoView(
                 )
             }
             .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(from = "player", dd = "next"))
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
             }
     ) {
         FBPlayerInfoSixthItem(contentsAlpha = contentsAlpha)
@@ -448,7 +481,7 @@ fun FBPlayerInfoSecondItem(
         var nationalityKrName by remember { mutableStateOf("") }
 
         LaunchedEffect(player) {
-            nationalityKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, player.nationality)
+            nationalityKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, input = player.nationality)
         }
 
         /* ---------------------
@@ -574,12 +607,6 @@ fun FBPlayerInfoFourthItem(
         val team = stats?.team
         val league = stats?.league
 
-        var teamKrName by remember { mutableStateOf("") }
-
-        LaunchedEffect(team) {
-            teamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(team?.name))
-        }
-
         /* ---------------------
            ui
            --------------------- */
@@ -619,7 +646,7 @@ fun FBPlayerInfoFourthItem(
                         )
 
                         Text(
-                            text = teamKrName,
+                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = team.name),
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -658,14 +685,6 @@ fun FBPlayerInfoFifthItem(
         val lastGame = it.lastGame
         val lastGamePlayerStats = it.lastGamePlayerStats
 
-        var homeTeamKrName by remember { mutableStateOf("") }
-        var awayTeamKrName by remember { mutableStateOf("") }
-
-        LaunchedEffect(lastGame) {
-            homeTeamKrName = EnNameTranslationUtils.translateByAWS(lastGame?.teams?.home?.name)
-            awayTeamKrName = EnNameTranslationUtils.translateByAWS(lastGame?.teams?.away?.name)
-        }
-
         /* ---------------------
            ui
            --------------------- */
@@ -692,7 +711,7 @@ fun FBPlayerInfoFifthItem(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, homeTeamKrName),
+                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = lastGame.teams.home.name),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Light,
                             maxLines = 1
@@ -718,7 +737,7 @@ fun FBPlayerInfoFifthItem(
                         )
 
                         Text(
-                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, awayTeamKrName),
+                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = lastGame.teams.away.name),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Light,
                             maxLines = 1
@@ -774,14 +793,6 @@ fun FBPlayerInfoSixthItem(
     displayModel?.let {
         val nextGame = it.nextGame
 
-        var homeTeamKrName by remember { mutableStateOf("") }
-        var awayTeamKrName by remember { mutableStateOf("") }
-
-        LaunchedEffect(nextGame) {
-            homeTeamKrName = EnNameTranslationUtils.translateByAWS(nextGame?.teams?.home?.name)
-            awayTeamKrName = EnNameTranslationUtils.translateByAWS(nextGame?.teams?.away?.name)
-        }
-
         /* ---------------------
            ui
            --------------------- */
@@ -800,7 +811,7 @@ fun FBPlayerInfoSixthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, homeTeamKrName),
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = nextGame.teams.home.name),
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.End,
                     modifier = Modifier.weight(1f)
@@ -815,7 +826,7 @@ fun FBPlayerInfoSixthItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, awayTeamKrName),
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = nextGame.teams.away.name),
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Start,
                     modifier = Modifier.weight(1f)

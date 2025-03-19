@@ -135,7 +135,7 @@ data class DataModel(
                 "football_game_stats" -> {
                     val responseModel: FBGameStatsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
 
-                    if (responseModel.stats == null) {
+                    if (responseModel.game == null) {
                         SportDecodableModel.NoResult
                     } else {
                         val displayModel = modelConverter.fbGameStatsConverter(responseModel)
@@ -223,8 +223,8 @@ sealed class SportDecodableModel {
 
     @Serializable
     data class FBPlayerStats(
-        val responseModel: FBPlayerInfoResponseModel,
-        val displayModel: FBPlayerStatsDisplayModel
+        var responseModel: FBPlayerInfoResponseModel,
+        var displayModel: FBPlayerStatsDisplayModel
     ) : SportDecodableModel()
 
     @Serializable
@@ -266,7 +266,7 @@ sealed class SportDecodableModel {
     @Serializable
     data class FBGameStats(
         val responseModel: FBGameStatsResponseModel,
-        val displayModel: FBGameStatsDisplayModel
+        var displayModel: FBGameStatsDisplayModel
     ) : SportDecodableModel()
 
     // nba

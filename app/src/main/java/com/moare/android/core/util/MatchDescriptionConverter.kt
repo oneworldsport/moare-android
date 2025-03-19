@@ -55,7 +55,7 @@ object MatchDescriptionConverter {
         "Regular Season" to "정규 시즌"
     )
 
-    fun convert(input: String): String {
+    fun convert(descriptionType: DescriptionType = DescriptionType.ROUND_WITH_DASH, input: String): String {
         // TODO: 패턴 더 추가해서 함수로 작성
         val dashNumberPattern = Regex("""- (\d+)$""") // "- 숫자" 패턴
         val isDashNumberFormat = dashNumberPattern.containsMatchIn(input)
@@ -73,11 +73,18 @@ object MatchDescriptionConverter {
         // replace "- 숫자" pattern with "숫자라운드"
         if (isDashNumberFormat) {
             result = dashNumberPattern.replace(result) { matchResult ->
-                "${matchResult.groupValues[1]}라운드"
+                when (descriptionType) {
+                    DescriptionType.ROUND_WITH_DASH -> "- ${matchResult.groupValues[1]}라운드"
+                    DescriptionType.ROUND_WITHOUT_DASH -> "${matchResult.groupValues[1]}라운드"
+                }
             }
         }
 
         return result
+    }
+
+    enum class DescriptionType {
+        ROUND_WITH_DASH, ROUND_WITHOUT_DASH
     }
 }
 

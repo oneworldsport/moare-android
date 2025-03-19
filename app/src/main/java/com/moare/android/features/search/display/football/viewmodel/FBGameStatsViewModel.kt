@@ -3,11 +3,24 @@ package com.moare.android.features.search.display.football.viewmodel
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBGameLineups
 import com.moare.android.features.search.models.models.football.FBGamePlayerStats
+import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
+import com.moare.android.features.search.models.models.football.FBGamePlayerStatsGames
 import com.moare.android.features.search.models.models.football.FBPerson
+import com.moare.android.features.search.models.models.football.FBPlayerStatsCards
+import com.moare.android.features.search.models.models.football.FBPlayerStatsDribbles
+import com.moare.android.features.search.models.models.football.FBPlayerStatsDuels
+import com.moare.android.features.search.models.models.football.FBPlayerStatsFouls
+import com.moare.android.features.search.models.models.football.FBPlayerStatsGoals
+import com.moare.android.features.search.models.models.football.FBPlayerStatsPasses
+import com.moare.android.features.search.models.models.football.FBPlayerStatsPenalty
+import com.moare.android.features.search.models.models.football.FBPlayerStatsShots
+import com.moare.android.features.search.models.models.football.FBPlayerStatsTackles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,19 +34,13 @@ class FBGameStatsViewModel @Inject constructor(
        constants
        --------------------- */
     val dataItemHeight = 40.dp
-    val categoryItemHeight = 30.dp
+    val categoryItemHeight = 34.dp
     val firstItemWidth = 120.dp
     val teamButtonWidth = 100.dp
     val itemWidth = 70.dp
     val barWidth = 2.dp
     val categoryFontSize = 14.sp
     val dataFontSize = 14.sp
-    val firstCategory = "선수 이름"
-    val firstCategoryList = listOf("공격지표", "수비지표", "공통지표")
-    val secondCategoryList = listOf("득점", "어시스트", "공격포인트", "슈팅", "유효슈팅", "태클", "패스", "파울", "경고", "퇴장")
-    val attackCategoryList = listOf("득점", "어시스트", "공격포인트", "슈팅", "유효슈팅")
-    val defendCategoryList = listOf("태클", "패스")
-    val commonCategoryList = listOf("파울", "경고", "퇴장")
 
     /* ---------------------
        variables
@@ -47,6 +54,9 @@ class FBGameStatsViewModel @Inject constructor(
 
     private val _playersStats = MutableStateFlow<List<FBGamePlayerStats>>(emptyList())
     val playerStats: StateFlow<List<FBGamePlayerStats>> = _playersStats
+
+    private val _playersTotalStats = MutableStateFlow<FBGamePlayerStatsDetail?>(null)
+    val playersTotalStats: StateFlow<FBGamePlayerStatsDetail?> = _playersTotalStats
 
     private val _lineups = MutableStateFlow<FBGameLineups?>(null)
     val lineups: StateFlow<FBGameLineups?> = _lineups
@@ -73,6 +83,7 @@ class FBGameStatsViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
+        data class InitData(val displayModel: FBGameStatsDisplayModel) : Intent()
         data class SelectFirstCategory(val index: Int) : Intent()
         data class SelectSecondCategory(val index: Int) : Intent()
         data class SelectTeam(val index: Int) : Intent()
@@ -81,6 +92,7 @@ class FBGameStatsViewModel @Inject constructor(
     override fun send(intent: Intent) {
         viewModelScope.launch {
             when (intent) {
+                is Intent.InitData -> initData(intent.displayModel)
                 is Intent.SelectFirstCategory -> selectFirstCategory(intent.index)
                 is Intent.SelectSecondCategory -> selectSecondCategory(intent.index)
                 is Intent.SelectTeam -> selectTeam(intent.index)
@@ -93,12 +105,24 @@ class FBGameStatsViewModel @Inject constructor(
        --------------------- */
     override fun initData(displayModel: FBGameStatsDisplayModel) {
         viewModelScope.launch {
+            // init with default value
+            _playersStats.emit(emptyList())
+            _playersTotalStats.emit(null)
+            _lineups.emit(null)
+            _coach.emit(null)
+            _firstSelectedIndex.emit(0)
+            _secondSelectedIndex.emit(0)
+            _selectedTeamIndex.emit(0)
+            shouldScrollCategory = false
+
+            // init data
             _displayModel.emit(displayModel)
 
             // set current(home) team's players stats
             val homeTeamId = displayModel.game.teams.home.id
             val playersStats = displayModel.game.players.find { it.team.id == homeTeamId }?.players
             _playersStats.emit(playersStats ?: emptyList())
+            setPlayersTotalStats()
 
             // set current(home) team's coach, lineups
             val lineups = displayModel.game.lineups.find { it.team.id == homeTeamId }
@@ -115,10 +139,13 @@ class FBGameStatsViewModel @Inject constructor(
     private suspend fun selectFirstCategory(index: Int) {
         shouldScrollCategory = true
 
+        val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
+        val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
+
         when (index) {
             0 -> _secondSelectedIndex.emit(0)
-            1 -> _secondSelectedIndex.emit(attackCategoryList.size)
-            2 -> _secondSelectedIndex.emit(attackCategoryList.size + defendCategoryList.size)
+            1 -> _secondSelectedIndex.emit(attackCategoriesSize)
+            2 -> _secondSelectedIndex.emit(attackCategoriesSize + defendCategoriesSize)
         }
 
         _firstSelectedIndex.emit(index)
@@ -130,9 +157,12 @@ class FBGameStatsViewModel @Inject constructor(
         shouldScrollCategory = false
         _secondSelectedIndex.emit(index)
 
+        val attackCategories = StringConstants.Football.gameStatsAttackCategories
+        val defendCategories = StringConstants.Football.gameStatsDefendCategories
+
         when (index) {
-            in attackCategoryList.indices -> _firstSelectedIndex.emit(0)
-            in attackCategoryList.size until attackCategoryList.size + defendCategoryList.size -> _firstSelectedIndex.emit(1)
+            in attackCategories.indices -> _firstSelectedIndex.emit(0)
+            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstSelectedIndex.emit(1)
             else -> _firstSelectedIndex.emit(2)
         }
 
@@ -151,6 +181,7 @@ class FBGameStatsViewModel @Inject constructor(
 
         val playersStats = displayModel.value?.game?.players?.find { teamId != null && it.team.id == teamId }?.players
         _playersStats.emit(playersStats ?: emptyList())
+        setPlayersTotalStats()
 
         // set selected team's coach, lineups
         val lineups = displayModel.value?.game?.lineups?.find { teamId != null && it.team.id == teamId }
@@ -165,19 +196,105 @@ class FBGameStatsViewModel @Inject constructor(
 
         when (secondSelectedIndex.value) {
             0 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.total ?: 0 }
-            1 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.assists ?: 0 }
-            2 -> playerStats.sortByDescending {
-                (it.statistics.firstOrNull()?.goals?.total ?: 0) + (it.statistics.firstOrNull()?.goals?.assists ?: 0)
-            }
+            1 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.penalty?.scored ?: 0 }
+            2 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.assists ?: 0 }
             3 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.shots?.total ?: 0 }
             4 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.shots?.on ?: 0 }
-            5 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.passes?.total ?: 0 }
-            6 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.tackles?.total ?: 0 }
-            7 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.fouls?.committed ?: 0 }
-            8 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.yellow ?: 0 }
-            9 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.red ?: 0 }
+            5 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.passes?.key ?: 0 }
+            6 -> if (playerStats.all { it.statistics.firstOrNull() != null }) {
+                playerStats.sortByDescending {
+                    val stats = it.statistics.firstOrNull()!!
+                    stats.dribbles.success.percentageOf(stats.dribbles.attempts, 1)
+                }
+            }
+            7 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.offsides ?: 0 }
+            8 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.tackles?.total ?: 0 }
+            9 -> if (playerStats.all { it.statistics.firstOrNull() != null }) {
+                playerStats.sortByDescending {
+                    val stats = it.statistics.firstOrNull()!!
+                    stats.duels.won.percentageOf(stats.duels.total, 1)
+                }
+            }
+            10 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.tackles?.interceptions ?: 0 }
+            11 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.passes?.total ?: 0 }
+            12 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.fouls?.drawn ?: 0 }
+            13 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.fouls?.committed ?: 0 }
+            14 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.yellow ?: 0 }
+            15 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.red ?: 0 }
+            16 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.games?.minutes ?: 0 }
+            17 -> {}
         }
 
         _playersStats.emit(playerStats)
+        setPlayersTotalStats()
+    }
+
+    private suspend fun setPlayersTotalStats() {
+//        playerStats.flatMap { it.statistics } -> 이게 정상적으로 동작했던 이유는 it.statistics의 item이 모두 하나였기 때문에. 하나 이상이었으면 값이 다르게 나왔을것.
+        val playersTotalStats = playerStats.value.mapNotNull { it.statistics.firstOrNull() }
+            .fold(
+                FBGamePlayerStatsDetail(
+                    games = FBGamePlayerStatsGames(),
+                    shots = FBPlayerStatsShots(),
+                    goals = FBPlayerStatsGoals(),
+                    passes = FBPlayerStatsPasses(),
+                    tackles = FBPlayerStatsTackles(),
+                    duels = FBPlayerStatsDuels(),
+                    dribbles = FBPlayerStatsDribbles(),
+                    fouls = FBPlayerStatsFouls(),
+                    cards = FBPlayerStatsCards(),
+                    penalty = FBPlayerStatsPenalty()
+                )
+            ) { acc, stats ->
+                FBGamePlayerStatsDetail(
+                    games = FBGamePlayerStatsGames(),
+                    shots = FBPlayerStatsShots(
+                        _total = acc.shots.total + stats.shots.total,
+                        _on = acc.shots.on + stats.shots.on
+                    ),
+                    goals = FBPlayerStatsGoals(
+                        _total = acc.goals.total + stats.goals.total,
+                        _assists = acc.goals.assists + stats.goals.assists
+                    ),
+                    passes = FBPlayerStatsPasses(
+                        _total = acc.passes.total + stats.passes.total,
+                        _key = acc.passes.key + stats.passes.key,
+                        _accuracy = null
+                    ),
+                    tackles = FBPlayerStatsTackles(
+                        _total = acc.tackles.total + stats.tackles.total,
+                        _blocks = null,
+                        _interceptions = acc.tackles.interceptions + stats.tackles.interceptions
+                    ),
+                    duels = FBPlayerStatsDuels(
+                        _total = acc.duels.total + stats.duels.total,
+                        _won = acc.duels.won + stats.duels.won
+                    ),
+                    dribbles = FBPlayerStatsDribbles(
+                        _attempts = acc.dribbles.attempts + stats.dribbles.attempts,
+                        _success = acc.dribbles.success + stats.dribbles.success,
+                        _past = null
+                    ),
+                    fouls = FBPlayerStatsFouls(
+                        _drawn = acc.fouls.drawn + stats.fouls.drawn,
+                        _committed = acc.fouls.committed + stats.fouls.committed
+                    ),
+                    cards = FBPlayerStatsCards(
+                        _yellow = acc.cards.yellow + stats.cards.yellow,
+                        _yellowred = null,
+                        _red = acc.cards.red + stats.cards.red
+                    ),
+                    penalty = FBPlayerStatsPenalty(
+                        _won = null,
+                        _commited = null,
+                        _scored = acc.penalty.scored + stats.penalty.scored,
+                        _missed = null,
+                        _saved = null
+                    ),
+                    _offsides = acc.offsides + stats.offsides
+                )
+            }
+
+        _playersTotalStats.emit(playersTotalStats)
     }
 }

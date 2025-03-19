@@ -26,6 +26,7 @@ fun CapsuleButton(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.primary,
+    isDisabled: Boolean = false,
     onClick: () -> Unit
 ) {
     Text(
@@ -33,12 +34,18 @@ fun CapsuleButton(
         fontSize = 12.sp,
         color = color,
         textAlign = TextAlign.Center,
-        modifier = modifier
-            .clickable {
-                onClick()
-            }
-            .border(BorderStroke(1.dp, color), RoundedCornerShape(20.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp)
+        modifier = if (isDisabled) {
+            modifier
+                .border(BorderStroke(1.dp, color), RoundedCornerShape(20.dp))
+                .padding(horizontal = 10.dp, vertical = 4.dp)
+        } else {
+            modifier
+                .clickable {
+                    onClick()
+                }
+                .border(BorderStroke(1.dp, color), RoundedCornerShape(20.dp))
+                .padding(horizontal = 10.dp, vertical = 4.dp)
+        }
     )
 }
 

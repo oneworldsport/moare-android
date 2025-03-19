@@ -13,6 +13,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.time.Duration
 
 @Composable
 fun SplashView(
@@ -84,128 +86,154 @@ fun SplashView(
 //    val offset4 = remember { Animatable(Offset(-bottomX, bottomY), Offset.VectorConverter) }
 //    val offset5 = remember { Animatable(Offset(-topX, -topY), Offset.VectorConverter) }
 
+//    LaunchedEffect(Unit) {
+//        delay(firstOpenDelay)
+//
+//        offset1.animateTo(
+//            Offset(0f, -firstY),
+//            tween(ofssetAniDuration, easing = animationEasing)
+//        )
+//    }
+//    LaunchedEffect(Unit) {
+//        delay(firstOpenDelay)
+//
+//        offset2.animateTo(
+//            Offset(topX, -topY),
+//            tween(ofssetAniDuration, easing = animationEasing)
+//        )
+//    }
+//    LaunchedEffect(Unit) {
+//        delay(firstOpenDelay)
+//
+//        offset3.animateTo(
+//            Offset(bottomX, bottomY),
+//            tween(ofssetAniDuration, easing = animationEasing)
+//        )
+//    }
+//    LaunchedEffect(Unit) {
+//        delay(firstOpenDelay)
+//
+//        offset4.animateTo(
+//            Offset(-bottomX, bottomY),
+//            tween(ofssetAniDuration, easing = animationEasing)
+//        )
+//    }
+//    LaunchedEffect(Unit) {
+//        delay(firstOpenDelay)
+//
+//        offset5.animateTo(
+//            Offset(-topX, -topY),
+//            tween(ofssetAniDuration, easing = animationEasing)
+//        )
+//
+//        // NOTE: ofssetAniDuration.toLong()으로 했을때 뭔가 더 delay가 있이 보여서 더 적게줌
+//        delay((ofssetAniDuration - 100).toLong())
+//
+//        isCircleVisible = false
+//        isLogoVisble = true
+//
+//        // NOTE: faede animation 끝나고 200ms동안 멈춤
+//        delay((fadeInOutAniDuration + 200).toLong())
+//
+//        isLogoVisble = false
+//
+//        delay(fadeOutAniDuration.toLong())
+//
+//        onComplete()
+//    }
+
+    var visible by remember { mutableStateOf(false) }
+    val fadeInDuration = 500
+    val fadeOutDuration = 700
+
     LaunchedEffect(Unit) {
-        delay(firstOpenDelay)
-
-        offset1.animateTo(
-            Offset(0f, -firstY),
-            tween(ofssetAniDuration, easing = animationEasing)
-        )
-    }
-    LaunchedEffect(Unit) {
-        delay(firstOpenDelay)
-
-        offset2.animateTo(
-            Offset(topX, -topY),
-            tween(ofssetAniDuration, easing = animationEasing)
-        )
-    }
-    LaunchedEffect(Unit) {
-        delay(firstOpenDelay)
-
-        offset3.animateTo(
-            Offset(bottomX, bottomY),
-            tween(ofssetAniDuration, easing = animationEasing)
-        )
-    }
-    LaunchedEffect(Unit) {
-        delay(firstOpenDelay)
-
-        offset4.animateTo(
-            Offset(-bottomX, bottomY),
-            tween(ofssetAniDuration, easing = animationEasing)
-        )
-    }
-    LaunchedEffect(Unit) {
-        delay(firstOpenDelay)
-
-        offset5.animateTo(
-            Offset(-topX, -topY),
-            tween(ofssetAniDuration, easing = animationEasing)
-        )
-
-        // NOTE: ofssetAniDuration.toLong()으로 했을때 뭔가 더 delay가 있이 보여서 더 적게줌
-        delay((ofssetAniDuration - 100).toLong())
-
-        isCircleVisible = false
-        isLogoVisble = true
-
-        // NOTE: faede animation 끝나고 200ms동안 멈춤
-        delay((fadeInOutAniDuration + 200).toLong())
-
-        isLogoVisble = false
-
-        delay(fadeOutAniDuration.toLong())
-
+        visible = true
+        delay(fadeInDuration.toLong() + 200)
+        visible = false
+        delay(fadeOutDuration.toLong())
         onComplete()
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+        ,
     ) {
         AnimatedVisibility(
-            visible = isCircleVisible,
-            exit = fadeOut(tween(fadeInOutAniDuration)),
+            visible = visible,
+            enter = fadeIn(animationSpec = tween(durationMillis = fadeInDuration)),
+            exit = fadeOut(animationSpec = tween(durationMillis = fadeOutDuration))
         ) {
-            Box(
-                Modifier.fillMaxSize()
-            ) {
-                Box(
-                    Modifier
-                        .offset(x = offset1.value.x.dp, y = offset1.value.y.dp)
-                        .size(72.dp)
-                        .clip(CircleShape)
-                        .border(6.dp, MaterialTheme.colors.primary, CircleShape)
-                        .background(Color.Transparent)
-                        .align(Alignment.Center)
-                )
-                Box(
-                    Modifier
-                        .offset(x = offset2.value.x.dp, y = offset2.value.y.dp)
-                        .size(72.dp)
-                        .clip(CircleShape)
-                        .border(6.dp, MaterialTheme.colors.primary, CircleShape)
-                        .background(Color.Transparent)
-                        .align(Alignment.Center)
-                )
-                Box(
-                    Modifier
-                        .offset(x = offset3.value.x.dp, y = offset3.value.y.dp)
-                        .size(72.dp)
-                        .clip(CircleShape)
-                        .border(6.dp, MaterialTheme.colors.primary, CircleShape)
-                        .background(Color.Transparent)
-                        .align(Alignment.Center)
-                )
-                Box(
-                    Modifier
-                        .offset(x = offset4.value.x.dp, y = offset4.value.y.dp)
-                        .size(72.dp)
-                        .clip(CircleShape)
-                        .border(6.dp, MaterialTheme.colors.primary, CircleShape)
-                        .background(Color.Transparent)
-                        .align(Alignment.Center)
-                )
-                Box(
-                    Modifier
-                        .offset(x = offset5.value.x.dp, y = offset5.value.y.dp)
-                        .size(72.dp)
-                        .clip(CircleShape)
-                        .border(6.dp, MaterialTheme.colors.primary, CircleShape)
-                        .background(Color.Transparent)
-                        .align(Alignment.Center)
-                )
-            }
+            Image(
+                painter = painterResource(R.drawable.moare_logo),
+                contentDescription = null,
+                modifier = Modifier.size(200.dp)
+            )
         }
-
-        AnimatedVisibility(
-            visible = isLogoVisble,
-            enter = fadeIn(tween(fadeInOutAniDuration)),
-            exit = fadeOut(tween(fadeOutAniDuration)),
-        ) {
-            FlowerShape(firstY, topX, topY, bottomX, bottomY)
-        }
+//        AnimatedVisibility(
+//            visible = isCircleVisible,
+//            exit = fadeOut(tween(fadeInOutAniDuration)),
+//        ) {
+//            Box(
+//                Modifier.fillMaxSize()
+//            ) {
+//                Box(
+//                    Modifier
+//                        .offset(x = offset1.value.x.dp, y = offset1.value.y.dp)
+//                        .size(72.dp)
+//                        .clip(CircleShape)
+//                        .border(6.dp, MaterialTheme.colors.primary, CircleShape)
+//                        .background(Color.Transparent)
+//                        .align(Alignment.Center)
+//                )
+//                Box(
+//                    Modifier
+//                        .offset(x = offset2.value.x.dp, y = offset2.value.y.dp)
+//                        .size(72.dp)
+//                        .clip(CircleShape)
+//                        .border(6.dp, MaterialTheme.colors.primary, CircleShape)
+//                        .background(Color.Transparent)
+//                        .align(Alignment.Center)
+//                )
+//                Box(
+//                    Modifier
+//                        .offset(x = offset3.value.x.dp, y = offset3.value.y.dp)
+//                        .size(72.dp)
+//                        .clip(CircleShape)
+//                        .border(6.dp, MaterialTheme.colors.primary, CircleShape)
+//                        .background(Color.Transparent)
+//                        .align(Alignment.Center)
+//                )
+//                Box(
+//                    Modifier
+//                        .offset(x = offset4.value.x.dp, y = offset4.value.y.dp)
+//                        .size(72.dp)
+//                        .clip(CircleShape)
+//                        .border(6.dp, MaterialTheme.colors.primary, CircleShape)
+//                        .background(Color.Transparent)
+//                        .align(Alignment.Center)
+//                )
+//                Box(
+//                    Modifier
+//                        .offset(x = offset5.value.x.dp, y = offset5.value.y.dp)
+//                        .size(72.dp)
+//                        .clip(CircleShape)
+//                        .border(6.dp, MaterialTheme.colors.primary, CircleShape)
+//                        .background(Color.Transparent)
+//                        .align(Alignment.Center)
+//                )
+//            }
+//        }
+//
+//        AnimatedVisibility(
+//            visible = isLogoVisble,
+//            enter = fadeIn(tween(fadeInOutAniDuration)),
+//            exit = fadeOut(tween(fadeOutAniDuration)),
+//        ) {
+//            FlowerShape(firstY, topX, topY, bottomX, bottomY)
+//        }
     }
 }
 

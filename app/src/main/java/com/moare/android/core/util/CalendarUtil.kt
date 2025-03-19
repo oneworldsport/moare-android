@@ -1,14 +1,18 @@
 package com.moare.android.core.util
 
+import java.sql.Time
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 import java.util.TimeZone
+import java.util.UUID
 
 data class DayInfo(
     val day: Int,
@@ -18,13 +22,27 @@ data class DayInfo(
 )
 
 enum class TimeFormatType {
-    AMPM, AMPM_WITH_DATE
+    AMPM, AMPM_WITH_DATE, YEAR_MONTH
 }
 
 object CalendarUtil {
+    enum class DefaultYearMonthType {
+        NEXT_YEARMONTH, CURRENT_YEARMONTH, PREVIOUS_YEARMONTH
+    }
+
     fun getDaysInMonth(year: Int, month: Int, locale: Locale = Locale.KOREAN): List<DayInfo> {
         val yearMonth = YearMonth.of(year, month)
         val daysInMonth = yearMonth.lengthOfMonth()
+
+        val koreanDaysOfWeek = mapOf(
+            DayOfWeek.MONDAY to "월",
+            DayOfWeek.TUESDAY to "화",
+            DayOfWeek.WEDNESDAY to "수",
+            DayOfWeek.THURSDAY to "목",
+            DayOfWeek.FRIDAY to "금",
+            DayOfWeek.SATURDAY to "토",
+            DayOfWeek.SUNDAY to "일"
+        )
 
         return (1..daysInMonth).map { day ->
             val date = yearMonth.atDay(day)
@@ -33,7 +51,7 @@ object CalendarUtil {
             DayInfo(
                 day = day,
                 dayOfWeek = dayOfWeek,
-                displayName = dayOfWeek.getDisplayName(TextStyle.FULL, locale)
+                displayName = koreanDaysOfWeek[dayOfWeek] ?: dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
             )
         }
     }
@@ -55,21 +73,118 @@ object CalendarUtil {
         formatType: TimeFormatType = TimeFormatType.AMPM_WITH_DATE,
         zoneId: TimeZone = TimeZone.getTimeZone("Asia/Seoul")
     ): String {
-        val inputDateFormat = SimpleDateFormat("yyyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault())
-        inputDateFormat.timeZone = TimeZone.getTimeZone("UTC")
+//        val inputDateFormat = SimpleDateFormat("yyyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault())
+//        inputDateFormat.timeZone = TimeZone.getTimeZone("UTC")
+//
+//        val parsedDate = inputDateFormat.parse(date) ?: return ""
+//
+//        val outputDateFormat = SimpleDateFormat(
+//            when (formatType) {
+//                TimeFormatType.AMPM -> "a hh:mm"
+//                TimeFormatType.AMPM_WITH_DATE -> "yyyy.MM.dd a hh:mm"
+//                TimeFormatType.YEAR_MONTH -> "yy/MM"
+//            },
+//            Locale("ko", "KR")
+//        )
+//        outputDateFormat.timeZone = zoneId
+//
+//        return outputDateFormat.format(parsedDate)
+        val offsetDateTime = OffsetDateTime.parse(date)
 
-        val parsedDate = inputDateFormat.parse(date) ?: return ""
+        val zonedDateTime = offsetDateTime.toInstant().atZone(zoneId.toZoneId())
 
-        val outputDateFormat = SimpleDateFormat(
-            if (formatType == TimeFormatType.AMPM) {
-                "a hh:mm"
-            } else {
-                "yyyy.MM.dd a hh:mm"
-            },
-            Locale("ko", "KR")
+        val formatter = DateTimeFormatter.ofPattern(
+            when (formatType) {
+                TimeFormatType.AMPM -> "a hh:mm"
+                TimeFormatType.AMPM_WITH_DATE -> "yyyy.MM.dd a hh:mm"
+                TimeFormatType.YEAR_MONTH -> "yy/MM"
+            }, Locale("ko", "KR")
         )
-        outputDateFormat.timeZone = zoneId
 
-        return outputDateFormat.format(parsedDate)
+        return zonedDateTime.format(formatter)
+    }
+
+    fun getDefaultDay(yearMonth: String, dayList: List<DayInfo>): Pair<Int, DayInfo>? {
+        val defaultYearMonthType = getDefaultYearMonthType(yearMonth)
+
+        when (defaultYearMonthType) {
+            DefaultYearMonthType.CURRENT_YEARMONTH -> {
+                // return closest future day that has games.
+                // If there are no matching day, get last day that has games from current month.
+                val currentDate = LocalDate.now()
+                val currentDay = currentDate.dayOfMonth
+
+                val result = dayList.withIndex().firstOrNull { (_, value) ->
+                    value.day >= currentDay && !value.isDataEmpty
+                }
+
+                if (result != null) {
+                    return Pair(result.index, result.value)
+                } else {
+                    val result = dayList.withIndex().lastOrNull { (_, value) ->
+                        !value.isDataEmpty
+                    }
+
+                    return if (result != null) Pair(result.index, result.value) else null
+                }
+            }
+            DefaultYearMonthType.NEXT_YEARMONTH -> {
+                // return first day that has games
+                val result = dayList.withIndex().firstOrNull { (_, value) ->
+                    !value.isDataEmpty
+                }
+
+                return if (result != null) Pair(result.index, result.value) else null
+            }
+            DefaultYearMonthType.PREVIOUS_YEARMONTH -> {
+                // return last day that has games
+                val result = dayList.withIndex().lastOrNull { (_, value) ->
+                    !value.isDataEmpty
+                }
+
+                return if (result != null) Pair(result.index, result.value) else null
+            }
+        }
+    }
+
+    private fun getDefaultYearMonthType(yearMonth: String): DefaultYearMonthType {
+        Locale.setDefault(Locale.KOREAN)
+
+        val currentDate = LocalDate.now()
+        val currentYear = currentDate.year % 100
+        val currentMonth = currentDate.monthValue
+        val totalCurrentYearMonth = currentYear * 12 + currentMonth
+
+        val (year, month) = yearMonth.split("/")
+        val totalYearMonth = year.toInt() * 12 + month.toInt()
+
+        return when {
+            totalYearMonth == totalCurrentYearMonth -> DefaultYearMonthType.CURRENT_YEARMONTH
+            totalYearMonth > totalCurrentYearMonth -> DefaultYearMonthType.NEXT_YEARMONTH
+            else -> DefaultYearMonthType.PREVIOUS_YEARMONTH
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

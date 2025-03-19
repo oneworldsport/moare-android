@@ -39,6 +39,8 @@ import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBTeamStats
 import com.moare.android.ui.common.components.HCapsuleBar
@@ -51,6 +53,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun FBTeamStatsView(
+    searchViewModel: SearchViewModel = hiltViewModel(),
     fbTeamStatsViewModel: FBTeamStatsViewModel = hiltViewModel(),
     data: FBTeamStatsDisplayModel,
     center: State<Offset>
@@ -61,6 +64,8 @@ fun FBTeamStatsView(
     val displayModel by fbTeamStatsViewModel.displayModel.collectAsState()
 
     val statsList = displayModel?.stats
+
+    val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
        animation
@@ -82,18 +87,20 @@ fun FBTeamStatsView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        fbTeamStatsViewModel.initData(data)
+        if (poppedView == null || poppedView is SportDecodableModel.FBTeamStats) {
+            fbTeamStatsViewModel.send(FBTeamStatsViewModel.Intent.InitData(data))
+        }
     }
 
     LaunchedEffect(itemPositions) {
         if (itemPositions.size == (statsList?.size ?: 0) + 1) {
             aniPositions = true
 
-            delay(2000)
+            delay(1000)
 
             aniShowContents = true
 
-            delay(1000)
+            delay(500)
 
             showContents = true
         }
@@ -200,12 +207,6 @@ fun FBTeamStatsTeamInfoItem(
         val team = it.team
         val venue = it.venue
 
-        var teamKrName by remember { mutableStateOf("") }
-
-        LaunchedEffect(displayModel) {
-            teamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, team.krname)
-        }
-
         /* ---------------------
            ui
            --------------------- */
@@ -224,7 +225,7 @@ fun FBTeamStatsTeamInfoItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = teamKrName,
+                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM,false, team.name),
                     fontWeight = FontWeight.Medium
                 )
 
@@ -352,7 +353,7 @@ fun FBTeamStatsAniListItem(
     aniPositions: Boolean,
     aniContentsAlpha: Float
 ) {
-    // add 1 to index because of the first item
+    // add 1 to index due to the first item
     val position = itemPositions[index + 1] ?: Offset.Zero
     val animatedPosition by animateOffsetAsState(
         targetValue = if (aniPositions) position else Offset.Zero,
@@ -382,12 +383,6 @@ fun FBTeamStatsItem(
     stats: FBTeamStats,
     aniContentsAlpha: Float = 1f
 ) {
-    var teamKrName by remember { mutableStateOf("") }
-
-    LaunchedEffect(stats) {
-        teamKrName = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, EnNameTranslationUtils.translateByAWS(stats.team.name))
-    }
-
     /* ---------------------
        ui
        --------------------- */
@@ -406,21 +401,21 @@ fun FBTeamStatsItem(
             leagueSeason = stats.league.season
         )
 
-        Text(
-            text = " - ",
-            fontWeight = FontWeight.Medium
-        )
-
-        URLImage(
-            url = stats.team.logo,
-            customSize = 24.dp
-        )
-
-        Text(
-            text = teamKrName,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(start = 4.dp)
-        )
+//        Text(
+//            text = " - ",
+//            fontWeight = FontWeight.Medium
+//        )
+//
+//        URLImage(
+//            url = stats.team.logo,
+//            customSize = 24.dp
+//        )
+//
+//        Text(
+//            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = stats.team.name),
+//            fontWeight = FontWeight.Medium,
+//            modifier = Modifier.padding(start = 4.dp)
+//        )
     }
 
     // stats
