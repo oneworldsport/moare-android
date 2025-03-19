@@ -96,11 +96,11 @@ fun FBTeamStatsView(
         if (itemPositions.size == (statsList?.size ?: 0) + 1) {
             aniPositions = true
 
-            delay(2000)
+            delay(1000)
 
             aniShowContents = true
 
-            delay(1000)
+            delay(500)
 
             showContents = true
         }
@@ -353,7 +353,7 @@ fun FBTeamStatsAniListItem(
     aniPositions: Boolean,
     aniContentsAlpha: Float
 ) {
-    // add 1 to index because of the first item
+    // add 1 to index due to the first item
     val position = itemPositions[index + 1] ?: Offset.Zero
     val animatedPosition by animateOffsetAsState(
         targetValue = if (aniPositions) position else Offset.Zero,

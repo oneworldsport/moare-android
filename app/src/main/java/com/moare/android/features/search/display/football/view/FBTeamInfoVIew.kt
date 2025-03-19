@@ -4,6 +4,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -30,9 +32,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,6 +66,8 @@ fun FBTeamInfoView(
     /* ---------------------
        ui state
        --------------------- */
+    val density = LocalDensity.current
+    var itemSizes = remember { mutableStateMapOf<Int, DpSize>() }
 
     /* ---------------------
        viewmodel state
@@ -137,6 +143,9 @@ fun FBTeamInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[0] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[0] =
                             Offset(centerX - center.value.x, centerY - center.value.y)
                     }
@@ -160,6 +169,9 @@ fun FBTeamInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[1] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[1] =
                             Offset(centerX - center.value.x, centerY - center.value.y)
                     }
@@ -183,6 +195,9 @@ fun FBTeamInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[2] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[2] =
                             Offset(centerX - center.value.x, centerY - center.value.y)
                     }
@@ -209,6 +224,9 @@ fun FBTeamInfoView(
                     val centerX = relativeX + itemSize.width / 2f
                     val centerY = relativeY + itemSize.height / 2f
 
+                    itemSizes[3] = with(density) {
+                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                    }
                     itemPositions[3] = Offset(centerX - center.value.x, centerY - center.value.y)
                 }
         ) {
@@ -226,6 +244,7 @@ fun FBTeamInfoView(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
+                    .weight(1f)
                     .onGloballyPositioned { layoutCoordinates ->
                         val itemSize = layoutCoordinates.size
                         val position = layoutCoordinates.positionInWindow()
@@ -237,10 +256,12 @@ fun FBTeamInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[4] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[4] =
                             Offset(centerX - center.value.x, centerY - center.value.y)
                     }
-                    .widthIn(max = screenWidthDp() / 2)
             ) {
                 FBTeamInfoFifthItem()
             }
@@ -250,6 +271,7 @@ fun FBTeamInfoView(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
+                    .weight(1f)
                     .onGloballyPositioned { layoutCoordinates ->
                         val itemSize = layoutCoordinates.size
                         val position = layoutCoordinates.positionInWindow()
@@ -261,6 +283,9 @@ fun FBTeamInfoView(
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
+                        itemSizes[5] = with(density) {
+                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                        }
                         itemPositions[5] =
                             Offset(centerX - center.value.x, centerY - center.value.y)
                     }
@@ -311,7 +336,7 @@ fun FBTeamInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .widthIn(max = 130.dp)
+            .size(itemSizes[0] ?: DpSize(width = 130.dp, height = 150.dp))
             .offset {
                 IntOffset(
                     firstAnimatedPosition.x.roundToInt(),
@@ -326,7 +351,7 @@ fun FBTeamInfoView(
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .widthIn(max = 130.dp)
+            .size(itemSizes[1] ?: DpSize(width = 130.dp, height = 150.dp))
             .offset {
                 IntOffset(
                     secondAnimatedPosition.x.roundToInt(),
@@ -341,7 +366,7 @@ fun FBTeamInfoView(
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .widthIn(max = 130.dp)
+            .size(itemSizes[2] ?: DpSize(width = 130.dp, height = 150.dp))
             .offset {
                 IntOffset(
                     thirdAnimatedPosition.x.roundToInt(),
@@ -357,6 +382,7 @@ fun FBTeamInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .size(itemSizes[3] ?: DpSize(width = screenWidthDp(), height = 150.dp))
             .offset {
                 IntOffset(
                     fourthAnimatedPosition.x.roundToInt(),
@@ -377,7 +403,7 @@ fun FBTeamInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .widthIn(max = screenWidthDp() / 2)
+            .size(itemSizes[4] ?: DpSize(width = screenWidthDp() / 2, height = 150.dp))
             .offset {
                 IntOffset(
                     fifthAnimatedPosition.x.roundToInt(),
@@ -396,7 +422,7 @@ fun FBTeamInfoView(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .widthIn(max = screenWidthDp() / 2)
+            .size(itemSizes[5] ?: DpSize(width = screenWidthDp() / 2, height = 150.dp))
             .offset {
                 IntOffset(
                     sixthAnimatedPosition.x.roundToInt(),
@@ -668,33 +694,45 @@ fun FBTeamInfoFifthItem(
                 Text(
                     text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = lastGame.teams.home.name),
                     fontSize = 15.sp,
-                    maxLines = 1
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
 
                 Text(
                     text = lastGame.goals.home.toString(),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(0.3f),
                     color = if ((lastGame.goals.home) >= (lastGame.goals.away)) MaterialTheme.colors.primary else Color.Black
                 )
 
                 Text(
                     text = " vs ",
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(0.3f)
                 )
 
                 Text(
                     text = lastGame.goals.away.toString(),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(0.3f),
                     color = if ((lastGame.goals.away) >= (lastGame.goals.home)) MaterialTheme.colors.primary else Color.Black
                 )
 
                 Text(
                     text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = lastGame.teams.away.name),
                     fontSize = 15.sp,
-                    maxLines = 1
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
             }
 
@@ -738,7 +776,7 @@ fun FBTeamInfoSixthItem(
                 Text(
                     text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = nextGame.teams.home.name),
                     fontSize = 15.sp,
-                    textAlign = TextAlign.End,
+                    textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -755,7 +793,7 @@ fun FBTeamInfoSixthItem(
                 Text(
                     text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = nextGame.teams.away.name),
                     fontSize = 15.sp,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
