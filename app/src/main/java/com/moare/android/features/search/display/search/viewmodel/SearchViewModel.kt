@@ -21,7 +21,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBPlayerS
 import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAGameScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
@@ -33,9 +33,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamSch
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
-import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
-import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
 import com.moare.android.features.search.networking.KeywordsClient
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -110,8 +108,8 @@ class SearchViewModel @Inject constructor(
     private val _nbaTeamStandingsData = MutableStateFlow<NBATeamStandingsDisplayModel?>(null)
     val nbaTeamStandingsData: StateFlow<NBATeamStandingsDisplayModel?> = _nbaTeamStandingsData
 
-    private val _nbaGameScheduleData = MutableStateFlow<NBAGameScheduleDisplayModel?>(null)
-    val nbaGameScheduleData: StateFlow<NBAGameScheduleDisplayModel?> = _nbaGameScheduleData
+    private val _nbaGameScheduleData = MutableStateFlow<NBATeamScheduleDisplayModel?>(null)
+    val nbaGameScheduleData: StateFlow<NBATeamScheduleDisplayModel?> = _nbaGameScheduleData
 
     private val _nbaGameStatsData = MutableStateFlow<NBAGameStatsDisplayModel?>(null)
     val nbaGameStatsData: StateFlow<NBAGameStatsDisplayModel?> = _nbaGameStatsData
@@ -254,8 +252,8 @@ class SearchViewModel @Inject constructor(
     private fun fetchTrendingKeywords() {
         viewModelScope.launch {
             try {
-                trendingKeywords = keywordsClient.fetchTrendingKeywords().associateBy { it.keyword }
-                _trendingKeywordList.emit(trendingKeywords.keys.toList())
+//                trendingKeywords = keywordsClient.fetchTrendingKeywords().associateBy { it.keyword }
+//                _trendingKeywordList.emit(trendingKeywords.keys.toList())
             } catch (e: Exception) {
                 Log.e("dsdf", e.localizedMessage ?: "trendingKeywords error")
             }
@@ -273,7 +271,7 @@ class SearchViewModel @Inject constructor(
             val dataFetchDeferred = viewModelScope.async {
 //                delay(5000) // test for fetching delay
                 when (searchType) {
-                    SearchType.QUERY -> searchClient.fetchDataByQuery(context, query.value.text)
+                    SearchType.QUERY -> searchClient.fetchDataByQuery(query.value.text)
                     SearchType.TRENDING_KEYWORD -> {
                         val keyword = trendingKeywords[query.value.text]
                         keyword?.let {
@@ -317,6 +315,8 @@ class SearchViewModel @Inject constructor(
             _fbLeagueScheduleData.emit(null)
             _fbGameStatsData.emit(null)
 
+            _nbaPlayerInfoData.emit(null)
+
             when (val data = data?.data) {
                 is SportDecodableModel.FBPlayerInfo -> {
                     _fbPlayerInfoData.emit(data.displayModel)
@@ -346,6 +346,11 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.FBGameStats -> {
                     _fbGameStatsData.emit(data.displayModel)
                 }
+
+                is SportDecodableModel.NBAPlayerInfo -> {
+                    _nbaPlayerInfoData.emit(data.displayModel)
+                }
+
                 else -> {
                     throw IllegalArgumentException("Unknown data type")
                 }

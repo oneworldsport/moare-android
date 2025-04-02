@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -44,10 +43,8 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBPlayerStats
 import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
-import com.moare.android.ui.common.components.URLImageSize
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -439,7 +436,7 @@ fun FBPlayerStatsItem(
         FBStatDataItem(
             category = "출전 경기수",
             data = stats.games.appearences.toString(),
-            customFontSize = 14,
+            customCategoryFontSize = 14,
             customWidth = 70.dp
         )
 //            FBPlayerStatsDataItem(

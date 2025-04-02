@@ -1063,6 +1063,7 @@
         "gameTime": "2:04"
       },
       "gameSummary": {
+        "date": "2025-03-31T08:00:00+09:00",
         "gamecode": "20250330/GSWSAS",
         "gameStatusId": 3,
         "gameStatusText": "Final",
@@ -1291,6 +1292,7 @@
         "gameTime": ""
       },
       "gameSummary": {
+        "date": "2025-04-02T09:00:00+09:00",
         "gamecode": "20250401/GSWMEM",
         "gameStatusId": 1,
         "gameStatusText": "8:00 pm ET",

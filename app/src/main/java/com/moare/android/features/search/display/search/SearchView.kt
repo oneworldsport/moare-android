@@ -57,6 +57,7 @@ import com.moare.android.features.search.display.football.view.FBTeamInfoView
 import com.moare.android.features.search.display.football.view.FBTeamScheduleView
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
+import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.ProgressIndicator
@@ -94,6 +95,9 @@ fun SearchView(
     val fbTeamScheduleData by searchViewModel.fbTeamScheduleData.collectAsState()
     val fbLeagueScheduleData by searchViewModel.fbLeagueScheduleData.collectAsState()
     val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
+
+    // nba
+    val nbaPlayerInfoData by searchViewModel.nbaPlayerInfoData.collectAsState()
 
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
@@ -324,6 +328,14 @@ fun SearchView(
                                 // football_team_stats
                                 fbTeamStatsData?.let {
                                     FBTeamStatsView(
+                                        data = it,
+                                        center = dataContainerCenter
+                                    )
+                                }
+
+                                // basketball_player_info
+                                nbaPlayerInfoData?.let {
+                                    NBAPlayerInfoView(
                                         data = it,
                                         center = dataContainerCenter
                                     )

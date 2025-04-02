@@ -126,6 +126,7 @@ data class NBAGameInfo(
 
 @Serializable
 data class NBAGameSummary(
+    @SerialName("date") private val _date: String? = null,
     @SerialName("gamecode") private val _gameCode: String? = null,
     @SerialName("gameStatusId") private val _gameStatusId: Int? = null,
     @SerialName("gameStatusText") private val _gameStatusText: String? = null,
@@ -135,6 +136,7 @@ data class NBAGameSummary(
     @SerialName("visitorTeamId") private val _visitorTeamId: Int? = null,
     @SerialName("whStatus") private val _whStatus: Int? = null,
 ) {
+    val date: String get() = _date ?: ""
     val gameCode: String get() = _gameCode ?: ""
     val gameStatusId: Int get() = _gameStatusId ?: 0
     val gameStatusText: String get() = _gameStatusText ?: ""

@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.nba.viewmodel
 
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
@@ -15,6 +16,7 @@ class NBAPlayerInfoViewModel @Inject constructor(
     /* ---------------------
        constants
        --------------------- */
+    val itemHeight = 30.dp
 
     /* ---------------------
        data state
@@ -30,14 +32,14 @@ class NBAPlayerInfoViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
-
+        data class InitData(val displayModel: NBAPlayerInfoDisplayModel) : Intent()
     }
 
     override fun send(intent: Intent) {
         viewModelScope.launch {
-//            when (intent) {
-//
-//            }
+            when (intent) {
+                is Intent.InitData -> initData(intent.displayModel)
+            }
         }
     }
 

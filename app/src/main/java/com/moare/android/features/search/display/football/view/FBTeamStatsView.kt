@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -44,10 +43,8 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBTeamStats
 import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
-import com.moare.android.ui.common.components.URLImageSize
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -459,7 +456,7 @@ fun FBTeamStatsItem(
         FBStatDataItem(
             category = "경기당 평균득점",
             data = stats.goals.teamGoalsFor.average.total,
-            customFontSize = 11,
+            customCategoryFontSize = 11,
             customWidth = 80.dp
         )
         FBStatDataItem(
@@ -470,7 +467,7 @@ fun FBTeamStatsItem(
         FBStatDataItem(
             category = "경기당 평균실점",
             data = stats.goals.teamGoalsAgainst.average.total,
-            customFontSize = 11,
+            customCategoryFontSize = 11,
             customWidth = 80.dp
         )
 //            FBTeamStatsDataItem(
