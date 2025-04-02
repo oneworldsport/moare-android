@@ -1,10 +1,12 @@
 package com.moare.android.core.util
 
+import android.util.Log
 import java.sql.Time
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.Period
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -26,6 +28,10 @@ enum class TimeFormatType {
 }
 
 object CalendarUtil {
+    init {
+        Locale.setDefault(Locale.KOREAN)
+    }
+
     enum class DefaultYearMonthType {
         NEXT_YEARMONTH, CURRENT_YEARMONTH, PREVIOUS_YEARMONTH
     }
@@ -89,6 +95,7 @@ object CalendarUtil {
 //        outputDateFormat.timeZone = zoneId
 //
 //        return outputDateFormat.format(parsedDate)
+        // NOTE: OffsetDateTime.parse()는 ISO-8601 표준 지원. "2025-04-02T09:00:00Z" 와 "2025-04-02T09:00:00+00:00" 은 둘다 동일한 의미의 ISO-8601 포맷
         val offsetDateTime = OffsetDateTime.parse(date)
 
         val zonedDateTime = offsetDateTime.toInstant().atZone(zoneId.toZoneId())
@@ -148,8 +155,6 @@ object CalendarUtil {
     }
 
     private fun getDefaultYearMonthType(yearMonth: String): DefaultYearMonthType {
-        Locale.setDefault(Locale.KOREAN)
-
         val currentDate = LocalDate.now()
         val currentYear = currentDate.year % 100
         val currentMonth = currentDate.monthValue
@@ -163,6 +168,20 @@ object CalendarUtil {
             totalYearMonth > totalCurrentYearMonth -> DefaultYearMonthType.NEXT_YEARMONTH
             else -> DefaultYearMonthType.PREVIOUS_YEARMONTH
         }
+    }
+
+    fun calculateAge(birthDate: String): Int {
+        var date = birthDate
+
+        if (date.contains("T")) {
+            date = date.split("T").first()
+        }
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val formattedDate = LocalDate.parse(date, formatter)
+        val today = LocalDate.now()
+
+        return Period.between(formattedDate, today).years
     }
 }
 

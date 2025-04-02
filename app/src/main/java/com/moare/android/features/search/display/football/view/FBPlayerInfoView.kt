@@ -70,7 +70,7 @@ fun FBPlayerInfoView(
        ui state
        --------------------- */
     val density = LocalDensity.current
-    var itemSizes = remember { mutableStateMapOf<Int, DpSize>() }
+    val itemSizes = remember { mutableStateMapOf<Int, DpSize>() }
 
     /* ---------------------
        viewmodel state
@@ -106,9 +106,7 @@ fun FBPlayerInfoView(
     LaunchedEffect(itemPositions) {
         if (itemPositions.size == 6) {
             aniPositions = true
-
             delay(1000)
-
             showContents = true
         }
     }
@@ -534,12 +532,11 @@ fun FBPlayerInfoSecondItem(
             )
 
             Text(
-                text = "${player.age}",
+                text = "${CalendarUtil.calculateAge(player.birth.date)}",
                 fontWeight = FontWeight.Medium
             )
         }
     }
-
 }
 
 @Composable
