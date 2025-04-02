@@ -634,6 +634,7 @@ fun NBAPlayerInfoSecondItem(
             HCapsuleBar()
         }
 
+        // TODO: "소속팀" 제목 표시 필요
         URLImage(
             url = player.teamLogo,
             modifier = Modifier.alpha(contentsAlpha)
@@ -642,14 +643,6 @@ fun NBAPlayerInfoSecondItem(
         Text(
             text = "골든스테이트 워리어스",
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.alpha(contentsAlpha)
-        )
-
-        Text(
-            text = "${player.teamCity} ${player.teamName}",
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Light,
-            maxLines = 2,
             modifier = Modifier.alpha(contentsAlpha)
         )
     }
@@ -731,7 +724,7 @@ fun NBAPlayerInfoFourthItem(
             modifier = Modifier.alpha(contentsAlpha)
         ) {
             Text(
-                text = "출신 학교/팀: ",
+                text = "출신 (학교 또는 팀): ",
                 fontSize = 15.sp
             )
 
@@ -849,8 +842,8 @@ fun NBAPlayerInfoSixthItem(
     displayModel?.let {
         val player = it.info
         val splittedPlayerHeight = player.height.split("-")
-        val playerCmHeight = toCm(splittedPlayerHeight.firstOrNull()?.toIntOrNull() ?: 0, splittedPlayerHeight.lastOrNull()?.toIntOrNull() ?: 0)
-        val playerKgWeight = (player.weight.toDoubleOrNull() ?: 0.0).toKg()
+        val playerCmHeight = toCm(splittedPlayerHeight.firstOrNull()?.toIntOrNull() ?: 0, splittedPlayerHeight.lastOrNull()?.toIntOrNull() ?: 0).toInt()
+        val playerKgWeight = (player.weight.toDoubleOrNull() ?: 0.0).toKg().toInt()
 
         /* ---------------------
            ui
@@ -913,11 +906,11 @@ fun NBAPlayerInfoSeventhItem(
             modifier = Modifier.alpha(contentsAlpha)
         )
 
-        Row(
-            modifier = Modifier
-                .alpha(contentsAlpha)
-        ) {
-            stats?.let {
+        stats?.let {
+            Row(
+                modifier = Modifier
+                    .alpha(contentsAlpha)
+            ) {
                 FBStatDataItem(
                     category = "경기수",
                     data = stats.gp.toString(),

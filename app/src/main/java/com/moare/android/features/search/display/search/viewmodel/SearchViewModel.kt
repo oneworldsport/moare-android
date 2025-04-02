@@ -30,6 +30,7 @@ import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDis
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
@@ -108,8 +109,11 @@ class SearchViewModel @Inject constructor(
     private val _nbaTeamStandingsData = MutableStateFlow<NBATeamStandingsDisplayModel?>(null)
     val nbaTeamStandingsData: StateFlow<NBATeamStandingsDisplayModel?> = _nbaTeamStandingsData
 
-    private val _nbaGameScheduleData = MutableStateFlow<NBATeamScheduleDisplayModel?>(null)
-    val nbaGameScheduleData: StateFlow<NBATeamScheduleDisplayModel?> = _nbaGameScheduleData
+    private val _nbaTeamScheduleData = MutableStateFlow<NBATeamScheduleDisplayModel?>(null)
+    val nbaTeamScheduleData: StateFlow<NBATeamScheduleDisplayModel?> = _nbaTeamScheduleData
+
+    private val _nbaLeagueScheduleData = MutableStateFlow<NBALeagueScheduleDisplayModel?>(null)
+    val nbaLeagueScheduleData: StateFlow<NBALeagueScheduleDisplayModel?> = _nbaLeagueScheduleData
 
     private val _nbaGameStatsData = MutableStateFlow<NBAGameStatsDisplayModel?>(null)
     val nbaGameStatsData: StateFlow<NBAGameStatsDisplayModel?> = _nbaGameStatsData
@@ -316,6 +320,14 @@ class SearchViewModel @Inject constructor(
             _fbGameStatsData.emit(null)
 
             _nbaPlayerInfoData.emit(null)
+            _nbaPlayerStatsData.emit(null)
+            _nbaPlayerStandingsData.emit(null)
+            _nbaTeamInfoData.emit(null)
+            _nbaTeamStatsData.emit(null)
+            _nbaTeamStandingsData.emit(null)
+            _nbaTeamScheduleData.emit(null)
+            _nbaLeagueScheduleData.emit(null)
+            _nbaGameStatsData.emit(null)
 
             when (val data = data?.data) {
                 is SportDecodableModel.FBPlayerInfo -> {
@@ -349,6 +361,30 @@ class SearchViewModel @Inject constructor(
 
                 is SportDecodableModel.NBAPlayerInfo -> {
                     _nbaPlayerInfoData.emit(data.displayModel)
+                }
+                is SportDecodableModel.NBAPlayerStats -> {
+                    _nbaPlayerStatsData.emit(data.displayModel)
+                }
+                is SportDecodableModel.NBAPlayerStandings -> {
+                    _nbaPlayerStandingsData.emit(data.displayModel)
+                }
+                is SportDecodableModel.NBATeamInfo -> {
+                    _nbaTeamInfoData.emit(data.displayModel)
+                }
+                is SportDecodableModel.NBATeamStats -> {
+                    _nbaTeamStatsData.emit(data.displayModel)
+                }
+                is SportDecodableModel.NBATeamStandings -> {
+                    _nbaTeamStandingsData.emit(data.displayModel)
+                }
+                is SportDecodableModel.NBATeamSchedule -> {
+                    _nbaTeamScheduleData.emit(data.displayModel)
+                }
+                is SportDecodableModel.NBALeagueSchedule -> {
+                    _nbaLeagueScheduleData.emit(data.displayModel)
+                }
+                is SportDecodableModel.NBAGameStats -> {
+                    _nbaGameStatsData.emit(data.displayModel)
                 }
 
                 else -> {

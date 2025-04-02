@@ -67,7 +67,7 @@ fun FBTeamInfoView(
        ui state
        --------------------- */
     val density = LocalDensity.current
-    var itemSizes = remember { mutableStateMapOf<Int, DpSize>() }
+    val itemSizes = remember { mutableStateMapOf<Int, DpSize>() }
 
     /* ---------------------
        viewmodel state
@@ -510,7 +510,7 @@ fun FBTeamInfoSecondItem(
             modifier = Modifier.alpha(contentsAlpha)
         ) {
             Text(
-                text = "창립년도: ",
+                text = "창단연도: ",
                 fontSize = 15.sp
             )
 

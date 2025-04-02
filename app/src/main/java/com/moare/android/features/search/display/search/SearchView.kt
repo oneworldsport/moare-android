@@ -58,6 +58,7 @@ import com.moare.android.features.search.display.football.view.FBTeamScheduleVie
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
+import com.moare.android.features.search.display.nba.view.NBATeamInfoView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.ProgressIndicator
@@ -98,6 +99,14 @@ fun SearchView(
 
     // nba
     val nbaPlayerInfoData by searchViewModel.nbaPlayerInfoData.collectAsState()
+    val nbaPlayerStatsData by searchViewModel.nbaPlayerStatsData.collectAsState()
+    val nbaPlayerStandingsData by searchViewModel.nbaPlayerStandingsData.collectAsState()
+    val nbaTeamInfoData by searchViewModel.nbaTeamInfoData.collectAsState()
+    val nbaTeamStatsData by searchViewModel.nbaTeamStatsData.collectAsState()
+    val nbaTeamStandingsData by searchViewModel.nbaTeamStandingsData.collectAsState()
+    val nbaTeamScheduleData by searchViewModel.nbaTeamScheduleData.collectAsState()
+    val nbaLeagueScheduleData by searchViewModel.nbaLeagueScheduleData.collectAsState()
+    val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
 
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
@@ -339,6 +348,24 @@ fun SearchView(
                                         data = it,
                                         center = dataContainerCenter
                                     )
+                                }
+
+                                // basketball_player_stats
+                                nbaPlayerStatsData?.let {
+
+                                }
+
+                                // basketball_team_info
+                                nbaTeamInfoData?.let {
+                                    NBATeamInfoView(
+                                        data = it,
+                                        center = dataContainerCenter
+                                    )
+                                }
+
+                                // basketball_team_stats
+                                nbaTeamStatsData?.let {
+
                                 }
                             }
 
