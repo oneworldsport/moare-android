@@ -2,6 +2,7 @@ package com.moare.android.core.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import coil3.ImageLoader
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.translate.AmazonTranslateClient
@@ -22,4 +23,6 @@ interface EntryPoint {
     fun getTrieDeferred(): CompletableDeferred<Pair<Trie, List<KeywordInfo>>>
 
     fun getDataStore(): DataStore<Preferences>
+
+    fun imageLoader(): ImageLoader
 }
