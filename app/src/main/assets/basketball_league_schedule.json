@@ -1,16 +1,7 @@
 {
   "dataType": "basketball_league_schedule",
   "keywords": [],
-  "entityInfo": [
-    {
-      "category": "basketball",
-      "entityType": "player",
-      "entityName": "제일렌 브라운",
-      "leagueId": 0,
-      "teamId": 2,
-      "playerId": 75
-    }
-  ],
+  "entityInfo": [],
   "data": {
     "schedule": [
       {
