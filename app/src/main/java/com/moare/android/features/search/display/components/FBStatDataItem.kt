@@ -20,6 +20,7 @@ fun FBStatDataItem(
     customCategoryFontSize: Int? = null,
     customDataFontSize: Int? = null,
     customWidth: Dp? = null,
+    customCategoryHeight: Dp? = null,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -30,7 +31,7 @@ fun FBStatDataItem(
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.height(25.dp)
+            modifier = Modifier.height(customCategoryHeight ?: 25.dp)
         ) {
             Text(
                 text = category,

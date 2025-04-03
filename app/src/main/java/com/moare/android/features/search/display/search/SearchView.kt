@@ -58,6 +58,7 @@ import com.moare.android.features.search.display.football.view.FBTeamScheduleVie
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
+import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
 import com.moare.android.features.search.display.nba.view.NBATeamInfoView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
@@ -299,6 +300,7 @@ fun SearchView(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            // TODO: Box 제거
                             Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
@@ -320,10 +322,7 @@ fun SearchView(
 
                                 // football_player_stats
                                 fbPlayerStatsData?.let {
-                                    FBPlayerStatsView(
-                                        data = it,
-                                        center = dataContainerCenter
-                                    )
+                                    FBPlayerStatsView(data = it)
                                 }
 
                                 // football_team_info
@@ -344,15 +343,12 @@ fun SearchView(
 
                                 // basketball_player_info
                                 nbaPlayerInfoData?.let {
-                                    NBAPlayerInfoView(
-                                        data = it,
-                                        center = dataContainerCenter
-                                    )
+                                    NBAPlayerInfoView(data = it )
                                 }
 
                                 // basketball_player_stats
                                 nbaPlayerStatsData?.let {
-
+                                    NBAPlayerStatsView(data = it)
                                 }
 
                                 // basketball_team_info

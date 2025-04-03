@@ -133,6 +133,7 @@ data class NBATeamStats(
     val drebPG: Double get() = if (gp != 0) (dreb.toDouble() /gp).rounded(1) else 0.0
     val orebPG: Double get() = if (gp != 0) (oreb.toDouble() /gp).rounded(1) else 0.0
     val blkPG: Double get() = if (gp != 0) (blk.toDouble() /gp).rounded(1) else 0.0
+    val blkaPG: Double get() = if (gp != 0) (blka.toDouble() /gp).rounded(1) else 0.0
     val stlPG: Double get() = if (gp != 0) (stl.toDouble() /gp).rounded(1) else 0.0
     val tovPG: Double get() = if (gp != 0) (tov.toDouble() /gp).rounded(1) else 0.0
     val fg3aPG: Double get() = if (gp != 0) (fg3a.toDouble() /gp).rounded(1) else 0.0
@@ -143,4 +144,5 @@ data class NBATeamStats(
     val ftmPG: Double get() = if (gp != 0) (ftm.toDouble() /gp).rounded(1) else 0.0
     val pfPG: Double get() = if (gp != 0) (pf.toDouble() /gp).rounded(1) else 0.0
     val pfdPG: Double get() = if (gp != 0) (pfd.toDouble() /gp).rounded(1) else 0.0
+    val minPG: Double get() = if (gp != 0) (min.toDouble() /gp).rounded(1) else 0.0
 }
