@@ -115,8 +115,8 @@ fun FBPlayerStandingsView(
         }
     }
 
-    // scroll to category that matches with the keyword,
-    // and when first category list's item is selected by click
+    // Scroll to category that matches with the keyword,
+    // or when first category list's item is selected by click.
     LaunchedEffect(isKeyword, firstSelectedIndex) {
         if (fbPlayerStandingsViewModel.shouldScrollCategory) {
             horizontalScrollState.animateScrollTo(
@@ -159,9 +159,9 @@ fun FBPlayerStandingsView(
        ui
        --------------------- */
     Column(
-        // if set fillMaxSize, AnimatedVisibility works fine on first show.
+        // NOTE: If set fillMaxSize, AnimatedVisibility works fine on first show.
         // But if fillMaxSize not set, AnimatedVisibility doesn't work on first show.
-        // not sure why yet
+        // Not sure why yet
         modifier = Modifier.fillMaxSize()
     ) {
         league?.let {
@@ -257,7 +257,7 @@ fun FBPlayerStandingsFirstCategoryList(
        --------------------- */
     val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
     val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
-    val etcCategoriesSize = StringConstants.Football.playerStandingsEtcCategories.size
+    val commonCategoriesSize = StringConstants.Football.playerStandingsCommonCategories.size
 
     /* ---------------------
        viewmodel state
@@ -283,7 +283,7 @@ fun FBPlayerStandingsFirstCategoryList(
             )
         } else {
             (itemWidth * attackCategoriesSize) + (barWidth * 2) + (itemWidth * defendCategoriesSize) + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * etcCategoriesSize,
+                itemWidth = itemWidth * commonCategoriesSize,
                 barWidth = 80.dp
             )
         },
@@ -336,15 +336,11 @@ fun FBPlayerStandingsFirstCategoryListItem(
                 } else if (index == 1) {
                     (itemWidth * StringConstants.Football.playerStandingsDefendCategories.size)
                 } else {
-                    (itemWidth * StringConstants.Football.playerStandingsEtcCategories.size)
+                    (itemWidth * StringConstants.Football.playerStandingsCommonCategories.size)
                 }
             )
             .clickable {
-                fbPlayerStandingsViewModel.send(
-                    FBPlayerStandingsViewModel.Intent.SelectFirstCategory(
-                        index
-                    )
-                )
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.SelectFirstCategory(index))
             }
     ) {
         Text(
@@ -365,7 +361,6 @@ fun FBPlayerStandingsSecondCategoryList(
        --------------------- */
     val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
     val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
-    val etcCategoriesSize = StringConstants.Football.playerStandingsEtcCategories.size
 
     /* ---------------------
        viewmodel state
@@ -444,6 +439,9 @@ fun FBPlayerStandingsSecondCategoryListItem(
 fun FBPlayerStandingsFirstDataList(
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
 ) {
+    /* ---------------------
+       viewmodel state
+       --------------------- */
     val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
     val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
     val filterStandingsStartIndex by fbPlayerStandingsViewModel.filteredStandingsStartIndex.collectAsState()
@@ -551,6 +549,9 @@ fun FBPlayerStandingsDataList(
     val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
     val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
 
+    /* ---------------------
+       viewmodel state
+       --------------------- */
     val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
     val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
     val filteredStandingsStartIndex by fbPlayerStandingsViewModel.filteredStandingsStartIndex.collectAsState()

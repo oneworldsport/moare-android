@@ -58,6 +58,7 @@ import com.moare.android.features.search.display.football.view.FBTeamScheduleVie
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
+import com.moare.android.features.search.display.nba.view.NBAPlayerStandingsView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
 import com.moare.android.features.search.display.nba.view.NBATeamInfoView
 import com.moare.android.features.search.display.nba.view.NBATeamStatsView
@@ -399,6 +400,11 @@ fun SearchView(
                                 FBGameStatsView(
                                     data = it
                                 )
+                            }
+
+                            // basketball_player_standings
+                            nbaPlayerStandingsData?.let {
+                                NBAPlayerStandingsView(data = it)
                             }
                         }
                     }

@@ -185,7 +185,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
     }
 
     private suspend fun filterStandings() {
-        // Get the first entity(player) matching with the standings.(Checking in the order of standings)
+        // Get the first entity(player) matching in the standings.(Process works in the order of standings)
         val index = standings.indexOfFirst { player ->
             val entity = displayModel.value?.entityInfo?.find { it.playerId == player.player.id }
             entity?.let {

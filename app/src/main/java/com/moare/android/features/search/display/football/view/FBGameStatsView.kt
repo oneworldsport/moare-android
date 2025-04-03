@@ -38,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,25 +56,13 @@ import com.moare.android.features.search.display.football.viewmodel.FBGameStatsV
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
-import com.moare.android.features.search.models.models.football.FBGamePlayerStats
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
-import com.moare.android.features.search.models.models.football.FBGamePlayerStatsGames
 import com.moare.android.features.search.models.models.football.FBPerson
-import com.moare.android.features.search.models.models.football.FBPlayerStatsCards
-import com.moare.android.features.search.models.models.football.FBPlayerStatsDribbles
-import com.moare.android.features.search.models.models.football.FBPlayerStatsDuels
-import com.moare.android.features.search.models.models.football.FBPlayerStatsFouls
-import com.moare.android.features.search.models.models.football.FBPlayerStatsGoals
-import com.moare.android.features.search.models.models.football.FBPlayerStatsPasses
-import com.moare.android.features.search.models.models.football.FBPlayerStatsPenalty
-import com.moare.android.features.search.models.models.football.FBPlayerStatsShots
-import com.moare.android.features.search.models.models.football.FBPlayerStatsTackles
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
-import com.moare.android.ui.util.convertDpToPx
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 
 @Composable
@@ -401,7 +388,7 @@ fun FBGameStatsFirstCategoryList(
        --------------------- */
     val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
     val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
-    val etcCategoriesSize = StringConstants.Football.gameStatsEtcCategories.size
+    val etcCategoriesSize = StringConstants.Football.gameStatsCommonCategories.size
 
     /* ---------------------
        viewmodel state
@@ -481,7 +468,7 @@ fun FBGameStatsFirstCategoryListItem(
                 } else if (index == 1) {
                     (itemWidth * StringConstants.Football.gameStatsDefendCategories.size)
                 } else {
-                    (itemWidth * StringConstants.Football.gameStatsEtcCategories.size)
+                    (itemWidth * StringConstants.Football.gameStatsCommonCategories.size)
                 }
             )
             .clickable {
