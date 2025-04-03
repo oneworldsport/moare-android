@@ -15,7 +15,7 @@ class SearchClient(
     suspend fun fetchDataByQuery(query: String): DataModel {
 //        val response = apiHelper.searchApi.searchByQuery(query)
 //        return DataModel.fromJson(response.string())
-        return fetchFromJson(context, "커리 기록")
+        return fetchFromJson(context, "워리어스 기록")
     }
 
     suspend fun fetchDataByKeyword(keyword: KeywordInfo): DataModel {
@@ -76,6 +76,9 @@ class SearchClient(
             }
             "워리어스" -> {
                 "basketball_team_info.json"
+            }
+            "워리어스 기록" -> {
+                "basketball_team_stats.json"
             }
             else -> {
                 "football_player_info.json"

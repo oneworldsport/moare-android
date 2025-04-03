@@ -12,12 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -39,9 +36,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.components.FBStatDataItem
-import com.moare.android.features.search.display.football.view.FBPlayerStatsItem
-import com.moare.android.features.search.display.football.view.FBPlayerStatsListItem
-import com.moare.android.features.search.display.football.view.FBPlayerStatsPlayerInfoItem
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -144,7 +138,7 @@ fun NBAPlayerStatsView(
                         itemPositions[0] = Offset(0f, centerY - parentCenter.y)
                     }
             ) {
-                NBAPlayerStatsPlayerInfoFirstItem()
+                NBAPlayerStatsPlayerInfoItem()
             }
 
             // stats list
@@ -156,7 +150,6 @@ fun NBAPlayerStatsView(
 
                 itemPositions[index] = Offset(0f, centerY - parentCenter.y)
             }
-
         }
 
         /* ---------------------
@@ -180,7 +173,7 @@ fun NBAPlayerStatsView(
                     )
                 }
         ) {
-            NBAPlayerStatsPlayerInfoFirstItem(contentsAlpha = contentsAlpha)
+            NBAPlayerStatsPlayerInfoItem(contentsAlpha = contentsAlpha)
         }
 
         NBAPlayerStatsList(
@@ -193,7 +186,7 @@ fun NBAPlayerStatsView(
 }
 
 @Composable
-fun NBAPlayerStatsPlayerInfoFirstItem(
+fun NBAPlayerStatsPlayerInfoItem(
     nbaPlayerStatsViewModel: NBAPlayerStatsViewModel = hiltViewModel(),
     contentsAlpha: Float = 1f
 ) {
@@ -368,7 +361,7 @@ fun NBAPlayerStatsListItem(
 @Composable
 fun NBAPlayerStatsItem(
     data: NBAPlayerStats,
-    contentsAlpha: Float,
+    contentsAlpha: Float
 ) {
     /* ---------------------
        ui

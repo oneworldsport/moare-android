@@ -60,6 +60,7 @@ import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
 import com.moare.android.features.search.display.nba.view.NBATeamInfoView
+import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.ProgressIndicator
@@ -361,7 +362,7 @@ fun SearchView(
 
                                 // basketball_team_stats
                                 nbaTeamStatsData?.let {
-
+                                    NBATeamStatsView(data = it)
                                 }
                             }
 
