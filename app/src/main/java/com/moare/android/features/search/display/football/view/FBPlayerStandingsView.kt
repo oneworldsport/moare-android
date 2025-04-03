@@ -237,7 +237,7 @@ fun FBPlayerStandingsFirstCategoryItem(
             .height(fbPlayerStandingsViewModel.categoryItemHeight * 2)
     ) {
         Text(
-            text = StringConstants.Football.standingsFirstCategory,
+            text = StringConstants.standingsFirstCategory,
             fontSize = fbPlayerStandingsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -299,13 +299,13 @@ fun FBPlayerStandingsFirstCategoryList(
             modifier = Modifier
                 .height(fbPlayerStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in StringConstants.Football.statsFirstCategories.withIndex()) {
+            for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
                 FBPlayerStandingsFirstCategoryListItem(
                     category = value,
                     index = index
                 )
 
-                if (index != StringConstants.Football.statsFirstCategories.size - 1) {
+                if (index != StringConstants.statsFirstCategories.size - 1) {
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
                 }
             }

@@ -381,7 +381,7 @@ fun FBGameStatsFirstCategoryItem(
             .height(fbGameStatsViewModel.categoryItemHeight * 2)
     ) {
         Text(
-            text = StringConstants.Football.gameStatsFirstCategory,
+            text = StringConstants.gameStatsFirstCategory,
             fontSize = fbGameStatsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -442,13 +442,13 @@ fun FBGameStatsFirstCategoryList(
         modifier = Modifier
             .height(fbGameStatsViewModel.categoryItemHeight - 2.dp)
     ) {
-        for ((index, value) in StringConstants.Football.statsFirstCategories.withIndex()) {
+        for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
             FBGameStatsFirstCategoryListItem(
                 category = value,
                 index = index
             )
 
-            if (index != StringConstants.Football.statsFirstCategories.size - 1) {
+            if (index != StringConstants.statsFirstCategories.size - 1) {
                 VCapsuleBar(modifier = Modifier.alpha(0.5f))
             }
         }

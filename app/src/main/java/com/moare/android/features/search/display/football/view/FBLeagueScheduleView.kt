@@ -181,9 +181,9 @@ fun FBLeagueScheduleView(
 
                 CapsuleButton(
                     text = if (isAllResultOpened) {
-                        StringConstants.Football.resultHide
+                        StringConstants.resultHide
                     } else {
-                        StringConstants.Football.resultOpen
+                        StringConstants.resultOpen
                     },
                     color = Color.Gray,
                     modifier = Modifier.padding(end = 8.dp)
@@ -305,15 +305,15 @@ fun FBLeagueScheduleListItem(
        --------------------- */
     val gameStatusText = if (isResultOpened) {
         when (data.fixture.status.short) {
-            StringConstants.Football.gameNotStarted -> StringConstants.Football.gameNotStartedStr
+            StringConstants.Football.gameNotStarted -> StringConstants.gameNotStartedStr
             StringConstants.Football.gameFirstHalf -> StringConstants.Football.gameFirstHalfStr
             StringConstants.Football.gameHalftime -> StringConstants.Football.gameHalftimeStr
             StringConstants.Football.gameSecondHalf -> StringConstants.Football.gameSecondHalfStr
-            in StringConstants.Football.gameFinishedList -> StringConstants.Football.gameFinishedStr
+            in StringConstants.Football.gameFinishedList -> StringConstants.gameFinishedStr
             else -> ""
         }
     } else {
-        StringConstants.Football.resultOpen
+        StringConstants.resultOpen
     }
 
     val gameStatusColor = if (isResultOpened) {
