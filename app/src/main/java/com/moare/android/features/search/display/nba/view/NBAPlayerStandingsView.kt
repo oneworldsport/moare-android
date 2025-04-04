@@ -617,7 +617,7 @@ fun NBAPlayerStandingsDataListItem(
         16 -> "${data.stats.pfPG}"
         17 -> "${data.stats.pfdPG}"
         18 -> "${data.stats.blkaPG}"
-        19 -> "${data.stats.plusMinus}"
+        19 -> "${data.stats.plusMinusPG}"
         20 -> "${data.stats.gp}"
         21 -> "${data.stats.minPG}"
         22 -> "${data.stats.wins}"

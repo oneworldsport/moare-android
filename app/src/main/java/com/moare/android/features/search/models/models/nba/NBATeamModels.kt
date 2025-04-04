@@ -145,4 +145,5 @@ data class NBATeamStats(
     val pfPG: Double get() = if (gp != 0) (pf.toDouble() /gp).rounded(1) else 0.0
     val pfdPG: Double get() = if (gp != 0) (pfd.toDouble() /gp).rounded(1) else 0.0
     val minPG: Double get() = if (gp != 0) (min.toDouble() /gp).rounded(1) else 0.0
+    val plusMinusPG: Double get() = if (gp != 0) (plusMinus.toDouble() /gp).rounded(1) else 0.0
 }

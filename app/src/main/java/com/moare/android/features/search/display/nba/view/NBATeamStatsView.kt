@@ -589,8 +589,8 @@ fun NBATeamStatsItem(
             modifier = Modifier.weight(1f)
         )
         FBStatDataItem(
-            category = "득실 마진",
-            data = data.plusMinus.toString(),
+            category = "경기당 득실마진",
+            data = data.plusMinusPG.toString(),
             customCategoryFontSize = 11,
             customCategoryHeight = 30.dp,
             modifier = Modifier.weight(1f)

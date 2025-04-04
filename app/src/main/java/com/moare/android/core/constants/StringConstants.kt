@@ -47,7 +47,7 @@ object StringConstants {
     object NBA {
         val playerStandingsAttackCategories = listOf("경기당 득점", "경기당 도움", "경기당 공격리바운드", "경기당 야투 시도", "경기당 야투 성공", "야투 성공률", "경기당 3점 시도", "경기당 3점 성공", "3점 성공률", "경기당 자유투 시도", "경기당 자유투 성공", "자유투 성공률")
         val playerStandingsDefendCategories = listOf("경기당 수비리바운드", "경기당 블록", "경기당 스틸")
-        val playerStandingsCommonCategories = listOf("경기당 리바운드", "경기당 파울", "경기당 파울 유도", "경기당 피블록", "득실 마진", "경기수", "경기당 출전시간", "출전 경기 승", "출전 경기 패", "출전 경기 승률", "트리플더블", "더블더블")
+        val playerStandingsCommonCategories = listOf("경기당 리바운드", "경기당 파울", "경기당 파울 유도", "경기당 피블록", "경기당 득실마진", "경기수", "경기당 출전시간", "출전 경기 승", "출전 경기 패", "출전 경기 승률", "트리플더블", "더블더블")
         val playerStandingsSecondCategories = playerStandingsAttackCategories + playerStandingsDefendCategories + playerStandingsCommonCategories
     }
 }
