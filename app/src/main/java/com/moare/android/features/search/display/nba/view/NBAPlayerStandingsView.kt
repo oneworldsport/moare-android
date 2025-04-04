@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.EnNameTranslationUtils
+import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TranslationType
 import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsViewModel
@@ -494,7 +495,7 @@ fun NBAPlayerStandingsFirstDataListItem(
         )
 
         URLImage(
-            url = data.player.playerPhoto,
+            url = NBAUtil.playerPhotoUrl(data.player.personId),
             customSize = 25.dp,
             modifier = Modifier.padding(end = 4.dp)
         )
@@ -505,7 +506,7 @@ fun NBAPlayerStandingsFirstDataListItem(
         ) {
             Column {
                 Text(
-                    text = data.player.krname,
+                    text = "data.player.krname",
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

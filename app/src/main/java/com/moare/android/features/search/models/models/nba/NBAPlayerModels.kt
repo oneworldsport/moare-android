@@ -26,12 +26,10 @@ data class NBAPlayerInfo(
     @SerialName("gamesPlayedFlag") private val _gamesPlayedFlag: String? = null,
     @SerialName("height") private val _height: String? = null,
     @SerialName("jersey") private val _jersey: String? = null,
-    @SerialName("krname") private val _krname: String? = null,
     @SerialName("lastAffiliation") private val _lastAffiliation: String? = null,
     @SerialName("lastName") private val _lastName: String? = null,
     @SerialName("nbaFlag") private val _nbaFlag: String? = null,
     @SerialName("personId") private val _personId: Int? = null,
-    @SerialName("playerPhoto") private val _playerPhoto: String? = null,
     @SerialName("position") private val _position: String? = null,
     @SerialName("rosterstatus") private val _rosterStatus: String? = null,
     @SerialName("school") private val _school: String? = null,
@@ -40,7 +38,6 @@ data class NBAPlayerInfo(
     @SerialName("teamCity") private val _teamCity: String? = null,
     @SerialName("teamCode") private val _teamCode: String? = null,
     @SerialName("teamId") private val _teamId: Int? = null,
-    @SerialName("teamLogo") private val _teamLogo: String? = null,
     @SerialName("teamName") private val _teamName: String? = null,
     @SerialName("toYear") private val _toYear: Int? = null,
     @SerialName("weight") private val _weight: String? = null,
@@ -58,12 +55,10 @@ data class NBAPlayerInfo(
     val gamesPlayedFlag: String get() = _gamesPlayedFlag ?: "" // NBA 정규 시즌에서 경기를 뛴 적이 있는지 여부
     val height: String get() = _height ?: ""
     val jersey: String get() = _jersey ?: ""
-    val krname: String get() = _krname ?: ""
     val lastAffiliation: String get() = _lastAffiliation ?: "" // 출신 학교 및 국가 정보
     val lastName: String get() = _lastName ?: ""
     val nbaFlag: String get() = _nbaFlag ?: "" // NBA에서 뛰었는지 여부
     val personId: Int get() = _personId ?: 0
-    val playerPhoto: String get() = _playerPhoto ?: ""
     val position: String get() = _position ?: ""
     val rosterStatus: String get() = _rosterStatus ?: ""
     val school: String get() = _school ?: ""
@@ -72,7 +67,6 @@ data class NBAPlayerInfo(
     val teamCity: String get() = _teamCity ?: ""
     val teamCode: String get() = _teamCode ?: ""
     val teamId: Int get() = _teamId ?: 0
-    val teamLogo: String get() = _teamLogo ?: ""
     val teamName: String get() = _teamName ?: ""
     val toYear: Int get() = _toYear ?: 0
     val weight: String get() = _weight ?: ""
@@ -113,6 +107,7 @@ data class NBAPlayerStats(
     @SerialName("tov") private val _tov: Int? = null,
     @SerialName("w") private val _w: Int? = null,
     @SerialName("wPct") private val _wPct: Double? = null,
+    @SerialName("teamGp") private val _teamGp: Int? = null
 ) {
     val ast: Int get() = _ast ?: 0
     val blk: Int get() = _blk ?: 0
@@ -147,6 +142,7 @@ data class NBAPlayerStats(
     val tov: Int get() = _tov ?: 0
     val wins: Int get() = _w ?: 0
     val winsPct: Double get() = _wPct ?: 0.0
+    val teamGp: Int get() = _teamGp ?: 0
 
     val ptsPG: Double get() = if (gp != 0) (pts.toDouble() / gp).rounded(1) else 0.0
     val astPG: Double get() = if (gp != 0) (ast.toDouble() /gp).rounded(1) else 0.0

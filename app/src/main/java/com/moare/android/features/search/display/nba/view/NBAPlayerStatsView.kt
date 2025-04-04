@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.EnNameTranslationUtils
+import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.components.FBStatDataItem
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsViewModel
@@ -206,14 +207,14 @@ fun NBAPlayerStatsPlayerInfoItem(
             modifier = Modifier
                 .alpha(contentsAlpha)
         ) {
-            URLImage(url = player.playerPhoto)
+            URLImage(url = NBAUtil.playerPhotoUrl(player.personId))
 
             // name
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
-                    text = player.krname,
+                    text = "player.krname",
                     fontWeight = FontWeight.Medium
                 )
 
@@ -239,7 +240,7 @@ fun NBAPlayerStatsPlayerInfoItem(
                 }
             }
 
-            URLImage(url = player.teamLogo)
+            URLImage(url = NBAUtil.teamLogoUrl(player.teamId))
 
             // nationality, team, jersey, position
             Column(
