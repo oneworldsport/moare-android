@@ -1,6 +1,7 @@
 package com.moare.android.core.util
 
 import android.content.Context
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
@@ -15,16 +16,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import java.io.File
 import java.lang.Exception
 
 object AWSUtils {
-    private val ETAG_KEY = stringPreferencesKey("autoCompleteETag")
+    private val AUTOCOMPLETE_ETAG_KEY = stringPreferencesKey("autoCompleteETag")
+    private val NBA_PLAYER_NAME_DICTIONARY_ETAG_KEY = stringPreferencesKey("nbaPlayerNameDictionaryETag")
 
-    suspend fun checkAutoCompleteJson(
-        context: Context
-    ) {
+    suspend fun checkAutoCompleteJson(context: Context) {
         val entryPoint = EntryPointAccessors.fromApplication(context, EntryPoint::class.java)
         val s3Client = entryPoint.getS3Client()
         val transferUtility = entryPoint.getTransferUtility()
@@ -39,7 +41,7 @@ object AWSUtils {
         val newETag = objectMetadata.eTag
 
         val currentETag = dataStore.data
-            .map { preferences -> preferences[ETAG_KEY] ?: "" }
+            .map { preferences -> preferences[AUTOCOMPLETE_ETAG_KEY] ?: "" }
             .first()
 
         if (newETag == currentETag) {
@@ -57,7 +59,7 @@ object AWSUtils {
                     if (state == TransferState.COMPLETED) {
                         runBlocking {
                             dataStore.edit { preferences ->
-                                preferences[ETAG_KEY] = newETag
+                                preferences[AUTOCOMPLETE_ETAG_KEY] = newETag
                             }
 
                             initTrie(context)
@@ -105,4 +107,72 @@ object AWSUtils {
             trieDeferred.complete(Pair(Trie(), emptyList()))
         }
     }
+
+    suspend fun checkNameDictionary(
+        context: Context,
+        category: String,
+        s3Key: String,
+        eTagKey: Preferences.Key<String>
+    ) {
+        val entryPoint = EntryPointAccessors.fromApplication(context, EntryPoint::class.java)
+        val s3Client = entryPoint.getS3Client()
+        val transferUtility = entryPoint.getTransferUtility()
+        val dataStore = entryPoint.getDataStore()
+        val translatedNameProvider = entryPoint.getTranslatedNameProvider()
+
+        val bucket = "sport-search-engine"
+        val objectMetadata: ObjectMetadata = withContext(Dispatchers.IO) {
+            s3Client.getObjectMetadata(bucket, s3Key)
+        }
+        val newETag = objectMetadata.eTag
+
+        val currentETag = dataStore.data
+            .map { preferences -> preferences[eTagKey] ?: "" }
+            .first()
+
+        if (newETag == currentETag) {
+            val jsonString = withContext(Dispatchers.IO) {
+                File(context.filesDir, s3Key.substringAfter("/")).readText()
+            }
+            val jsonElement = Json.parseToJsonElement(jsonString)
+            val map: Map<String, String> = Json.decodeFromJsonElement(jsonElement)
+            translatedNameProvider.setDictionary(category, map)
+
+            return
+        }
+
+        val downloadFile = File(context.filesDir, s3Key.substringAfter("/"))
+        if (downloadFile.exists()) downloadFile.delete()
+
+        withContext(Dispatchers.IO) {
+            val observer = transferUtility.download(bucket, s3Key, downloadFile)
+            observer.setTransferListener(object : TransferListener {
+                override fun onStateChanged(id: Int, state: TransferState?) {
+                    if (state == TransferState.COMPLETED) {
+                        runBlocking {
+                            dataStore.edit { it[eTagKey] = newETag }
+
+                            // if the file is changed or first download, initialize player names(Map<String, String>) here
+                        }
+                    }
+                }
+
+                override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {}
+
+                override fun onError(id: Int, ex: Exception?) {
+                    ex?.printStackTrace()
+                }
+            })
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+

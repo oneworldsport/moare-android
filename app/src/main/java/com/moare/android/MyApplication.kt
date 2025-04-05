@@ -2,6 +2,7 @@ package com.moare.android
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
 import com.amazonaws.auth.CognitoCredentialsProvider
 import com.amazonaws.regions.Regions
@@ -19,6 +20,13 @@ class MyApplication : Application() {
 
         CoroutineScope(Dispatchers.IO).launch {
             AWSUtils.checkAutoCompleteJson(this@MyApplication)
+
+            AWSUtils.checkNameDictionary(
+                context = this@MyApplication,
+                category = "nba_player",
+                s3Key = "name_dictionary/nba_player_name_dictionary.json",
+                eTagKey = stringPreferencesKey("nbaPlayerNameDictionaryETag")
+            )
         }
 
         // STUDY: Hilt를 통해 AppModule에 싱글톤으로 선언된 AmazonTranslateClient를 object EnNameTranslationUtils에서 사용하기 위해 EnNameTranslationUtils에 초기화하는 과정

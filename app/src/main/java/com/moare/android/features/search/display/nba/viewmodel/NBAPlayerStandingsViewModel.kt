@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
@@ -22,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NBAPlayerStandingsViewModel @Inject constructor(
-    private val searchClient: SearchClient
+    private val searchClient: SearchClient,
+    private val nameProvider: TranslatedNameProvider
 ) : MVIViewModel<NBAPlayerStandingsViewModel.Intent, NBAPlayerStandingsDisplayModel>() {
     /* ---------------------
        constants
@@ -34,6 +36,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
     val categoryFontSize = 15.sp
     val dataFontSize = 15.sp
     val barWidth = 2.dp // TODO: Make it const
+    private val fetchCategoryIndexList = listOf(5, 8, 11, 20, 22, 23, 25, 26)
 
     /* ---------------------
        data state
@@ -72,6 +75,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
     var standings: List<NBAPlayerStandingsDisplay> = emptyList()
     private var selectedEntity: EntityInfo? = null
     private var filteredStandingsEndIndex = 0 // NOTE: one bigger then actual showing end item's index. Because of subList.
+    var playerNameDictionary: Map<String, String> = emptyMap() // TODO: EnNameTranslationUtils 여기로 옮길지 아니면 각 ViewModel마다 선언해줄지 결정 필요
 
     /* ---------------------
        intent
@@ -81,6 +85,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         data class SelectFirstCategory(val index: Int) : Intent()
         data class SelectSecondCategory(val index: Int, val category: String) : Intent()
         data class ShowMoreStandings(val isUp: Boolean) : Intent()
+        data object SortStandings : Intent()
     }
 
     override fun send(intent: Intent) {
@@ -90,8 +95,13 @@ class NBAPlayerStandingsViewModel @Inject constructor(
                 is Intent.SelectFirstCategory -> selectFirstCategory(intent.index)
                 is Intent.SelectSecondCategory -> selectSecondCategory(intent.index, intent.category)
                 is Intent.ShowMoreStandings -> addStandings(intent.isUp)
+                is Intent.SortStandings -> sortStandings()
             }
         }
+    }
+
+    init {
+        playerNameDictionary = nameProvider.getDictionary("nba_player")
     }
 
     /* ---------------------
@@ -131,7 +141,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
                 }
             }
 
-            filterStandings()
+            sortStandings()
         }
     }
 
@@ -139,34 +149,36 @@ class NBAPlayerStandingsViewModel @Inject constructor(
        implements
        --------------------- */
     private suspend fun selectFirstCategory(index: Int) {
+        val beforeSecondSelectedIndex = secondSelectedIndex.value
+
         shouldScrollCategory = true
 
         val attackCategoriesSize = StringConstants.NBA.playerStandingsAttackCategories.size
         val defendCategoriesSize = StringConstants.NBA.playerStandingsDefendCategories.size
 
-        var secondCategory = "경기당 득점"
-
         when (index) {
             0 -> {
                 _secondSelectedIndex.emit(0)
-                secondCategory = "경기당 득점"
             }
             1 -> {
                 _secondSelectedIndex.emit(attackCategoriesSize)
-                secondCategory = "경기당 수비리바운드"
             }
             2 -> {
                 _secondSelectedIndex.emit(attackCategoriesSize + defendCategoriesSize)
-                secondCategory = "경기당 리바운드"
             }
         }
 
         _firstSelectedIndex.emit(index)
 
-        fetchStandings(secondCategory)
+        when (beforeSecondSelectedIndex) {
+            in fetchCategoryIndexList -> fetchStandings("category") // 경기당(PG) 데이터 아닌 카테고리에서 first 카테고리를 눌렀을때는 fetch 해야함
+            else -> sortStandings()
+        }
     }
 
     private suspend fun selectSecondCategory(index: Int, category: String) {
+        val beforeSecondSelectedIndex = secondSelectedIndex.value
+
         shouldScrollCategory = false
         _secondSelectedIndex.emit(index)
 
@@ -179,7 +191,40 @@ class NBAPlayerStandingsViewModel @Inject constructor(
             else -> _firstSelectedIndex.emit(2)
         }
 
-        fetchStandings(category)
+        when (beforeSecondSelectedIndex) {
+            in fetchCategoryIndexList -> fetchStandings("category") // 경기당(PG) 데이터가 아닌 카테고리에서 다른 카테고리를 눌렀을때는 무조건 fetch 해야함
+            else -> when (index) { // 경기당(PG) 데이터인 카테고리에서 경기당 카테고리를 눌렀을때는 sort, 이외의 카테고리는 fetch
+                in fetchCategoryIndexList -> fetchStandings(category)
+                else -> sortStandings()
+            }
+        }
+    }
+
+    private suspend fun sortStandings() {
+        standings = when (secondSelectedIndex.value) {
+            0 -> standings.sortedByDescending { it.stats.ptsPG }
+            1 -> standings.sortedByDescending { it.stats.astPG }
+            2 -> standings.sortedByDescending { it.stats.orebPG }
+            3 -> standings.sortedByDescending { it.stats.fgaPG }
+            4 -> standings.sortedByDescending { it.stats.fgmPG }
+            6 -> standings.sortedByDescending { it.stats.fg3aPG }
+            7 -> standings.sortedByDescending { it.stats.fg3mPG }
+            9 -> standings.sortedByDescending { it.stats.ftaPG }
+            10 -> standings.sortedByDescending { it.stats.ftmPG }
+            12 -> standings.sortedByDescending { it.stats.drebPG }
+            13 -> standings.sortedByDescending { it.stats.blkPG }
+            14 -> standings.sortedByDescending { it.stats.stlPG }
+            15 -> standings.sortedByDescending { it.stats.rebPG }
+            16 -> standings.sortedByDescending { it.stats.pfPG }
+            17 -> standings.sortedByDescending { it.stats.pfdPG }
+            18 -> standings.sortedByDescending { it.stats.blkaPG }
+            19 -> standings.sortedByDescending { it.stats.plusMinusPG }
+            21 -> standings.sortedByDescending { it.stats.minPG }
+            24 -> standings.sortedByDescending { it.stats.winsPct }
+            else -> standings // 경기당(PG) 데이터 이외에는 sort 할필요 없음
+        }
+
+        filterStandings()
     }
 
     private suspend fun filterStandings() {
@@ -259,7 +304,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
             if (result.data is SportDecodableModel.NBAPlayerStandings) {
                 _displayModel.emit(result.data.displayModel)
                 standings = result.data.displayModel.standings
-                filterStandings()
+                sortStandings()
             }
         } catch (e: Exception) {
             _displayDataState.emit(ApiFetchState.Error("데이터를 불러오는데 실패하였습니다."))

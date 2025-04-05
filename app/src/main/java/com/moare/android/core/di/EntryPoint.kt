@@ -25,4 +25,6 @@ interface EntryPoint {
     fun getDataStore(): DataStore<Preferences>
 
     fun imageLoader(): ImageLoader
+
+    fun getTranslatedNameProvider(): TranslatedNameProvider
 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -506,7 +507,7 @@ fun NBAPlayerStandingsFirstDataListItem(
         ) {
             Column {
                 Text(
-                    text = "data.player.krname",
+                    text = nbaPlayerStandingsViewModel.playerNameDictionary[data.player.displayFirstLast.lowercase()] ?: data.player.displayFirstLast,
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
