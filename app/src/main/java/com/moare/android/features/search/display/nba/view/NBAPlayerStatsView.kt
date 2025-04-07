@@ -240,7 +240,10 @@ fun NBAPlayerStatsPlayerInfoItem(
                 }
             }
 
-            URLImage(url = NBAUtil.teamLogoUrl(player.teamId))
+            URLImage(
+                url = NBAUtil.teamLogoUrl(player.teamId),
+                isSvg = true
+            )
 
             // nationality, team, jersey, position
             Column(
@@ -586,7 +589,7 @@ fun NBAPlayerStatsItem(
         )
         FBStatDataItem(
             category = "경기당 출전 시간",
-            data = data.minPG.toString(),
+            data = data.minPG,
             customCategoryFontSize = 11,
             customCategoryHeight = 30.dp,
             modifier = Modifier.weight(1f)

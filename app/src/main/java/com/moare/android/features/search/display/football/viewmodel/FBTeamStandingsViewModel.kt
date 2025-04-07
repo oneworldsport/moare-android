@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
@@ -28,8 +29,6 @@ class FBTeamStandingsViewModel @Inject constructor(
     val stringDataItemTextWidth = 34.dp
     val categoryFontSize = 15.sp
     val dataFontSize = 15.sp
-    val firstCategory = "팀 순위"
-    val categoryList = listOf("승점", "승", "무", "패", "경기수", "득점", "실점", "득실차", "홈성적", "원정성적")
 
     /* ---------------------
        data state
@@ -83,7 +82,7 @@ class FBTeamStandingsViewModel @Inject constructor(
 
             val keywords = displayModel.keywords
             if (keywords.isNotEmpty()) {
-                val index = categoryList.indexOfFirst { category ->
+                val index = StringConstants.Football.teamStandingsCategories.indexOfFirst { category ->
                     val keyword = keywords.find { it.keyword == category }
                     keyword != null
                 }
@@ -126,6 +125,7 @@ class FBTeamStandingsViewModel @Inject constructor(
         _standings.emit(standings)
     }
 
+    // TODO: Should move to util or make it as intent(mvi)
     fun isStringData(index: Int): Boolean {
         return index == 8 || index == 9
     }

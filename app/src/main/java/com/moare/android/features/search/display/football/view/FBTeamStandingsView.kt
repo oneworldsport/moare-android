@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsViewModel
@@ -93,13 +94,15 @@ fun FBTeamStandingsView(
 
     // scroll to category that matches with the keyword
     LaunchedEffect(isKeyword) {
-        horizontalScrollState.animateScrollTo(
-            value = selectedCategoryPosition,
-            animationSpec = tween(
-                durationMillis = 500,
-                easing = LinearOutSlowInEasing
+        if (isKeyword) {
+            horizontalScrollState.animateScrollTo(
+                value = selectedCategoryPosition,
+                animationSpec = tween(
+                    durationMillis = 500,
+                    easing = LinearOutSlowInEasing
+                )
             )
-        )
+        }
     }
 
     /* ---------------------
@@ -160,7 +163,7 @@ fun FBTeamStandingsFirstCategoryItem(
             .height(fbTeamStandingsViewModel.categoryItemHeight)
     ) {
         Text(
-            text = fbTeamStandingsViewModel.firstCategory,
+            text = StringConstants.standingsFirstCategory,
             fontSize = fbTeamStandingsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -207,7 +210,7 @@ fun FBTeamStandingsCategoryList(
             modifier = Modifier
                 .height(fbTeamStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in fbTeamStandingsViewModel.categoryList.withIndex()) {
+            for ((index, value) in StringConstants.Football.teamStandingsCategories.withIndex()) {
                 FBTeamStandingsCategoryListItem(
                     category = value,
                     index = index
@@ -270,7 +273,7 @@ fun FBTeamStandingsFirstDataListItem(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .width(132.dp)
+            .width(fbTeamStandingsViewModel.firstCategoryItemWidth)
             .padding(start = 10.dp)
             .height(fbTeamStandingsViewModel.dataItemHeight)
             .clickable {
@@ -332,7 +335,7 @@ fun FBTeamStandingsDataList(
                 modifier = Modifier
                     .height(fbTeamStandingsViewModel.dataItemHeight)
             ) {
-                for (index in 0 until fbTeamStandingsViewModel.categoryList.size) {
+                for (index in 0 until StringConstants.Football.teamStandingsCategories.size) {
                     FBTeamStandingsDataItem(
                         data = value,
                         index = index

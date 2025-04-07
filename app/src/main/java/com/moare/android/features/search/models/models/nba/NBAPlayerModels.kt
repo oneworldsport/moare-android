@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.models.nba
 
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.rounded
 import com.moare.android.features.search.models.models.football.FBPlayerBirth
 import kotlinx.serialization.SerialName
@@ -127,7 +128,7 @@ data class NBAPlayerStats(
     val groupValue: String get() = _groupValue ?: ""
     val losses: Int get() = _l ?: 0
     val maxGameDate: String get() = _maxGameDate ?: "" // 가장 최근 경기
-    val min: Double get() = _min ?: 0.0
+    val min: Int get() = (_min ?: 0.0).rounded(0).toInt() // 분단위
     val oreb: Int get() = _oreb ?: 0
     val pf: Int get() = _pf ?: 0 // 파울 횟수
     val pfd: Int get() = _pfd ?: 0 // 파울 유도 횟수
@@ -161,6 +162,6 @@ data class NBAPlayerStats(
     val ftmPG: Double get() = if (gp != 0) (ftm.toDouble() /gp).rounded(1) else 0.0
     val pfPG: Double get() = if (gp != 0) (pf.toDouble() /gp).rounded(1) else 0.0
     val pfdPG: Double get() = if (gp != 0) (pfd.toDouble() /gp).rounded(1) else 0.0
-    val minPG: Double get() = if (gp != 0) (min /gp).rounded(1) else 0.0
+    val minPG: String get() = if (gp != 0) CalendarUtil.formatMinutesToHourMinute(min) else "0:0"
     val plusMinusPG: Double get() = if (gp != 0) (plusMinus.toDouble() /gp).rounded(1) else 0.0
 }

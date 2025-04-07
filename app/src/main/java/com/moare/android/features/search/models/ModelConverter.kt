@@ -243,15 +243,21 @@ class ModelConverter(
 
     fun nbaTeamStandingsConverter(response: NBATeamStandingsResponseModel): NBATeamStandingsDisplayModel {
         val standings: List<NBATeamStandingsDisplay> = response.standings.mapNotNull { teamInfo ->
-            val stats = teamInfo.statistics.find { it.seasonType == "Regular Season" }
+            val statsList = teamInfo.statistics
 
-            return@mapNotNull NBATeamStandingsDisplay(
-                team = teamInfo.team,
-                stats = stats
-            )
+            for (item in statsList) {
+                if (item.seasonType == "Regular Season") {
+                    return@mapNotNull NBATeamStandingsDisplay(
+                        team = teamInfo.team,
+                        stats = item
+                    )
+                }
+            }
+
+            null
         }
 
-        return NBATeamStandingsDisplayModel(keywords, standings)
+        return NBATeamStandingsDisplayModel(keywords, entityInfo, standings)
     }
 
     fun nbaTeamScheduleConverter(response: NBAGameScheduleResponseModel): NBATeamScheduleDisplayModel {

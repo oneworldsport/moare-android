@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
@@ -36,7 +37,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
     val categoryFontSize = 15.sp
     val dataFontSize = 15.sp
     val barWidth = 2.dp // TODO: Make it const
-    private val fetchCategoryIndexList = listOf(5, 8, 11, 20, 22, 23, 25, 26)
+    private val fetchCategoryIndexList = listOf(5, 8, 11, 21, 23, 24, 26, 27)
 
     /* ---------------------
        data state
@@ -171,7 +172,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         _firstSelectedIndex.emit(index)
 
         when (beforeSecondSelectedIndex) {
-            in fetchCategoryIndexList -> fetchStandings("category") // 경기당(PG) 데이터 아닌 카테고리에서 first 카테고리를 눌렀을때는 fetch 해야함
+            in fetchCategoryIndexList -> fetchStandings(StringConstants.NBA.playerStandingsSecondCategories[beforeSecondSelectedIndex]) // 경기당(PG) 데이터 아닌 카테고리에서 first 카테고리를 눌렀을때는 fetch 해야함
             else -> sortStandings()
         }
     }
@@ -192,7 +193,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         }
 
         when (beforeSecondSelectedIndex) {
-            in fetchCategoryIndexList -> fetchStandings("category") // 경기당(PG) 데이터가 아닌 카테고리에서 다른 카테고리를 눌렀을때는 무조건 fetch 해야함
+            in fetchCategoryIndexList -> fetchStandings(StringConstants.NBA.playerStandingsSecondCategories[beforeSecondSelectedIndex]) // 경기당(PG) 데이터가 아닌 카테고리에서 다른 카테고리를 눌렀을때는 무조건 fetch 해야함
             else -> when (index) { // 경기당(PG) 데이터인 카테고리에서 경기당 카테고리를 눌렀을때는 sort, 이외의 카테고리는 fetch
                 in fetchCategoryIndexList -> fetchStandings(category)
                 else -> sortStandings()
@@ -215,12 +216,13 @@ class NBAPlayerStandingsViewModel @Inject constructor(
             13 -> standings.sortedByDescending { it.stats.blkPG }
             14 -> standings.sortedByDescending { it.stats.stlPG }
             15 -> standings.sortedByDescending { it.stats.rebPG }
-            16 -> standings.sortedByDescending { it.stats.pfPG }
-            17 -> standings.sortedByDescending { it.stats.pfdPG }
-            18 -> standings.sortedByDescending { it.stats.blkaPG }
-            19 -> standings.sortedByDescending { it.stats.plusMinusPG }
-            21 -> standings.sortedByDescending { it.stats.minPG }
-            24 -> standings.sortedByDescending { it.stats.winsPct }
+            16 -> standings.sortedByDescending { it.stats.tovPG }
+            17 -> standings.sortedByDescending { it.stats.pfPG }
+            18 -> standings.sortedByDescending { it.stats.pfdPG }
+            19 -> standings.sortedByDescending { it.stats.blkaPG }
+            20 -> standings.sortedByDescending { it.stats.plusMinusPG }
+            22 -> standings.sortedByDescending { CalendarUtil.formatHourMinuteToMinutes(it.stats.minPG) }
+            25 -> standings.sortedByDescending { it.stats.winsPct }
             else -> standings // 경기당(PG) 데이터 이외에는 sort 할필요 없음
         }
 

@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.models.nba
 
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.rounded
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -85,7 +86,7 @@ data class NBATeamStats(
     @SerialName("gp") private val _gp: Int? = null,
     @SerialName("groupValue") private val _groupValue: String? = null,
     @SerialName("l") private val _l: Int? = null,
-    @SerialName("min") private val _min: Int? = null,
+    @SerialName("min") private val _min: Double? = null,
     @SerialName("oreb") private val _oreb: Int? = null,
     @SerialName("pf") private val _pf: Int? = null,
     @SerialName("pfd") private val _pfd: Int? = null,
@@ -114,7 +115,7 @@ data class NBATeamStats(
     val gp: Int get() = _gp ?: 0
     val groupValue: String get() = _groupValue ?: ""
     val losses: Int get() = _l ?: 0
-    val min: Int get() = _min ?: 0
+    val min: Int get() = (_min ?: 0.0).rounded(0).toInt()
     val oreb: Int get() = _oreb ?: 0
     val pf: Int get() = _pf ?: 0
     val pfd: Int get() = _pfd ?: 0
@@ -144,6 +145,6 @@ data class NBATeamStats(
     val ftmPG: Double get() = if (gp != 0) (ftm.toDouble() /gp).rounded(1) else 0.0
     val pfPG: Double get() = if (gp != 0) (pf.toDouble() /gp).rounded(1) else 0.0
     val pfdPG: Double get() = if (gp != 0) (pfd.toDouble() /gp).rounded(1) else 0.0
-    val minPG: Double get() = if (gp != 0) (min.toDouble() /gp).rounded(1) else 0.0
+    val minPG: String get() = if (gp != 0) CalendarUtil.formatMinutesToHourMinute(min) else "0:0"
     val plusMinusPG: Double get() = if (gp != 0) (plusMinus.toDouble() /gp).rounded(1) else 0.0
 }
