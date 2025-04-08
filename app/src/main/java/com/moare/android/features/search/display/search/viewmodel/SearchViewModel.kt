@@ -32,9 +32,11 @@ import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDi
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
+import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.networking.KeywordsClient
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -200,6 +202,7 @@ class SearchViewModel @Inject constructor(
         data object ToggleAutoCompleteListVisibleState : Intent()
 
         data class SelectFBGame(val game: FBGame) : Intent()
+        data class SelectNBAGame(val game: NBAGame) : Intent()
 
         data class GoBack(val activity: Activity?) : Intent()
 
@@ -236,6 +239,7 @@ class SearchViewModel @Inject constructor(
                 is Intent.UpdateTextField -> updateTextField(intent.newValue, intent.updateAutoCompleteList)
                 is Intent.ToggleSearchBar -> toggleSearchBar()
                 is Intent.SelectFBGame -> selectFBGame(intent.game)
+                is Intent.SelectNBAGame -> selectNBAGame(intent.game)
                 is Intent.GoBack -> goBack(intent.activity)
                 is Intent.ShowPlayerStats -> showPlayerStats(intent.category, intent.playerId)
                 is Intent.ShowTeamStats -> showTeamStats(intent.teamId)
@@ -489,6 +493,20 @@ class SearchViewModel @Inject constructor(
         _poppedView.emit(null)
 
         _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game))
+    }
+
+    private suspend fun selectNBAGame(game: NBAGame) {
+        val dataModel = SportDecodableModel.NBAGameStats(
+            responseModel = NBAGameStatsResponseModel(game = game),
+            displayModel = NBAGameStatsDisplayModel(game = game)
+        )
+
+        val stack = viewStack.value.toMutableList()
+        stack.add(dataModel)
+        _viewStack.emit(stack)
+        _poppedView.emit(null)
+
+        _nbaGameStatsData.emit(NBAGameStatsDisplayModel(game = game))
     }
 
     private suspend fun goBack(activity: Activity?) {

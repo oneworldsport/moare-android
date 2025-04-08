@@ -135,14 +135,14 @@ fun NBALeagueScheduleView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 NBATitle(
-                    leagueName = "NBA 정규시즌",
+                    leagueName = "NBA",
                     leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
                 )
 
-//                Text(
-//                    text = " - " + MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = it.game.league.round),
-//                    fontSize = 14.sp
-//                )
+                Text(
+                    text = " - 정규시즌",
+                    fontSize = 14.sp
+                )
             }
         }
 
@@ -359,7 +359,7 @@ fun NBALeagueScheduleListItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = nbaGameStatsData == null) {
-//                searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data))
+                searchViewModel.send(SearchViewModel.Intent.SelectNBAGame(data))
 
                 // set selected game's isOpened true
                 data.gameSummary?.let {

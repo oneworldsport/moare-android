@@ -337,7 +337,6 @@ fun FBGameStatsTeamButtonContainer(
             }
         }
     }
-
 }
 
 @Composable
@@ -388,7 +387,7 @@ fun FBGameStatsFirstCategoryList(
        --------------------- */
     val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
     val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
-    val etcCategoriesSize = StringConstants.Football.gameStatsCommonCategories.size
+    val commonCategoriesSize = StringConstants.Football.gameStatsCommonCategories.size
 
     /* ---------------------
        viewmodel state
@@ -414,7 +413,7 @@ fun FBGameStatsFirstCategoryList(
             )
         } else {
             (itemWidth * attackCategoriesSize) + (barWidth * 2) + (itemWidth * defendCategoriesSize) + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * etcCategoriesSize,
+                itemWidth = itemWidth * commonCategoriesSize,
                 barWidth = 80.dp
             )
         },
@@ -584,7 +583,7 @@ fun FBGameStatsFirstDataList(
                 .height(fbGameStatsViewModel.dataItemHeight)
         ) {
             Text(
-                text = "팀 총합", // 팀 기록?
+                text = "합계(팀 기록)",
                 fontSize = 12.sp,
                 maxLines = 2,
                 modifier = Modifier.weight(1f),
@@ -715,14 +714,14 @@ fun FBGameStatsDataList(
     val playersTotalStats by fbGameStatsViewModel.playersTotalStats.collectAsState()
 
     Column {
-        for (value in playerStats) {
+        for (item in playerStats) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .height(fbGameStatsViewModel.dataItemHeight)
             ) {
                 for (index in 0 until StringConstants.Football.gameStatsSecondCategories.size) {
-                    value.statistics.first().let {
+                    item.statistics.first().let {
                         FBGameStatsDataListItem(
                             data = it,
                             index = index

@@ -98,16 +98,14 @@ fun NBATeamScheduleView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 NBATitle(
-                    leagueName = "NBA 정규시즌",
+                    leagueName = "NBA",
                     leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
                 )
 
-//                Text(
-//                    text = " - " + if (nbaGameStatsData?.game?.league?.round != null) {
-//                        MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = fbGameStatsData?.game?.league?.round!!)
-//                    } else { "" },
-//                    fontSize = 14.sp
-//                )
+                Text(
+                    text = " - 정규시즌",
+                    fontSize = 14.sp
+                )
             }
         }
 
@@ -273,7 +271,7 @@ fun NBATeamScheduleListItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = nbaGameStatsData == null) {
-//                searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data))
+                searchViewModel.send(SearchViewModel.Intent.SelectNBAGame(data))
 
                 // set selected game's isOpened true
                 data.gameSummary?.let {

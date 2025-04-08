@@ -76,13 +76,13 @@ data class NBAGameBoxScoreStats(
     @SerialName("blocks") private val _blocks: Int? = null,
     @SerialName("fieldGoalsAttempted") private val _fieldGoalsAttempted: Int? = null,
     @SerialName("fieldGoalsMade") private val _fieldGoalsMade: Int? = null,
-    @SerialName("fieldGoalsPercentage") private val _fieldGoalsPercentage: Double? = null,
+    @SerialName("fieldGoalsPercentage") private var _fieldGoalsPercentage: Double? = null,
     @SerialName("foulsPersonal") private val _foulsPersonal: Int? = null,
     @SerialName("freeThrowsAttempted") private val _freeThrowsAttempted: Int? = null,
     @SerialName("freeThrowsMade") private val _freeThrowsMade: Int? = null,
-    @SerialName("freeThrowsPercentage") private val _freeThrowsPercentage: Double? = null,
+    @SerialName("freeThrowsPercentage") private var _freeThrowsPercentage: Double? = null,
     @SerialName("minutes") private val _minutes: String? = null,
-    @SerialName("plusMinusPoints") private val _plusMinusPoints: Int? = null,
+    @SerialName("plusMinusPoints") private var _plusMinusPoints: Int? = null,
     @SerialName("points") private val _points: Int? = null,
     @SerialName("reboundsDefensive") private val _reboundsDefensive: Int? = null,
     @SerialName("reboundsOffensive") private val _reboundsOffensive: Int? = null,
@@ -90,20 +90,26 @@ data class NBAGameBoxScoreStats(
     @SerialName("steals") private val _steals: Int? = null,
     @SerialName("threePointersAttempted") private val _threePointersAttempted: Int? = null,
     @SerialName("threePointersMade") private val _threePointersMade: Int? = null,
-    @SerialName("threePointersPercentage") private val _threePointersPercentage: Double? = null,
+    @SerialName("threePointersPercentage") private var _threePointersPercentage: Double? = null,
     @SerialName("turnovers") private val _turnovers: Int? = null,
 ) {
     val assists: Int get() = _assists ?: 0
     val blocks: Int get() = _blocks ?: 0
     val fieldGoalsAttempted: Int get() = _fieldGoalsAttempted ?: 0
     val fieldGoalsMade: Int get() = _fieldGoalsMade ?: 0
-    val fieldGoalsPercentage: Double get() = _fieldGoalsPercentage ?: 0.0
+    var fieldGoalsPercentage: Double
+        get() = _fieldGoalsPercentage ?: 0.0
+        set(value) { _fieldGoalsPercentage = value }
     val foulsPersonal: Int get() = _foulsPersonal ?: 0
     val freeThrowsAttempted: Int get() = _freeThrowsAttempted ?: 0
     val freeThrowsMade: Int get() = _freeThrowsMade ?: 0
-    val freeThrowsPercentage: Double get() = _freeThrowsPercentage ?: 0.0
+    var freeThrowsPercentage: Double
+        get() = _freeThrowsPercentage ?: 0.0
+        set(value) { _freeThrowsPercentage = value }
     val minutes: String get() = _minutes ?: ""
-    val plusMinusPoints: Int get() = _plusMinusPoints ?: 0
+    var plusMinusPoints: Int
+        get() = _plusMinusPoints ?: 0
+        set(value) { _plusMinusPoints = value }
     val points: Int get() = _points ?: 0
     val reboundsDefensive: Int get() = _reboundsDefensive ?: 0
     val reboundsOffensive: Int get() = _reboundsOffensive ?: 0
@@ -111,7 +117,9 @@ data class NBAGameBoxScoreStats(
     val steals: Int get() = _steals ?: 0
     val threePointersAttempted: Int get() = _threePointersAttempted ?: 0
     val threePointersMade: Int get() = _threePointersMade ?: 0
-    val threePointersPercentage: Double get() = _threePointersPercentage ?: 0.0
+    var threePointersPercentage: Double
+        get() = _threePointersPercentage ?: 0.0
+        set(value) { _threePointersPercentage = value }
     val turnovers: Int get() = _turnovers ?: 0
 }
 

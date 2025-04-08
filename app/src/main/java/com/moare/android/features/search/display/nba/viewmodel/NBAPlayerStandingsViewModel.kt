@@ -78,6 +78,10 @@ class NBAPlayerStandingsViewModel @Inject constructor(
     private var filteredStandingsEndIndex = 0 // NOTE: one bigger then actual showing end item's index. Because of subList.
     var playerNameDictionary: Map<String, String> = emptyMap() // TODO: EnNameTranslationUtils 여기로 옮길지 아니면 각 ViewModel마다 선언해줄지 결정 필요
 
+    init {
+        playerNameDictionary = nameProvider.getDictionary("nba_player")
+    }
+
     /* ---------------------
        intent
        --------------------- */
@@ -99,10 +103,6 @@ class NBAPlayerStandingsViewModel @Inject constructor(
                 is Intent.SortStandings -> sortStandings()
             }
         }
-    }
-
-    init {
-        playerNameDictionary = nameProvider.getDictionary("nba_player")
     }
 
     /* ---------------------
