@@ -93,21 +93,21 @@ fun NBATeamScheduleView(
            game title
            - shows when game selected
            --------------------- */
-        nbaGameStatsData?.let {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                NBATitle(
-                    leagueName = "NBA",
-                    leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
-                )
-
-                Text(
-                    text = " - 정규시즌",
-                    fontSize = 14.sp
-                )
-            }
-        }
+//        nbaGameStatsData?.let {
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                NBATitle(
+//                    leagueName = "NBA",
+//                    leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
+//                )
+//
+//                Text(
+//                    text = " - 정규시즌",
+//                    fontSize = 14.sp
+//                )
+//            }
+//        }
 
         /* ---------------------
            all result open button
@@ -129,18 +129,16 @@ fun NBATeamScheduleView(
                     nbaTeamScheduleViewModel.send(NBATeamScheduleViewModel.Intent.ToggleAllResult)
                 }
             }
-        }
 
-        /* ---------------------
-           schedule
-           --------------------- */
-        NBATeamScheduleList()
+            /* ---------------------
+               schedule
+               --------------------- */
+            NBATeamScheduleList()
 
-        /* ---------------------
-           bottom empty space
-           - hides when game selected
-           --------------------- */
-        if (nbaGameStatsData == null) {
+            /* ---------------------
+               bottom empty space
+               - hides when game selected
+               --------------------- */
             Spacer(Modifier.fillMaxSize())
         }
     }
@@ -188,7 +186,7 @@ fun NBATeamScheduleListItem(
     val homeTeamScore = data.lineScore.find { it.teamId == homeTeamId }?.pts ?: 0
     val awayTeamScore = data.lineScore.find { it.teamId == awayTeamId }?.pts ?: 0
 
-    val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
+//    val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
 
     /* ---------------------
        animation
@@ -256,11 +254,11 @@ fun NBATeamScheduleListItem(
             isResultOpened = gameResultOpenedStateList[data.gameSummary.gameCode] ?: false
         }
     }
-    LaunchedEffect(nbaGameStatsData) {
-        nbaGameStatsData?.let {
-            isResultOpened = true
-        }
-    }
+//    LaunchedEffect(nbaGameStatsData) {
+//        nbaGameStatsData?.let {
+//            isResultOpened = true
+//        }
+//    }
 
     /* ---------------------
        ui
@@ -270,7 +268,7 @@ fun NBATeamScheduleListItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = nbaGameStatsData == null) {
+            .clickable {
                 searchViewModel.send(SearchViewModel.Intent.SelectNBAGame(data))
 
                 // set selected game's isOpened true
@@ -307,15 +305,15 @@ fun NBATeamScheduleListItem(
                 maxLines = 2
             )
 
-            nbaGameStatsData?.let {
-                RoundedBorderText(
-                    text = "홈",
-                    fontSize = 11.sp,
-                    radius = 4.dp,
-                    textColor = Moare,
-                    borderColor = Moare
-                )
-            }
+//            nbaGameStatsData?.let {
+//                RoundedBorderText(
+//                    text = "홈",
+//                    fontSize = 11.sp,
+//                    radius = 4.dp,
+//                    textColor = Moare,
+//                    borderColor = Moare
+//                )
+//            }
         }
 
         // Add space to both sides of each score to place the score in the middle
@@ -345,7 +343,7 @@ fun NBATeamScheduleListItem(
             CapsuleButton(
                 text = gameStatusText,
                 color = gameStatusColor,
-                isDisabled = nbaGameStatsData != null || data.gameSummary?.gameStatusId != 3
+                isDisabled = data.gameSummary?.gameStatusId != 3
             ) {
                 data.gameSummary?.let {
                     nbaTeamScheduleViewModel.send(NBATeamScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, !isResultOpened))
@@ -353,13 +351,13 @@ fun NBATeamScheduleListItem(
             }
 
             // game date
-            if (nbaGameStatsData != null) {
-                Text(
-                    text = CalendarUtil.formatDate(data.gameSummary?.date, TimeFormatType.AMPM),
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(vertical = 2.dp)
-                )
-            } else {
+//            if (nbaGameStatsData != null) {
+//                Text(
+//                    text = CalendarUtil.formatDate(data.gameSummary?.date, TimeFormatType.AMPM),
+//                    fontSize = 12.sp,
+//                    modifier = Modifier.padding(vertical = 2.dp)
+//                )
+//            } else {
                 Text(
                     text = CalendarUtil.formatDate(data.gameSummary?.date).split(" ")[0],
                     fontSize = 12.sp,
@@ -371,18 +369,18 @@ fun NBATeamScheduleListItem(
                     fontSize = 12.sp,
                     modifier = Modifier.padding(bottom = 2.dp)
                 )
-            }
+//            }
 
             // venue
-            nbaGameStatsData?.let {
-                Text(
-                    text = "장소: ",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Light,
-                    maxLines = 1,
-                    modifier = Modifier.padding(bottom = 2.dp)
-                )
-            }
+//            nbaGameStatsData?.let {
+//                Text(
+//                    text = "장소: ",
+//                    fontSize = 12.sp,
+//                    fontWeight = FontWeight.Light,
+//                    maxLines = 1,
+//                    modifier = Modifier.padding(bottom = 2.dp)
+//                )
+//            }
 
             // game type or referee
 //            Text(
@@ -432,15 +430,15 @@ fun NBATeamScheduleListItem(
                 maxLines = 2
             )
 
-            nbaGameStatsData?.let {
-                RoundedBorderText(
-                    text = "원정",
-                    fontSize = 11.sp,
-                    radius = 4.dp,
-                    textColor = Color.Gray,
-                    borderColor = Color.Gray
-                )
-            }
+//            nbaGameStatsData?.let {
+//                RoundedBorderText(
+//                    text = "원정",
+//                    fontSize = 11.sp,
+//                    radius = 4.dp,
+//                    textColor = Color.Gray,
+//                    borderColor = Color.Gray
+//                )
+//            }
         }
     }
 }

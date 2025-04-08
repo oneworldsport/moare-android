@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ModifierInfo
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
@@ -60,17 +61,22 @@ import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.TranslationType
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsViewModel
+import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
 import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
+import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
+import com.moare.android.features.search.models.models.nba.NBALineScore
+import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.util.convertDpToPx
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
@@ -153,7 +159,7 @@ fun NBAGameStatsView(
            game title, info
            - hides when game selected by schedule
            --------------------- */
-        if (nbaLeagueScheduleData == null && nbaTeamScheduleData == null) {
+//        if (nbaLeagueScheduleData == null && nbaTeamScheduleData == null) {
             displayModel?.game?.let { game ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -170,9 +176,10 @@ fun NBAGameStatsView(
                     )
                 }
 
-                NBALeagueScheduleListItem(data = game)
+//                NBALeagueScheduleListItem(data = game)
+                NBAGameStatsScoreInfoItem()
             }
-        }
+//        }
 
         Box(
             Modifier
@@ -233,6 +240,301 @@ fun NBAGameStatsView(
             )
 
             Spacer(Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+fun NBAGameStatsScoreInfoItem(
+    nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel()
+) {
+    /* ---------------------
+       viewmodel state
+       --------------------- */
+    val displayModel by nbaGameStatsViewModel.displayModel.collectAsState()
+    val homeTeamLineScore by nbaGameStatsViewModel.homeTeamLineScore.collectAsState()
+    val awayTeamLineScore by nbaGameStatsViewModel.awayTeamLineScore.collectAsState()
+
+    val game = displayModel?.game
+    val homeTeamId = game?.gameSummary?.homeTeamId
+    val awayTeamId = game?.gameSummary?.visitorTeamId
+
+    /* ---------------------
+       constants
+       --------------------- */
+    val gameStatusText = when (game?.gameSummary?.gameStatusId) {
+        1 -> StringConstants.gameNotStartedStr
+        2 -> if (homeTeamLineScore?.ptsOt3 != null) {
+            StringConstants.NBA.gameOt3
+        } else if (homeTeamLineScore?.ptsOt2 != null) {
+            StringConstants.NBA.gameOt2
+        } else if (homeTeamLineScore?.ptsOt1 != null) {
+            StringConstants.NBA.gameOt1
+        } else if (homeTeamLineScore?.ptsQtr4 != null) {
+            StringConstants.NBA.gameQtr4
+        } else if (homeTeamLineScore?.ptsQtr3 != null) {
+            StringConstants.NBA.gameQtr3
+        } else if (homeTeamLineScore?.ptsQtr2 != null) {
+            StringConstants.NBA.gameQtr2
+        } else if (homeTeamLineScore?.ptsQtr1 != null) {
+            StringConstants.NBA.gameQtr1
+        } else {
+            ""
+        }
+        3 -> StringConstants.gameFinishedStr
+        else -> ""
+    }
+
+    val gameStatusColor = if (game?.gameSummary?.gameStatusId == 2) {
+        MaterialTheme.colors.primary
+    } else {
+        Color.Gray
+    }
+
+    /* ---------------------
+       ui
+       --------------------- */
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .padding(horizontal = UIConstants.Padding.defaultHPadding)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(top = 26.dp) // for NBAGameStatsLineScoreTitle
+        ) {
+            URLImage(
+                url = if (homeTeamId != null) NBAUtil.teamLogoUrl(homeTeamId) else "",
+                size = URLImageSize.SMALL,
+                isSvg = true
+            )
+
+            Text(
+                text = "워리어스",
+                fontSize = 13.sp,
+                maxLines = 2
+            )
+
+            // game status
+            CapsuleButton(
+                text = gameStatusText,
+                color = gameStatusColor,
+                isDisabled = true
+            ) {}
+
+            Text(
+                text = "클리블랜드",
+                fontSize = 13.sp,
+                maxLines = 2
+            )
+
+            URLImage(
+                url = if (awayTeamId != null) NBAUtil.teamLogoUrl(awayTeamId) else "",
+                size = URLImageSize.SMALL,
+                isSvg = true
+            )
+        }
+
+        homeTeamLineScore?.let { home ->
+            awayTeamLineScore?.let { away ->
+                NBAGameStatsLineScoreContainer(
+                    homeTeamLineScore = home,
+                    awayTeamLineScore = away,
+                    modifier = Modifier.height(127.dp).weight(1f) // 25 + 1 + 50 + 1 + 50
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun NBAGameStatsLineScoreContainer(
+    homeTeamLineScore: NBALineScore,
+    awayTeamLineScore: NBALineScore,
+    modifier: Modifier
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Box(Modifier.height(26.dp)) // Empty space to position pts to same line with linescore
+
+                Box(
+                    modifier = Modifier.height(50.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = homeTeamLineScore.pts.toString(),
+                        modifier = Modifier.padding(start = 4.dp, end = 8.dp)
+                    )
+                }
+            }
+
+            Column(
+                Modifier.weight(1f)
+            ) {
+                NBAGameStatsLineScoreTitle(homeTeamLineScore)
+
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.Gray)
+                )
+
+                NBAGameStatsLineScoreItem(homeTeamLineScore)
+            }
+        }
+
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Gray)
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = awayTeamLineScore.pts.toString(),
+                modifier = Modifier.padding(start = 4.dp, end = 8.dp)
+            )
+
+            NBAGameStatsLineScoreItem(awayTeamLineScore)
+        }
+    }
+}
+
+@Composable
+fun NBAGameStatsLineScoreTitle(
+    lineScore: NBALineScore
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().height(25.dp)
+    ) {
+        VCapsuleBar()
+        Text(
+            text = "1쿼터",
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        VCapsuleBar()
+        Text(
+            text = "2쿼터",
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        VCapsuleBar()
+        Text(
+            text = "3쿼터",
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        VCapsuleBar()
+        Text(
+            text = "4쿼터",
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+
+        if (lineScore.ptsOt1 != 0) {
+            VCapsuleBar()
+            Text(
+                text = "연장 1쿼터",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        if (lineScore.ptsOt2 != 0) {
+            VCapsuleBar()
+            Text(
+                text = "연장 2쿼터",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        if (lineScore.ptsOt3 != 0) {
+            VCapsuleBar()
+            Text(
+                text = "연장 3쿼터",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun NBAGameStatsLineScoreItem(
+    lineScore: NBALineScore
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().height(50.dp)
+    ) {
+        VCapsuleBar()
+        Text(
+            text = lineScore.ptsQtr1.toString(),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        VCapsuleBar()
+        Text(
+            text = lineScore.ptsQtr2.toString(),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        VCapsuleBar()
+        Text(
+            text = lineScore.ptsQtr3.toString(),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        VCapsuleBar()
+        Text(
+            text = lineScore.ptsQtr4.toString(),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+
+        // TODO: 홈, 원정 둘중에 하나는 0이 아닌데 다른 팀은 0일때 0인팀의 UI가 깨짐
+        if (lineScore.ptsOt1 != 0) {
+            VCapsuleBar()
+            Text(
+                text = lineScore.ptsOt1.toString(),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        if (lineScore.ptsOt2 != 0) {
+            VCapsuleBar()
+            Text(
+                text = lineScore.ptsOt2.toString(),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        if (lineScore.ptsOt3 != 0) {
+            VCapsuleBar()
+            Text(
+                text = lineScore.ptsOt3.toString(),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
