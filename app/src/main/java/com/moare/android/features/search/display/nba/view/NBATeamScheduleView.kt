@@ -1,15 +1,10 @@
 package com.moare.android.features.search.display.nba.view
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -45,78 +40,46 @@ import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.TranslationType
-import com.moare.android.features.search.display.football.view.FBLeagueScheduleListItem
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleViewModel
+import com.moare.android.features.search.display.football.view.FBTeamScheduleList
+import com.moare.android.features.search.display.football.view.FBTeamScheduleListItem
+import com.moare.android.features.search.display.football.viewmodel.FBTeamScheduleViewModel
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleViewModel
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
-import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.nba.NBAGame
-import com.moare.android.ui.common.components.CalendarList
-import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.NBATitle
-import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.theme.Moare
 
 @Composable
-fun NBALeagueScheduleView(
+fun NBATeamScheduleView(
     searchViewModel: SearchViewModel = hiltViewModel(),
-    nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel(),
-    data: NBALeagueScheduleDisplayModel
+    nbaTeamScheduleViewModel: NBATeamScheduleViewModel = hiltViewModel(),
+    data: NBATeamScheduleDisplayModel
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by nbaLeagueScheduleViewModel.displayModel.collectAsState()
-    val yearMonthList by nbaLeagueScheduleViewModel.yearMonthList.collectAsState()
-    val days by nbaLeagueScheduleViewModel.days.collectAsState()
-    val selectedYearMonthIndex by nbaLeagueScheduleViewModel.selectedYearMonthIndex.collectAsState()
-    val selectedDayIndex by nbaLeagueScheduleViewModel.selectedDayIndex.collectAsState()
-    val yearMonthCalendarScrollTrigger by nbaLeagueScheduleViewModel.yearMonthCalendarScrollTrigger.collectAsState()
-    val dayCalendarScrollTrigger by nbaLeagueScheduleViewModel.dayCalendarScrollTrigger.collectAsState()
-    val isAllResultOpened by nbaLeagueScheduleViewModel.isAllResultOpened.collectAsState()
-    val displayDataState by nbaLeagueScheduleViewModel.displayDataState.collectAsState()
+    val displayModel by nbaTeamScheduleViewModel.displayModel.collectAsState()
+    val isAllResultOpened by nbaTeamScheduleViewModel.isAllResultOpened.collectAsState()
 
     val season = displayModel?.games?.firstOrNull()?.gameSummary?.season
 
     val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
-
-    val viewStack by searchViewModel.viewStack.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       etc
-       --------------------- */
 
     /* ---------------------
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.NBALeagueSchedule) {
-            nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.InitData(data))
-        }
-    }
-
-    LaunchedEffect(viewStack) {
-        // update games data after refreshing in NBAGameStatsView
-        if (viewStack.isNotEmpty() && viewStack.last() is SportDecodableModel.NBALeagueSchedule) {
-            val nbaLeagueSchedule = viewStack.last() as SportDecodableModel.NBALeagueSchedule
-
-            poppedView?.let {
-                if (it is SportDecodableModel.NBAGameStats) {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.UpdateGamesData(nbaLeagueSchedule, it) { data ->
-                        searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
-                    })
-                }
-            }
+        if (poppedView == null || poppedView is SportDecodableModel.NBATeamSchedule) {
+            nbaTeamScheduleViewModel.send(NBATeamScheduleViewModel.Intent.InitData(data))
         }
     }
 
@@ -140,26 +103,11 @@ fun NBALeagueScheduleView(
                 )
 
 //                Text(
-//                    text = " - " + MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = it.game.league.round),
+//                    text = " - " + if (nbaGameStatsData?.game?.league?.round != null) {
+//                        MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = fbGameStatsData?.game?.league?.round!!)
+//                    } else { "" },
 //                    fontSize = 14.sp
 //                )
-            }
-        }
-
-        /* ---------------------
-           calendar
-           - hides when game selected
-           --------------------- */
-        if (nbaGameStatsData == null) {
-            CalendarList(yearMonthList, CalendarType.YEARMONTH, selectedYearMonthIndex, yearMonthCalendarScrollTrigger) { yearMonth, index ->
-                nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.SelectYearMonth(yearMonth, index) { data ->
-                    // 현재 구조 콜백 수정 필요?
-                    searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
-                })
-            }
-
-            CalendarList(days, CalendarType.DAY, selectedDayIndex, dayCalendarScrollTrigger) { day, index ->
-                nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.SelectDay(day, index))
             }
         }
 
@@ -180,47 +128,15 @@ fun NBALeagueScheduleView(
                     color = Color.Gray,
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.ToggleAllResult)
+                    nbaTeamScheduleViewModel.send(NBATeamScheduleViewModel.Intent.ToggleAllResult)
                 }
             }
         }
 
-        // NOTE: In most situations, loading should be used in Box for smooth animation.
-        Box {
-            // loading
-            this@Column.AnimatedVisibility(
-                visible = displayDataState == ApiFetchState.Fetching,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    ProgressIndicator()
-                }
-            }
-
-            /* ---------------------
-               schedule
-               --------------------- */
-            this@Column.AnimatedVisibility(
-                visible = displayDataState == ApiFetchState.Success
-            ) {
-                NBALeagueScheduleList()
-            }
-        }
-
-        // no result / error
-        AnimatedVisibility(
-            visible = displayDataState is ApiFetchState.Error,
-//            enter = fadeIn()
-        ) {
-            val error = displayDataState as? ApiFetchState.Error
-            error?.let {
-                Text(error.message)
-            }
-        }
+        /* ---------------------
+           schedule
+           --------------------- */
+        NBATeamScheduleList()
 
         /* ---------------------
            bottom empty space
@@ -233,43 +149,41 @@ fun NBALeagueScheduleView(
 }
 
 @Composable
-fun NBALeagueScheduleList(
+fun NBATeamScheduleList(
     searchViewModel: SearchViewModel = hiltViewModel(),
-    nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel()
+    nbaTeamScheduleViewModel: NBATeamScheduleViewModel = hiltViewModel()
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
-    val filteredGames by nbaLeagueScheduleViewModel.filteredGames.collectAsState()
-    val selectedDayIndex by nbaLeagueScheduleViewModel.selectedDayIndex.collectAsState()
+    val games by nbaTeamScheduleViewModel.games.collectAsState()
 
     val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
 
-    val gameListToDisplay = if (nbaGameStatsData == null) filteredGames[selectedDayIndex] ?: emptyList() else listOf(nbaGameStatsData!!.game)
+    val gameListToDisplay = if (nbaGameStatsData == null) games else listOf(nbaGameStatsData!!.game)
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            NBALeagueScheduleListItem(data = item)
+            NBATeamScheduleListItem(data = item)
         }
     }
 }
 
 @Composable
-fun NBALeagueScheduleListItem(
+fun NBATeamScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
-    nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel(),
-    data: NBAGame,
+    nbaTeamScheduleViewModel: NBATeamScheduleViewModel = hiltViewModel(),
+    data: NBAGame
 ) {
     /* ---------------------
        ui state
        --------------------- */
     var isResultOpened by remember { mutableStateOf(false) }
-    val noRippleInteractionSource = remember { MutableInteractionSource() }
 
     /* ---------------------
        viewmodel state
        --------------------- */
-    val gameResultOpenedStateList by nbaLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
+    val gameResultOpenedStateList by nbaTeamScheduleViewModel.gameResultOpenedStateList.collectAsState()
 
     val homeTeamId = data.gameSummary?.homeTeamId
     val awayTeamId = data.gameSummary?.visitorTeamId
@@ -363,7 +277,7 @@ fun NBALeagueScheduleListItem(
 
                 // set selected game's isOpened true
                 data.gameSummary?.let {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, true))
+                    nbaTeamScheduleViewModel.send(NBATeamScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, true))
                 }
             }
             .padding(vertical = 8.dp)
@@ -419,6 +333,7 @@ fun NBALeagueScheduleListItem(
             color = if (homeTeamScore >= awayTeamScore) MaterialTheme.colors.primary else Color.Black
         )
 
+        // Add space to both sides of each score to place the score in the middle
         Spacer(Modifier.weight(0.3f))
 
         /* ---------------------
@@ -435,16 +350,30 @@ fun NBALeagueScheduleListItem(
                 isDisabled = nbaGameStatsData != null || data.gameSummary?.gameStatusId != 3
             ) {
                 data.gameSummary?.let {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, !isResultOpened))
+                    nbaTeamScheduleViewModel.send(NBATeamScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, !isResultOpened))
                 }
             }
 
             // game date
-            Text(
-                text = CalendarUtil.formatDate(data.gameSummary?.date, TimeFormatType.AMPM),
-                fontSize = 12.sp,
-                modifier = Modifier.padding(vertical = 2.dp)
-            )
+            if (nbaGameStatsData != null) {
+                Text(
+                    text = CalendarUtil.formatDate(data.gameSummary?.date, TimeFormatType.AMPM),
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(vertical = 2.dp)
+                )
+            } else {
+                Text(
+                    text = CalendarUtil.formatDate(data.gameSummary?.date).split(" ")[0],
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+
+                Text(
+                    text = CalendarUtil.formatDate(data.gameSummary?.date, TimeFormatType.AMPM),
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(bottom = 2.dp)
+                )
+            }
 
             // venue
             nbaGameStatsData?.let {
@@ -517,6 +446,25 @@ fun NBALeagueScheduleListItem(
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
