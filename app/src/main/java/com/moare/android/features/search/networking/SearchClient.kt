@@ -3,6 +3,7 @@ package com.moare.android.features.search.networking
 import android.content.Context
 import com.moare.android.core.networking.ApiHelper
 import com.moare.android.features.search.models.DataModel
+import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.KeywordInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 
@@ -23,8 +24,8 @@ class SearchClient(
         return DataModel.fromJson(response.string())
     }
 
-    suspend fun fetchLeagueSchedule(leagueId: Int, yearMonth: String): DataModel {
-        val response = apiHelper.searchApi.getLeagueSchedule(leagueId, yearMonth)
+    suspend fun fetchLeagueSchedule(entity: EntityInfo, yearMonth: String): DataModel {
+        val response = apiHelper.searchApi.getLeagueSchedule(entity, yearMonth)
         return DataModel.fromJson(response.string())
     }
 

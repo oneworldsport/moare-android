@@ -1,5 +1,6 @@
 package com.moare.android.core.networking.apiendpoint
 
+import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.KeywordInfo
 import okhttp3.ResponseBody
 import retrofit2.http.Body
@@ -23,9 +24,9 @@ interface SearchApi {
         @Body request: KeywordInfo
     ): ResponseBody
 
-    @GET("search/schedule")
+    @POST("search/schedule")
     suspend fun getLeagueSchedule(
-        @Query("leagueId") leagueId: Int,
+        @Body entity: EntityInfo,
         @Query("yearMonth") yearMonth: String
     ): ResponseBody
 

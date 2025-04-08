@@ -156,7 +156,7 @@ class ModelConverter(
             "${year.takeLast(2)}/$month"
         }
 
-        return FBLeagueScheduleDisplayModel(yearMonthList, response.schedule)
+        return FBLeagueScheduleDisplayModel(yearMonthList, response.schedule, entityInfo)
     }
 
     fun fbGameStatsConverter(response: FBGameStatsResponseModel): FBGameStatsDisplayModel {

@@ -8,6 +8,7 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.models.ApiFetchState
+import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
@@ -236,9 +237,15 @@ class FBLeagueScheduleViewModel @Inject constructor(
             val selectedYearMonth = selectedYearMonth.value.split("/")
             val yearMonth = selectedYearMonth[0] + selectedYearMonth[1]
 
-            val leagueId = displayModel.value?.games?.firstOrNull()?.league?.id ?: 39
+            val entity = displayModel.value?.entityInfo?.firstOrNull() ?: EntityInfo(
+                entityId = 39,
+                entityName = "프리미어리그",
+                category = "football",
+                entityType = "league",
+                leagueId = 39
+            )
 
-            val result = searchClient.fetchLeagueSchedule(leagueId, yearMonth)
+            val result = searchClient.fetchLeagueSchedule(entity, yearMonth)
 
             if (result.data is SportDecodableModel.FBLeagueSchedule) {
                 val data = result.data

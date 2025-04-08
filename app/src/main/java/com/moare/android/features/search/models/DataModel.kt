@@ -237,6 +237,7 @@ data class DataModel(
 
 @Serializable
 data class EntityInfo(
+    val entityId: Int,
     val entityName: String,
     val category: String,
     val entityType: String,

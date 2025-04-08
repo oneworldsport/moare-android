@@ -8,5 +8,5 @@ import kotlinx.serialization.Serializable
 data class NBALeagueScheduleDisplayModel(
     val yearMonthList: List<String>,
     var games: List<NBAGame>,
-    val entityInfo: List<EntityInfo>,
+    val entityInfo: List<EntityInfo>
 )
