@@ -47,6 +47,14 @@ object StringConstants {
     }
 
     object NBA {
+        const val gameQtr1 = "1쿼터"
+        const val gameQtr2 = "2쿼터"
+        const val gameQtr3 = "3쿼터"
+        const val gameQtr4 = "4쿼터"
+        const val gameOt1 = "연장 1쿼터"
+        const val gameOt2 = "연장 2쿼터"
+        const val gameOt3 = "연장 3쿼터"
+
         val conferenceCategory = listOf("서부", "동부")
         // TODO: 나중에 데이터 추가되면 카테고리 추가
 //        val teamStandingsCategories = listOf("게임차", "승률", "승", "패", "경기수", "홈성적", "원정성적", "경기당 득점", "경기당 득실마진", "경기당 도움", "경기당 리바운드", "야투 성공률", "3점 성공률", "자유투 성공률", "경기당 블록", "경기당 스틸", "경기당 턴오버", "경기당 파울")

@@ -270,7 +270,7 @@ class ModelConverter(
             "${year.takeLast(2)}/$month"
         }
 
-        return NBALeagueScheduleDisplayModel(yearMonthList, response.schedule)
+        return NBALeagueScheduleDisplayModel(yearMonthList, response.schedule, entityInfo)
     }
 
     fun nbaGameStatsConverter(response: NBAGameStatsResponseModel): NBAGameStatsDisplayModel {

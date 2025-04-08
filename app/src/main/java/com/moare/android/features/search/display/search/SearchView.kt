@@ -57,10 +57,13 @@ import com.moare.android.features.search.display.football.view.FBTeamInfoView
 import com.moare.android.features.search.display.football.view.FBTeamScheduleView
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
+import com.moare.android.features.search.display.nba.view.NBAGameStatsView
+import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStandingsView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
 import com.moare.android.features.search.display.nba.view.NBATeamInfoView
+import com.moare.android.features.search.display.nba.view.NBATeamScheduleView
 import com.moare.android.features.search.display.nba.view.NBATeamStandingsView
 import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -411,6 +414,21 @@ fun SearchView(
                             // basketball_team_standings
                             nbaTeamStandingsData?.let {
                                 NBATeamStandingsView(data = it)
+                            }
+
+                            // basketball_team_schedule
+                            nbaTeamScheduleData?.let {
+                                NBATeamScheduleView(data = it)
+                            }
+
+                            // basketball_league_schedule
+                            nbaLeagueScheduleData?.let {
+                                NBALeagueScheduleView(data = it)
+                            }
+
+                            // basketball_game_stats
+                            nbaGameStatsData?.let {
+                                NBAGameStatsView(data = it)
                             }
                         }
                     }
