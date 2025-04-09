@@ -347,25 +347,18 @@ fun FBTeamScheduleListItem(
             }
 
             // game date
-            if (fbGameStatsData != null) {
-                Text(
-                    text = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(vertical = 2.dp)
-                )
-            } else {
-                Text(
-                    text = CalendarUtil.formatDate(data.fixture.date).split(" ")[0],
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
+            // TODO: 아래 날짜 형식 CalendarUtil에 만들기?
+            Text(
+                text = CalendarUtil.formatDate(data.fixture.date).split(" ")[0],
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 2.dp)
+            )
 
-                Text(
-                    text = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 2.dp)
-                )
-            }
+            Text(
+                text = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
+                fontSize = 12.sp,
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
 
             // venue
             fbGameStatsData?.let {
