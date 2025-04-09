@@ -19,7 +19,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -43,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.EnNameTranslationUtils
+import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TranslationType
 import com.moare.android.core.util.toCm
 import com.moare.android.core.util.toKg
@@ -62,8 +62,7 @@ import kotlin.math.roundToInt
 fun NBAPlayerInfoView(
     searchViewModel: SearchViewModel = hiltViewModel(),
     nbaPlayerInfoViewModel: NBAPlayerInfoViewModel = hiltViewModel(),
-    data: NBAPlayerInfoDisplayModel,
-    center: State<Offset>
+    data: NBAPlayerInfoDisplayModel
 ) {
     /* ---------------------
        ui state
@@ -81,8 +80,9 @@ fun NBAPlayerInfoView(
     /* ---------------------
        animation
        --------------------- */
-    var parentOffset by remember { mutableStateOf(Offset.Zero) }
-    val itemPositions = remember { mutableStateMapOf<Int, Offset>() }
+    var parentPosition by remember { mutableStateOf(Offset.Zero) }
+    var parentCenter by remember { mutableStateOf(Offset.Zero) }
+    val itemPositions = remember { mutableStateMapOf<Int, Offset>() } // NOTE: parentCenter를 기준으로 이동해야할 각 아이템들의 offset
     var aniPositions by remember { mutableStateOf(false) }
     var showContents by remember { mutableStateOf(false) }
     val contentsAlpha by animateFloatAsState(
@@ -110,186 +110,413 @@ fun NBAPlayerInfoView(
         }
     }
 
-    /* ---------------------
-       invisible ui
-       - for position
-       --------------------- */
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .onGloballyPositioned { parentCoordinates ->
-                val parentPosition = parentCoordinates.positionInWindow()
-                parentOffset = parentPosition
-            }
-            .alpha(0f)
+    Box(
+        contentAlignment = Alignment.Center,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
+        /* ---------------------
+           invisible ui
+           - for position
+           --------------------- */
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .onGloballyPositioned { parentCoordinates ->
+                    parentPosition = parentCoordinates.positionInWindow()
+                    parentCenter = Offset(
+                        x = parentCoordinates.size.width / 2f,
+                        y = parentCoordinates.size.height / 2f
+                    )
+                }
+                .alpha(0f)
         ) {
-            // photo, name
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // photo, name
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
+
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
+
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
+
+                            itemSizes[0] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[0] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
+                        }
+                        .widthIn(max = 130.dp)
+                ) {
+                    NBAPlayerInfoFirstItem()
+                }
+
+                // logo, team, name
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
+
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
+
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
+
+                            itemSizes[1] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[1] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
+                        }
+                        .widthIn(max = 130.dp)
+                ) {
+                    NBAPlayerInfoSecondItem()
+                }
+
+                // jersey, position
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
+
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
+
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
+
+                            itemSizes[2] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[2] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
+                        }
+                        .widthIn(max = 130.dp)
+                ) {
+                    NBAPlayerInfoThirdItem()
+                }
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // from school/team, draft info, career info
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
+
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
+
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
+
+                            itemSizes[3] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[3] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
+                        }
+                        .widthIn(max = 130.dp)
+                ) {
+                    NBAPlayerInfoFourthItem()
+                }
+
+                // country, birth, age
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
+
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
+
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
+
+                            itemSizes[4] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[4] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
+                        }
+                        .widthIn(max = 130.dp)
+                ) {
+                    NBAPlayerInfoFifthItem()
+                }
+
+                // weight(kg/pound), height(cm/feet)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
+
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
+
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
+
+                            itemSizes[5] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[5] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
+                        }
+                        .widthIn(max = 130.dp)
+                ) {
+                    NBAPlayerInfoSixthItem()
+                }
+            }
+
+            // league stats
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
+                    .padding(top = 12.dp)
                     .onGloballyPositioned { layoutCoordinates ->
                         val itemSize = layoutCoordinates.size
                         val position = layoutCoordinates.positionInWindow()
 
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
+                        val relativeX = position.x - parentPosition.x
+                        val relativeY = position.y - parentPosition.y
 
                         // Calculate the center of the InfoItem
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
-                        itemSizes[0] = with(density) {
+                        itemSizes[6] = with(density) {
                             DpSize(itemSize.width.toDp(), itemSize.height.toDp())
                         }
-                        itemPositions[0] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
+                        itemPositions[6] = Offset(centerX - parentCenter.x, centerY - parentCenter.y)
                     }
-                    .widthIn(max = 130.dp)
             ) {
-                NBAPlayerInfoFirstItem()
+                NBAPlayerInfoSeventhItem()
             }
 
-            // logo, team, name
+            // last game
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
+                    .padding(top = 12.dp)
                     .onGloballyPositioned { layoutCoordinates ->
                         val itemSize = layoutCoordinates.size
                         val position = layoutCoordinates.positionInWindow()
 
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
+                        val relativeX = position.x - parentPosition.x
+                        val relativeY = position.y - parentPosition.y
 
                         // Calculate the center of the InfoItem
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
-                        itemSizes[1] = with(density) {
+                        itemSizes[7] = with(density) {
                             DpSize(itemSize.width.toDp(), itemSize.height.toDp())
                         }
-                        itemPositions[1] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
+                        itemPositions[7] = Offset(centerX - parentCenter.x, centerY - parentCenter.y)
                     }
-                    .widthIn(max = 130.dp)
             ) {
-                NBAPlayerInfoSecondItem()
+                NBAPlayerInfoEighthItem()
             }
 
-            // jersey, position
+            // next game
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
+                    .padding(top = 12.dp)
                     .onGloballyPositioned { layoutCoordinates ->
                         val itemSize = layoutCoordinates.size
                         val position = layoutCoordinates.positionInWindow()
 
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
+                        val relativeX = position.x - parentPosition.x
+                        val relativeY = position.y - parentPosition.y
 
                         // Calculate the center of the InfoItem
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
-                        itemSizes[2] = with(density) {
+                        itemSizes[8] = with(density) {
                             DpSize(itemSize.width.toDp(), itemSize.height.toDp())
                         }
-                        itemPositions[2] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
+                        itemPositions[8] = Offset(centerX - parentCenter.x, centerY - parentCenter.y)
                     }
-                    .widthIn(max = 130.dp)
             ) {
-                NBAPlayerInfoThirdItem()
+                NBAPlayerInfoNinethItem()
             }
         }
 
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
+        /* ---------------------
+           visible ui
+           - with animation effect
+           --------------------- */
+        val firstPosition = itemPositions[0] ?: Offset.Zero
+        val firstAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) firstPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val secondPosition = itemPositions[1] ?: Offset.Zero
+        val secondAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) secondPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val thirdPosition = itemPositions[2] ?: Offset.Zero
+        val thirdAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) thirdPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val fourthPosition = itemPositions[3] ?: Offset.Zero
+        val fourthAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) fourthPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val fifthPosition = itemPositions[4] ?: Offset.Zero
+        val fifthAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) fifthPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val sixthPosition = itemPositions[5] ?: Offset.Zero
+        val sixthAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) sixthPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val seventhPosition = itemPositions[6] ?: Offset.Zero
+        val seventhAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) seventhPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val eighthPosition = itemPositions[7] ?: Offset.Zero
+        val eighthAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) eighthPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val ninethPosition = itemPositions[8] ?: Offset.Zero
+        val ninethAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) ninethPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+
+        // photo, name
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .size(itemSizes[0] ?: DpSize(width = 130.dp, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        firstAnimatedPosition.x.roundToInt(),
+                        firstAnimatedPosition.y.roundToInt()
+                    )
+                }
         ) {
-            // from school/team, draft info, career info
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .onGloballyPositioned { layoutCoordinates ->
-                        val itemSize = layoutCoordinates.size
-                        val position = layoutCoordinates.positionInWindow()
+            NBAPlayerInfoFirstItem(contentsAlpha = contentsAlpha)
+        }
 
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
+        // logo, team, name
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .size(itemSizes[1] ?: DpSize(width = 130.dp, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        secondAnimatedPosition.x.roundToInt(),
+                        secondAnimatedPosition.y.roundToInt()
+                    )
+                }
+        ) {
+            NBAPlayerInfoSecondItem(contentsAlpha = contentsAlpha)
+        }
 
-                        // Calculate the center of the InfoItem
-                        val centerX = relativeX + itemSize.width / 2f
-                        val centerY = relativeY + itemSize.height / 2f
+        // jersey, position
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .size(itemSizes[2] ?: DpSize(width = 130.dp, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        thirdAnimatedPosition.x.roundToInt(),
+                        thirdAnimatedPosition.y.roundToInt()
+                    )
+                }
+        ) {
+            NBAPlayerInfoThirdItem(contentsAlpha = contentsAlpha)
+        }
 
-                        itemSizes[3] = with(density) {
-                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                        }
-                        itemPositions[3] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
-                    }
-                    .widthIn(max = 130.dp)
-            ) {
-                NBAPlayerInfoFourthItem()
-            }
+        // from school/team, draft info, career info
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .size(itemSizes[3] ?: DpSize(width = 130.dp, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        fourthAnimatedPosition.x.roundToInt(),
+                        fourthAnimatedPosition.y.roundToInt()
+                    )
+                }
+        ) {
+            NBAPlayerInfoFourthItem(contentsAlpha = contentsAlpha)
+        }
 
-            // country, birth, age
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
-                    .onGloballyPositioned { layoutCoordinates ->
-                        val itemSize = layoutCoordinates.size
-                        val position = layoutCoordinates.positionInWindow()
+        // country, birth, age
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .size(itemSizes[4] ?: DpSize(width = 130.dp, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        fifthAnimatedPosition.x.roundToInt(),
+                        fifthAnimatedPosition.y.roundToInt()
+                    )
+                }
+        ) {
+            NBAPlayerInfoFifthItem(contentsAlpha = contentsAlpha)
+        }
 
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
-
-                        // Calculate the center of the InfoItem
-                        val centerX = relativeX + itemSize.width / 2f
-                        val centerY = relativeY + itemSize.height / 2f
-
-                        itemSizes[4] = with(density) {
-                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                        }
-                        itemPositions[4] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
-                    }
-                    .widthIn(max = 130.dp)
-            ) {
-                NBAPlayerInfoFifthItem()
-            }
-
-            // weight(kg/pound), height(cm/feet)
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
-                    .onGloballyPositioned { layoutCoordinates ->
-                        val itemSize = layoutCoordinates.size
-                        val position = layoutCoordinates.positionInWindow()
-
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
-
-                        // Calculate the center of the InfoItem
-                        val centerX = relativeX + itemSize.width / 2f
-                        val centerY = relativeY + itemSize.height / 2f
-
-                        itemSizes[5] = with(density) {
-                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                        }
-                        itemPositions[5] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
-                    }
-                    .widthIn(max = 130.dp)
-            ) {
-                NBAPlayerInfoSixthItem()
-            }
+        // weight(kg/pound), height(cm/feet)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .size(itemSizes[5] ?: DpSize(width = 130.dp, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        sixthAnimatedPosition.x.roundToInt(),
+                        sixthAnimatedPosition.y.roundToInt()
+                    )
+                }
+        ) {
+            NBAPlayerInfoSixthItem(contentsAlpha = contentsAlpha)
         }
 
         // league stats
@@ -297,25 +524,20 @@ fun NBAPlayerInfoView(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(top = 12.dp)
-                .onGloballyPositioned { layoutCoordinates ->
-                    val itemSize = layoutCoordinates.size
-                    val position = layoutCoordinates.positionInWindow()
-
-                    val relativeX = position.x - parentOffset.x
-                    val relativeY = position.y - parentOffset.y
-
-                    // Calculate the center of the InfoItem
-                    val centerX = relativeX + itemSize.width / 2f
-                    val centerY = relativeY + itemSize.height / 2f
-
-                    itemSizes[6] = with(density) {
-                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                .size(itemSizes[6] ?: DpSize(width = screenWidthDp(), height = 150.dp))
+                .offset {
+                    IntOffset(
+                        seventhAnimatedPosition.x.roundToInt(),
+                        seventhAnimatedPosition.y.roundToInt()
+                    )
+                }
+                .clickable {
+                    displayModel?.let {
+                        searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(playerId = it.info.personId))
                     }
-                    itemPositions[6] = Offset(centerX - center.value.x, centerY - center.value.y)
                 }
         ) {
-            NBAPlayerInfoSeventhItem()
+            NBAPlayerInfoSeventhItem(contentsAlpha = contentsAlpha)
         }
 
         // last game
@@ -323,25 +545,18 @@ fun NBAPlayerInfoView(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(top = 12.dp)
-                .onGloballyPositioned { layoutCoordinates ->
-                    val itemSize = layoutCoordinates.size
-                    val position = layoutCoordinates.positionInWindow()
-
-                    val relativeX = position.x - parentOffset.x
-                    val relativeY = position.y - parentOffset.y
-
-                    // Calculate the center of the InfoItem
-                    val centerX = relativeX + itemSize.width / 2f
-                    val centerY = relativeY + itemSize.height / 2f
-
-                    itemSizes[7] = with(density) {
-                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                    }
-                    itemPositions[7] = Offset(centerX - center.value.x, centerY - center.value.y)
+                .size(itemSizes[7] ?: DpSize(width = screenWidthDp(), height = 150.dp))
+                .offset {
+                    IntOffset(
+                        eighthAnimatedPosition.x.roundToInt(),
+                        eighthAnimatedPosition.y.roundToInt()
+                    )
+                }
+                .clickable {
+                    searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
                 }
         ) {
-            NBAPlayerInfoEighthItem()
+            NBAPlayerInfoEighthItem(contentsAlpha = contentsAlpha)
         }
 
         // next game
@@ -349,227 +564,19 @@ fun NBAPlayerInfoView(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(top = 12.dp)
-                .onGloballyPositioned { layoutCoordinates ->
-                    val itemSize = layoutCoordinates.size
-                    val position = layoutCoordinates.positionInWindow()
-
-                    val relativeX = position.x - parentOffset.x
-                    val relativeY = position.y - parentOffset.y
-
-                    // Calculate the center of the InfoItem
-                    val centerX = relativeX + itemSize.width / 2f
-                    val centerY = relativeY + itemSize.height / 2f
-
-                    itemSizes[8] = with(density) {
-                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                    }
-                    itemPositions[8] = Offset(centerX - center.value.x, centerY - center.value.y)
+                .size(itemSizes[8] ?: DpSize(width = screenWidthDp(), height = 150.dp))
+                .offset {
+                    IntOffset(
+                        ninethAnimatedPosition.x.roundToInt(),
+                        ninethAnimatedPosition.y.roundToInt()
+                    )
+                }
+                .clickable {
+                    searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
                 }
         ) {
-            NBAPlayerInfoNinethItem()
+            NBAPlayerInfoNinethItem(contentsAlpha = contentsAlpha)
         }
-    }
-
-    /* ---------------------
-       visible ui
-       - with animation effect
-       --------------------- */
-    val firstPosition = itemPositions[0] ?: Offset.Zero
-    val firstAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) firstPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val secondPosition = itemPositions[1] ?: Offset.Zero
-    val secondAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) secondPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val thirdPosition = itemPositions[2] ?: Offset.Zero
-    val thirdAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) thirdPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val fourthPosition = itemPositions[3] ?: Offset.Zero
-    val fourthAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) fourthPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val fifthPosition = itemPositions[4] ?: Offset.Zero
-    val fifthAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) fifthPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val sixthPosition = itemPositions[5] ?: Offset.Zero
-    val sixthAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) sixthPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val seventhPosition = itemPositions[6] ?: Offset.Zero
-    val seventhAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) seventhPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val eighthPosition = itemPositions[7] ?: Offset.Zero
-    val eighthAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) eighthPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val ninethPosition = itemPositions[8] ?: Offset.Zero
-    val ninethAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) ninethPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-
-    // photo, name
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .size(itemSizes[0] ?: DpSize(width = 130.dp, height = 150.dp))
-            .offset {
-                IntOffset(
-                    firstAnimatedPosition.x.roundToInt(),
-                    firstAnimatedPosition.y.roundToInt()
-                )
-            }
-    ) {
-        NBAPlayerInfoFirstItem(contentsAlpha = contentsAlpha)
-    }
-
-    // logo, team, name
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .size(itemSizes[1] ?: DpSize(width = 130.dp, height = 150.dp))
-            .offset {
-                IntOffset(
-                    secondAnimatedPosition.x.roundToInt(),
-                    secondAnimatedPosition.y.roundToInt()
-                )
-            }
-    ) {
-        NBAPlayerInfoSecondItem(contentsAlpha = contentsAlpha)
-    }
-
-    // jersey, position
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .size(itemSizes[2] ?: DpSize(width = 130.dp, height = 150.dp))
-            .offset {
-                IntOffset(
-                    thirdAnimatedPosition.x.roundToInt(),
-                    thirdAnimatedPosition.y.roundToInt()
-                )
-            }
-    ) {
-        NBAPlayerInfoThirdItem(contentsAlpha = contentsAlpha)
-    }
-
-    // from school/team, draft info, career info
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .size(itemSizes[3] ?: DpSize(width = 130.dp, height = 150.dp))
-            .offset {
-                IntOffset(
-                    fourthAnimatedPosition.x.roundToInt(),
-                    fourthAnimatedPosition.y.roundToInt()
-                )
-            }
-    ) {
-        NBAPlayerInfoFourthItem(contentsAlpha = contentsAlpha)
-    }
-
-    // country, birth, age
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .size(itemSizes[4] ?: DpSize(width = 130.dp, height = 150.dp))
-            .offset {
-                IntOffset(
-                    fifthAnimatedPosition.x.roundToInt(),
-                    fifthAnimatedPosition.y.roundToInt()
-                )
-            }
-    ) {
-        NBAPlayerInfoFifthItem(contentsAlpha = contentsAlpha)
-    }
-
-    // weight(kg/pound), height(cm/feet)
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .size(itemSizes[5] ?: DpSize(width = 130.dp, height = 150.dp))
-            .offset {
-                IntOffset(
-                    sixthAnimatedPosition.x.roundToInt(),
-                    sixthAnimatedPosition.y.roundToInt()
-                )
-            }
-    ) {
-        NBAPlayerInfoSixthItem(contentsAlpha = contentsAlpha)
-    }
-
-    // league stats
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .size(itemSizes[6] ?: DpSize(width = screenWidthDp(), height = 150.dp))
-            .offset {
-                IntOffset(
-                    seventhAnimatedPosition.x.roundToInt(),
-                    seventhAnimatedPosition.y.roundToInt()
-                )
-            }
-            .clickable {
-                displayModel?.let {
-                    searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(playerId = it.info.personId))
-                }
-            }
-    ) {
-        NBAPlayerInfoSeventhItem(contentsAlpha = contentsAlpha)
-    }
-
-    // last game
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .size(itemSizes[7] ?: DpSize(width = screenWidthDp(), height = 150.dp))
-            .offset {
-                IntOffset(
-                    eighthAnimatedPosition.x.roundToInt(),
-                    eighthAnimatedPosition.y.roundToInt()
-                )
-            }
-            .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
-            }
-    ) {
-        NBAPlayerInfoEighthItem(contentsAlpha = contentsAlpha)
-    }
-
-    // next game
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .size(itemSizes[8] ?: DpSize(width = screenWidthDp(), height = 150.dp))
-            .offset {
-                IntOffset(
-                    ninethAnimatedPosition.x.roundToInt(),
-                    ninethAnimatedPosition.y.roundToInt()
-                )
-            }
-            .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
-            }
-    ) {
-        NBAPlayerInfoNinethItem(contentsAlpha = contentsAlpha)
     }
 }
 
@@ -594,12 +601,12 @@ fun NBAPlayerInfoFirstItem(
         }
 
         URLImage(
-            url = player.playerPhoto,
+            url = NBAUtil.playerPhotoUrl(player.personId),
             modifier = Modifier.alpha(contentsAlpha)
         )
 
         Text(
-            text = player.krname,
+            text = nbaPlayerInfoViewModel.playerNameDictionary[player.displayFirstLast.lowercase()] ?: player.displayFirstLast,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.alpha(contentsAlpha)
         )
@@ -634,14 +641,15 @@ fun NBAPlayerInfoSecondItem(
             HCapsuleBar()
         }
 
-        // TODO: "소속팀" 제목 표시 필요
+        // TODO: "소속팀" 라벨 표시 필요
         URLImage(
-            url = player.teamLogo,
-            modifier = Modifier.alpha(contentsAlpha)
+            url = NBAUtil.teamLogoUrl(player.teamId),
+            modifier = Modifier.alpha(contentsAlpha),
+            isSvg = true
         )
 
         Text(
-            text = "골든스테이트 워리어스",
+            text = nbaPlayerInfoViewModel.teamNameDictionary["full_${player.teamId}"] ?: "${player.teamCity} ${player.teamName}",
             fontWeight = FontWeight.Medium,
             modifier = Modifier.alpha(contentsAlpha)
         )
@@ -995,7 +1003,7 @@ fun NBAPlayerInfoEighthItem(
                         modifier = Modifier.height(25.dp)
                     ) {
                         Text(
-                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = homeTeam?.teamName ?: ""),
+                            text = if (homeTeam == null) "" else nbaPlayerInfoViewModel.teamNameDictionary["short_${homeTeam.teamId}"] ?: homeTeam.teamCity,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Light,
                             maxLines = 1
@@ -1021,7 +1029,7 @@ fun NBAPlayerInfoEighthItem(
                         )
 
                         Text(
-                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = awayTeam?.teamName ?: ""),
+                            text = if (awayTeam == null) "" else nbaPlayerInfoViewModel.teamNameDictionary["short_${awayTeam.teamId}"] ?: awayTeam.teamCity,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Light,
                             maxLines = 1
@@ -1033,7 +1041,7 @@ fun NBAPlayerInfoEighthItem(
                         modifier = Modifier.height(nbaPlayerInfoViewModel.itemHeight)
                     ) {
                         Text(
-                            text = CalendarUtil.formatDate(lastGame.gameSummary?.date ?: ""),
+                            text = CalendarUtil.formatDate(lastGame.gameSummary?.date),
                             fontSize = 15.sp
                         )
                     }
@@ -1104,8 +1112,7 @@ fun NBAPlayerInfoNinethItem(
         )
 
         nextGame?.let {
-            val homeTeam = nextGame.lastMeeting?.lastGameHomeTeamName
-            val awayTeam = nextGame.lastMeeting?.lastGameVisitorTeamName
+            val lastMeeting = nextGame.lastMeeting
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1114,7 +1121,7 @@ fun NBAPlayerInfoNinethItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = homeTeam ?: ""),
+                    text = if (lastMeeting?.lastGameHomeTeamId == null) "" else nbaPlayerInfoViewModel.teamNameDictionary["short_${lastMeeting.lastGameHomeTeamId}"] ?: lastMeeting.lastGameHomeTeamCity,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.End,
                     modifier = Modifier.weight(1f)
@@ -1129,7 +1136,7 @@ fun NBAPlayerInfoNinethItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = awayTeam ?: ""),
+                    text = if (lastMeeting?.lastGameVisitorTeamId == null) "" else nbaPlayerInfoViewModel.teamNameDictionary["short_${lastMeeting.lastGameVisitorTeamId}"] ?: lastMeeting.lastGameVisitorTeamCity,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Start,
                     modifier = Modifier.weight(1f)

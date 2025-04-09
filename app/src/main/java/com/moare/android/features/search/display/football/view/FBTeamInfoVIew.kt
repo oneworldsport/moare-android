@@ -4,9 +4,9 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +18,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -60,8 +59,7 @@ import kotlin.math.roundToInt
 fun FBTeamInfoView(
     searchViewModel: SearchViewModel = hiltViewModel(),
     fbTeamInfoViewModel: FBTeamInfoViewModel = hiltViewModel(),
-    data: FBTeamInfoDisplayModel,
-    center: State<Offset>
+    data: FBTeamInfoDisplayModel
 ) {
     /* ---------------------
        ui state
@@ -79,7 +77,8 @@ fun FBTeamInfoView(
     /* ---------------------
        animation
        --------------------- */
-    var parentOffset by remember { mutableStateOf(Offset.Zero) }
+    var parentPosition by remember { mutableStateOf(Offset.Zero) }
+    var parentCenter by remember { mutableStateOf(Offset.Zero) }
     val itemPositions = remember { mutableStateMapOf<Int, Offset>() }
     var aniPositions by remember { mutableStateOf(false) }
     var showContents by remember { mutableStateOf(false) }
@@ -103,108 +102,283 @@ fun FBTeamInfoView(
     LaunchedEffect(itemPositions) {
         if (itemPositions.size == 6) {
             aniPositions = true
-
             delay(1000)
-
             showContents = true
         }
     }
 
-    /* ---------------------
-       invisible ui
-       - for position
-       --------------------- */
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .onGloballyPositioned { parentCoordinates ->
-                val parentPosition = parentCoordinates.positionInWindow()
-                parentOffset = parentPosition
-            }
-            .alpha(0f)
+    Box(
+        contentAlignment = Alignment.Center,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
+        /* ---------------------
+           invisible ui
+           - for position
+           --------------------- */
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .onGloballyPositioned { parentCoordinates ->
+                    parentPosition = parentCoordinates.positionInWindow()
+                    parentCenter = Offset(
+                        x = parentCoordinates.size.width / 2f,
+                        y = parentCoordinates.size.height / 2f
+                    )
+                }
+                .alpha(0f)
         ) {
-            // logo, name
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // logo, name
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
+
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
+
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
+
+                            itemSizes[0] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[0] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
+                        }
+                        .widthIn(max = 130.dp)
+                ) {
+                    FBTeamInfoFirstItem()
+                }
+
+                // founded, city, country
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
+
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
+
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
+
+                            itemSizes[1] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[1] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
+                        }
+                        .widthIn(max = 130.dp)
+                ) {
+                    FBTeamInfoSecondItem()
+                }
+
+                // venue
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
+
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
+
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
+
+                            itemSizes[2] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[2] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
+                        }
+                        .widthIn(max = 130.dp)
+                ) {
+                    FBTeamInfoThirdItem()
+                }
+            }
+
+            // league stats
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
+                    .padding(top = 12.dp)
                     .onGloballyPositioned { layoutCoordinates ->
                         val itemSize = layoutCoordinates.size
                         val position = layoutCoordinates.positionInWindow()
 
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
+                        val relativeX = position.x - parentPosition.x
+                        val relativeY = position.y - parentPosition.y
 
                         // Calculate the center of the InfoItem
                         val centerX = relativeX + itemSize.width / 2f
                         val centerY = relativeY + itemSize.height / 2f
 
-                        itemSizes[0] = with(density) {
+                        itemSizes[3] = with(density) {
                             DpSize(itemSize.width.toDp(), itemSize.height.toDp())
                         }
-                        itemPositions[0] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
+                        itemPositions[3] =
+                            Offset(centerX - parentCenter.x, centerY - parentCenter.y)
                     }
-                    .widthIn(max = 130.dp)
             ) {
-                FBTeamInfoFirstItem()
+                FBTeamInfoFourthItem()
             }
 
-            // founded, city, country
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            Row(
+                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .onGloballyPositioned { layoutCoordinates ->
-                        val itemSize = layoutCoordinates.size
-                        val position = layoutCoordinates.positionInWindow()
-
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
-
-                        // Calculate the center of the InfoItem
-                        val centerX = relativeX + itemSize.width / 2f
-                        val centerY = relativeY + itemSize.height / 2f
-
-                        itemSizes[1] = with(density) {
-                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                        }
-                        itemPositions[1] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
-                    }
-                    .widthIn(max = 130.dp)
+                    .padding(top = 12.dp)
+                    .fillMaxWidth()
             ) {
-                FBTeamInfoSecondItem()
-            }
+                // last game stats
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
 
-            // venue
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
-                    .onGloballyPositioned { layoutCoordinates ->
-                        val itemSize = layoutCoordinates.size
-                        val position = layoutCoordinates.positionInWindow()
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
 
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
 
-                        // Calculate the center of the InfoItem
-                        val centerX = relativeX + itemSize.width / 2f
-                        val centerY = relativeY + itemSize.height / 2f
-
-                        itemSizes[2] = with(density) {
-                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            itemSizes[4] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[4] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
                         }
-                        itemPositions[2] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
-                    }
-                    .widthIn(max = 130.dp)
-            ) {
-                FBTeamInfoThirdItem()
+                ) {
+                    FBTeamInfoFifthItem()
+                }
+
+                // next game stats
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .onGloballyPositioned { layoutCoordinates ->
+                            val itemSize = layoutCoordinates.size
+                            val position = layoutCoordinates.positionInWindow()
+
+                            val relativeX = position.x - parentPosition.x
+                            val relativeY = position.y - parentPosition.y
+
+                            // Calculate the center of the InfoItem
+                            val centerX = relativeX + itemSize.width / 2f
+                            val centerY = relativeY + itemSize.height / 2f
+
+                            itemSizes[5] = with(density) {
+                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                            }
+                            itemPositions[5] =
+                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
+                        }
+                        .widthIn(max = screenWidthDp() / 2)
+                ) {
+                    FBTeamInfoSixthItem()
+                }
             }
+        }
+
+        /* ---------------------
+           visible ui
+           - with animation effect
+           --------------------- */
+        val firstPosition = itemPositions[0] ?: Offset.Zero
+        val firstAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) firstPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val secondPosition = itemPositions[1] ?: Offset.Zero
+        val secondAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) secondPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val thirdPosition = itemPositions[2] ?: Offset.Zero
+        val thirdAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) thirdPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val fourthPosition = itemPositions[3] ?: Offset.Zero
+        val fourthAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) fourthPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val fifthPosition = itemPositions[4] ?: Offset.Zero
+        val fifthAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) fifthPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+        val sixthPosition = itemPositions[5] ?: Offset.Zero
+        val sixthAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) sixthPosition else Offset.Zero,
+            animationSpec = tween(1000),
+        )
+
+        // logo, name
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .size(itemSizes[0] ?: DpSize(width = 130.dp, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        firstAnimatedPosition.x.roundToInt(),
+                        firstAnimatedPosition.y.roundToInt()
+                    )
+                }
+        ) {
+            FBTeamInfoFirstItem(contentsAlpha = contentsAlpha)
+        }
+
+        // founded, city, country
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .size(itemSizes[1] ?: DpSize(width = 130.dp, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        secondAnimatedPosition.x.roundToInt(),
+                        secondAnimatedPosition.y.roundToInt()
+                    )
+                }
+        ) {
+            FBTeamInfoSecondItem(contentsAlpha = contentsAlpha)
+        }
+
+        // venue
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .size(itemSizes[2] ?: DpSize(width = 130.dp, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        thirdAnimatedPosition.x.roundToInt(),
+                        thirdAnimatedPosition.y.roundToInt()
+                    )
+                }
+        ) {
+            FBTeamInfoThirdItem(contentsAlpha = contentsAlpha)
         }
 
         // league stats
@@ -212,228 +386,59 @@ fun FBTeamInfoView(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(top = 12.dp)
-                .onGloballyPositioned { layoutCoordinates ->
-                    val itemSize = layoutCoordinates.size
-                    val position = layoutCoordinates.positionInWindow()
-
-                    val relativeX = position.x - parentOffset.x
-                    val relativeY = position.y - parentOffset.y
-
-                    // Calculate the center of the InfoItem
-                    val centerX = relativeX + itemSize.width / 2f
-                    val centerY = relativeY + itemSize.height / 2f
-
-                    itemSizes[3] = with(density) {
-                        DpSize(itemSize.width.toDp(), itemSize.height.toDp())
+                .size(itemSizes[3] ?: DpSize(width = screenWidthDp(), height = 150.dp))
+                .offset {
+                    IntOffset(
+                        fourthAnimatedPosition.x.roundToInt(),
+                        fourthAnimatedPosition.y.roundToInt()
+                    )
+                }
+                .clickable {
+                    displayModel?.let {
+                        searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
                     }
-                    itemPositions[3] = Offset(centerX - center.value.x, centerY - center.value.y)
                 }
         ) {
-            FBTeamInfoFourthItem()
+            FBTeamInfoFourthItem(contentsAlpha = contentsAlpha)
         }
 
-        Row(
-            horizontalArrangement = Arrangement.Center,
+        // last game stats
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(top = 12.dp)
-                .fillMaxWidth()
-        ) {
-            // last game stats
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .weight(1f)
-                    .onGloballyPositioned { layoutCoordinates ->
-                        val itemSize = layoutCoordinates.size
-                        val position = layoutCoordinates.positionInWindow()
-
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
-
-                        // Calculate the center of the InfoItem
-                        val centerX = relativeX + itemSize.width / 2f
-                        val centerY = relativeY + itemSize.height / 2f
-
-                        itemSizes[4] = with(density) {
-                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                        }
-                        itemPositions[4] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
-                    }
-            ) {
-                FBTeamInfoFifthItem()
-            }
-
-            // next game stats
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .weight(1f)
-                    .onGloballyPositioned { layoutCoordinates ->
-                        val itemSize = layoutCoordinates.size
-                        val position = layoutCoordinates.positionInWindow()
-
-                        val relativeX = position.x - parentOffset.x
-                        val relativeY = position.y - parentOffset.y
-
-                        // Calculate the center of the InfoItem
-                        val centerX = relativeX + itemSize.width / 2f
-                        val centerY = relativeY + itemSize.height / 2f
-
-                        itemSizes[5] = with(density) {
-                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                        }
-                        itemPositions[5] =
-                            Offset(centerX - center.value.x, centerY - center.value.y)
-                    }
-                    .widthIn(max = screenWidthDp() / 2)
-            ) {
-                FBTeamInfoSixthItem()
-            }
-        }
-    }
-
-    /* ---------------------
-       visible ui
-       - with animation effect
-       --------------------- */
-    val firstPosition = itemPositions[0] ?: Offset.Zero
-    val firstAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) firstPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val secondPosition = itemPositions[1] ?: Offset.Zero
-    val secondAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) secondPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val thirdPosition = itemPositions[2] ?: Offset.Zero
-    val thirdAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) thirdPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val fourthPosition = itemPositions[3] ?: Offset.Zero
-    val fourthAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) fourthPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val fifthPosition = itemPositions[4] ?: Offset.Zero
-    val fifthAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) fifthPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-    val sixthPosition = itemPositions[5] ?: Offset.Zero
-    val sixthAnimatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) sixthPosition else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-
-    // logo, name
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .size(itemSizes[0] ?: DpSize(width = 130.dp, height = 150.dp))
-            .offset {
-                IntOffset(
-                    firstAnimatedPosition.x.roundToInt(),
-                    firstAnimatedPosition.y.roundToInt()
-                )
-            }
-    ) {
-        FBTeamInfoFirstItem(contentsAlpha = contentsAlpha)
-    }
-
-    // founded, city, country
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .size(itemSizes[1] ?: DpSize(width = 130.dp, height = 150.dp))
-            .offset {
-                IntOffset(
-                    secondAnimatedPosition.x.roundToInt(),
-                    secondAnimatedPosition.y.roundToInt()
-                )
-            }
-    ) {
-        FBTeamInfoSecondItem(contentsAlpha = contentsAlpha)
-    }
-
-    // venue
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .size(itemSizes[2] ?: DpSize(width = 130.dp, height = 150.dp))
-            .offset {
-                IntOffset(
-                    thirdAnimatedPosition.x.roundToInt(),
-                    thirdAnimatedPosition.y.roundToInt()
-                )
-            }
-    ) {
-        FBTeamInfoThirdItem(contentsAlpha = contentsAlpha)
-    }
-
-    // league stats
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .size(itemSizes[3] ?: DpSize(width = screenWidthDp(), height = 150.dp))
-            .offset {
-                IntOffset(
-                    fourthAnimatedPosition.x.roundToInt(),
-                    fourthAnimatedPosition.y.roundToInt()
-                )
-            }
-            .clickable {
-                displayModel?.let {
-                    searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
+                .size(itemSizes[4] ?: DpSize(width = screenWidthDp() / 2, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        fifthAnimatedPosition.x.roundToInt(),
+                        fifthAnimatedPosition.y.roundToInt()
+                    )
                 }
-            }
-    ) {
-        FBTeamInfoFourthItem(contentsAlpha = contentsAlpha)
-    }
+                .clickable {
+                    searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
+                }
+        ) {
+            FBTeamInfoFifthItem(contentsAlpha = contentsAlpha)
+        }
 
-    // last game stats
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .size(itemSizes[4] ?: DpSize(width = screenWidthDp() / 2, height = 150.dp))
-            .offset {
-                IntOffset(
-                    fifthAnimatedPosition.x.roundToInt(),
-                    fifthAnimatedPosition.y.roundToInt()
-                )
-            }
-            .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
-            }
-    ) {
-        FBTeamInfoFifthItem(contentsAlpha = contentsAlpha)
-    }
-
-    // next game stats
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .size(itemSizes[5] ?: DpSize(width = screenWidthDp() / 2, height = 150.dp))
-            .offset {
-                IntOffset(
-                    sixthAnimatedPosition.x.roundToInt(),
-                    sixthAnimatedPosition.y.roundToInt()
-                )
-            }
-            .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
-            }
-    ) {
-        FBTeamInfoSixthItem(contentsAlpha = contentsAlpha)
+        // next game stats
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .size(itemSizes[5] ?: DpSize(width = screenWidthDp() / 2, height = 150.dp))
+                .offset {
+                    IntOffset(
+                        sixthAnimatedPosition.x.roundToInt(),
+                        sixthAnimatedPosition.y.roundToInt()
+                    )
+                }
+                .clickable {
+                    searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
+                }
+        ) {
+            FBTeamInfoSixthItem(contentsAlpha = contentsAlpha)
+        }
     }
 }
 

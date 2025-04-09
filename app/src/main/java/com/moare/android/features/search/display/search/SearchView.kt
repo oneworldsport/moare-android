@@ -308,69 +308,44 @@ fun SearchView(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // TODO: Box 제거
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .onGloballyPositioned { layoutCoordinates ->
-                                        // Calculate the center of the Box
-                                        dataContainerCenter.value = Offset(
-                                            x = layoutCoordinates.size.width / 2f,
-                                            y = layoutCoordinates.size.height / 2f
-                                        )
-                                    }
-                            ) {
-                                // football_player_info
-                                fbPlayerInfoData?.let {
-                                    FBPlayerInfoView(
-                                        data = it,
-                                        center = dataContainerCenter
-                                    )
-                                }
+                            // football_player_info
+                            fbPlayerInfoData?.let {
+                                FBPlayerInfoView(data = it)
+                            }
 
-                                // football_player_stats
-                                fbPlayerStatsData?.let {
-                                    FBPlayerStatsView(data = it)
-                                }
+                            // football_player_stats
+                            fbPlayerStatsData?.let {
+                                FBPlayerStatsView(data = it)
+                            }
 
-                                // football_team_info
-                                fbTeamInfoData?.let {
-                                    FBTeamInfoView(
-                                        data = it,
-                                        center = dataContainerCenter
-                                    )
-                                }
+                            // football_team_info
+                            fbTeamInfoData?.let {
+                                FBTeamInfoView(data = it)
+                            }
 
-                                // football_team_stats
-                                fbTeamStatsData?.let {
-                                    FBTeamStatsView(
-                                        data = it,
-                                        center = dataContainerCenter
-                                    )
-                                }
+                            // football_team_stats
+                            fbTeamStatsData?.let {
+                                FBTeamStatsView(data = it)
+                            }
 
-                                // basketball_player_info
-                                nbaPlayerInfoData?.let {
-                                    NBAPlayerInfoView(data = it )
-                                }
+                            // basketball_player_info
+                            nbaPlayerInfoData?.let {
+                                NBAPlayerInfoView(data = it )
+                            }
 
-                                // basketball_player_stats
-                                nbaPlayerStatsData?.let {
-                                    NBAPlayerStatsView(data = it)
-                                }
+                            // basketball_player_stats
+                            nbaPlayerStatsData?.let {
+                                NBAPlayerStatsView(data = it)
+                            }
 
-                                // basketball_team_info
-                                nbaTeamInfoData?.let {
-                                    NBATeamInfoView(
-                                        data = it,
-                                        center = dataContainerCenter
-                                    )
-                                }
+                            // basketball_team_info
+                            nbaTeamInfoData?.let {
+                                NBATeamInfoView(data = it)
+                            }
 
-                                // basketball_team_stats
-                                nbaTeamStatsData?.let {
-                                    NBATeamStatsView(data = it)
-                                }
+                            // basketball_team_stats
+                            nbaTeamStatsData?.let {
+                                NBATeamStatsView(data = it)
                             }
 
                             // football_player_standings
