@@ -80,14 +80,18 @@ class NBAGameStatsViewModel @Inject constructor(
     private var _selectedTeamIndex = MutableStateFlow(0)
     val selectedTeamIndex: StateFlow<Int> = _selectedTeamIndex
 
-    // etc
+    /* ---------------------
+       etc
+       --------------------- */
     var shouldScrollCategory = false
     var homeTeamId = 0
     var awayTeamId = 0
     var playerNameDictionary: Map<String, String> = emptyMap()
+    var teamNameDictionary: Map<String, String> = emptyMap()
 
     init {
         playerNameDictionary = nameProvider.getDictionary("nba_player")
+        teamNameDictionary = nameProvider.getDictionary("nba_team")
     }
 
     /* ---------------------

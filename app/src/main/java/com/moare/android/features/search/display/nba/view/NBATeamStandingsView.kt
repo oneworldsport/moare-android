@@ -332,7 +332,7 @@ fun NBATeamStandingsFirstDataListItem(
         )
 
         Text(
-            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.team.fullName),
+            text = nbaTeamStandingsViewModel.teamNameDictionary["short_${data.team.id}"] ?: data.team.fullName,
             fontSize = 12.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,

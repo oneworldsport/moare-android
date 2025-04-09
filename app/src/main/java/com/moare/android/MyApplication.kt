@@ -27,6 +27,13 @@ class MyApplication : Application() {
                 s3Key = "name_dictionary/nba_player_name_dictionary.json",
                 eTagKey = stringPreferencesKey("nbaPlayerNameDictionaryETag")
             )
+
+            AWSUtils.checkNameDictionary(
+                context = this@MyApplication,
+                category = "nba_team",
+                s3Key = "name_dictionary/nba_team_name_dictionary.json",
+                eTagKey = stringPreferencesKey("nbaTeamNameDictionaryETag")
+            )
         }
 
         // STUDY: Hilt를 통해 AppModule에 싱글톤으로 선언된 AmazonTranslateClient를 object EnNameTranslationUtils에서 사용하기 위해 EnNameTranslationUtils에 초기화하는 과정

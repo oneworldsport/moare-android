@@ -2,6 +2,7 @@ package com.moare.android.features.search.display.nba.viewmodel
 
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStatsDisplayModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,6 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NBAPlayerStatsViewModel @Inject constructor(
+    private val nameProvider: TranslatedNameProvider
 ) : MVIViewModel<NBAPlayerStatsViewModel.Intent, NBAPlayerStatsDisplayModel>() {
     /* ---------------------
        constants
@@ -26,6 +28,17 @@ class NBAPlayerStatsViewModel @Inject constructor(
     /* ---------------------
        ui state
        --------------------- */
+
+    /* ---------------------
+       etc
+       --------------------- */
+    var playerNameDictionary: Map<String, String> = emptyMap()
+    var teamNameDictionary: Map<String, String> = emptyMap()
+
+    init {
+        playerNameDictionary = nameProvider.getDictionary("nba_player")
+        teamNameDictionary = nameProvider.getDictionary("nba_team")
+    }
 
     /* ---------------------
        intent

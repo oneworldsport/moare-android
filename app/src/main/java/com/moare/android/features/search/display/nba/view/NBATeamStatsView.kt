@@ -217,7 +217,7 @@ fun NBATeamStatsTeamInfoItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
-                    text = team.fullName,
+                    text = nbaTeamStatsViewModel.teamNameDictionary["full_${team.id}"] ?: team.fullName,
                     fontWeight = FontWeight.Medium
                 )
 

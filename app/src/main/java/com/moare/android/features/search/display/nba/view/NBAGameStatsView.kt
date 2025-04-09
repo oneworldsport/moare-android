@@ -581,7 +581,7 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
                 ) {
                     // home
                     NBAGameStatsTeamButton(
-                        team = "",
+                        team = nbaGameStatsViewModel.teamNameDictionary["short_${displayModel.game.gameSummary?.homeTeamId}"] ?: "",
                         index = 0,
                         modifier = Modifier
                             .weight(1f)
@@ -596,7 +596,7 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
 
                     // away
                     NBAGameStatsTeamButton(
-                        team = "",
+                        team = nbaGameStatsViewModel.teamNameDictionary["short_${displayModel.game.gameSummary?.visitorTeamId}"] ?: "",
                         index = 1,
                         modifier = Modifier
                             .weight(1f)
@@ -614,7 +614,7 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
                 Modifier.weight(0.3f)
             ) {
                 Text(
-                    text = "장소: ",
+                    text = "장소: ${nbaGameStatsViewModel.teamNameDictionary["venue_${displayModel.game.gameSummary?.homeTeamId}"]}" ?: "",
                     fontSize = 12.sp,
                 )
 

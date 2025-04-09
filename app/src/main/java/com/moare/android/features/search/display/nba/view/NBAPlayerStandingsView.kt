@@ -516,7 +516,7 @@ fun NBAPlayerStandingsFirstDataListItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.player.teamName),
+                    text = nbaPlayerStandingsViewModel.teamNameDictionary["short_${data.player.teamId}"] ?: data.player.teamCity,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Light,
                     color = Color.Gray,

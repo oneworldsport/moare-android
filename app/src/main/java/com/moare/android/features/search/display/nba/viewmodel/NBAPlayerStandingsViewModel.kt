@@ -76,10 +76,13 @@ class NBAPlayerStandingsViewModel @Inject constructor(
     var standings: List<NBAPlayerStandingsDisplay> = emptyList()
     private var selectedEntity: EntityInfo? = null
     private var filteredStandingsEndIndex = 0 // NOTE: one bigger then actual showing end item's index. Because of subList.
-    var playerNameDictionary: Map<String, String> = emptyMap() // TODO: EnNameTranslationUtils 여기로 옮길지 아니면 각 ViewModel마다 선언해줄지 결정 필요
+    var playerNameDictionary: Map<String, String> = emptyMap()
+    var teamNameDictionary: Map<String, String> = emptyMap()
 
     init {
+        // TODO: object에서 EntryPoint를 통해 가져와 사용하는 방법은 지양해야함. 그렇다면 ViewModel마다 주입하지 않고 사용할 수 있는 더 나은 방법이 있을지 고민해볼 필요 있음.
         playerNameDictionary = nameProvider.getDictionary("nba_player")
+        teamNameDictionary = nameProvider.getDictionary("nba_team")
     }
 
     /* ---------------------

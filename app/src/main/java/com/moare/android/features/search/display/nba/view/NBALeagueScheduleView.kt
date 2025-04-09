@@ -390,7 +390,7 @@ fun NBALeagueScheduleListItem(
             )
 
             Text(
-                text = "",
+                text = nbaLeagueScheduleViewModel.teamNameDictionary["short_$homeTeamId"] ?: "",
                 fontSize = 13.sp,
                 maxLines = 2
             )
@@ -500,7 +500,7 @@ fun NBALeagueScheduleListItem(
             )
 
             Text(
-                text = "",
+                text = nbaLeagueScheduleViewModel.teamNameDictionary["short_$awayTeamId"] ?: "",
                 fontSize = 13.sp,
                 maxLines = 2
             )

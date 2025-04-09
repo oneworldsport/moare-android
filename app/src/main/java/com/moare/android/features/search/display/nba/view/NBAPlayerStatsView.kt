@@ -214,7 +214,7 @@ fun NBAPlayerStatsPlayerInfoItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
-                    text = "player.krname",
+                    text = nbaPlayerStatsViewModel.playerNameDictionary[player.displayFirstLast] ?: player.displayFirstLast,
                     fontWeight = FontWeight.Medium
                 )
 
@@ -250,7 +250,7 @@ fun NBAPlayerStatsPlayerInfoItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = player.teamName),
+                    text = nbaPlayerStatsViewModel.teamNameDictionary["full_${player.teamId}"] ?: "${player.teamCity} ${player.teamName}",
                     fontWeight = FontWeight.Medium
                 )
 

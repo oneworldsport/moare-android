@@ -1,6 +1,7 @@
 package com.moare.android.features.search.display.nba.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
@@ -14,6 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NBATeamScheduleViewModel @Inject constructor(
+    private val nameProvider: TranslatedNameProvider
 ) : MVIViewModel<NBATeamScheduleViewModel.Intent, NBATeamScheduleDisplayModel>() {
     /* ---------------------
        data state
@@ -32,6 +34,15 @@ class NBATeamScheduleViewModel @Inject constructor(
 
     private val _gameResultOpenedStateList = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     val gameResultOpenedStateList: StateFlow<Map<String, Boolean>> = _gameResultOpenedStateList
+
+    /* ---------------------
+       etc
+       --------------------- */
+    var teamNameDictionary: Map<String, String> = emptyMap()
+
+    init {
+        teamNameDictionary = nameProvider.getDictionary("nba_team")
+    }
 
     /* ---------------------
        intent

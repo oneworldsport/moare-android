@@ -467,7 +467,7 @@ fun NBATeamInfoFirstItem(
         )
 
         Text(
-            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, false, team.fullName),
+            text = nbaTeamInfoViewModel.teamNameDictionary["full_${team.id}"] ?: team.fullName,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.alpha(contentsAlpha)
         )
@@ -706,7 +706,7 @@ fun NBATeamInfoFifthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = homeTeam?.teamName ?: ""),
+                    text = if (homeTeam == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${homeTeam.teamId}"] ?: homeTeam.teamCity,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -741,7 +741,7 @@ fun NBATeamInfoFifthItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = awayTeam?.teamName ?: ""),
+                    text = if (awayTeam == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${awayTeam.teamId}"] ?: awayTeam.teamCity,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -782,8 +782,7 @@ fun NBATeamInfoSixthItem(
         )
 
         nextGame?.let {
-            val homeTeam = nextGame.lastMeeting?.lastGameHomeTeamName
-            val awayTeam = nextGame.lastMeeting?.lastGameVisitorTeamName
+            val lastMeeting = nextGame.lastMeeting
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -791,7 +790,7 @@ fun NBATeamInfoSixthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = homeTeam ?: ""),
+                    text = if (lastMeeting?.lastGameHomeTeamId == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${lastMeeting.lastGameHomeTeamId}"] ?: lastMeeting.lastGameHomeTeamCity,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -808,7 +807,7 @@ fun NBATeamInfoSixthItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = awayTeam ?: ""),
+                    text = if (lastMeeting?.lastGameVisitorTeamId == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${lastMeeting.lastGameVisitorTeamId}"] ?: lastMeeting.lastGameVisitorTeamCity,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
