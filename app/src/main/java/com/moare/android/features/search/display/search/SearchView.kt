@@ -57,6 +57,15 @@ import com.moare.android.features.search.display.football.view.FBTeamInfoView
 import com.moare.android.features.search.display.football.view.FBTeamScheduleView
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
+import com.moare.android.features.search.display.nba.view.NBAGameStatsView
+import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
+import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
+import com.moare.android.features.search.display.nba.view.NBAPlayerStandingsView
+import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
+import com.moare.android.features.search.display.nba.view.NBATeamInfoView
+import com.moare.android.features.search.display.nba.view.NBATeamScheduleView
+import com.moare.android.features.search.display.nba.view.NBATeamStandingsView
+import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.ProgressIndicator
@@ -83,6 +92,7 @@ fun SearchView(
     val searchState by searchViewModel.searchState.collectAsState()
     val barFirstOpened by searchViewModel.barFirstOpened.collectAsState()
     val focusState by searchViewModel.focusState.collectAsState()
+    val notice by searchViewModel.noticeData.collectAsState()
 
     // football
     val fbPlayerInfoData by searchViewModel.fbPlayerInfoData.collectAsState()
@@ -94,6 +104,17 @@ fun SearchView(
     val fbTeamScheduleData by searchViewModel.fbTeamScheduleData.collectAsState()
     val fbLeagueScheduleData by searchViewModel.fbLeagueScheduleData.collectAsState()
     val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
+
+    // nba
+    val nbaPlayerInfoData by searchViewModel.nbaPlayerInfoData.collectAsState()
+    val nbaPlayerStatsData by searchViewModel.nbaPlayerStatsData.collectAsState()
+    val nbaPlayerStandingsData by searchViewModel.nbaPlayerStandingsData.collectAsState()
+    val nbaTeamInfoData by searchViewModel.nbaTeamInfoData.collectAsState()
+    val nbaTeamStatsData by searchViewModel.nbaTeamStatsData.collectAsState()
+    val nbaTeamStandingsData by searchViewModel.nbaTeamStandingsData.collectAsState()
+    val nbaTeamScheduleData by searchViewModel.nbaTeamScheduleData.collectAsState()
+    val nbaLeagueScheduleData by searchViewModel.nbaLeagueScheduleData.collectAsState()
+    val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
 
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
@@ -183,6 +204,7 @@ fun SearchView(
                     horizontalAlignment = Alignment.End
                 ) {
                     NoticeBox(
+                        notice = notice,
                         modifier = Modifier.alpha(noticeAlpha)
                     )
 
@@ -264,7 +286,8 @@ fun SearchView(
 
             // loading
             AnimatedVisibility(
-                visible = searchDataState == ApiFetchState.Fetching
+                visible = searchDataState == ApiFetchState.Fetching,
+                modifier = Modifier.padding(top = 8.dp)
             ) {
                 ProgressIndicator()
             }
@@ -286,48 +309,44 @@ fun SearchView(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .onGloballyPositioned { layoutCoordinates ->
-                                        // Calculate the center of the Box
-                                        dataContainerCenter.value = Offset(
-                                            x = layoutCoordinates.size.width / 2f,
-                                            y = layoutCoordinates.size.height / 2f
-                                        )
-                                    }
-                            ) {
-                                // football_player_info
-                                fbPlayerInfoData?.let {
-                                    FBPlayerInfoView(
-                                        data = it,
-                                        center = dataContainerCenter
-                                    )
-                                }
+                            // football_player_info
+                            fbPlayerInfoData?.let {
+                                FBPlayerInfoView(data = it)
+                            }
 
-                                // football_player_stats
-                                fbPlayerStatsData?.let {
-                                    FBPlayerStatsView(
-                                        data = it,
-                                        center = dataContainerCenter
-                                    )
-                                }
+                            // football_player_stats
+                            fbPlayerStatsData?.let {
+                                FBPlayerStatsView(data = it)
+                            }
 
-                                // football_team_info
-                                fbTeamInfoData?.let {
-                                    FBTeamInfoView(
-                                        data = it,
-                                        center = dataContainerCenter
-                                    )
-                                }
+                            // football_team_info
+                            fbTeamInfoData?.let {
+                                FBTeamInfoView(data = it)
+                            }
 
-                                // football_team_stats
-                                fbTeamStatsData?.let {
-                                    FBTeamStatsView(
-                                        data = it,
-                                        center = dataContainerCenter
-                                    )
-                                }
+                            // football_team_stats
+                            fbTeamStatsData?.let {
+                                FBTeamStatsView(data = it)
+                            }
+
+                            // basketball_player_info
+                            nbaPlayerInfoData?.let {
+                                NBAPlayerInfoView(data = it )
+                            }
+
+                            // basketball_player_stats
+                            nbaPlayerStatsData?.let {
+                                NBAPlayerStatsView(data = it)
+                            }
+
+                            // basketball_team_info
+                            nbaTeamInfoData?.let {
+                                NBATeamInfoView(data = it)
+                            }
+
+                            // basketball_team_stats
+                            nbaTeamStatsData?.let {
+                                NBATeamStatsView(data = it)
                             }
 
                             // football_player_standings
@@ -363,6 +382,31 @@ fun SearchView(
                                 FBGameStatsView(
                                     data = it
                                 )
+                            }
+
+                            // basketball_player_standings
+                            nbaPlayerStandingsData?.let {
+                                NBAPlayerStandingsView(data = it)
+                            }
+
+                            // basketball_team_standings
+                            nbaTeamStandingsData?.let {
+                                NBATeamStandingsView(data = it)
+                            }
+
+                            // basketball_team_schedule
+                            nbaTeamScheduleData?.let {
+                                NBATeamScheduleView(data = it)
+                            }
+
+                            // basketball_league_schedule
+                            nbaLeagueScheduleData?.let {
+                                NBALeagueScheduleView(data = it)
+                            }
+
+                            // basketball_game_stats
+                            nbaGameStatsData?.let {
+                                NBAGameStatsView(data = it)
                             }
                         }
                     }

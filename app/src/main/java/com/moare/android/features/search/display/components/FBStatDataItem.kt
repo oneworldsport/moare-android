@@ -1,7 +1,5 @@
 package com.moare.android.features.search.display.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
@@ -10,7 +8,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -20,8 +17,10 @@ import androidx.compose.ui.unit.sp
 fun FBStatDataItem(
     category: String,
     data: String,
-    customFontSize: Int? = null,
+    customCategoryFontSize: Int? = null,
+    customDataFontSize: Int? = null,
     customWidth: Dp? = null,
+    customCategoryHeight: Dp? = null,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -30,10 +29,15 @@ fun FBStatDataItem(
         modifier = modifier
             .width(customWidth ?: 50.dp)
     ) {
-        Text(
-            text = category,
-            fontSize = (customFontSize ?: 15).sp
-        )
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.height(customCategoryHeight ?: 25.dp)
+        ) {
+            Text(
+                text = category,
+                fontSize = (customCategoryFontSize ?: 15).sp
+            )
+        }
 
         // NOTE: use Box to position text at center
         // if Text has height, the text inside cannot be positioned at center
@@ -43,6 +47,7 @@ fun FBStatDataItem(
         ) {
             Text(
                 text = data,
+                fontSize = (customDataFontSize ?: 16).sp,
                 fontWeight = FontWeight.Medium
             )
         }

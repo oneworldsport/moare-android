@@ -127,9 +127,9 @@ fun FBTeamScheduleView(
 
                 CapsuleButton(
                     text = if (isAllResultOpened) {
-                        StringConstants.Football.resultHide
+                        StringConstants.resultHide
                     } else {
-                        StringConstants.Football.resultOpen
+                        StringConstants.resultOpen
                     },
                     color = Color.Gray,
                     modifier = Modifier.padding(end = 8.dp)
@@ -185,7 +185,6 @@ fun FBTeamScheduleListItem(
        ui state
        --------------------- */
     var isResultOpened by remember { mutableStateOf(false) }
-    var venueKrName by remember { mutableStateOf("") }
     var refereeKrName by remember { mutableStateOf("") }
 
     /* ---------------------
@@ -212,15 +211,15 @@ fun FBTeamScheduleListItem(
        --------------------- */
     val gameStatusText = if (isResultOpened) {
         when (data.fixture.status.short) {
-            StringConstants.Football.gameNotStarted -> StringConstants.Football.gameNotStartedStr
+            StringConstants.Football.gameNotStarted -> StringConstants.gameNotStartedStr
             StringConstants.Football.gameFirstHalf -> StringConstants.Football.gameFirstHalfStr
             StringConstants.Football.gameHalftime -> StringConstants.Football.gameHalftimeStr
             StringConstants.Football.gameSecondHalf -> StringConstants.Football.gameSecondHalfStr
-            in StringConstants.Football.gameFinishedList -> StringConstants.Football.gameFinishedStr
+            in StringConstants.Football.gameFinishedList -> StringConstants.gameFinishedStr
             else -> ""
         }
     } else {
-        StringConstants.Football.resultOpen
+        StringConstants.resultOpen
     }
 
     val gameStatusColor = if (isResultOpened) {
@@ -251,7 +250,6 @@ fun FBTeamScheduleListItem(
         fbGameStatsData?.let {
             isResultOpened = true
 
-            venueKrName = EnNameTranslationUtils.translateByAWS(it.game.fixture.venue.name)
             refereeKrName = EnNameTranslationUtils.translateByAWS(it.game.fixture.referee)
         }
     }
@@ -298,7 +296,7 @@ fun FBTeamScheduleListItem(
             )
 
             Text(
-                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.teams.home.name),
+                text = fbTeamScheduleViewModel.teamNameDictionary["short_${data.teams.home.id}"] ?: data.teams.home.name,
                 fontSize = 13.sp,
                 maxLines = 2
             )
@@ -347,30 +345,22 @@ fun FBTeamScheduleListItem(
             }
 
             // game date
-            if (fbGameStatsData != null) {
-                Text(
-                    text = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(vertical = 2.dp)
-                )
-            } else {
-                Text(
-                    text = CalendarUtil.formatDate(data.fixture.date).split(" ")[0],
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
+            Text(
+                text = CalendarUtil.formatDate(data.fixture.date).split(" ")[0],
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 2.dp)
+            )
 
-                Text(
-                    text = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 2.dp)
-                )
-            }
+            Text(
+                text = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
+                fontSize = 12.sp,
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
 
             // venue
             fbGameStatsData?.let {
                 Text(
-                    text = "장소: $venueKrName",
+                    text = "장소: ${fbTeamScheduleViewModel.teamNameDictionary["venue_${data.teams.home.id}"] ?: it.game.fixture.venue.name}",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Light,
                     maxLines = 1,
@@ -420,7 +410,7 @@ fun FBTeamScheduleListItem(
             )
 
             Text(
-                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.teams.away.name),
+                text = fbTeamScheduleViewModel.teamNameDictionary["short_${data.teams.away.id}"] ?: data.teams.away.name,
                 fontSize = 13.sp,
                 maxLines = 2
             )

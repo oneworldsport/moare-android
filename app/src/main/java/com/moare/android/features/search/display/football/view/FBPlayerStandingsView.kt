@@ -115,8 +115,8 @@ fun FBPlayerStandingsView(
         }
     }
 
-    // scroll to category that matches with the keyword,
-    // and when first category list's item is selected by click
+    // Scroll to category that matches with the keyword,
+    // or when first category list's item is selected by click.
     LaunchedEffect(isKeyword, firstSelectedIndex) {
         if (fbPlayerStandingsViewModel.shouldScrollCategory) {
             horizontalScrollState.animateScrollTo(
@@ -159,9 +159,9 @@ fun FBPlayerStandingsView(
        ui
        --------------------- */
     Column(
-        // if set fillMaxSize, AnimatedVisibility works fine on first show.
+        // NOTE: If set fillMaxSize, AnimatedVisibility works fine on first show.
         // But if fillMaxSize not set, AnimatedVisibility doesn't work on first show.
-        // not sure why yet
+        // Not sure why yet
         modifier = Modifier.fillMaxSize()
     ) {
         league?.let {
@@ -172,54 +172,51 @@ fun FBPlayerStandingsView(
             )
         }
 
-        Box(
-            Modifier.padding(top = 6.dp)
+        // category
+        Row(
+            modifier = Modifier.padding(top = 6.dp)
         ) {
-            // category
-            Row {
-                FBPlayerStandingsFirstCategoryItem()
+            FBPlayerStandingsFirstCategoryItem()
 
-                Row(
-                    Modifier.horizontalScroll(horizontalScrollState)
-                ) {
-                    Column {
-                        FBPlayerStandingsFirstCategoryList()
-                        FBPlayerStandingsSecondCategoryList()
-                    }
+            Row(
+                Modifier.horizontalScroll(horizontalScrollState)
+            ) {
+                Column {
+                    FBPlayerStandingsFirstCategoryList()
+                    FBPlayerStandingsSecondCategoryList()
                 }
             }
+        }
 
-            // loading
-            this@Column.AnimatedVisibility(
-                visible = displayDataState == ApiFetchState.Fetching,
-                enter = fadeIn(),
-                exit = fadeOut()
+        // loading
+        AnimatedVisibility(
+            visible = displayDataState == ApiFetchState.Fetching,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    ProgressIndicator()
-                }
+                ProgressIndicator()
             }
+        }
 
-            // standings data
-            this@Column.AnimatedVisibility(
-                visible = displayDataState == ApiFetchState.Success
+        // standings data
+        AnimatedVisibility(
+            visible = displayDataState == ApiFetchState.Success
+        ) {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(verticalScrollState)
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(top = fbPlayerStandingsViewModel.categoryItemHeight * 2)
-                        .verticalScroll(verticalScrollState)
-                ) {
-                    Row {
-                        FBPlayerStandingsFirstDataList()
+                Row {
+                    FBPlayerStandingsFirstDataList()
 
-                        Row(
-                            Modifier.horizontalScroll(horizontalScrollState)
-                        ) {
-                            FBPlayerStandingsDataList()
-                        }
+                    Row(
+                        Modifier.horizontalScroll(horizontalScrollState)
+                    ) {
+                        FBPlayerStandingsDataList()
                     }
                 }
             }
@@ -237,7 +234,7 @@ fun FBPlayerStandingsFirstCategoryItem(
             .height(fbPlayerStandingsViewModel.categoryItemHeight * 2)
     ) {
         Text(
-            text = StringConstants.Football.standingsFirstCategory,
+            text = StringConstants.standingsFirstCategory,
             fontSize = fbPlayerStandingsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -257,7 +254,7 @@ fun FBPlayerStandingsFirstCategoryList(
        --------------------- */
     val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
     val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
-    val etcCategoriesSize = StringConstants.Football.playerStandingsEtcCategories.size
+    val commonCategoriesSize = StringConstants.Football.playerStandingsCommonCategories.size
 
     /* ---------------------
        viewmodel state
@@ -283,7 +280,7 @@ fun FBPlayerStandingsFirstCategoryList(
             )
         } else {
             (itemWidth * attackCategoriesSize) + (barWidth * 2) + (itemWidth * defendCategoriesSize) + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * etcCategoriesSize,
+                itemWidth = itemWidth * commonCategoriesSize,
                 barWidth = 80.dp
             )
         },
@@ -299,13 +296,13 @@ fun FBPlayerStandingsFirstCategoryList(
             modifier = Modifier
                 .height(fbPlayerStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in StringConstants.Football.statsFirstCategories.withIndex()) {
+            for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
                 FBPlayerStandingsFirstCategoryListItem(
                     category = value,
                     index = index
                 )
 
-                if (index != StringConstants.Football.statsFirstCategories.size - 1) {
+                if (index != StringConstants.statsFirstCategories.size - 1) {
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
                 }
             }
@@ -336,15 +333,11 @@ fun FBPlayerStandingsFirstCategoryListItem(
                 } else if (index == 1) {
                     (itemWidth * StringConstants.Football.playerStandingsDefendCategories.size)
                 } else {
-                    (itemWidth * StringConstants.Football.playerStandingsEtcCategories.size)
+                    (itemWidth * StringConstants.Football.playerStandingsCommonCategories.size)
                 }
             )
             .clickable {
-                fbPlayerStandingsViewModel.send(
-                    FBPlayerStandingsViewModel.Intent.SelectFirstCategory(
-                        index
-                    )
-                )
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.SelectFirstCategory(index))
             }
     ) {
         Text(
@@ -365,7 +358,6 @@ fun FBPlayerStandingsSecondCategoryList(
        --------------------- */
     val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
     val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
-    val etcCategoriesSize = StringConstants.Football.playerStandingsEtcCategories.size
 
     /* ---------------------
        viewmodel state
@@ -444,6 +436,9 @@ fun FBPlayerStandingsSecondCategoryListItem(
 fun FBPlayerStandingsFirstDataList(
     fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
 ) {
+    /* ---------------------
+       viewmodel state
+       --------------------- */
     val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
     val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
     val filterStandingsStartIndex by fbPlayerStandingsViewModel.filteredStandingsStartIndex.collectAsState()
@@ -517,7 +512,7 @@ fun FBPlayerStandingsFirstDataListItem(
         ) {
             Column {
                 Text(
-                    text = data.player.krname,
+                    text = fbPlayerStandingsViewModel.playerNameDictionary[data.player.name] ?: data.player.name,
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -526,7 +521,7 @@ fun FBPlayerStandingsFirstDataListItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.stats.team.name),
+                    text = fbPlayerStandingsViewModel.teamNameDictionary["short_${data.stats.team.id}"] ?: data.stats.team.name,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Light,
                     color = Color.Gray,
@@ -551,6 +546,9 @@ fun FBPlayerStandingsDataList(
     val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
     val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
 
+    /* ---------------------
+       viewmodel state
+       --------------------- */
     val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
     val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
     val filteredStandingsStartIndex by fbPlayerStandingsViewModel.filteredStandingsStartIndex.collectAsState()

@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NBAGameStatsResponseModel(
-    val stats: NBAGame
+    val game: NBAGame? = null
 )

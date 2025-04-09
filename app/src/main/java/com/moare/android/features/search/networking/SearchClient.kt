@@ -3,17 +3,20 @@ package com.moare.android.features.search.networking
 import android.content.Context
 import com.moare.android.core.networking.ApiHelper
 import com.moare.android.features.search.models.DataModel
+import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.KeywordInfo
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 //import com.moare.android.features.search.models.DataModelDeserializer
 
 class SearchClient(
+    private val context: Context,
     private val apiHelper: ApiHelper
 ) {
-    suspend fun fetchDataByQuery(context: Context, query: String): DataModel {
+    suspend fun fetchDataByQuery(query: String): DataModel {
         val response = apiHelper.searchApi.searchByQuery(query)
         return DataModel.fromJson(response.string())
-//        return getJson(context, query)
+//        return fetchFromJson(context, "커리 순위")
     }
 
     suspend fun fetchDataByKeyword(keyword: KeywordInfo): DataModel {
@@ -21,8 +24,8 @@ class SearchClient(
         return DataModel.fromJson(response.string())
     }
 
-    suspend fun fetchLeagueSchedule(leagueId: Int, yearMonth: String): DataModel {
-        val response = apiHelper.searchApi.getLeagueSchedule(leagueId, yearMonth)
+    suspend fun fetchLeagueSchedule(entity: EntityInfo, yearMonth: String): DataModel {
+        val response = apiHelper.searchApi.getLeagueSchedule(entity, yearMonth)
         return DataModel.fromJson(response.string())
     }
 
@@ -31,13 +34,13 @@ class SearchClient(
         date: String? = null,
         dataType: String,
         leagueId: Int,
-        id: Int
+        id: String
     ): DataModel {
         val response = apiHelper.searchApi.searchById(category, date, dataType, leagueId, id)
         return DataModel.fromJson(response.string())
     }
 
-    fun getJson(context: Context, query: String): DataModel {
+    fun fetchFromJson(context: Context, query: String): DataModel {
         val filePath = when (query) {
             "손흥민" -> {
                 "football_player_info.json"
@@ -65,6 +68,21 @@ class SearchClient(
             }
             "토트넘 일정" -> {
                 "football_team_schedule.json"
+            }
+            "커리" -> {
+                "basketball_player_info.json"
+            }
+            "커리 기록" -> {
+                "basketball_player_stats.json"
+            }
+            "커리 순위" -> {
+                "basketball_player_standings.json"
+            }
+            "워리어스" -> {
+                "basketball_team_info.json"
+            }
+            "워리어스 기록" -> {
+                "basketball_team_stats.json"
             }
             else -> {
                 "football_player_info.json"
