@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
@@ -17,6 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FBTeamStandingsViewModel @Inject constructor(
+    private val nameProvider: TranslatedNameProvider
 ) : MVIViewModel<FBTeamStandingsViewModel.Intent, FBTeamStandingsDisplayModel>() {
     /* ---------------------
        constants
@@ -47,6 +49,15 @@ class FBTeamStandingsViewModel @Inject constructor(
 
     private var _isKeyword = MutableStateFlow(false)
     val isKeyword: StateFlow<Boolean> = _isKeyword
+
+    /* ---------------------
+       etc
+       --------------------- */
+    var teamNameDictionary: Map<String, String> = emptyMap()
+
+    init {
+        teamNameDictionary = nameProvider.getDictionary("nba_team")
+    }
 
     /* ---------------------
        intent

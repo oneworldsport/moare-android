@@ -79,7 +79,6 @@ fun FBGameStatsView(
        ui state
        --------------------- */
     val horizontalScrollState = rememberScrollState()
-    var coachKrName by remember { mutableStateOf("") }
 
     /* ---------------------
        viewmodel state
@@ -116,10 +115,6 @@ fun FBGameStatsView(
         if (poppedView == null || poppedView is SportDecodableModel.FBGameStats) {
             fbGameStatsViewModel.send(FBGameStatsViewModel.Intent.InitData(data))
         }
-    }
-
-    LaunchedEffect(coach) {
-        coachKrName = EnNameTranslationUtils.translateByAWS(coach?.name)
     }
 
     LaunchedEffect(Unit) {
@@ -208,7 +203,7 @@ fun FBGameStatsView(
                 )
 
                 Text(
-                    text = coachKrName,
+                    text = fbGameStatsViewModel.playerNameDictionary[coach?.name] ?: (coach?.name ?: ""),
                     fontSize = 15.sp,
                     modifier = Modifier.padding(start = 4.dp)
                 )
@@ -298,12 +293,18 @@ fun FBGameStatsTeamButtonContainer(
                     modifier = Modifier.height(50.dp)
                 ) {
                     // home
-                    FBGameStatsTeamButton(team = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = it.game.teams.home.name), index = 0)
+                    FBGameStatsTeamButton(
+                        team = fbGameStatsViewModel.teamNameDictionary["short_${it.game.teams.home.id}"] ?: it.game.teams.home.name,
+                        index = 0
+                    )
 
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
 
                     // away
-                    FBGameStatsTeamButton(team = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = it.game.teams.away.name), index = 1)
+                    FBGameStatsTeamButton(
+                        team = fbGameStatsViewModel.teamNameDictionary["short_${it.game.teams.away.id}"] ?: it.game.teams.away.name,
+                        index = 1
+                    )
                 }
 
 
@@ -610,13 +611,10 @@ fun FBGameStatsFirstDataListItem(
     /* ---------------------
        ui state
        --------------------- */
-    var playerKrName by remember { mutableStateOf("") }
     var isStarter by remember { mutableStateOf(false) }
     var position by remember { mutableStateOf("") }
 
     LaunchedEffect(data) {
-        playerKrName = EnNameTranslationUtils.translateByAWS(data.name)
-
         lineups?.let {
             // starter
             for (player in it.startXI) {
@@ -662,7 +660,7 @@ fun FBGameStatsFirstDataListItem(
         )
 
         Text(
-            text = playerKrName,
+            text = fbGameStatsViewModel.playerNameDictionary[data.name] ?: data.name,
             fontSize = 12.sp,
             maxLines = 2,
             modifier = Modifier.width(60.dp)

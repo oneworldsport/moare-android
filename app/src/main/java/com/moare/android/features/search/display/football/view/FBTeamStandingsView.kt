@@ -292,7 +292,7 @@ fun FBTeamStandingsFirstDataListItem(
         )
 
         Text(
-            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.team.name),
+            text = fbTeamStandingsViewModel.teamNameDictionary["short_${data.team.id}"] ?: data.team.name,
             fontSize = 12.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,

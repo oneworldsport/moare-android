@@ -1,6 +1,7 @@
 package com.moare.android.core.util
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -21,7 +22,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import java.io.File
-import java.lang.Exception
 
 object AWSUtils {
     private val AUTOCOMPLETE_ETAG_KEY = stringPreferencesKey("autoCompleteETag")
@@ -240,60 +240,64 @@ object AWSUtils {
         s3Key: String,
         eTagKey: Preferences.Key<String>
     ) {
-        val entryPoint = EntryPointAccessors.fromApplication(context, EntryPoint::class.java)
-        val s3Client = entryPoint.getS3Client()
-        val transferUtility = entryPoint.getTransferUtility()
-        val dataStore = entryPoint.getDataStore()
-        val translatedNameProvider = entryPoint.getTranslatedNameProvider()
+        try {
+            val entryPoint = EntryPointAccessors.fromApplication(context, EntryPoint::class.java)
+            val s3Client = entryPoint.getS3Client()
+            val transferUtility = entryPoint.getTransferUtility()
+            val dataStore = entryPoint.getDataStore()
+            val translatedNameProvider = entryPoint.getTranslatedNameProvider()
 
-        val bucket = "sport-search-engine"
-        val objectMetadata: ObjectMetadata = withContext(Dispatchers.IO) {
-            s3Client.getObjectMetadata(bucket, s3Key)
-        }
-        val newETag = objectMetadata.eTag
-
-        val currentETag = dataStore.data
-            .map { preferences -> preferences[eTagKey] ?: "" }
-            .first()
-
-        if (newETag == currentETag) {
-            val jsonString = withContext(Dispatchers.IO) {
-                File(context.filesDir, s3Key.substringAfter("/")).readText()
+            val bucket = "sport-search-engine"
+            val objectMetadata: ObjectMetadata = withContext(Dispatchers.IO) {
+                s3Client.getObjectMetadata(bucket, s3Key)
             }
-            val jsonElement = Json.parseToJsonElement(jsonString)
-            val map: Map<String, String> = Json.decodeFromJsonElement(jsonElement)
-            translatedNameProvider.setDictionary(category, map)
+            val newETag = objectMetadata.eTag
 
-            return
-        }
+            val currentETag = dataStore.data
+                .map { preferences -> preferences[eTagKey] ?: "" }
+                .first()
 
-        val downloadFile = File(context.filesDir, s3Key.substringAfter("/"))
-        if (downloadFile.exists()) downloadFile.delete()
+            if (newETag == currentETag) {
+                val jsonString = withContext(Dispatchers.IO) {
+                    File(context.filesDir, s3Key.substringAfter("/")).readText()
+                }
+                val jsonElement = Json.parseToJsonElement(jsonString)
+                val map: Map<String, String> = Json.decodeFromJsonElement(jsonElement)
+                translatedNameProvider.setDictionary(category, map)
 
-        withContext(Dispatchers.IO) {
-            val observer = transferUtility.download(bucket, s3Key, downloadFile)
-            observer.setTransferListener(object : TransferListener {
-                override fun onStateChanged(id: Int, state: TransferState?) {
-                    if (state == TransferState.COMPLETED) {
-                        runBlocking {
-                            dataStore.edit { it[eTagKey] = newETag }
+                return
+            }
 
-                            val jsonString = withContext(Dispatchers.IO) {
-                                downloadFile.readText()
+            val downloadFile = File(context.filesDir, s3Key.substringAfter("/"))
+            if (downloadFile.exists()) downloadFile.delete()
+
+            withContext(Dispatchers.IO) {
+                val observer = transferUtility.download(bucket, s3Key, downloadFile)
+                observer.setTransferListener(object : TransferListener {
+                    override fun onStateChanged(id: Int, state: TransferState?) {
+                        if (state == TransferState.COMPLETED) {
+                            runBlocking {
+                                dataStore.edit { it[eTagKey] = newETag }
+
+                                val jsonString = withContext(Dispatchers.IO) {
+                                    downloadFile.readText()
+                                }
+                                val jsonElement = Json.parseToJsonElement(jsonString)
+                                val map: Map<String, String> = Json.decodeFromJsonElement(jsonElement)
+                                translatedNameProvider.setDictionary(category, map)
                             }
-                            val jsonElement = Json.parseToJsonElement(jsonString)
-                            val map: Map<String, String> = Json.decodeFromJsonElement(jsonElement)
-                            translatedNameProvider.setDictionary(category, map)
                         }
                     }
-                }
 
-                override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {}
+                    override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {}
 
-                override fun onError(id: Int, ex: Exception?) {
-                    ex?.printStackTrace()
-                }
-            })
+                    override fun onError(id: Int, ex: Exception?) {
+                        ex?.printStackTrace()
+                    }
+                })
+            }
+        } catch (e: Exception) {
+            Log.d("awsS3", e.localizedMessage ?: "aws s3 error")
         }
     }
 }

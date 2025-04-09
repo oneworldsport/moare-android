@@ -2,6 +2,7 @@ package com.moare.android.features.search.display.football.viewmodel
 
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
@@ -18,6 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FBTeamScheduleViewModel @Inject constructor(
+    private val nameProvider: TranslatedNameProvider
 ) : MVIViewModel<FBTeamScheduleViewModel.Intent, FBTeamScheduleDisplayModel>() {
     /* ---------------------
        constants
@@ -41,6 +43,15 @@ class FBTeamScheduleViewModel @Inject constructor(
 
     private val _gameResultOpenedStateList = MutableStateFlow<Map<Int, Boolean>>(emptyMap())
     val gameResultOpenedStateList: StateFlow<Map<Int, Boolean>> = _gameResultOpenedStateList
+
+    /* ---------------------
+       etc
+       --------------------- */
+    var teamNameDictionary: Map<String, String> = emptyMap()
+
+    init {
+        teamNameDictionary = nameProvider.getDictionary("nba_team")
+    }
 
     /* ---------------------
        intent

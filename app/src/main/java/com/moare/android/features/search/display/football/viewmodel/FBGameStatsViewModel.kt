@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
@@ -29,6 +30,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FBGameStatsViewModel @Inject constructor(
+    private val nameProvider: TranslatedNameProvider
 ) : MVIViewModel<FBGameStatsViewModel.Intent, FBGameStatsDisplayModel>() {
     /* ---------------------
        constants
@@ -76,8 +78,17 @@ class FBGameStatsViewModel @Inject constructor(
     private var _selectedTeamIndex = MutableStateFlow(0)
     val selectedTeamIndex: StateFlow<Int> = _selectedTeamIndex
 
-    // etc
+    /* ---------------------
+       etc
+       --------------------- */
     var shouldScrollCategory = false
+    var playerNameDictionary: Map<String, String> = emptyMap()
+    var teamNameDictionary: Map<String, String> = emptyMap()
+
+    init {
+        playerNameDictionary = nameProvider.getDictionary("nba_player")
+        teamNameDictionary = nameProvider.getDictionary("nba_team")
+    }
 
     /* ---------------------
        intent

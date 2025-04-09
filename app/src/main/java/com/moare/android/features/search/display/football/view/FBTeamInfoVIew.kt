@@ -468,7 +468,7 @@ fun FBTeamInfoFirstItem(
         )
 
         Text(
-            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, false, team.name),
+            text = fbTeamInfoViewModel.teamNameDictionary["full_${team.id}"] ?: team.name,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.alpha(contentsAlpha)
         )
@@ -587,7 +587,7 @@ fun FBTeamInfoThirdItem(
             )
 
             Text(
-                text = venue.name,
+                text = fbTeamInfoViewModel.teamNameDictionary["venue_${displayModel?.team?.id}"] ?: venue.name,
                 fontWeight = FontWeight.Medium
             )
         }
@@ -697,7 +697,7 @@ fun FBTeamInfoFifthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = lastGame.teams.home.name),
+                    text = fbTeamInfoViewModel.teamNameDictionary["short_${lastGame.teams.home.id}"] ?: lastGame.teams.home.name,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -732,7 +732,7 @@ fun FBTeamInfoFifthItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = lastGame.teams.away.name),
+                    text = fbTeamInfoViewModel.teamNameDictionary["short_${lastGame.teams.away.id}"] ?: lastGame.teams.away.name,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -779,7 +779,7 @@ fun FBTeamInfoSixthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = nextGame.teams.home.name),
+                    text = fbTeamInfoViewModel.teamNameDictionary["short_${nextGame.teams.home.id}"] ?: nextGame.teams.home.name,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -796,7 +796,7 @@ fun FBTeamInfoSixthItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = nextGame.teams.away.name),
+                    text = fbTeamInfoViewModel.teamNameDictionary["short_${nextGame.teams.away.id}"] ?: nextGame.teams.away.name,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,

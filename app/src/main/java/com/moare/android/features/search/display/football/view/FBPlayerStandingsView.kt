@@ -512,7 +512,7 @@ fun FBPlayerStandingsFirstDataListItem(
         ) {
             Column {
                 Text(
-                    text = data.player.krname,
+                    text = fbPlayerStandingsViewModel.playerNameDictionary[data.player.name] ?: data.player.name,
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -521,7 +521,7 @@ fun FBPlayerStandingsFirstDataListItem(
                 )
 
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.stats.team.name),
+                    text = fbPlayerStandingsViewModel.teamNameDictionary["short_${data.stats.team.id}"] ?: data.stats.team.name,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Light,
                     color = Color.Gray,

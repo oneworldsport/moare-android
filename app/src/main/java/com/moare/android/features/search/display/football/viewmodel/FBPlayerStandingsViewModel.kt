@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
@@ -22,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FBPlayerStandingsViewModel @Inject constructor(
-    private val searchClient: SearchClient
+    private val searchClient: SearchClient,
+    private val nameProvider: TranslatedNameProvider
 ) : MVIViewModel<FBPlayerStandingsViewModel.Intent, FBPlayerStandingsDisplayModel>() {
     /* ---------------------
        constants
@@ -72,6 +74,13 @@ class FBPlayerStandingsViewModel @Inject constructor(
     var standings: List<FBPlayerStandingsDisplay> = emptyList()
     private var selectedEntity: EntityInfo? = null
     private var filteredStandingsEndIndex = 0 // NOTE: one bigger then actual showing end item's index. Because of subList.
+    var playerNameDictionary: Map<String, String> = emptyMap()
+    var teamNameDictionary: Map<String, String> = emptyMap()
+
+    init {
+        playerNameDictionary = nameProvider.getDictionary("nba_player")
+        teamNameDictionary = nameProvider.getDictionary("nba_team")
+    }
 
     /* ---------------------
        intent

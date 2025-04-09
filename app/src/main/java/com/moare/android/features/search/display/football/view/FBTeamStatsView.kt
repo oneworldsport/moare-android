@@ -213,7 +213,7 @@ fun FBTeamStatsTeamInfoItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM,false, team.name),
+                    text = fbTeamStatsViewModel.teamNameDictionary["full_${team.id}"] ?: team.name,
                     fontWeight = FontWeight.Medium
                 )
 
@@ -252,7 +252,7 @@ fun FBTeamStatsTeamInfoItem(
                     )
 
                     Text(
-                        text = venue.name,
+                        text = fbTeamStatsViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
                         fontWeight = FontWeight.Medium
                     )
                 }

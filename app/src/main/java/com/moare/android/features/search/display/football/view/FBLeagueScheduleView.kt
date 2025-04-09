@@ -278,7 +278,6 @@ fun FBLeagueScheduleListItem(
 //    var isResultOpened by remember(data.fixture.id) { mutableStateOf(false) }
     var isResultOpened by remember { mutableStateOf(false) }
     val noRippleInteractionSource = remember { MutableInteractionSource() }
-    var venueKrName by remember { mutableStateOf("") }
     var refereeKrName by remember { mutableStateOf("") }
 
     /* ---------------------
@@ -344,7 +343,6 @@ fun FBLeagueScheduleListItem(
         fbGameStatsData?.let {
             isResultOpened = true
 
-            venueKrName = EnNameTranslationUtils.translateByAWS(it.game.fixture.venue.name)
             refereeKrName = EnNameTranslationUtils.translateByAWS(it.game.fixture.referee)
         }
     }
@@ -386,7 +384,7 @@ fun FBLeagueScheduleListItem(
             )
 
             Text(
-                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.teams.home.name),
+                text = fbLeagueScheduleViewModel.teamNameDictionary["short_${data.teams.home.id}"] ?: data.teams.home.name,
                 fontSize = 13.sp,
                 maxLines = 2
             )
@@ -457,7 +455,7 @@ fun FBLeagueScheduleListItem(
             // venue
             fbGameStatsData?.let {
                 Text(
-                    text = "장소: $venueKrName",
+                    text = "장소: ${fbLeagueScheduleViewModel.teamNameDictionary["venue_${data.teams.home.id}"] ?: it.game.fixture.venue.name}",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Light,
                     maxLines = 1,
@@ -507,7 +505,7 @@ fun FBLeagueScheduleListItem(
             )
 
             Text(
-                text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.teams.away.name),
+                text = fbLeagueScheduleViewModel.teamNameDictionary["short_${data.teams.away.id}"] ?: data.teams.away.name,
                 fontSize = 13.sp,
                 maxLines = 2
             )

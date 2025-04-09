@@ -223,7 +223,7 @@ fun FBPlayerStatsPlayerInfoItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = player.krname,
+                    text = fbPlayerStatsViewModel.playerNameDictionary[player.name] ?: player.name,
                     fontWeight = FontWeight.Medium
                 )
 
@@ -267,7 +267,7 @@ fun FBPlayerStatsPlayerInfoItem(
                         )
 
                         Text(
-                            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = team.name),
+                            text = fbPlayerStatsViewModel.teamNameDictionary["full_${team.id}"] ?: team.name,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -355,6 +355,7 @@ fun FBPlayerStatsListItem(
 
 @Composable
 fun FBPlayerStatsItem(
+    fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
     data: FBPlayerStats,
     contentsAlpha: Float = 1f
 ) {
@@ -387,7 +388,7 @@ fun FBPlayerStatsItem(
         )
 
         Text(
-            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = data.team.name),
+            text = fbPlayerStatsViewModel.teamNameDictionary["short_${data.team.id}"] ?: data.team.name,
             fontWeight = FontWeight.Medium
         )
     }
