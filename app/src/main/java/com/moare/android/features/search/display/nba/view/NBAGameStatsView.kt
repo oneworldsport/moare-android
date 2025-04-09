@@ -1074,7 +1074,7 @@ fun NBAGameStatsDataListItem(
         16 -> "${data.turnovers}"
         17 -> "${data.foulsPersonal}"
         18 -> "${data.plusMinusPoints}"
-        19 -> if (isTotalStats) "" else data.minutes // TODO: change
+        19 -> if (isTotalStats) "" else data.minutes
         else -> ""
     }
 

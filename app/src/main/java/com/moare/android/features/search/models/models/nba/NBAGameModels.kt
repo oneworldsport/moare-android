@@ -106,7 +106,7 @@ data class NBAGameBoxScoreStats(
     var freeThrowsPercentage: Double
         get() = _freeThrowsPercentage ?: 0.0
         set(value) { _freeThrowsPercentage = value }
-    val minutes: String get() = _minutes ?: ""
+    val minutes: String get() = if (_minutes.isNullOrBlank()) "0:0" else _minutes
     var plusMinusPoints: Int
         get() = _plusMinusPoints ?: 0
         set(value) { _plusMinusPoints = value }
