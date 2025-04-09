@@ -38,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,25 +56,13 @@ import com.moare.android.features.search.display.football.viewmodel.FBGameStatsV
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
-import com.moare.android.features.search.models.models.football.FBGamePlayerStats
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
-import com.moare.android.features.search.models.models.football.FBGamePlayerStatsGames
 import com.moare.android.features.search.models.models.football.FBPerson
-import com.moare.android.features.search.models.models.football.FBPlayerStatsCards
-import com.moare.android.features.search.models.models.football.FBPlayerStatsDribbles
-import com.moare.android.features.search.models.models.football.FBPlayerStatsDuels
-import com.moare.android.features.search.models.models.football.FBPlayerStatsFouls
-import com.moare.android.features.search.models.models.football.FBPlayerStatsGoals
-import com.moare.android.features.search.models.models.football.FBPlayerStatsPasses
-import com.moare.android.features.search.models.models.football.FBPlayerStatsPenalty
-import com.moare.android.features.search.models.models.football.FBPlayerStatsShots
-import com.moare.android.features.search.models.models.football.FBPlayerStatsTackles
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
-import com.moare.android.ui.util.convertDpToPx
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 
 @Composable
@@ -92,7 +79,6 @@ fun FBGameStatsView(
        ui state
        --------------------- */
     val horizontalScrollState = rememberScrollState()
-    var coachKrName by remember { mutableStateOf("") }
 
     /* ---------------------
        viewmodel state
@@ -129,10 +115,6 @@ fun FBGameStatsView(
         if (poppedView == null || poppedView is SportDecodableModel.FBGameStats) {
             fbGameStatsViewModel.send(FBGameStatsViewModel.Intent.InitData(data))
         }
-    }
-
-    LaunchedEffect(coach) {
-        coachKrName = EnNameTranslationUtils.translateByAWS(coach?.name)
     }
 
     LaunchedEffect(Unit) {
@@ -221,7 +203,7 @@ fun FBGameStatsView(
                 )
 
                 Text(
-                    text = coachKrName,
+                    text = fbGameStatsViewModel.playerNameDictionary[coach?.name] ?: (coach?.name ?: ""),
                     fontSize = 15.sp,
                     modifier = Modifier.padding(start = 4.dp)
                 )
@@ -311,12 +293,18 @@ fun FBGameStatsTeamButtonContainer(
                     modifier = Modifier.height(50.dp)
                 ) {
                     // home
-                    FBGameStatsTeamButton(team = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = it.game.teams.home.name), index = 0)
+                    FBGameStatsTeamButton(
+                        team = fbGameStatsViewModel.teamNameDictionary["short_${it.game.teams.home.id}"] ?: it.game.teams.home.name,
+                        index = 0
+                    )
 
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
 
                     // away
-                    FBGameStatsTeamButton(team = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = it.game.teams.away.name), index = 1)
+                    FBGameStatsTeamButton(
+                        team = fbGameStatsViewModel.teamNameDictionary["short_${it.game.teams.away.id}"] ?: it.game.teams.away.name,
+                        index = 1
+                    )
                 }
 
 
@@ -330,6 +318,7 @@ fun FBGameStatsTeamButtonContainer(
             Row {
                 Spacer(Modifier.weight(1f))
 
+                // TODO: Make it component
                 Box(
                     Modifier
                         .padding(end = UIConstants.Padding.defaultHPadding)
@@ -350,7 +339,6 @@ fun FBGameStatsTeamButtonContainer(
             }
         }
     }
-
 }
 
 @Composable
@@ -381,7 +369,7 @@ fun FBGameStatsFirstCategoryItem(
             .height(fbGameStatsViewModel.categoryItemHeight * 2)
     ) {
         Text(
-            text = StringConstants.Football.gameStatsFirstCategory,
+            text = StringConstants.gameStatsFirstCategory,
             fontSize = fbGameStatsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -401,7 +389,7 @@ fun FBGameStatsFirstCategoryList(
        --------------------- */
     val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
     val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
-    val etcCategoriesSize = StringConstants.Football.gameStatsEtcCategories.size
+    val commonCategoriesSize = StringConstants.Football.gameStatsCommonCategories.size
 
     /* ---------------------
        viewmodel state
@@ -427,7 +415,7 @@ fun FBGameStatsFirstCategoryList(
             )
         } else {
             (itemWidth * attackCategoriesSize) + (barWidth * 2) + (itemWidth * defendCategoriesSize) + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * etcCategoriesSize,
+                itemWidth = itemWidth * commonCategoriesSize,
                 barWidth = 80.dp
             )
         },
@@ -442,13 +430,13 @@ fun FBGameStatsFirstCategoryList(
         modifier = Modifier
             .height(fbGameStatsViewModel.categoryItemHeight - 2.dp)
     ) {
-        for ((index, value) in StringConstants.Football.statsFirstCategories.withIndex()) {
+        for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
             FBGameStatsFirstCategoryListItem(
                 category = value,
                 index = index
             )
 
-            if (index != StringConstants.Football.statsFirstCategories.size - 1) {
+            if (index != StringConstants.statsFirstCategories.size - 1) {
                 VCapsuleBar(modifier = Modifier.alpha(0.5f))
             }
         }
@@ -481,7 +469,7 @@ fun FBGameStatsFirstCategoryListItem(
                 } else if (index == 1) {
                     (itemWidth * StringConstants.Football.gameStatsDefendCategories.size)
                 } else {
-                    (itemWidth * StringConstants.Football.gameStatsEtcCategories.size)
+                    (itemWidth * StringConstants.Football.gameStatsCommonCategories.size)
                 }
             )
             .clickable {
@@ -597,7 +585,7 @@ fun FBGameStatsFirstDataList(
                 .height(fbGameStatsViewModel.dataItemHeight)
         ) {
             Text(
-                text = "팀 총합", // 팀 기록?
+                text = "합계(팀 기록)",
                 fontSize = 12.sp,
                 maxLines = 2,
                 modifier = Modifier.weight(1f),
@@ -623,13 +611,10 @@ fun FBGameStatsFirstDataListItem(
     /* ---------------------
        ui state
        --------------------- */
-    var playerKrName by remember { mutableStateOf("") }
     var isStarter by remember { mutableStateOf(false) }
     var position by remember { mutableStateOf("") }
 
     LaunchedEffect(data) {
-        playerKrName = EnNameTranslationUtils.translateByAWS(data.name)
-
         lineups?.let {
             // starter
             for (player in it.startXI) {
@@ -675,7 +660,7 @@ fun FBGameStatsFirstDataListItem(
         )
 
         Text(
-            text = playerKrName,
+            text = fbGameStatsViewModel.playerNameDictionary[data.name] ?: data.name,
             fontSize = 12.sp,
             maxLines = 2,
             modifier = Modifier.width(60.dp)
@@ -728,14 +713,14 @@ fun FBGameStatsDataList(
     val playersTotalStats by fbGameStatsViewModel.playersTotalStats.collectAsState()
 
     Column {
-        for (value in playerStats) {
+        for (item in playerStats) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .height(fbGameStatsViewModel.dataItemHeight)
             ) {
                 for (index in 0 until StringConstants.Football.gameStatsSecondCategories.size) {
-                    value.statistics.first().let {
+                    item.statistics.first().let {
                         FBGameStatsDataListItem(
                             data = it,
                             index = index

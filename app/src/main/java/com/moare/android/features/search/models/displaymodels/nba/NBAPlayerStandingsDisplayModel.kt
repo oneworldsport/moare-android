@@ -1,17 +1,20 @@
 package com.moare.android.features.search.models.displaymodels.nba
 
-import com.moare.android.features.search.models.models.nba.NBAPlayer
-import com.moare.android.features.search.models.models.nba.NBAPlayerStatistic
+import com.moare.android.features.search.models.EntityInfo
+import com.moare.android.features.search.models.Keyword
+import com.moare.android.features.search.models.models.nba.NBAPlayerInfo
+import com.moare.android.features.search.models.models.nba.NBAPlayerStats
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class NBAPlayerStandingsDisplayModel(
-    val keywords: List<String>,
-    val playerList: List<NBAPlayerStandingsDisplay>
+    val keywords: List<Keyword>,
+    val entityInfo: List<EntityInfo>,
+    val standings: List<NBAPlayerStandingsDisplay>
 )
 
 @Serializable
 data class NBAPlayerStandingsDisplay(
-    val player: NBAPlayer?,
-    val stats: NBAPlayerStatistic?
+    val player: NBAPlayerInfo,
+    val stats: NBAPlayerStats
 )

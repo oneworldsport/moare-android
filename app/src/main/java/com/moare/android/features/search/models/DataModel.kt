@@ -9,8 +9,9 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamInf
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAGameScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStatsDisplayModel
@@ -62,6 +63,7 @@ data class DataModel(
             val modelConverter = ModelConverter(keywords, entityInfo)
 
             val data = when (dataType) {
+                // football
                 "football_player_info" -> {
                     val responseModel: FBPlayerInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
 
@@ -142,51 +144,89 @@ data class DataModel(
                         SportDecodableModel.FBGameStats(responseModel, displayModel)
                     }
                 }
-//                "basketball_player_info" -> {
-//                    val responseModel: NBAPlayerInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-//                    val displayModel = modelConverter.nbaPlayerInfoConverter(responseModel)
-//                    SportDecodableModel.NBAPlayerInfo(responseModel, displayModel)
-//                }
-//                "basketball_player_stats" -> {
-//                    val responseModel: NBAPlayerInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-//                    val displayModel = modelConverter.nbaPlayerStatsConverter(responseModel)
-//                    SportDecodableModel.NBAPlayerStats(responseModel, displayModel)
-//                }
-//                "basketball_player_standings" -> {
-//                    val responseModel: NBAPlayerStandingsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-//                    val displayModel = modelConverter.nbaPlayerStandingsConverter(responseModel)
-//                    SportDecodableModel.NBAPlayerStandings(responseModel, displayModel)
-//                }
-//                "basketball_team_info" -> {
-//                    val responseModel: NBATeamInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-//                    val displayModel = modelConverter.nbaTeamInfoConverter(responseModel)
-//                    SportDecodableModel.NBATeamInfo(responseModel, displayModel)
-//                }
-//                "basketball_team_stats" -> {
-//                    val responseModel: NBATeamInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-//                    val displayModel = modelConverter.nbaTeamStatsConverter(responseModel)
-//                    SportDecodableModel.NBATeamStats(responseModel, displayModel)
-//                }
-//                "basketball_team_standings" -> {
-//                    val responseModel: NBATeamStandingsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-//                    val displayModel = modelConverter.nbaTeamStandingsConverter(responseModel)
-//                    SportDecodableModel.NBATeamStandings(responseModel, displayModel)
-//                }
-//                "basketball_game_schedule" -> {
-//                    val responseModel: NBAGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-//                    val displayModel = modelConverter.nbaGameScheduleConverter(responseModel)
-//                    SportDecodableModel.NBAGameSchedule(responseModel, displayModel)
-//                }
-//                "basketball_team_schedule" -> {
-//                    val responseModel: NBAGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-//                    val displayModel = modelConverter.nbaGameScheduleConverter(responseModel)
-//                    SportDecodableModel.NBAGameSchedule(responseModel, displayModel)
-//                }
-//                "basketball_game_stats" -> {
-//                    val responseModel: NBAGameStatsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-//                    val displayModel = modelConverter.nbaGameStatsConverter(responseModel)
-//                    SportDecodableModel.NBAGameStats(responseModel, displayModel)
-//                }
+
+                // basketball
+                "basketball_player_info" -> {
+                    val responseModel: NBAPlayerInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.info == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.nbaPlayerInfoConverter(responseModel)
+                        SportDecodableModel.NBAPlayerInfo(responseModel, displayModel)
+                    }
+                }
+                "basketball_player_stats" -> {
+                    val responseModel: NBAPlayerInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.info == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.nbaPlayerStatsConverter(responseModel)
+                        SportDecodableModel.NBAPlayerStats(responseModel, displayModel)
+                    }
+                }
+                "basketball_player_standings" -> {
+                    val responseModel: NBAPlayerStandingsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.standings.isEmpty()) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.nbaPlayerStandingsConverter(responseModel)
+                        SportDecodableModel.NBAPlayerStandings(responseModel, displayModel)
+                    }
+                }
+                "basketball_team_info" -> {
+                    val responseModel: NBATeamInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.info == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.nbaTeamInfoConverter(responseModel)
+                        SportDecodableModel.NBATeamInfo(responseModel, displayModel)
+                    }
+                }
+                "basketball_team_stats" -> {
+                    val responseModel: NBATeamInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.info == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.nbaTeamStatsConverter(responseModel)
+                        SportDecodableModel.NBATeamStats(responseModel, displayModel)
+                    }
+                }
+                "basketball_team_standings" -> {
+                    val responseModel: NBATeamStandingsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.standings.isEmpty()) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.nbaTeamStandingsConverter(responseModel)
+                        SportDecodableModel.NBATeamStandings(responseModel, displayModel)
+                    }
+                }
+                "basketball_team_schedule" -> {
+                    val responseModel: NBAGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                    val displayModel = modelConverter.nbaTeamScheduleConverter(responseModel)
+                    SportDecodableModel.NBATeamSchedule(responseModel, displayModel)
+                }
+                "basketball_league_schedule" -> {
+                    val responseModel: NBAGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                    val displayModel = modelConverter.nbaLeagueScheduleConverter(responseModel)
+                    SportDecodableModel.NBALeagueSchedule(responseModel, displayModel)
+                }
+                "basketball_game_stats" -> {
+                    val responseModel: NBAGameStatsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.game == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.nbaGameStatsConverter(responseModel)
+                        SportDecodableModel.NBAGameStats(responseModel, displayModel)
+                    }
+                }
+
                 else -> SportDecodableModel.NoResult
             }
 
@@ -197,6 +237,7 @@ data class DataModel(
 
 @Serializable
 data class EntityInfo(
+    val entityId: Int,
     val entityName: String,
     val category: String,
     val entityType: String,
@@ -307,9 +348,15 @@ sealed class SportDecodableModel {
     ) : SportDecodableModel()
 
     @Serializable
-    data class NBAGameSchedule(
+    data class NBATeamSchedule(
         val responseModel: NBAGameScheduleResponseModel,
-        val displayModel: NBAGameScheduleDisplayModel
+        val displayModel: NBATeamScheduleDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class NBALeagueSchedule(
+        val responseModel: NBAGameScheduleResponseModel,
+        val displayModel: NBALeagueScheduleDisplayModel
     ) : SportDecodableModel()
 
     @Serializable

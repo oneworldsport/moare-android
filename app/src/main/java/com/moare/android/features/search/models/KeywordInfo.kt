@@ -9,3 +9,9 @@ data class KeywordInfo(
     var keywords: List<Keyword>, // keyword list that are in searching keyword
     var entities: List<EntityInfo>
 )
+
+@Serializable
+data class TrendingKeywords(
+    val date: String,
+    val keywords: List<KeywordInfo>
+)

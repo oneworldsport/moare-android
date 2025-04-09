@@ -1,11 +1,13 @@
 package com.moare.android.core.di
 
+import android.content.Context
 import com.moare.android.core.networking.ApiHelper
 import com.moare.android.features.search.networking.KeywordsClient
 import com.moare.android.features.search.networking.SearchClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -18,7 +20,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideSearchClient(apiHelper: ApiHelper): SearchClient = SearchClient(apiHelper)
+    fun provideSearchClient(
+        @ApplicationContext context: Context,
+        apiHelper: ApiHelper
+    ): SearchClient = SearchClient(context, apiHelper)
 
     @Provides
     @Singleton

@@ -1,39 +1,30 @@
-package com.moare.android.features.search.display.football.viewmodel
+package com.moare.android.features.search.display.nba.viewmodel
 
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
-import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.DayInfo
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleViewModel.Intent
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
+import com.moare.android.features.search.models.models.nba.NBAGame
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
-class FBTeamScheduleViewModel @Inject constructor(
+class NBATeamScheduleViewModel @Inject constructor(
     private val nameProvider: TranslatedNameProvider
-) : MVIViewModel<FBTeamScheduleViewModel.Intent, FBTeamScheduleDisplayModel>() {
-    /* ---------------------
-       constants
-       --------------------- */
-    val itemHeight = 100.dp
-
+) : MVIViewModel<NBATeamScheduleViewModel.Intent, NBATeamScheduleDisplayModel>() {
     /* ---------------------
        data state
        --------------------- */
-    private val _displayModel = MutableStateFlow<FBTeamScheduleDisplayModel?>(null)
-    val displayModel: StateFlow<FBTeamScheduleDisplayModel?> = _displayModel
+    private val _displayModel = MutableStateFlow<NBATeamScheduleDisplayModel?>(null)
+    val displayModel: StateFlow<NBATeamScheduleDisplayModel?> = _displayModel
 
-    private val _games = MutableStateFlow<List<FBGame>>(emptyList())
-    val games: StateFlow<List<FBGame>> = _games
+    private val _games = MutableStateFlow<List<NBAGame>>(emptyList())
+    val games: StateFlow<List<NBAGame>> = _games
 
     /* ---------------------
        ui state
@@ -41,8 +32,8 @@ class FBTeamScheduleViewModel @Inject constructor(
     private val _isAllResultOpened = MutableStateFlow(false)
     val isAllResultOpened: StateFlow<Boolean> = _isAllResultOpened
 
-    private val _gameResultOpenedStateList = MutableStateFlow<Map<Int, Boolean>>(emptyMap())
-    val gameResultOpenedStateList: StateFlow<Map<Int, Boolean>> = _gameResultOpenedStateList
+    private val _gameResultOpenedStateList = MutableStateFlow<Map<String, Boolean>>(emptyMap())
+    val gameResultOpenedStateList: StateFlow<Map<String, Boolean>> = _gameResultOpenedStateList
 
     /* ---------------------
        etc
@@ -57,9 +48,9 @@ class FBTeamScheduleViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
-        data class InitData(val displayModel: FBTeamScheduleDisplayModel) : Intent()
+        data class InitData(val displayModel: NBATeamScheduleDisplayModel) : Intent()
         data object ToggleAllResult : Intent()
-        data class UpdateResultOpenedState(val fixtureId: Int, val isOpened: Boolean) : Intent()
+        data class UpdateResultOpenedState(val gameCode: String, val isOpened: Boolean) : Intent()
     }
 
     override fun send(intent: Intent) {
@@ -67,7 +58,7 @@ class FBTeamScheduleViewModel @Inject constructor(
             when (intent) {
                 is Intent.InitData -> initData(intent.displayModel)
                 is Intent.ToggleAllResult -> toggleAllResult()
-                is Intent.UpdateResultOpenedState -> updateResultOpenedState(intent.fixtureId, intent.isOpened)
+                is Intent.UpdateResultOpenedState -> updateResultOpenedState(intent.gameCode, intent.isOpened)
             }
         }
     }
@@ -75,7 +66,7 @@ class FBTeamScheduleViewModel @Inject constructor(
     /* ---------------------
        init
        --------------------- */
-    override fun initData(displayModel: FBTeamScheduleDisplayModel) {
+    override fun initData(displayModel: NBATeamScheduleDisplayModel) {
         viewModelScope.launch {
             // init with default value
             _isAllResultOpened.emit(false)
@@ -84,9 +75,7 @@ class FBTeamScheduleViewModel @Inject constructor(
             _displayModel.emit(displayModel)
             _games.emit(displayModel.games)
 
-            val gameResultOpenedStateList = games.value.associate {
-                it.fixture.id to false
-            }
+            val gameResultOpenedStateList = games.value.associate { (it.gameSummary?.gameCode ?: "") to false }
             _gameResultOpenedStateList.emit(gameResultOpenedStateList)
         }
     }
@@ -100,9 +89,9 @@ class FBTeamScheduleViewModel @Inject constructor(
         _gameResultOpenedStateList.emit(gameResultOpenedStateList.value.mapValues { newState })
     }
 
-    private suspend fun updateResultOpenedState(fixtureId: Int, isOpened: Boolean) {
+    private suspend fun updateResultOpenedState(gameCode: String, isOpened: Boolean) {
         val newMap = gameResultOpenedStateList.value.toMutableMap()
-        newMap[fixtureId] = isOpened
+        newMap[gameCode] = isOpened
         _gameResultOpenedStateList.emit(newMap)
     }
 }

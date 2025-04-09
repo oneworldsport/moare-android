@@ -3,12 +3,13 @@
   "keywords": [],
   "entityInfo": [
     {
+      "entityName": "스테픈 커리",
+      "entityId": 201939,
       "category": "basketball",
       "entityType": "player",
-      "entityName": "제일렌 브라운",
-      "leagueId": 0,
-      "teamId": 2,
-      "playerId": 75
+      "leagueId": 90001,
+      "playerId": 201939,
+      "teamId": 1610612744
     }
   ],
   "data": {

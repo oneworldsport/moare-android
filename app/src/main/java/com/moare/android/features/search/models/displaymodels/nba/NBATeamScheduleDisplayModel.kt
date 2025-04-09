@@ -4,6 +4,6 @@ import com.moare.android.features.search.models.models.nba.NBAGame
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class NBAGameScheduleDisplayModel(
+data class NBATeamScheduleDisplayModel(
     val games: List<NBAGame>
 )

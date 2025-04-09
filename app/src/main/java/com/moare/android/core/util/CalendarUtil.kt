@@ -1,10 +1,12 @@
 package com.moare.android.core.util
 
+import android.util.Log
 import java.sql.Time
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.Period
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -13,6 +15,7 @@ import java.time.format.TextStyle
 import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
+import kotlin.math.min
 
 data class DayInfo(
     val day: Int,
@@ -26,6 +29,10 @@ enum class TimeFormatType {
 }
 
 object CalendarUtil {
+    init {
+        Locale.setDefault(Locale.KOREAN)
+    }
+
     enum class DefaultYearMonthType {
         NEXT_YEARMONTH, CURRENT_YEARMONTH, PREVIOUS_YEARMONTH
     }
@@ -69,7 +76,7 @@ object CalendarUtil {
     }
 
     fun formatDate(
-        date: String,
+        date: String?,
         formatType: TimeFormatType = TimeFormatType.AMPM_WITH_DATE,
         zoneId: TimeZone = TimeZone.getTimeZone("Asia/Seoul")
     ): String {
@@ -89,19 +96,25 @@ object CalendarUtil {
 //        outputDateFormat.timeZone = zoneId
 //
 //        return outputDateFormat.format(parsedDate)
-        val offsetDateTime = OffsetDateTime.parse(date)
 
-        val zonedDateTime = offsetDateTime.toInstant().atZone(zoneId.toZoneId())
+        if (!date.isNullOrEmpty()) {
+            // NOTE: OffsetDateTime.parse()는 ISO-8601 표준 지원. "2025-04-02T09:00:00Z" 와 "2025-04-02T09:00:00+00:00" 은 둘다 동일한 의미의 ISO-8601 포맷
+            val offsetDateTime = OffsetDateTime.parse(date)
 
-        val formatter = DateTimeFormatter.ofPattern(
-            when (formatType) {
-                TimeFormatType.AMPM -> "a hh:mm"
-                TimeFormatType.AMPM_WITH_DATE -> "yyyy.MM.dd a hh:mm"
-                TimeFormatType.YEAR_MONTH -> "yy/MM"
-            }, Locale("ko", "KR")
-        )
+            val zonedDateTime = offsetDateTime.toInstant().atZone(zoneId.toZoneId())
 
-        return zonedDateTime.format(formatter)
+            val formatter = DateTimeFormatter.ofPattern(
+                when (formatType) {
+                    TimeFormatType.AMPM -> "a hh:mm"
+                    TimeFormatType.AMPM_WITH_DATE -> "yyyy.MM.dd a hh:mm"
+                    TimeFormatType.YEAR_MONTH -> "yy/MM"
+                }, Locale("ko", "KR")
+            )
+
+            return zonedDateTime.format(formatter)
+        } else {
+            return ""
+        }
     }
 
     fun getDefaultDay(yearMonth: String, dayList: List<DayInfo>): Pair<Int, DayInfo>? {
@@ -148,8 +161,6 @@ object CalendarUtil {
     }
 
     private fun getDefaultYearMonthType(yearMonth: String): DefaultYearMonthType {
-        Locale.setDefault(Locale.KOREAN)
-
         val currentDate = LocalDate.now()
         val currentYear = currentDate.year % 100
         val currentMonth = currentDate.monthValue
@@ -162,6 +173,37 @@ object CalendarUtil {
             totalYearMonth == totalCurrentYearMonth -> DefaultYearMonthType.CURRENT_YEARMONTH
             totalYearMonth > totalCurrentYearMonth -> DefaultYearMonthType.NEXT_YEARMONTH
             else -> DefaultYearMonthType.PREVIOUS_YEARMONTH
+        }
+    }
+
+    fun calculateAge(birthDate: String): Int {
+        var date = birthDate
+
+        if (date.contains("T")) {
+            date = date.split("T").first()
+        }
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val formattedDate = LocalDate.parse(date, formatter)
+        val today = LocalDate.now()
+
+        return Period.between(formattedDate, today).years
+    }
+
+    fun formatMinutesToHourMinute(min: Int): String {
+        val hours = min / 60
+        val minutes = min % 60
+        return "$hours:$minutes"
+    }
+
+    fun formatHourMinuteToMinutes(time: String): Int {
+        if (time.contains(":")) {
+            val timeArr = time.split(":")
+            val hours = timeArr.first().toInt()
+            val minutes = timeArr.last().toInt()
+            return (hours * 60) + minutes
+        } else {
+            return 0
         }
     }
 }
