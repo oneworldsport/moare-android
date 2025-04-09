@@ -272,9 +272,13 @@ fun NBATeamStandingsCategoryListItem(
     index: Int
 ) {
     Text(
-        text = category,
+        text = if (category.contains("경기당")) {
+            "경기당\n${category.substringAfter("경기당 ")}"
+        } else {
+            category
+        },
         textAlign = TextAlign.Center,
-        fontSize = nbaTeamStandingsViewModel.categoryFontSize,
+        fontSize = 14.sp,
         fontWeight = FontWeight.Medium,
         modifier = Modifier
             .width(nbaTeamStandingsViewModel.dataItemWidth)

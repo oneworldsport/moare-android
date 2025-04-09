@@ -6,25 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
-import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.percentageOf
 import com.moare.android.core.util.rounded
-import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
-import com.moare.android.features.search.models.models.football.FBGameLineups
-import com.moare.android.features.search.models.models.football.FBGamePlayerStats
-import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
-import com.moare.android.features.search.models.models.football.FBGamePlayerStatsGames
-import com.moare.android.features.search.models.models.football.FBPerson
-import com.moare.android.features.search.models.models.football.FBPlayerStatsCards
-import com.moare.android.features.search.models.models.football.FBPlayerStatsDribbles
-import com.moare.android.features.search.models.models.football.FBPlayerStatsDuels
-import com.moare.android.features.search.models.models.football.FBPlayerStatsFouls
-import com.moare.android.features.search.models.models.football.FBPlayerStatsGoals
-import com.moare.android.features.search.models.models.football.FBPlayerStatsPasses
-import com.moare.android.features.search.models.models.football.FBPlayerStatsPenalty
-import com.moare.android.features.search.models.models.football.FBPlayerStatsShots
-import com.moare.android.features.search.models.models.football.FBPlayerStatsTackles
 import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
 import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
 import com.moare.android.features.search.models.models.nba.NBALineScore
@@ -42,12 +25,14 @@ class NBAGameStatsViewModel @Inject constructor(
        constants
        --------------------- */
     val dataItemHeight = 40.dp
-    val categoryItemHeight = 34.dp
+    val firstCategoryItemHeight = 34.dp
+    val secondCategoryItemHeight = 40.dp
     val firstItemWidth = 120.dp
     val teamButtonWidth = 100.dp
     val itemWidth = 70.dp
     val barWidth = 2.dp
-    val categoryFontSize = 14.sp
+    val firstCategoryFontSize = 14.sp
+    val secondCategoryFontSize = 13.sp
     val dataFontSize = 14.sp
 
     /* ---------------------

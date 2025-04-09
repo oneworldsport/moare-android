@@ -119,34 +119,31 @@ fun FBTeamStandingsView(
             )
         }
 
-        Box(
-            Modifier.padding(top = 6.dp)
+        // category
+        Row(
+            modifier = Modifier.padding(top = 6.dp)
         ) {
-            // category
+            FBTeamStandingsFirstCategoryItem()
+
+            Row(
+                Modifier.horizontalScroll(horizontalScrollState)
+            ) {
+                FBTeamStandingsCategoryList()
+            }
+        }
+
+        // standings data
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+        ) {
             Row {
-                FBTeamStandingsFirstCategoryItem()
+                FBTeamStandingsFirstDataList()
 
                 Row(
                     Modifier.horizontalScroll(horizontalScrollState)
                 ) {
-                    FBTeamStandingsCategoryList()
-                }
-            }
-
-            // standings data
-            Column(
-                modifier = Modifier
-                    .padding(top = fbTeamStandingsViewModel.categoryItemHeight)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Row {
-                    FBTeamStandingsFirstDataList()
-
-                    Row(
-                        Modifier.horizontalScroll(horizontalScrollState)
-                    ) {
-                        FBTeamStandingsDataList()
-                    }
+                    FBTeamStandingsDataList()
                 }
             }
         }

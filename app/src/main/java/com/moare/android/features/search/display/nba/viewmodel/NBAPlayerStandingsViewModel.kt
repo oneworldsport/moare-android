@@ -33,8 +33,10 @@ class NBAPlayerStandingsViewModel @Inject constructor(
     val dataItemHeight = 40.dp
     val itemWidth = 70.dp
     val firstCategoryItemWidth = 132.dp
-    val categoryItemHeight = 40.dp
-    val categoryFontSize = 15.sp
+    val firstCategoryItemHeight = 40.dp
+    val secondCategoryItemHeight = 44.dp
+    val firstCategoryFontSize = 15.sp
+    val secondCategoryFontSize = 14.sp
     val dataFontSize = 15.sp
     val barWidth = 2.dp // TODO: Make it const
     private val fetchCategoryIndexList = listOf(5, 8, 11, 21, 23, 24, 26, 27)

@@ -32,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,10 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TranslationType
-import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
@@ -168,54 +164,51 @@ fun NBAPlayerStandingsView(
             leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
         )
 
-        Box(
+        // category
+        Row(
             Modifier.padding(top = 6.dp)
         ) {
-            // category
-            Row {
-                NBAPlayerStandingsFirstCategoryItem()
+            NBAPlayerStandingsFirstCategoryItem()
 
-                Row(
-                    Modifier.horizontalScroll(horizontalScrollState)
-                ) {
-                    Column {
-                        NBAPlayerStandingsFirstCategoryList()
-                        NBAPlayerStandingsSecondCategoryList()
-                    }
+            Row(
+                Modifier.horizontalScroll(horizontalScrollState)
+            ) {
+                Column {
+                    NBAPlayerStandingsFirstCategoryList()
+                    NBAPlayerStandingsSecondCategoryList()
                 }
             }
+        }
 
-            // loading
-            this@Column.AnimatedVisibility(
-                visible = displayDataState == ApiFetchState.Fetching,
-                enter = fadeIn(),
-                exit = fadeOut()
+        // loading
+        AnimatedVisibility(
+            visible = displayDataState == ApiFetchState.Fetching,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    ProgressIndicator()
-                }
+                ProgressIndicator()
             }
+        }
 
-            // standings data
-            this@Column.AnimatedVisibility(
-                visible = displayDataState == ApiFetchState.Success
+        // standings data
+        AnimatedVisibility(
+            visible = displayDataState == ApiFetchState.Success
+        ) {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(verticalScrollState)
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(top = nbaPlayerStandingsViewModel.categoryItemHeight * 2)
-                        .verticalScroll(verticalScrollState)
-                ) {
-                    Row {
-                        NBAPlayerStandingsFirstDataList()
+                Row {
+                    NBAPlayerStandingsFirstDataList()
 
-                        Row(
-                            Modifier.horizontalScroll(horizontalScrollState)
-                        ) {
-                            NBAPlayerStandingsDataList()
-                        }
+                    Row(
+                        Modifier.horizontalScroll(horizontalScrollState)
+                    ) {
+                        NBAPlayerStandingsDataList()
                     }
                 }
             }
@@ -230,11 +223,11 @@ fun NBAPlayerStandingsFirstCategoryItem(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .height(nbaPlayerStandingsViewModel.categoryItemHeight * 2)
+            .height(nbaPlayerStandingsViewModel.firstCategoryItemHeight + nbaPlayerStandingsViewModel.secondCategoryItemHeight)
     ) {
         Text(
             text = StringConstants.standingsFirstCategory,
-            fontSize = nbaPlayerStandingsViewModel.categoryFontSize,
+            fontSize = nbaPlayerStandingsViewModel.firstCategoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
             modifier = Modifier.width(130.dp)
@@ -293,7 +286,7 @@ fun NBAPlayerStandingsFirstCategoryList(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .height(nbaPlayerStandingsViewModel.categoryItemHeight - 2.dp)
+                .height(nbaPlayerStandingsViewModel.firstCategoryItemHeight - 2.dp)
         ) {
             for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
                 NBAPlayerStandingsFirstCategoryListItem(
@@ -341,7 +334,7 @@ fun NBAPlayerStandingsFirstCategoryListItem(
     ) {
         Text(
             text = category,
-            fontSize = nbaPlayerStandingsViewModel.categoryFontSize,
+            fontSize = nbaPlayerStandingsViewModel.firstCategoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center
         )
@@ -384,7 +377,7 @@ fun NBAPlayerStandingsSecondCategoryList(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .height(nbaPlayerStandingsViewModel.categoryItemHeight - 2.dp)
+                .height(nbaPlayerStandingsViewModel.secondCategoryItemHeight - 2.dp)
         ) {
             for ((index, value) in StringConstants.NBA.playerStandingsSecondCategories.withIndex()) {
                 NBAPlayerStandingsSecondCategoryListItem(
@@ -411,15 +404,14 @@ fun NBAPlayerStandingsSecondCategoryListItem(
     category: String,
     index: Int
 ) {
-    val fontSize = when (index) {
-        6, 9, 17 -> 13.sp
-        else -> nbaPlayerStandingsViewModel.categoryFontSize
-    }
-
     Text(
-        text = category,
+        text = if (category.contains("경기당")) {
+            "경기당\n${category.substringAfter("경기당 ")}"
+        } else {
+            category
+        },
         textAlign = TextAlign.Center,
-        fontSize = fontSize,
+        fontSize = nbaPlayerStandingsViewModel.secondCategoryFontSize,
         fontWeight = FontWeight.Medium,
         modifier = Modifier
             .width(nbaPlayerStandingsViewModel.itemWidth)

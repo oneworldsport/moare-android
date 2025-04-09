@@ -3,9 +3,7 @@ package com.moare.android.features.search.display.nba.view
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -18,12 +16,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -37,48 +33,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierInfo
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.moare.android.R
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
-import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.EnNameTranslationUtils
-import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TimeFormatType
-import com.moare.android.core.util.TranslationType
-import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsViewModel
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
-import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
 import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
-import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
 import com.moare.android.features.search.models.models.nba.NBALineScore
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
-import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.common.components.VCapsuleBar
-import com.moare.android.ui.util.convertDpToPx
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 
 @Composable
@@ -636,6 +616,7 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
                     Text(
                         text = "• ${value.firstName + value.lastName}",
                         fontSize = 12.sp,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -693,11 +674,11 @@ fun NBAGameStatsFirstCategoryItem(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .height(nbaGameStatsViewModel.categoryItemHeight * 2)
+            .height(nbaGameStatsViewModel.firstCategoryItemHeight + nbaGameStatsViewModel.secondCategoryItemHeight)
     ) {
         Text(
             text = StringConstants.gameStatsFirstCategory,
-            fontSize = nbaGameStatsViewModel.categoryFontSize,
+            fontSize = nbaGameStatsViewModel.firstCategoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
             modifier = Modifier.width(130.dp)
@@ -755,7 +736,7 @@ fun NBAGameStatsFirstCategoryList(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .height(nbaGameStatsViewModel.categoryItemHeight - 2.dp)
+            .height(nbaGameStatsViewModel.firstCategoryItemHeight - 2.dp)
     ) {
         for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
             NBAGameStatsFirstCategoryListItem(
@@ -786,7 +767,7 @@ fun NBAGameStatsFirstCategoryListItem(
 
     Text(
         text = category,
-        fontSize = nbaGameStatsViewModel.categoryFontSize,
+        fontSize = nbaGameStatsViewModel.firstCategoryFontSize,
         fontWeight = FontWeight.Medium,
         textAlign = TextAlign.Center,
         modifier = Modifier
@@ -842,7 +823,7 @@ fun NBAGameStatsSecondCategoryList(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .height(nbaGameStatsViewModel.categoryItemHeight - 2.dp)
+            .height(nbaGameStatsViewModel.secondCategoryItemHeight - 2.dp)
     ) {
         for ((index, value) in StringConstants.NBA.gameStatsSecondCategories.withIndex()) {
             NBAGameStatsSecondCategoryListItem(
@@ -868,16 +849,10 @@ fun NBAGameStatsSecondCategoryListItem(
     category: String,
     index: Int
 ) {
-    val fontSize = when (index) {
-        6, 9 -> 11.sp
-        16 -> 12.sp
-        else -> nbaGameStatsViewModel.dataFontSize
-    }
-
     Text(
         text = category,
         textAlign = TextAlign.Center,
-        fontSize = fontSize,
+        fontSize = nbaGameStatsViewModel.secondCategoryFontSize,
         fontWeight = FontWeight.Medium,
         maxLines = 2,
         modifier = Modifier

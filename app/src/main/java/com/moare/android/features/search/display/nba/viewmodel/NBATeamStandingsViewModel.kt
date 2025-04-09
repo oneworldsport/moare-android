@@ -23,7 +23,7 @@ class NBATeamStandingsViewModel @Inject constructor(
        constants
        --------------------- */
     val dataItemHeight = 40.dp
-    val categoryItemHeight = 40.dp
+    val categoryItemHeight = 44.dp
     val firstCategoryItemWidth = 132.dp
     val dataItemWidth = 50.dp
     val categoryFontSize = 15.sp

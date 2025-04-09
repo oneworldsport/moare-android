@@ -172,54 +172,51 @@ fun FBPlayerStandingsView(
             )
         }
 
-        Box(
-            Modifier.padding(top = 6.dp)
+        // category
+        Row(
+            modifier = Modifier.padding(top = 6.dp)
         ) {
-            // category
-            Row {
-                FBPlayerStandingsFirstCategoryItem()
+            FBPlayerStandingsFirstCategoryItem()
 
-                Row(
-                    Modifier.horizontalScroll(horizontalScrollState)
-                ) {
-                    Column {
-                        FBPlayerStandingsFirstCategoryList()
-                        FBPlayerStandingsSecondCategoryList()
-                    }
+            Row(
+                Modifier.horizontalScroll(horizontalScrollState)
+            ) {
+                Column {
+                    FBPlayerStandingsFirstCategoryList()
+                    FBPlayerStandingsSecondCategoryList()
                 }
             }
+        }
 
-            // loading
-            this@Column.AnimatedVisibility(
-                visible = displayDataState == ApiFetchState.Fetching,
-                enter = fadeIn(),
-                exit = fadeOut()
+        // loading
+        AnimatedVisibility(
+            visible = displayDataState == ApiFetchState.Fetching,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    ProgressIndicator()
-                }
+                ProgressIndicator()
             }
+        }
 
-            // standings data
-            this@Column.AnimatedVisibility(
-                visible = displayDataState == ApiFetchState.Success
+        // standings data
+        AnimatedVisibility(
+            visible = displayDataState == ApiFetchState.Success
+        ) {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(verticalScrollState)
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(top = fbPlayerStandingsViewModel.categoryItemHeight * 2)
-                        .verticalScroll(verticalScrollState)
-                ) {
-                    Row {
-                        FBPlayerStandingsFirstDataList()
+                Row {
+                    FBPlayerStandingsFirstDataList()
 
-                        Row(
-                            Modifier.horizontalScroll(horizontalScrollState)
-                        ) {
-                            FBPlayerStandingsDataList()
-                        }
+                    Row(
+                        Modifier.horizontalScroll(horizontalScrollState)
+                    ) {
+                        FBPlayerStandingsDataList()
                     }
                 }
             }
