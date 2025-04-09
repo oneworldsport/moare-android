@@ -36,6 +36,6 @@ interface SearchApi {
         @Query("date") date: String?,
         @Query("dataType") dataType: String,
         @Query("leagueId") leagueId: Int,
-        @Query("id") id: Int,
+        @Query("id") id: String,
     ): ResponseBody
 }

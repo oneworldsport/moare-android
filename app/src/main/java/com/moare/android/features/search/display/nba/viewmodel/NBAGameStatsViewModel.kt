@@ -34,6 +34,7 @@ class NBAGameStatsViewModel @Inject constructor(
     val firstCategoryFontSize = 14.sp
     val secondCategoryFontSize = 13.sp
     val dataFontSize = 14.sp
+    val lineScoreItemHeight = 50.dp
 
     /* ---------------------
        data state

@@ -3,7 +3,9 @@ package com.moare.android.features.search.display.nba.view
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,10 +18,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -36,15 +40,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.R
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -56,9 +64,11 @@ import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.NBATitle
+import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 
 @Composable
@@ -111,7 +121,7 @@ fun NBAGameStatsView(
     }
 
     LaunchedEffect(Unit) {
-        searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
+        searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
     }
 
     // scroll to category that matches with the keyword,
@@ -132,42 +142,35 @@ fun NBAGameStatsView(
        ui
        --------------------- */
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
         /* ---------------------
            game title, info
-           - hides when game selected by schedule
            --------------------- */
-//        if (nbaLeagueScheduleData == null && nbaTeamScheduleData == null) {
-            displayModel?.game?.let { game ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 6.dp)
-                ) {
-                    NBATitle(
-                        leagueName = "NBA",
-                        leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
-                    )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+//            modifier = Modifier.padding(bottom = 6.dp)
+        ) {
+            NBATitle(
+                leagueName = "NBA",
+                leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
+            )
 
-                    Text(
-                        text = " - 정규시즌",
-                        fontSize = 14.sp
-                    )
-                }
+            Text(
+                text = " - 정규시즌",
+                fontSize = 14.sp
+            )
+        }
 
-//                NBALeagueScheduleListItem(data = game)
-                NBAGameStatsScoreInfoItem()
-            }
-//        }
+        NBAGameStatsScoreInfoItem()
 
         Box(
             Modifier
                 .fillMaxWidth()
+                .padding(vertical = 4.dp)
                 .height(1.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .padding(horizontal = UIConstants.Padding.defaultHPadding)
-                .padding(vertical = 6.dp)
                 .background(MaterialTheme.colors.primary)
         )
 
@@ -278,12 +281,13 @@ fun NBAGameStatsScoreInfoItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
             .padding(horizontal = UIConstants.Padding.defaultHPadding)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(top = 26.dp) // for NBAGameStatsLineScoreTitle
+            modifier = Modifier
+                .weight(0.4f)
+                .padding(top = 26.dp) // for NBAGameStatsLineScoreTitle. TODO: NBATitle 과의 간격 줄이고 싶음
         ) {
             URLImage(
                 url = if (homeTeamId != null) NBAUtil.teamLogoUrl(homeTeamId) else "",
@@ -291,24 +295,46 @@ fun NBAGameStatsScoreInfoItem(
                 isSvg = true
             )
 
-            Text(
-                text = "워리어스",
-                fontSize = 13.sp,
-                maxLines = 2
-            )
+            Row {
+                // TODO: RoundedBorderText 는 왼쪽 정렬, 팀 이름은 가운데 정렬 하고 싶음
+                RoundedBorderText(
+                    text = "홈",
+                    fontSize = 11.sp,
+                    radius = 4.dp,
+                    textColor = Moare,
+                    borderColor = Moare
+                )
+                Text(
+                    text = nbaGameStatsViewModel.teamNameDictionary["short_$homeTeamId"] ?: "",
+                    fontSize = 13.sp,
+                    maxLines = 2,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
 
             // game status
             CapsuleButton(
                 text = gameStatusText,
                 color = gameStatusColor,
-                isDisabled = true
+                isDisabled = true,
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {}
 
-            Text(
-                text = "클리블랜드",
-                fontSize = 13.sp,
-                maxLines = 2
-            )
+            Row {
+                RoundedBorderText(
+                    text = "원정",
+                    fontSize = 11.sp,
+                    radius = 4.dp,
+                    textColor = Color.Gray,
+                    borderColor = Color.Gray
+                )
+                Text(
+                    text = nbaGameStatsViewModel.teamNameDictionary["short_$awayTeamId"] ?: "",
+                    fontSize = 13.sp,
+                    maxLines = 2,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
 
             URLImage(
                 url = if (awayTeamId != null) NBAUtil.teamLogoUrl(awayTeamId) else "",
@@ -331,6 +357,7 @@ fun NBAGameStatsScoreInfoItem(
 
 @Composable
 fun NBAGameStatsLineScoreContainer(
+    nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel(),
     homeTeamLineScore: NBALineScore,
     awayTeamLineScore: NBALineScore,
     modifier: Modifier
@@ -345,14 +372,17 @@ fun NBAGameStatsLineScoreContainer(
                 Box(Modifier.height(26.dp)) // Empty space to position pts to same line with linescore
 
                 Box(
-                    modifier = Modifier.height(50.dp),
+                    modifier = Modifier.height(nbaGameStatsViewModel.lineScoreItemHeight),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = homeTeamLineScore.pts.toString(),
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Medium,
                         modifier = Modifier
                             .padding(start = 4.dp, end = 8.dp)
-                            .width(30.dp)
+                            .width(30.dp),
+                        color = if (homeTeamLineScore.pts >= awayTeamLineScore.pts) MaterialTheme.colors.primary else Color.Black
                     )
                 }
             }
@@ -368,9 +398,10 @@ fun NBAGameStatsLineScoreContainer(
                         .height(1.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(Color.Gray)
+                        .alpha(0.5f)
                 )
 
-                NBAGameStatsLineScoreItem(homeTeamLineScore)
+                NBAGameStatsLineScoreItem(lineScore = homeTeamLineScore)
             }
         }
 
@@ -380,19 +411,24 @@ fun NBAGameStatsLineScoreContainer(
                 .height(1.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .background(Color.Gray)
+                .alpha(0.5f)
         )
 
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+//            modifier = Modifier.height(nbaGameStatsViewModel.lineScoreItemHeight)
         ) {
             Text(
                 text = awayTeamLineScore.pts.toString(),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier
                     .padding(start = 4.dp, end = 8.dp)
-                    .width(30.dp)
+                    .width(30.dp),
+                color = if (awayTeamLineScore.pts >= homeTeamLineScore.pts) MaterialTheme.colors.primary else Color.Black
             )
 
-            NBAGameStatsLineScoreItem(awayTeamLineScore)
+            NBAGameStatsLineScoreItem(lineScore = awayTeamLineScore)
         }
     }
 }
@@ -405,54 +441,61 @@ fun NBAGameStatsLineScoreTitle(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth().height(25.dp)
     ) {
-        VCapsuleBar()
+        VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
             text = "1쿼터",
             textAlign = TextAlign.Center,
+            fontSize = 15.sp,
             modifier = Modifier.weight(1f)
         )
-        VCapsuleBar()
+        VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
             text = "2쿼터",
             textAlign = TextAlign.Center,
+            fontSize = 15.sp,
             modifier = Modifier.weight(1f)
         )
-        VCapsuleBar()
+        VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
             text = "3쿼터",
             textAlign = TextAlign.Center,
+            fontSize = 15.sp,
             modifier = Modifier.weight(1f)
         )
-        VCapsuleBar()
+        VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
             text = "4쿼터",
             textAlign = TextAlign.Center,
+            fontSize = 15.sp,
             modifier = Modifier.weight(1f)
         )
 
         if (lineScore.ptsOt1 != 0) {
-            VCapsuleBar()
+            VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = "연장 1쿼터",
                 textAlign = TextAlign.Center,
+                fontSize = 14.sp,
                 modifier = Modifier.weight(1f)
             )
         }
 
         if (lineScore.ptsOt2 != 0) {
-            VCapsuleBar()
+            VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = "연장 2쿼터",
                 textAlign = TextAlign.Center,
+                fontSize = 14.sp,
                 modifier = Modifier.weight(1f)
             )
         }
 
         if (lineScore.ptsOt3 != 0) {
-            VCapsuleBar()
+            VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = "연장 3쿼터",
                 textAlign = TextAlign.Center,
+                fontSize = 14.sp,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -461,62 +504,70 @@ fun NBAGameStatsLineScoreTitle(
 
 @Composable
 fun NBAGameStatsLineScoreItem(
+    nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel(),
     lineScore: NBALineScore
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().height(50.dp)
+        modifier = Modifier.fillMaxWidth().height(nbaGameStatsViewModel.lineScoreItemHeight)
     ) {
-        VCapsuleBar()
+        VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
             text = lineScore.ptsQtr1.toString(),
             textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
-        VCapsuleBar()
+        VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
             text = lineScore.ptsQtr2.toString(),
             textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
-        VCapsuleBar()
+        VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
             text = lineScore.ptsQtr3.toString(),
             textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
-        VCapsuleBar()
+        VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
             text = lineScore.ptsQtr4.toString(),
             textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
 
         // TODO: 홈, 원정 둘중에 하나는 0이 아닌데 다른 팀은 0일때 0인팀의 UI가 깨짐
         if (lineScore.ptsOt1 != 0) {
-            VCapsuleBar()
+            VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = lineScore.ptsOt1.toString(),
                 textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f)
             )
         }
 
         if (lineScore.ptsOt2 != 0) {
-            VCapsuleBar()
+            VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = lineScore.ptsOt2.toString(),
                 textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f)
             )
         }
 
         if (lineScore.ptsOt3 != 0) {
-            VCapsuleBar()
+            VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = lineScore.ptsOt3.toString(),
                 textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -594,55 +645,65 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
                 )
             }
 
-            Column(
-                Modifier.weight(0.3f)
+            Row(
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier.weight(0.4f)
             ) {
-                Text(
-                    text = "장소: ${nbaGameStatsViewModel.teamNameDictionary["venue_${displayModel.game.gameSummary?.homeTeamId}"]}" ?: "",
-                    fontSize = 12.sp,
-                )
-
-                Text(
-                    text = "관중수: ${displayModel.game.gameInfo?.attendance ?: 0}",
-                    fontSize = 12.sp,
-                )
-
-                Text(
-                    text = "심판:",
-                    fontSize = 12.sp,
-                )
-
-                for ((index, value) in displayModel.game.officials.withIndex()) {
-                    Text(
-                        text = "• ${value.firstName + value.lastName}",
-                        fontSize = 12.sp,
-                        overflow = TextOverflow.Ellipsis
+                // refresh button
+                Box(
+                    Modifier
+                        .padding(end = 4.dp)
+                        .alpha(0.6f)
+                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
+                        .padding(2.dp)
+                        .clickable {
+                            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
+                        }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_round_refresh_24),
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier.size(22.dp)
                     )
                 }
-            }
 
-            // refresh button
-//            Row {
-//                Spacer(Modifier.weight(1f))
-//
-//                Box(
-//                    Modifier
-//                        .padding(end = UIConstants.Padding.defaultHPadding)
-//                        .alpha(0.6f)
-//                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
-//                        .padding(2.dp)
-//                        .clickable {
-//                            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
-//                        }
-//                ) {
-//                    Icon(
-//                        painter = painterResource(id = R.drawable.ic_round_refresh_24),
-//                        contentDescription = null,
-//                        tint = Color.Gray,
-//                        modifier = Modifier.size(22.dp)
-//                    )
-//                }
-//            }
+                Column {
+                    Text(
+                        text = "날짜: ${CalendarUtil.formatDate(displayModel.game.gameSummary?.date).split(" ")[0]}",
+                        fontSize = 12.sp,
+                    )
+
+                    Text(
+                        text = CalendarUtil.formatDate(displayModel.game.gameSummary?.date, TimeFormatType.AMPM),
+                        fontSize = 12.sp
+                    )
+
+                    Text(
+                        text = "장소: ${nbaGameStatsViewModel.teamNameDictionary["venue_${displayModel.game.gameSummary?.homeTeamId}"]}" ?: "",
+                        fontSize = 12.sp,
+                    )
+
+                    Text(
+                        text = "관중수: ${displayModel.game.gameInfo?.attendance ?: 0}",
+                        fontSize = 12.sp,
+                    )
+
+                    Text(
+                        text = "심판:",
+                        fontSize = 12.sp,
+                    )
+
+                    for ((index, value) in displayModel.game.officials.withIndex()) {
+                        Text(
+                            text = "• ${value.firstName + value.lastName}",
+                            fontSize = 12.sp,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
         }
     }
 }

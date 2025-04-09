@@ -665,7 +665,7 @@ class SearchViewModel @Inject constructor(
                         category = category,
                         dataType = "${category}_player_stats",
                         leagueId = leagueId,
-                        id = playerId
+                        id = playerId.toString()
                     )
 
                     if (result.data is SportDecodableModel.FBPlayerStats) {
@@ -837,24 +837,54 @@ class SearchViewModel @Inject constructor(
 
     private suspend fun refreshGame(category: String) {
         try {
-            val game = fbGameStatsData.value?.game
-            game?.let {
-                // TODO: Has to add loading
-                val result = searchClient.fetchById(
-                    category = category,
-                    date = it.fixture.date,
-                    dataType = "${category}_game_stats",
-                    leagueId = it.league.id,
-                    id = it.fixture.id
-                )
+            when (val lastView = viewStack.value.lastOrNull()) {
+                is SportDecodableModel.FBGameStats -> {
+                    val game = fbGameStatsData.value?.game
+                    game?.let {
+                        // TODO: Has to add loading
+                        val result = searchClient.fetchById(
+                            category = category,
+                            date = it.fixture.date,
+                            dataType = "${category}_game_stats",
+                            leagueId = it.league.id,
+                            id = it.fixture.id.toString()
+                        )
 
-                if (result.data is SportDecodableModel.FBGameStats) {
-                    val data = result.data
+                        if (result.data is SportDecodableModel.FBGameStats) {
+                            val data = result.data
 //                    _fbGameStatsData.emit(data.displayModel)
-                    updateMainDisplayModel(data = data, shouldReset = false)
+                            updateMainDisplayModel(data = data, shouldReset = false)
 
-                    updateLastViewStack(data)
+                            updateLastViewStack(data)
+                        }
+                    }
                 }
+
+                is SportDecodableModel.NBAGameStats -> {
+                    val gameSummary = nbaGameStatsData.value?.game?.gameSummary
+                    val boxScoreTraditional = nbaGameStatsData.value?.game?.boxScoreTraditional
+                    gameSummary?.let { gameSummary ->
+                        boxScoreTraditional?.let { boxScoreTraditional->
+                            // TODO: Has to add loading
+                            val result = searchClient.fetchById(
+                                category = category,
+                                date = gameSummary.date,
+                                dataType = "${category}_game_stats",
+                                leagueId = 90001,
+                                id = boxScoreTraditional.gameId
+                            )
+
+                            if (result.data is SportDecodableModel.NBAGameStats) {
+                                val data = result.data
+                                updateMainDisplayModel(data = data, shouldReset = false)
+
+                                updateLastViewStack(data)
+                            }
+                        }
+                    }
+                }
+
+                else -> return // do nothing
             }
         } catch (e: Exception) {
             Log.e("dsdf", e.localizedMessage ?: "error")

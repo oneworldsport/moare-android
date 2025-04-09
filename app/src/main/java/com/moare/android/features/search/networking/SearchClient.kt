@@ -34,7 +34,7 @@ class SearchClient(
         date: String? = null,
         dataType: String,
         leagueId: Int,
-        id: Int
+        id: String
     ): DataModel {
         val response = apiHelper.searchApi.searchById(category, date, dataType, leagueId, id)
         return DataModel.fromJson(response.string())

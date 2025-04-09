@@ -317,6 +317,7 @@ fun FBGameStatsTeamButtonContainer(
             Row {
                 Spacer(Modifier.weight(1f))
 
+                // TODO: Make it component
                 Box(
                     Modifier
                         .padding(end = UIConstants.Padding.defaultHPadding)

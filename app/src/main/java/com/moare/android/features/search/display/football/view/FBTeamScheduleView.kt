@@ -347,7 +347,6 @@ fun FBTeamScheduleListItem(
             }
 
             // game date
-            // TODO: 아래 날짜 형식 CalendarUtil에 만들기?
             Text(
                 text = CalendarUtil.formatDate(data.fixture.date).split(" ")[0],
                 fontSize = 12.sp,
