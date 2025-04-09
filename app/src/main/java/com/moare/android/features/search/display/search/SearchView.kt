@@ -286,7 +286,8 @@ fun SearchView(
 
             // loading
             AnimatedVisibility(
-                visible = searchDataState == ApiFetchState.Fetching
+                visible = searchDataState == ApiFetchState.Fetching,
+                modifier = Modifier.padding(top = 8.dp)
             ) {
                 ProgressIndicator()
             }

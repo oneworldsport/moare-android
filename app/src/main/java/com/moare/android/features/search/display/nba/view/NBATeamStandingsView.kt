@@ -317,7 +317,7 @@ fun NBATeamStandingsFirstDataListItem(
             .padding(start = 10.dp)
             .height(nbaTeamStandingsViewModel.dataItemHeight)
             .clickable {
-//                searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = data.team.id))
+                searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = data.team.id))
             }
     ) {
         Text(

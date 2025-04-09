@@ -476,7 +476,7 @@ fun NBAPlayerStandingsFirstDataListItem(
             .padding(start = 10.dp)
             .height(nbaPlayerStandingsViewModel.dataItemHeight)
             .clickable {
-//                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(category = "football", playerId = data.player.personId))
+                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(category = "basketball", playerId = data.player.personId))
             }
     ) {
         Text(

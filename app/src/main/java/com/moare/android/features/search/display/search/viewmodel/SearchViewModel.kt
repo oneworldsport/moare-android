@@ -39,6 +39,8 @@ import com.moare.android.features.search.models.responsemodels.football.FBGameSt
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
 import com.moare.android.features.search.networking.KeywordsClient
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -641,10 +643,7 @@ class SearchViewModel @Inject constructor(
     private suspend fun showPlayerStats(category: String?, playerId: Int) {
         val modelConverter = ModelConverter()
 
-//        val playerInfoResponseModel: FBPlayerInfoResponseModel
-//        val stats: FBPlayerStatsDisplayModel
-
-        val dataModel: SportDecodableModel.FBPlayerStats
+        val dataModel: SportDecodableModel
 
         when (val lastView = viewStack.value.lastOrNull()) {
             is SportDecodableModel.FBPlayerStandings -> {
@@ -676,11 +675,29 @@ class SearchViewModel @Inject constructor(
                     }
                 }
             }
-
             is SportDecodableModel.FBPlayerInfo -> {
                 dataModel = SportDecodableModel.FBPlayerStats(
                     responseModel = lastView.responseModel,
                     displayModel = modelConverter.fbPlayerStatsConverter(lastView.responseModel)
+                )
+            }
+
+            is SportDecodableModel.NBAPlayerStandings -> {
+                // NOTE: nba player stats data in standings has all the stats for now, so doesn't has to fetchById like football above.
+                val player = lastView.responseModel.standings.find { player ->
+                    player.player.personId == playerId
+                }
+
+                val responseModel = NBAPlayerInfoResponseModel(info = player)
+                dataModel = SportDecodableModel.NBAPlayerStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.nbaPlayerStatsConverter(responseModel)
+                )
+            }
+            is SportDecodableModel.NBAPlayerInfo -> {
+                dataModel = SportDecodableModel.NBAPlayerStats(
+                    responseModel = lastView.responseModel,
+                    displayModel = modelConverter.nbaPlayerStatsConverter(lastView.responseModel)
                 )
             }
 
@@ -703,8 +720,7 @@ class SearchViewModel @Inject constructor(
     private suspend fun showTeamStats(teamId: Int) {
         val modelConverter = ModelConverter()
 
-        val teamInfoResponseModel: FBTeamInfoResponseModel
-        val stats: FBTeamStatsDisplayModel
+        val dataModel: SportDecodableModel
 
         when (val lastView = viewStack.value.lastOrNull()) {
             is SportDecodableModel.FBTeamStandings -> {
@@ -712,14 +728,35 @@ class SearchViewModel @Inject constructor(
                     team.team.id == teamId
                 }
 
-                teamInfoResponseModel = FBTeamInfoResponseModel(info = team)
-
-                stats = modelConverter.fbTeamStatsConverter(teamInfoResponseModel)
+                val responseModel = FBTeamInfoResponseModel(info = team)
+                dataModel = SportDecodableModel.FBTeamStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.fbTeamStatsConverter(responseModel)
+                )
+            }
+            is SportDecodableModel.FBTeamInfo -> {
+                dataModel = SportDecodableModel.FBTeamStats(
+                    responseModel = lastView.responseModel,
+                    displayModel = modelConverter.fbTeamStatsConverter(lastView.responseModel)
+                )
             }
 
-            is SportDecodableModel.FBTeamInfo -> {
-                teamInfoResponseModel = lastView.responseModel
-                stats = modelConverter.fbTeamStatsConverter(teamInfoResponseModel)
+            is SportDecodableModel.NBATeamStandings -> {
+                val team = lastView.responseModel.standings.find { team ->
+                    team.team.id == teamId
+                }
+
+                val responseModel = NBATeamInfoResponseModel(info = team)
+                dataModel = SportDecodableModel.NBATeamStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.nbaTeamStatsConverter(responseModel)
+                )
+            }
+            is SportDecodableModel.NBATeamInfo -> {
+                dataModel = SportDecodableModel.NBATeamStats(
+                    responseModel = lastView.responseModel,
+                    displayModel = modelConverter.nbaTeamStatsConverter(lastView.responseModel)
+                )
             }
 
             else -> return // Make it do nothing
@@ -727,11 +764,6 @@ class SearchViewModel @Inject constructor(
 
         _resultVisibleState.emit(false)
         delay(1000)
-
-        val dataModel = SportDecodableModel.FBTeamStats(
-            responseModel = teamInfoResponseModel,
-            displayModel = stats
-        )
 
         updateMainDisplayModel(dataModel)
 
@@ -746,18 +778,45 @@ class SearchViewModel @Inject constructor(
     private suspend fun showGameStats(gameType: String) {
         val modelConverter = ModelConverter()
 
-        val gameStatsReponseModel: FBGameStatsResponseModel
-        val stats: FBGameStatsDisplayModel
+        val dataModel: SportDecodableModel
 
         when (val lastView = viewStack.value.lastOrNull()) {
-            is SportDecodableModel.FBPlayerInfo -> {
-                gameStatsReponseModel = if (gameType == "previous") FBGameStatsResponseModel(lastView.responseModel.lastGame) else FBGameStatsResponseModel(lastView.responseModel.nextGame)
-                stats = modelConverter.fbGameStatsConverter(gameStatsReponseModel)
+            is SportDecodableModel.FBPlayerInfo,
+            is SportDecodableModel.FBTeamInfo-> {
+                val lastGame: FBGame?
+                val nextGame: FBGame?
+                if (lastView is SportDecodableModel.FBPlayerInfo) {
+                    lastGame = lastView.responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                } else {
+                    lastGame = (lastView as SportDecodableModel.FBTeamInfo).responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                }
+
+                val responseModel = if (gameType == "previous") FBGameStatsResponseModel(lastGame) else FBGameStatsResponseModel(nextGame)
+                dataModel = SportDecodableModel.FBGameStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.fbGameStatsConverter(responseModel)
+                )
             }
 
-            is SportDecodableModel.FBTeamInfo -> {
-                gameStatsReponseModel = if (gameType == "previous") FBGameStatsResponseModel(lastView.responseModel.lastGame) else FBGameStatsResponseModel(lastView.responseModel.nextGame)
-                stats = modelConverter.fbGameStatsConverter(gameStatsReponseModel)
+            is SportDecodableModel.NBAPlayerInfo,
+            is SportDecodableModel.NBATeamInfo-> {
+                val lastGame: NBAGame?
+                val nextGame: NBAGame?
+                if (lastView is SportDecodableModel.NBAPlayerInfo) {
+                    lastGame = lastView.responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                } else {
+                    lastGame = (lastView as SportDecodableModel.NBATeamInfo).responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                }
+
+                val responseModel = if (gameType == "previous") NBAGameStatsResponseModel(lastGame) else NBAGameStatsResponseModel(nextGame)
+                dataModel = SportDecodableModel.NBAGameStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.nbaGameStatsConverter(responseModel)
+                )
             }
 
              else -> return // Make it do nothing
@@ -765,11 +824,6 @@ class SearchViewModel @Inject constructor(
 
         _resultVisibleState.emit(false)
         delay(1000)
-
-        val dataModel = SportDecodableModel.FBGameStats(
-            responseModel = gameStatsReponseModel,
-            displayModel = stats
-        )
 
         updateMainDisplayModel(dataModel)
 
