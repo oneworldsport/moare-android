@@ -324,7 +324,7 @@ fun NBATeamScheduleListItem(
             text = homeTeamScore.toString(),
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .width(20.dp)
+                .width(30.dp)
                 .alpha(scoreAlpha),
             color = if (homeTeamScore >= awayTeamScore) MaterialTheme.colors.primary else Color.Black
         )
@@ -405,7 +405,7 @@ fun NBATeamScheduleListItem(
             text = awayTeamScore.toString(),
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .width(20.dp)
+                .width(30.dp)
                 .alpha(scoreAlpha),
             color = if (awayTeamScore >= homeTeamScore) MaterialTheme.colors.primary else Color.Black
         )

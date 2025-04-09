@@ -370,7 +370,9 @@ fun NBAGameStatsLineScoreContainer(
                 ) {
                     Text(
                         text = homeTeamLineScore.pts.toString(),
-                        modifier = Modifier.padding(start = 4.dp, end = 8.dp)
+                        modifier = Modifier
+                            .padding(start = 4.dp, end = 8.dp)
+                            .width(30.dp)
                     )
                 }
             }
@@ -405,7 +407,9 @@ fun NBAGameStatsLineScoreContainer(
         ) {
             Text(
                 text = awayTeamLineScore.pts.toString(),
-                modifier = Modifier.padding(start = 4.dp, end = 8.dp)
+                modifier = Modifier
+                    .padding(start = 4.dp, end = 8.dp)
+                    .width(30.dp)
             )
 
             NBAGameStatsLineScoreItem(awayTeamLineScore)
