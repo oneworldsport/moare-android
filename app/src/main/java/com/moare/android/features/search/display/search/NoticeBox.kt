@@ -17,9 +17,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.UIConstants
+import com.moare.android.features.search.models.NoticeModel
 
 @Composable
 fun NoticeBox(
+    notice: List<NoticeModel>,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -32,33 +34,27 @@ fun NoticeBox(
                 .verticalScroll(rememberScrollState())
                 .padding(10.dp)
         ) {
-            Text(
-                text = "현재 제공중인 스포츠 데이터:",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Gray
-            )
-            Text(
-                text = "• 프리미어리그 24/25" +
-                        "\n• 라리가 24/25" +
-                        "\n• 분데스리가 24/25" +
-                        "\n• 리그 1 24/25",
-                fontSize = 12.sp,
-                color = Color.Gray
-            )
-            Text(
-                text = "\n제공 예정 스포츠 데이터:",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Gray
-            )
-            Text(
-                text = "• 챔피언스리그 24/25" +
-                        "\n• KBO 리그 2025" +
-                        "\n• MLB 2025",
-                fontSize = 12.sp,
-                color = Color.Gray
-            )
+            for ((index, item) in notice.withIndex()) {
+                Text(
+                    text = if (index == 0) item.title else "\n${item.title}",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Gray
+                )
+
+                Text(
+                    text = item.content,
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
+            }
+//            Text(
+//                text = "• 챔피언스리그 24/25" +
+//                        "\n• KBO 리그 2025" +
+//                        "\n• MLB 2025",
+//                fontSize = 12.sp,
+//                color = Color.Gray
+//            )
         }
     }
 }

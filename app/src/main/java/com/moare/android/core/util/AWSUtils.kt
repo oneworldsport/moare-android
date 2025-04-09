@@ -9,22 +9,148 @@ import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.moare.android.core.di.EntryPoint
 import com.moare.android.features.search.models.KeywordInfo
+import com.moare.android.features.search.models.NoticeModel
+import com.moare.android.features.search.models.TrendingKeywords
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.jsonObject
 import java.io.File
 import java.lang.Exception
 
 object AWSUtils {
     private val AUTOCOMPLETE_ETAG_KEY = stringPreferencesKey("autoCompleteETag")
     private val NBA_PLAYER_NAME_DICTIONARY_ETAG_KEY = stringPreferencesKey("nbaPlayerNameDictionaryETag")
+
+    // TODO: 함수 기능 겹쳐서 합칠 수 있을듯
+    suspend fun checkTrendingKeywords(
+        context: Context,
+        s3Key: String,
+        eTagKey: Preferences.Key<String>
+    ) {
+        val entryPoint = EntryPointAccessors.fromApplication(context, EntryPoint::class.java)
+        val s3Client = entryPoint.getS3Client()
+        val transferUtility = entryPoint.getTransferUtility()
+        val dataStore = entryPoint.getDataStore()
+        val trendingKeywordsDeferred = entryPoint.getTrendingKeywords()
+
+        val bucket = "sport-search-engine"
+        val objectMetadata: ObjectMetadata = withContext(Dispatchers.IO) {
+            s3Client.getObjectMetadata(bucket, s3Key)
+        }
+        val newETag = objectMetadata.eTag
+
+        val currentETag = dataStore.data
+            .map { preferences -> preferences[eTagKey] ?: "" }
+            .first()
+
+        if (newETag == currentETag) {
+            val jsonString = withContext(Dispatchers.IO) {
+                File(context.filesDir, s3Key.substringAfter("/")).readText()
+            }
+            val jsonElement = Json.parseToJsonElement(jsonString)
+            val trendingKeywords: TrendingKeywords = Json.decodeFromJsonElement(jsonElement)
+            trendingKeywordsDeferred.complete(trendingKeywords)
+
+            return
+        }
+
+        val downloadFile = File(context.filesDir, s3Key.substringAfter("/"))
+        if (downloadFile.exists()) downloadFile.delete()
+
+        withContext(Dispatchers.IO) {
+            val observer = transferUtility.download(bucket, s3Key, downloadFile)
+            observer.setTransferListener(object : TransferListener {
+                override fun onStateChanged(id: Int, state: TransferState?) {
+                    if (state == TransferState.COMPLETED) {
+                        runBlocking {
+                            dataStore.edit { it[eTagKey] = newETag }
+
+                            val jsonString = withContext(Dispatchers.IO) {
+                                downloadFile.readText()
+                            }
+                            val jsonElement = Json.parseToJsonElement(jsonString)
+                            val trendingKeywords: TrendingKeywords = Json.decodeFromJsonElement(jsonElement)
+                            trendingKeywordsDeferred.complete(trendingKeywords)
+                        }
+                    }
+                }
+
+                override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {}
+
+                override fun onError(id: Int, ex: Exception?) {
+                    ex?.printStackTrace()
+                }
+            })
+        }
+    }
+
+    suspend fun checkNotice(
+        context: Context,
+        s3Key: String,
+        eTagKey: Preferences.Key<String>
+    ) {
+        val entryPoint = EntryPointAccessors.fromApplication(context, EntryPoint::class.java)
+        val s3Client = entryPoint.getS3Client()
+        val transferUtility = entryPoint.getTransferUtility()
+        val dataStore = entryPoint.getDataStore()
+        val noticeDeferred = entryPoint.getNotice()
+
+        val bucket = "sport-search-engine"
+        val objectMetadata: ObjectMetadata = withContext(Dispatchers.IO) {
+            s3Client.getObjectMetadata(bucket, s3Key)
+        }
+        val newETag = objectMetadata.eTag
+
+        val currentETag = dataStore.data
+            .map { preferences -> preferences[eTagKey] ?: "" }
+            .first()
+
+        if (newETag == currentETag) {
+            val jsonString = withContext(Dispatchers.IO) {
+                File(context.filesDir, s3Key.substringAfter("/")).readText()
+            }
+            val jsonElement = Json.parseToJsonElement(jsonString)
+            val list: List<NoticeModel> = Json.decodeFromJsonElement(jsonElement)
+            noticeDeferred.complete(list)
+
+            return
+        }
+
+        val downloadFile = File(context.filesDir, s3Key.substringAfter("/"))
+        if (downloadFile.exists()) downloadFile.delete()
+
+        withContext(Dispatchers.IO) {
+            val observer = transferUtility.download(bucket, s3Key, downloadFile)
+            observer.setTransferListener(object : TransferListener {
+                override fun onStateChanged(id: Int, state: TransferState?) {
+                    if (state == TransferState.COMPLETED) {
+                        runBlocking {
+                            dataStore.edit { it[eTagKey] = newETag }
+
+                            val jsonString = withContext(Dispatchers.IO) {
+                                downloadFile.readText()
+                            }
+                            val jsonElement = Json.parseToJsonElement(jsonString)
+                            val list: List<NoticeModel> = Json.decodeFromJsonElement(jsonElement)
+                            noticeDeferred.complete(list)
+                        }
+                    }
+                }
+
+                override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {}
+
+                override fun onError(id: Int, ex: Exception?) {
+                    ex?.printStackTrace()
+                }
+            })
+        }
+    }
 
     suspend fun checkAutoCompleteJson(context: Context) {
         val entryPoint = EntryPointAccessors.fromApplication(context, EntryPoint::class.java)
@@ -152,7 +278,12 @@ object AWSUtils {
                         runBlocking {
                             dataStore.edit { it[eTagKey] = newETag }
 
-                            // if the file is changed or first download, initialize player names(Map<String, String>) here
+                            val jsonString = withContext(Dispatchers.IO) {
+                                downloadFile.readText()
+                            }
+                            val jsonElement = Json.parseToJsonElement(jsonString)
+                            val map: Map<String, String> = Json.decodeFromJsonElement(jsonElement)
+                            translatedNameProvider.setDictionary(category, map)
                         }
                     }
                 }

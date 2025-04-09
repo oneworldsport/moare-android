@@ -19,7 +19,24 @@ class MyApplication : Application() {
         super.onCreate()
 
         CoroutineScope(Dispatchers.IO).launch {
+            // process
+            // 1. Trending Keywords
+            // 2. AutoComplete
+            // 3. Notice
+            // 4. Dictionary
+            AWSUtils.checkTrendingKeywords(
+                context = this@MyApplication,
+                s3Key = "trending_keywords/trending_keywords.json",
+                eTagKey = stringPreferencesKey("trendingKeywordsETag")
+            )
+
             AWSUtils.checkAutoCompleteJson(this@MyApplication)
+
+            AWSUtils.checkNotice(
+                context = this@MyApplication,
+                s3Key = "notice/main_notice.json",
+                eTagKey = stringPreferencesKey("mainNoticeETag")
+            )
 
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,

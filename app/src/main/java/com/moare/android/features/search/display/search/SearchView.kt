@@ -92,6 +92,7 @@ fun SearchView(
     val searchState by searchViewModel.searchState.collectAsState()
     val barFirstOpened by searchViewModel.barFirstOpened.collectAsState()
     val focusState by searchViewModel.focusState.collectAsState()
+    val notice by searchViewModel.noticeData.collectAsState()
 
     // football
     val fbPlayerInfoData by searchViewModel.fbPlayerInfoData.collectAsState()
@@ -203,6 +204,7 @@ fun SearchView(
                     horizontalAlignment = Alignment.End
                 ) {
                     NoticeBox(
+                        notice = notice,
                         modifier = Modifier.alpha(noticeAlpha)
                     )
 

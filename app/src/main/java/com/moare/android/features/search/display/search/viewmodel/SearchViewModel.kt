@@ -31,6 +31,8 @@ import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandin
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
+import com.moare.android.features.search.models.NoticeModel
+import com.moare.android.features.search.models.TrendingKeywords
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
@@ -55,7 +57,9 @@ class SearchViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val searchClient: SearchClient,
     private val keywordsClient: KeywordsClient,
-    private val trieDeferred: CompletableDeferred<Pair<Trie, List<KeywordInfo>>>
+    private val trieDeferred: CompletableDeferred<Pair<Trie, List<KeywordInfo>>>,
+    private val noticeDeferred: CompletableDeferred<List<NoticeModel>>,
+    private val trendingKeywordsDeferred: CompletableDeferred<TrendingKeywords>,
 ) : MVIViewModel<SearchViewModel.Intent, Nothing>() {
     /* ---------------------
        data state
@@ -127,6 +131,9 @@ class SearchViewModel @Inject constructor(
     private val _trendingKeywordList = MutableStateFlow<List<String>>(emptyList())
     val trendingKeywordList: StateFlow<List<String>> = _trendingKeywordList
 
+    private val _noticeData = MutableStateFlow<List<NoticeModel>>(emptyList())
+    val noticeData: StateFlow<List<NoticeModel>> = _noticeData
+
     /* ---------------------
        ui state
        --------------------- */
@@ -164,14 +171,14 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    private var trendingKeywords: Map<String, KeywordInfo> = emptyMap()
+
     // NOTE: viewStack should always be up to date
     private val _viewStack = MutableStateFlow<List<SportDecodableModel>>(emptyList())
     val viewStack: StateFlow<List<SportDecodableModel>> = _viewStack
 
     private val _poppedView = MutableStateFlow<SportDecodableModel?>(null)
     val poppedView: StateFlow<SportDecodableModel?> = _poppedView
-
-    private var trendingKeywords: Map<String, KeywordInfo> = emptyMap()
 
     /* ---------------------
        init
@@ -184,9 +191,12 @@ class SearchViewModel @Inject constructor(
 //
 //            val data = DataModel.fromJson(jsonContent).data as SportDecodableModel.FBPlayerStandings
 //            _fbPlayerStandingsData.emit(data.displayModel)
-        }
+//            delay(5000)
+            trendingKeywords = trendingKeywordsDeferred.await().keywords.associateBy { it.keyword }
+            _trendingKeywordList.emit(trendingKeywords.keys.toList())
 
-        fetchTrendingKeywords()
+            _noticeData.emit(noticeDeferred.await())
+        }
     }
 
     /* ---------------------
@@ -255,17 +265,6 @@ class SearchViewModel @Inject constructor(
        --------------------- */
     private suspend fun barFirstOpen() {
         _barFirstOpened.emit(true)
-    }
-
-    private fun fetchTrendingKeywords() {
-        viewModelScope.launch {
-            try {
-//                trendingKeywords = keywordsClient.fetchTrendingKeywords().associateBy { it.keyword }
-//                _trendingKeywordList.emit(trendingKeywords.keys.toList())
-            } catch (e: Exception) {
-                Log.e("dsdf", e.localizedMessage ?: "trendingKeywords error")
-            }
-        }
     }
 
     private suspend fun performSearch(searchType: SearchType, aniDuration: Long) {
