@@ -177,7 +177,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         _firstSelectedIndex.emit(index)
 
         when (beforeSecondSelectedIndex) {
-            in fetchCategoryIndexList -> fetchStandings(StringConstants.NBA.playerStandingsSecondCategories[beforeSecondSelectedIndex]) // 경기당(PG) 데이터 아닌 카테고리에서 first 카테고리를 눌렀을때는 fetch 해야함
+            in fetchCategoryIndexList -> fetchStandings("득점") // 경기당(PG) 데이터 아닌 카테고리에서 first 카테고리를 눌렀을때는 fetch 해야함. (PG 데이터로 fetch)
             else -> sortStandings()
         }
     }
@@ -198,7 +198,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         }
 
         when (beforeSecondSelectedIndex) {
-            in fetchCategoryIndexList -> fetchStandings(StringConstants.NBA.playerStandingsSecondCategories[beforeSecondSelectedIndex]) // 경기당(PG) 데이터가 아닌 카테고리에서 다른 카테고리를 눌렀을때는 무조건 fetch 해야함
+            in fetchCategoryIndexList -> fetchStandings(category) // 경기당(PG) 데이터가 아닌 카테고리에서 다른 카테고리를 눌렀을때는 무조건 fetch 해야함
             else -> when (index) { // 경기당(PG) 데이터인 카테고리에서 경기당 카테고리를 눌렀을때는 sort, 이외의 카테고리는 fetch
                 in fetchCategoryIndexList -> fetchStandings(category)
                 else -> sortStandings()
@@ -227,8 +227,8 @@ class NBAPlayerStandingsViewModel @Inject constructor(
             19 -> standings.sortedByDescending { it.stats.blkaPG }
             20 -> standings.sortedByDescending { it.stats.plusMinusPG }
             22 -> standings.sortedByDescending { CalendarUtil.formatHourMinuteToMinutes(it.stats.minPG) }
-            25 -> standings.sortedByDescending { it.stats.winsPct }
-            else -> standings // 경기당(PG) 데이터 이외에는 sort 할필요 없음
+            25 -> standings.sortedByDescending { it.stats.winsPct } // 승률 데이터도 경기당(PG) 데이터와 데이터가 같아 fetch 할 필요 없음
+            else -> standings // 경기당(PG) 데이터 이외에는 sort 할 필요 없음
         }
 
         filterStandings()
