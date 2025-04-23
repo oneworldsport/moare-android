@@ -2,6 +2,7 @@ package com.moare.android.features.search.display.football.viewmodel
 
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.CalendarUtil
@@ -49,10 +50,6 @@ class FBTeamScheduleViewModel @Inject constructor(
        --------------------- */
     var teamNameDictionary: Map<String, String> = emptyMap()
 
-    init {
-        teamNameDictionary = nameProvider.getDictionary("nba_team")
-    }
-
     /* ---------------------
        intent
        --------------------- */
@@ -83,6 +80,22 @@ class FBTeamScheduleViewModel @Inject constructor(
             // init data
             _displayModel.emit(displayModel)
             _games.emit(displayModel.games)
+
+            when (displayModel.leagueId) {
+                Constants.Ids.EPL -> {
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_TEAM_DIC)
+                }
+                Constants.Ids.LALIGA -> {
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_TEAM_DIC)
+                }
+                Constants.Ids.BUNDESLIGA -> {
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_TEAM_DIC)
+                }
+                Constants.Ids.LIGUE1 -> {
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
+                }
+                else -> {}
+            }
 
             val gameResultOpenedStateList = games.value.associate {
                 it.fixture.id to false

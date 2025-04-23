@@ -8,5 +8,6 @@ import kotlinx.serialization.Serializable
 data class FBLeagueScheduleDisplayModel(
     val yearMonthList: List<String>,
     var games: List<FBGame>,
-    val entityInfo: List<EntityInfo>
+    val entityInfo: List<EntityInfo>,
+    val leagueId: Int?
 )

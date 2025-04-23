@@ -214,7 +214,7 @@ class SearchViewModel @Inject constructor(
         data object ToggleSearchBar : Intent()
         data object ToggleAutoCompleteListVisibleState : Intent()
 
-        data class SelectFBGame(val game: FBGame) : Intent()
+        data class SelectFBGame(val game: FBGame, val leagueId: Int?) : Intent()
         data class SelectNBAGame(val game: NBAGame) : Intent()
 
         data class GoBack(val activity: Activity?) : Intent()
@@ -251,7 +251,7 @@ class SearchViewModel @Inject constructor(
                 is Intent.ToggleAutoCompleteListVisibleState -> toggleAutoCompleteListVisibleState()
                 is Intent.UpdateTextField -> updateTextField(intent.newValue, intent.updateAutoCompleteList)
                 is Intent.ToggleSearchBar -> toggleSearchBar()
-                is Intent.SelectFBGame -> selectFBGame(intent.game)
+                is Intent.SelectFBGame -> selectFBGame(intent.game, intent.leagueId)
                 is Intent.SelectNBAGame -> selectNBAGame(intent.game)
                 is Intent.GoBack -> goBack(intent.activity)
                 is Intent.ShowPlayerStats -> showPlayerStats(intent.category, intent.playerId)
@@ -484,10 +484,10 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun selectFBGame(game: FBGame) {
+    private suspend fun selectFBGame(game: FBGame, leagueId: Int?) {
         val dataModel = SportDecodableModel.FBGameStats(
             responseModel = FBGameStatsResponseModel(game = game),
-            displayModel = FBGameStatsDisplayModel(game = game)
+            displayModel = FBGameStatsDisplayModel(game = game, leagueId = leagueId)
         )
 
         // add stack before emiting _fbGameStatsData to ensure the last stack(SportDecodableModel.FBGameStats in this case) can be up to date after refreshing game data when opening FBGameStatsView
@@ -496,7 +496,7 @@ class SearchViewModel @Inject constructor(
         _viewStack.emit(stack)
         _poppedView.emit(null)
 
-        _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game))
+        _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game, leagueId = leagueId))
     }
 
     private suspend fun selectNBAGame(game: NBAGame) {

@@ -10,7 +10,8 @@ import kotlinx.serialization.Serializable
 data class FBPlayerStandingsDisplayModel(
     val keywords: List<Keyword>,
     val entityInfo: List<EntityInfo>,
-    var standings: List<FBPlayerStandingsDisplay>
+    var standings: List<FBPlayerStandingsDisplay>,
+    val leagueId: Int?
 )
 
 @Serializable
