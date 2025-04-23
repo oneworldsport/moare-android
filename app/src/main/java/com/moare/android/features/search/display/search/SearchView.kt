@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -213,7 +211,7 @@ fun SearchView(
                         contentDescription = null,
                         tint = Color.Gray,
                         modifier = Modifier
-                            .padding(top = UIConstants.Padding.defalutVPadding)
+                            .padding(top = UIConstants.Padding.DEFAULT_V_PADDING)
                             .size(20.dp)
                             .clickable {
                                 isNoticeOpened = !isNoticeOpened

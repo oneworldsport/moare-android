@@ -26,7 +26,7 @@ fun NoticeBox(
 ) {
     Box(
         modifier
-            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(UIConstants.CornerRadius.small))
+            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(UIConstants.CornerRadius.SMALL))
             .height(100.dp)
     ) {
         Column(

@@ -99,8 +99,8 @@ fun NBAGameStatsView(
        etc
        --------------------- */
     val secondSelectedCategoryPosition = with(LocalDensity.current) {
-        val attackCategoriesSize = StringConstants.NBA.gameStatsAttackCategories.size
-        val defendCategoriesSize = StringConstants.NBA.gameStatsDefendCategories.size
+        val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
+        val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
 
         if (secondSelectedIndex in 0 until attackCategoriesSize) {
             (nbaGameStatsViewModel.itemWidth * secondSelectedIndex).toPx()
@@ -170,7 +170,7 @@ fun NBAGameStatsView(
                 .padding(vertical = 4.dp)
                 .height(1.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .padding(horizontal = UIConstants.Padding.defaultHPadding)
+                .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
                 .background(MaterialTheme.colors.primary)
         )
 
@@ -246,25 +246,25 @@ fun NBAGameStatsScoreInfoItem(
        constants
        --------------------- */
     val gameStatusText = when (game?.gameSummary?.gameStatusId) {
-        1 -> StringConstants.gameNotStartedStr
+        1 -> StringConstants.GAME_NOT_STARTED_STR
         2 -> if (homeTeamLineScore?.ptsOt3 != null) {
-            StringConstants.NBA.gameOt3
+            StringConstants.NBA.GAME_OT_3
         } else if (homeTeamLineScore?.ptsOt2 != null) {
-            StringConstants.NBA.gameOt2
+            StringConstants.NBA.GAME_OT_2
         } else if (homeTeamLineScore?.ptsOt1 != null) {
-            StringConstants.NBA.gameOt1
+            StringConstants.NBA.GAME_OT_1
         } else if (homeTeamLineScore?.ptsQtr4 != null) {
-            StringConstants.NBA.gameQtr4
+            StringConstants.NBA.GAME_QTR_4
         } else if (homeTeamLineScore?.ptsQtr3 != null) {
-            StringConstants.NBA.gameQtr3
+            StringConstants.NBA.GAME_QTR_3
         } else if (homeTeamLineScore?.ptsQtr2 != null) {
-            StringConstants.NBA.gameQtr2
+            StringConstants.NBA.GAME_QTR_2
         } else if (homeTeamLineScore?.ptsQtr1 != null) {
-            StringConstants.NBA.gameQtr1
+            StringConstants.NBA.GAME_QTR_1
         } else {
             ""
         }
-        3 -> StringConstants.gameFinishedStr
+        3 -> StringConstants.GAME_FINISHED_STR
         else -> ""
     }
 
@@ -281,7 +281,7 @@ fun NBAGameStatsScoreInfoItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = UIConstants.Padding.defaultHPadding)
+            .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -737,7 +737,7 @@ fun NBAGameStatsFirstCategoryItem(
             .height(nbaGameStatsViewModel.firstCategoryItemHeight + nbaGameStatsViewModel.secondCategoryItemHeight)
     ) {
         Text(
-            text = StringConstants.gameStatsFirstCategory,
+            text = StringConstants.GAME_STATS_FIRST_CATEGORY,
             fontSize = nbaGameStatsViewModel.firstCategoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -755,9 +755,9 @@ fun NBAGameStatsFirstCategoryList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.NBA.gameStatsAttackCategories.size
-    val defendCategoriesSize = StringConstants.NBA.gameStatsDefendCategories.size
-    val commonCategoriesSize = StringConstants.NBA.gameStatsCommonCategories.size
+    val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
+    val commonCategoriesSize = StringConstants.NBA.GAME_STATS_COMMON_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -798,13 +798,13 @@ fun NBAGameStatsFirstCategoryList(
         modifier = Modifier
             .height(nbaGameStatsViewModel.firstCategoryItemHeight - 2.dp)
     ) {
-        for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
+        for ((index, value) in StringConstants.STATS_FIRST_CATEGORIES.withIndex()) {
             NBAGameStatsFirstCategoryListItem(
                 category = value,
                 index = index
             )
 
-            if (index != StringConstants.statsFirstCategories.size - 1) {
+            if (index != StringConstants.STATS_FIRST_CATEGORIES.size - 1) {
                 VCapsuleBar(modifier = Modifier.alpha(0.5f))
             }
         }
@@ -833,11 +833,11 @@ fun NBAGameStatsFirstCategoryListItem(
         modifier = Modifier
             .width(
                 if (index == 0) {
-                    (itemWidth * StringConstants.NBA.gameStatsAttackCategories.size)
+                    (itemWidth * StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size)
                 } else if (index == 1) {
-                    (itemWidth * StringConstants.NBA.gameStatsDefendCategories.size)
+                    (itemWidth * StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size)
                 } else {
-                    (itemWidth * StringConstants.NBA.gameStatsCommonCategories.size)
+                    (itemWidth * StringConstants.NBA.GAME_STATS_COMMON_CATEGORIES.size)
                 }
             )
             .clickable {
@@ -855,8 +855,8 @@ fun NBAGameStatsSecondCategoryList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.NBA.gameStatsAttackCategories.size
-    val defendCategoriesSize = StringConstants.NBA.gameStatsDefendCategories.size
+    val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -885,7 +885,7 @@ fun NBAGameStatsSecondCategoryList(
         modifier = Modifier
             .height(nbaGameStatsViewModel.secondCategoryItemHeight - 2.dp)
     ) {
-        for ((index, value) in StringConstants.NBA.gameStatsSecondCategories.withIndex()) {
+        for ((index, value) in StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES.withIndex()) {
             NBAGameStatsSecondCategoryListItem(
                 category = value,
                 index = index
@@ -1034,8 +1034,8 @@ fun NBAGameStatsDataList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.NBA.gameStatsAttackCategories.size
-    val defendCategoriesSize = StringConstants.NBA.gameStatsDefendCategories.size
+    val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -1050,7 +1050,7 @@ fun NBAGameStatsDataList(
                 modifier = Modifier
                     .height(nbaGameStatsViewModel.dataItemHeight)
             ) {
-                for (index in 0 until StringConstants.NBA.gameStatsSecondCategories.size) {
+                for (index in 0 until StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES.size) {
                     NBAGameStatsDataListItem(
                         data = item.statistics,
                         index = index
@@ -1069,7 +1069,7 @@ fun NBAGameStatsDataList(
             modifier = Modifier
                 .height(nbaGameStatsViewModel.dataItemHeight)
         ) {
-            for (index in 0 until StringConstants.NBA.gameStatsSecondCategories.size) {
+            for (index in 0 until StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES.size) {
                 playersTotalStats?.let {
                     NBAGameStatsDataListItem(
                         data = it,

@@ -131,7 +131,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
             val keywords = displayModel.keywords
             if (keywords.isNotEmpty()) {
                 // Check matching keyword in the order of categories, doesn't matter what keyword is in keywords
-                val index = StringConstants.Football.playerStandingsSecondCategories.indexOfFirst { category ->
+                val index = StringConstants.Football.PLAYER_STANDINGS_SECOND_CATEGORIES.indexOfFirst { category ->
                     val keyword = keywords.find { it.keyword == category }
                     keyword != null
                 }
@@ -152,8 +152,8 @@ class FBPlayerStandingsViewModel @Inject constructor(
     private suspend fun selectFirstCategory(index: Int) {
         shouldScrollCategory = true
 
-        val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
-        val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+        val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+        val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
         var secondCategory = "득점"
 
@@ -181,8 +181,8 @@ class FBPlayerStandingsViewModel @Inject constructor(
         shouldScrollCategory = false
         _secondSelectedIndex.emit(index)
 
-        val attackCategories = StringConstants.Football.playerStandingsAttackCategories
-        val defendCategories = StringConstants.Football.playerStandingsDefendCategories
+        val attackCategories = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES
+        val defendCategories = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES
 
         when (index) {
             in attackCategories.indices -> _firstSelectedIndex.emit(0)

@@ -40,8 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.EnNameTranslationUtils
-import com.moare.android.core.util.TranslationType
 import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -91,8 +89,8 @@ fun FBPlayerStandingsView(
        etc
        --------------------- */
     val secondSelectedCategoryPosition = with(LocalDensity.current) {
-        val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
-        val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+        val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+        val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
         if (secondSelectedIndex in 0 until attackCategoriesSize) {
             (fbPlayerStandingsViewModel.itemWidth * secondSelectedIndex).toPx()
@@ -234,7 +232,7 @@ fun FBPlayerStandingsFirstCategoryItem(
             .height(fbPlayerStandingsViewModel.categoryItemHeight * 2)
     ) {
         Text(
-            text = StringConstants.standingsFirstCategory,
+            text = StringConstants.STANDINGS_FIRST_CATEGORY,
             fontSize = fbPlayerStandingsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -252,9 +250,9 @@ fun FBPlayerStandingsFirstCategoryList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
-    val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
-    val commonCategoriesSize = StringConstants.Football.playerStandingsCommonCategories.size
+    val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
+    val commonCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_COMMON_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -296,13 +294,13 @@ fun FBPlayerStandingsFirstCategoryList(
             modifier = Modifier
                 .height(fbPlayerStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
+            for ((index, value) in StringConstants.STATS_FIRST_CATEGORIES.withIndex()) {
                 FBPlayerStandingsFirstCategoryListItem(
                     category = value,
                     index = index
                 )
 
-                if (index != StringConstants.statsFirstCategories.size - 1) {
+                if (index != StringConstants.STATS_FIRST_CATEGORIES.size - 1) {
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
                 }
             }
@@ -329,11 +327,11 @@ fun FBPlayerStandingsFirstCategoryListItem(
         modifier = Modifier
             .width(
                 if (index == 0) {
-                    (itemWidth * StringConstants.Football.playerStandingsAttackCategories.size)
+                    (itemWidth * StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size)
                 } else if (index == 1) {
-                    (itemWidth * StringConstants.Football.playerStandingsDefendCategories.size)
+                    (itemWidth * StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size)
                 } else {
-                    (itemWidth * StringConstants.Football.playerStandingsCommonCategories.size)
+                    (itemWidth * StringConstants.Football.PLAYER_STANDINGS_COMMON_CATEGORIES.size)
                 }
             )
             .clickable {
@@ -356,8 +354,8 @@ fun FBPlayerStandingsSecondCategoryList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
-    val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+    val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -387,7 +385,7 @@ fun FBPlayerStandingsSecondCategoryList(
             modifier = Modifier
                 .height(fbPlayerStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in StringConstants.Football.playerStandingsSecondCategories.withIndex()) {
+            for ((index, value) in StringConstants.Football.PLAYER_STANDINGS_SECOND_CATEGORIES.withIndex()) {
                 FBPlayerStandingsSecondCategoryListItem(
                     category = value,
                     index = index
@@ -543,8 +541,8 @@ fun FBPlayerStandingsDataList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
-    val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+    val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -569,7 +567,7 @@ fun FBPlayerStandingsDataList(
     Column {
         for ((index, value) in filteredStandings.withIndex()) {
             val standingsIndex = filteredStandingsStartIndex + index
-            val categorySize = StringConstants.Football.playerStandingsSecondCategories.size
+            val categorySize = StringConstants.Football.PLAYER_STANDINGS_SECOND_CATEGORIES.size
             val highlightWidth = (fbPlayerStandingsViewModel.itemWidth * categorySize) + (2.dp * 2)
 
             if (entityIndex != null && entityIndex == standingsIndex) {

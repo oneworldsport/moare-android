@@ -136,7 +136,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
             val keywords = displayModel.keywords
             if (keywords.isNotEmpty()) {
                 // Check matching keyword in the order of categories, doesn't matter what keyword is in keywords
-                val index = StringConstants.NBA.playerStandingsSecondCategories.indexOfFirst { category ->
+                val index = StringConstants.NBA.PLAYER_STANDINGS_SECOND_CATEGORIES.indexOfFirst { category ->
                     val keyword = keywords.find { it.keyword == category }
                     keyword != null
                 }
@@ -159,8 +159,8 @@ class NBAPlayerStandingsViewModel @Inject constructor(
 
         shouldScrollCategory = true
 
-        val attackCategoriesSize = StringConstants.NBA.playerStandingsAttackCategories.size
-        val defendCategoriesSize = StringConstants.NBA.playerStandingsDefendCategories.size
+        val attackCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+        val defendCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
         when (index) {
             0 -> {
@@ -188,8 +188,8 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         shouldScrollCategory = false
         _secondSelectedIndex.emit(index)
 
-        val attackCategories = StringConstants.NBA.playerStandingsAttackCategories
-        val defendCategories = StringConstants.NBA.playerStandingsDefendCategories
+        val attackCategories = StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES
+        val defendCategories = StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES
 
         when (index) {
             in attackCategories.indices -> _firstSelectedIndex.emit(0)

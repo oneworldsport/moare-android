@@ -150,8 +150,8 @@ class FBGameStatsViewModel @Inject constructor(
     private suspend fun selectFirstCategory(index: Int) {
         shouldScrollCategory = true
 
-        val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
-        val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
+        val attackCategoriesSize = StringConstants.Football.GAME_STATS_ATTACK_CATEGORIES.size
+        val defendCategoriesSize = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES.size
 
         when (index) {
             0 -> _secondSelectedIndex.emit(0)
@@ -168,8 +168,8 @@ class FBGameStatsViewModel @Inject constructor(
         shouldScrollCategory = false
         _secondSelectedIndex.emit(index)
 
-        val attackCategories = StringConstants.Football.gameStatsAttackCategories
-        val defendCategories = StringConstants.Football.gameStatsDefendCategories
+        val attackCategories = StringConstants.Football.GAME_STATS_ATTACK_CATEGORIES
+        val defendCategories = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES
 
         when (index) {
             in attackCategories.indices -> _firstSelectedIndex.emit(0)

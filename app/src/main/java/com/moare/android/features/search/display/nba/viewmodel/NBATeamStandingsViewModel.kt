@@ -98,7 +98,7 @@ class NBATeamStandingsViewModel @Inject constructor(
 
             val keywords = displayModel.keywords
             if (keywords.isNotEmpty()) {
-                val index = StringConstants.NBA.teamStandingsCategories.indexOfFirst { category ->
+                val index = StringConstants.NBA.TEAM_STANDINGS_CATEGORIES.indexOfFirst { category ->
                     val keyword = keywords.find { it.keyword == category }
                     keyword != null
                 }

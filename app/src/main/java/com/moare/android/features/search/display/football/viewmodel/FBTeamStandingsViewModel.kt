@@ -93,7 +93,7 @@ class FBTeamStandingsViewModel @Inject constructor(
 
             val keywords = displayModel.keywords
             if (keywords.isNotEmpty()) {
-                val index = StringConstants.Football.teamStandingsCategories.indexOfFirst { category ->
+                val index = StringConstants.Football.TEAM_STANDINGS_CATEGORIES.indexOfFirst { category ->
                     val keyword = keywords.find { it.keyword == category }
                     keyword != null
                 }
