@@ -109,11 +109,11 @@ fun NBATeamScheduleView(
 //            }
 //        }
 
-        /* ---------------------
-           all result open button
-           - hides when game selected
-           --------------------- */
         if (nbaGameStatsData == null) {
+            /* ---------------------
+               all result open button
+               - hides when game selected
+               --------------------- */
             Row {
                 Spacer(Modifier.weight(1f))
 

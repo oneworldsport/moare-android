@@ -638,7 +638,6 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
                     )
                 }
 
-
                 HCapsuleBar(
                     modifier = Modifier.offset(x = barOffset),
                     size = HCapsuleBarSize.MEDIUM
@@ -680,7 +679,7 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
                     )
 
                     Text(
-                        text = "장소: ${nbaGameStatsViewModel.teamNameDictionary["venue_${displayModel.game.gameSummary?.homeTeamId}"]}" ?: "",
+                        text = "장소: ${nbaGameStatsViewModel.teamNameDictionary["venue_${displayModel.game.gameSummary?.homeTeamId}"] ?: ""}",
                         fontSize = 12.sp,
                     )
 

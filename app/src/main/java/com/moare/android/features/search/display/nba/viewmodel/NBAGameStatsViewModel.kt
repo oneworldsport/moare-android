@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.rounded
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
@@ -70,8 +71,8 @@ class NBAGameStatsViewModel @Inject constructor(
        etc
        --------------------- */
     var shouldScrollCategory = false
-    var homeTeamId = 0
-    var awayTeamId = 0
+    private var homeTeamId = 0
+    private var awayTeamId = 0
     var playerNameDictionary: Map<String, String> = emptyMap()
     var teamNameDictionary: Map<String, String> = emptyMap()
 
@@ -132,10 +133,11 @@ class NBAGameStatsViewModel @Inject constructor(
 
             displayModel.game.boxScoreTraditional?.let {
                 // set current(home) team's players stats
-                _playersStats.emit(it.homeTeam.players)
-                setPlayersTotalStats()
-
-                sortPlayers()
+                selectTeam(0)
+//                _playersStats.emit(it.homeTeam.players)
+//                setPlayersTotalStats()
+//
+//                sortPlayers()
             }
         }
     }
@@ -213,12 +215,12 @@ class NBAGameStatsViewModel @Inject constructor(
             16 -> playerStats.sortedByDescending { it.statistics.turnovers }
             17 -> playerStats.sortedByDescending { it.statistics.foulsPersonal }
             18 -> playerStats.sortedByDescending { it.statistics.plusMinusPoints }
-            19 -> playerStats.sortedByDescending { it.statistics.minutes } // TODO: change
+            19 -> playerStats.sortedByDescending { CalendarUtil.formatHourMinuteToMinutes(it.statistics.minutes) }
             else -> {}
         }
 
         _playersStats.emit(playerStats)
-        setPlayersTotalStats()
+//        setPlayersTotalStats()
     }
 
     private suspend fun setPlayersTotalStats() {

@@ -203,7 +203,7 @@ fun FBGameStatsView(
                 )
 
                 Text(
-                    text = fbGameStatsViewModel.playerNameDictionary[coach?.name] ?: (coach?.name ?: ""),
+                    text = fbGameStatsViewModel.playerNameDictionary[coach?.name?.lowercase()] ?: (coach?.name ?: ""),
                     fontSize = 15.sp,
                     modifier = Modifier.padding(start = 4.dp)
                 )
@@ -660,7 +660,7 @@ fun FBGameStatsFirstDataListItem(
         )
 
         Text(
-            text = fbGameStatsViewModel.playerNameDictionary[data.name] ?: data.name,
+            text = fbGameStatsViewModel.playerNameDictionary[data.name.lowercase()] ?: data.name,
             fontSize = 12.sp,
             maxLines = 2,
             modifier = Modifier.width(60.dp)

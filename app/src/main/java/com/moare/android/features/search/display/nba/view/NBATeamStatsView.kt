@@ -127,7 +127,7 @@ fun NBATeamStatsView(
                 }
                 .alpha(0f)
         ) {
-            // player info
+            // team info
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,

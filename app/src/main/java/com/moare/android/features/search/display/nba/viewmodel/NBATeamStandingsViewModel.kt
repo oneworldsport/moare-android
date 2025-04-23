@@ -66,6 +66,8 @@ class NBATeamStandingsViewModel @Inject constructor(
         data class InitData(val displayModel: NBATeamStandingsDisplayModel) : Intent()
         data class SelectConference(val index: Int) : Intent()
         data class SelectCagetory(val index: Int) : Intent()
+
+        // TODO: viewmodel에서만 쓰여서 지워도 될 것 같은데, TCA와 구조를 완전히 동일하게 가져가려면 지금처럼 선언을 하고 사용할때는 send(Intent.SortStandings)로 사용해야함. 근데 굳이..?
         data object SortStandings : Intent()
     }
 
@@ -159,7 +161,6 @@ class NBATeamStandingsViewModel @Inject constructor(
 
     private suspend fun sortStandings() {
         var standings = standings.value.toMutableList()
-
 
         when (selectedCategoryIndex.value) {
             0 -> standings.sortByDescending { calculateGamesBack(it.stats) }

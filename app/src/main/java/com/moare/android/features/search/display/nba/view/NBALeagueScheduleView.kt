@@ -146,11 +146,11 @@ fun NBALeagueScheduleView(
 //            }
 //        }
 
-        /* ---------------------
-           calendar
-           - hides when game selected
-           --------------------- */
         if (nbaGameStatsData == null) {
+            /* ---------------------
+               calendar
+               - hides when game selected
+               --------------------- */
             CalendarList(yearMonthList, CalendarType.YEARMONTH, selectedYearMonthIndex, yearMonthCalendarScrollTrigger) { yearMonth, index ->
                 nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.SelectYearMonth(yearMonth, index) { data ->
                     // 현재 구조 콜백 수정 필요?
@@ -161,13 +161,11 @@ fun NBALeagueScheduleView(
             CalendarList(days, CalendarType.DAY, selectedDayIndex, dayCalendarScrollTrigger) { day, index ->
                 nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.SelectDay(day, index))
             }
-        }
 
-        /* ---------------------
-           all result open button
-           - hides when game selected
-           --------------------- */
-        if (nbaGameStatsData == null) {
+            /* ---------------------
+               all result open button
+               - hides when game selected
+               --------------------- */
             Row {
                 Spacer(Modifier.weight(1f))
 
@@ -227,7 +225,6 @@ fun NBALeagueScheduleView(
                --------------------- */
             Spacer(Modifier.fillMaxSize())
         }
-
     }
 }
 

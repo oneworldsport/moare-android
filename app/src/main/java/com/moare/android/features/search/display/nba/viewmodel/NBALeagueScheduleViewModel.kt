@@ -137,7 +137,7 @@ class NBALeagueScheduleViewModel @Inject constructor(
             // select default yearMonth
             displayModel.games.firstOrNull()?.gameSummary?.date?.let {
                 val defaultYearMonth = CalendarUtil.formatDate(it, TimeFormatType.YEAR_MONTH)
-                val defaultYearMonthIndex = yearMonthList.value.withIndex().first{ (_, value) -> value == defaultYearMonth }
+                val defaultYearMonthIndex = yearMonthList.value.withIndex().first { (_, value) -> value == defaultYearMonth }
                 _selectedYearMonth.emit(defaultYearMonth)
                 _selectedYearMonthIndex.emit(defaultYearMonthIndex.index)
                 _yearMonthCalendarScrollTrigger.emit(UUID.randomUUID().toString())
