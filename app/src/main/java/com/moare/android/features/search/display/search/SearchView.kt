@@ -194,19 +194,24 @@ fun SearchView(
         /* ---------------------
            back button
            --------------------- */
-        Column {
+        Column(
+            Modifier.zIndex(1f)
+        ) {
             Row {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_round_arrow_back_24),
-                    contentDescription = null,
-                    tint = Moare,
-                    modifier = Modifier
-                        .padding(start = 10.dp)
-                        .height(barHeight)
-                        .clickable {
-                            searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
-                        }
-                )
+                Box(
+                    contentAlignment = Alignment.CenterEnd,
+                    modifier = Modifier.size(width = 34.dp, height = 50.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_round_arrow_back_24),
+                        contentDescription = null,
+                        tint = Moare,
+                        modifier = Modifier
+                            .clickable {
+                                searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
+                            }
+                    )
+                }
 
                 Spacer(Modifier.weight(1f))
             }
