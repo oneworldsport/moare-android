@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.components.FBStatDataItem
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -461,9 +462,9 @@ fun NBATeamInfoFirstItem(
         }
 
         URLImage(
-            url = team.teamLogo,
+            url = NBAUtil.teamLogoUrl(team.id),
             modifier = Modifier.alpha(contentsAlpha),
-//            isSvg = true
+            isSvg = true
         )
 
         Text(

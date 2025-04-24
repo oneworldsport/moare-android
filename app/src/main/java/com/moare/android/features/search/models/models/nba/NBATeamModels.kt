@@ -30,7 +30,6 @@ data class NBATeamInfo(
     @SerialName("teamCode") private val _teamCode: String? = null,
     @SerialName("teamConference") private val _teamConference: String? = null,
     @SerialName("teamDivision") private val _teamDivision: String? = null,
-    @SerialName("teamLogo") private val _teamLogo: String? = null,
     @SerialName("w") private val _w: Int? = null,
     @SerialName("yearFounded") private val _yearFounded: Int? = null,
 ) {
@@ -50,7 +49,6 @@ data class NBATeamInfo(
     val teamCode: String get() = _teamCode ?: ""
     val teamConference: String get() = _teamConference ?: ""
     val teamDivision: String get() = _teamDivision ?: ""
-    val teamLogo: String get() = _teamLogo ?: ""
     val wins: Int get() = _w ?: 0
     val yearFounded: Int get() = _yearFounded ?: 0
 }

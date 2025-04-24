@@ -210,7 +210,10 @@ fun NBATeamStatsTeamInfoItem(
             modifier = Modifier
                 .alpha(contentsAlpha)
         ) {
-            URLImage(url = team.teamLogo)
+            URLImage(
+                url = NBAUtil.teamLogoUrl(team.id),
+                isSvg = true
+            )
 
             // name, state and city
             Column(
