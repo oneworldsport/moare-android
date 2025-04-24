@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -39,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -189,6 +192,23 @@ fun AnimatingSearchBar(
                     ),
                     enabled = if (searchState) false else true,
                     readOnly = aniBarVisibleState, // to prevent focusing while first open animation
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Search
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            if (searchState) {
+                                searchViewModel.send(SearchViewModel.Intent.ToggleSearchBar)
+                            } else {
+                                searchViewModel.send(SearchViewModel.Intent.ToggleAutoCompleteListVisibleState)
+                                searchViewModel.send(
+                                    SearchViewModel.Intent.PerformSearch(
+                                        aniDuration = 1000
+                                    )
+                                )
+                            }
+                        }
+                    ),
                     modifier = Modifier
                         .width(textFieldWidthState)
                         .focusRequester(focusRequester)
