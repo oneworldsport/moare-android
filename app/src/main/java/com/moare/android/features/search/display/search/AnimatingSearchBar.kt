@@ -67,6 +67,7 @@ fun AnimatingSearchBar(
     val barHeight = 50.dp
     val strokeWidth = convertDpToPx(3.dp)
     val cornerRadius = CornerRadius(50f)
+    val paddingForBackButton = 34.dp
 
     val disabledColor = Color.Gray
     val enabledColor = MaterialTheme.colors.primary
@@ -143,7 +144,7 @@ fun AnimatingSearchBar(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = if (searchState) 8.dp + paddingForBackButton else 16.dp)
                 .height(barHeight)
                 .drawBehind {
                     val path = RoundedRectPath(

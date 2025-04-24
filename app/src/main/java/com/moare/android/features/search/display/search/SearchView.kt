@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -67,6 +69,7 @@ import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.ProgressIndicator
+import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
 import com.moare.android.ui.util.rememberKeyboardVisibility
 import kotlinx.coroutines.delay
@@ -75,6 +78,11 @@ import kotlinx.coroutines.delay
 fun SearchView(
     searchViewModel: SearchViewModel = hiltViewModel()
 ) {
+    /* ---------------------
+       constants
+       --------------------- */
+    val barHeight = 50.dp
+
     /* ---------------------
        ui state
        --------------------- */
@@ -183,6 +191,29 @@ fun SearchView(
     Box(
         contentAlignment = Alignment.Center
     ) {
+        /* ---------------------
+           back button
+           --------------------- */
+        Column {
+            Row {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_round_arrow_back_24),
+                    contentDescription = null,
+                    tint = Moare,
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .height(barHeight)
+                        .clickable {
+                            searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
+                        }
+                )
+
+                Spacer(Modifier.weight(1f))
+            }
+
+            Spacer(Modifier.weight(1f))
+        }
+
         /* ---------------------
            notice
            - info about providing data
