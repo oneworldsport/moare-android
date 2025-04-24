@@ -510,7 +510,7 @@ fun FBPlayerStandingsFirstDataListItem(
         ) {
             Column {
                 Text(
-                    text = fbPlayerStandingsViewModel.playerNameDictionary[data.player.name.lowercase()] ?: data.player.name,
+                    text = fbPlayerStandingsViewModel.playerNameDictionary["${data.player.id}"] ?: data.player.name,
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
