@@ -296,117 +296,109 @@ fun SearchView(
                 enter = fadeIn(tween(durationMillis = 500)) + expandVertically(tween(durationMillis = 1000)),
                 exit = fadeOut(tween(durationMillis = 500)) + shrinkVertically(tween(durationMillis = 1000))
             ) {
-                Column {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp)
-                    ) {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            // football_player_info
-                            fbPlayerInfoData?.let {
-                                FBPlayerInfoView(data = it)
-                            }
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(top = 20.dp)
+                ) {
+                    // football_player_info
+                    fbPlayerInfoData?.let {
+                        FBPlayerInfoView(data = it)
+                    }
 
-                            // football_player_stats
-                            fbPlayerStatsData?.let {
-                                FBPlayerStatsView(data = it)
-                            }
+                    // football_player_stats
+                    fbPlayerStatsData?.let {
+                        FBPlayerStatsView(data = it)
+                    }
 
-                            // football_team_info
-                            fbTeamInfoData?.let {
-                                FBTeamInfoView(data = it)
-                            }
+                    // football_team_info
+                    fbTeamInfoData?.let {
+                        FBTeamInfoView(data = it)
+                    }
 
-                            // football_team_stats
-                            fbTeamStatsData?.let {
-                                FBTeamStatsView(data = it)
-                            }
+                    // football_team_stats
+                    fbTeamStatsData?.let {
+                        FBTeamStatsView(data = it)
+                    }
 
-                            // basketball_player_info
-                            nbaPlayerInfoData?.let {
-                                NBAPlayerInfoView(data = it )
-                            }
+                    // basketball_player_info
+                    nbaPlayerInfoData?.let {
+                        NBAPlayerInfoView(data = it )
+                    }
 
-                            // basketball_player_stats
-                            nbaPlayerStatsData?.let {
-                                NBAPlayerStatsView(data = it)
-                            }
+                    // basketball_player_stats
+                    nbaPlayerStatsData?.let {
+                        NBAPlayerStatsView(data = it)
+                    }
 
-                            // basketball_team_info
-                            nbaTeamInfoData?.let {
-                                NBATeamInfoView(data = it)
-                            }
+                    // basketball_team_info
+                    nbaTeamInfoData?.let {
+                        NBATeamInfoView(data = it)
+                    }
 
-                            // basketball_team_stats
-                            nbaTeamStatsData?.let {
-                                NBATeamStatsView(data = it)
-                            }
+                    // basketball_team_stats
+                    nbaTeamStatsData?.let {
+                        NBATeamStatsView(data = it)
+                    }
 
-                            // football_player_standings
-                            fbPlayerStandingsData?.let {
-                                FBPlayerStandingsView(
-                                    data = it
-                                )
-                            }
+                    // football_player_standings
+                    fbPlayerStandingsData?.let {
+                        FBPlayerStandingsView(
+                            data = it
+                        )
+                    }
 
-                            // football_team_standings
-                            fbTeamStandingsData?.let {
-                                FBTeamStandingsView(
-                                    data = it
-                                )
-                            }
+                    // football_team_standings
+                    fbTeamStandingsData?.let {
+                        FBTeamStandingsView(
+                            data = it
+                        )
+                    }
 
-                            // football_team_schedule
-                            fbTeamScheduleData?.let {
-                                FBTeamScheduleView(
-                                    data = it
-                                )
-                            }
+                    // football_team_schedule
+                    fbTeamScheduleData?.let {
+                        FBTeamScheduleView(
+                            data = it
+                        )
+                    }
 
-                            // football_league_schedule
-                            fbLeagueScheduleData?.let {
-                                FBLeagueScheduleView(
-                                    data = it
-                                )
-                            }
+                    // football_league_schedule
+                    fbLeagueScheduleData?.let {
+                        FBLeagueScheduleView(
+                            data = it
+                        )
+                    }
 
-                            // football_game_stats
-                            fbGameStatsData?.let {
-                                FBGameStatsView(
-                                    data = it
-                                )
-                            }
+                    // football_game_stats
+                    fbGameStatsData?.let {
+                        FBGameStatsView(
+                            data = it
+                        )
+                    }
 
-                            // basketball_player_standings
-                            nbaPlayerStandingsData?.let {
-                                NBAPlayerStandingsView(data = it)
-                            }
+                    // basketball_player_standings
+                    nbaPlayerStandingsData?.let {
+                        NBAPlayerStandingsView(data = it)
+                    }
 
-                            // basketball_team_standings
-                            nbaTeamStandingsData?.let {
-                                NBATeamStandingsView(data = it)
-                            }
+                    // basketball_team_standings
+                    nbaTeamStandingsData?.let {
+                        NBATeamStandingsView(data = it)
+                    }
 
-                            // basketball_team_schedule
-                            nbaTeamScheduleData?.let {
-                                NBATeamScheduleView(data = it)
-                            }
+                    // basketball_team_schedule
+                    nbaTeamScheduleData?.let {
+                        NBATeamScheduleView(data = it)
+                    }
 
-                            // basketball_league_schedule
-                            nbaLeagueScheduleData?.let {
-                                NBALeagueScheduleView(data = it)
-                            }
+                    // basketball_league_schedule
+                    nbaLeagueScheduleData?.let {
+                        NBALeagueScheduleView(data = it)
+                    }
 
-                            // basketball_game_stats
-                            nbaGameStatsData?.let {
-                                NBAGameStatsView(data = it)
-                            }
-                        }
+                    // basketball_game_stats
+                    nbaGameStatsData?.let {
+                        NBAGameStatsView(data = it)
                     }
                 }
             }
