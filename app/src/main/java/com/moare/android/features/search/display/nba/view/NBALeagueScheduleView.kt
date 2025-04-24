@@ -369,7 +369,7 @@ fun NBALeagueScheduleListItem(
 //                }
         ) {
             URLImage(
-                url = if (homeTeamId != null) NBAUtil.teamLogoUrl(homeTeamId) else "",
+                url = NBAUtil.teamLogoUrl(homeTeamId),
                 size = URLImageSize.SMALL,
                 isSvg = true
             )
@@ -479,7 +479,7 @@ fun NBALeagueScheduleListItem(
                 .weight(1f)
         ) {
             URLImage(
-                url = if (awayTeamId != null) NBAUtil.teamLogoUrl(awayTeamId) else "",
+                url = NBAUtil.teamLogoUrl(awayTeamId),
                 size = URLImageSize.SMALL,
                 isSvg = true
             )

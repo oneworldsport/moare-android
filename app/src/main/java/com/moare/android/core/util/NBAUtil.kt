@@ -13,11 +13,19 @@ object NBAUtil {
         }
     }
 
-    fun playerPhotoUrl(id: Int): String {
-        return "https://cdn.nba.com/headshots/nba/latest/1040x760/$id.png"
+    fun playerPhotoUrl(id: Int?): String? {
+        return if (id != null) {
+            "https://cdn.nba.com/headshots/nba/latest/1040x760/$id.png"
+        } else {
+            null
+        }
     }
 
-    fun teamLogoUrl(id: Int): String {
-        return "https://cdn.nba.com/logos/nba/$id/primary/L/logo.svg"
+    fun teamLogoUrl(id: Int?): String? {
+        return if (id != null) {
+            "https://cdn.nba.com/logos/nba/$id/primary/L/logo.svg"
+        } else {
+            null
+        }
     }
 }

@@ -290,7 +290,7 @@ fun NBAGameStatsScoreInfoItem(
                 .padding(top = 26.dp) // for NBAGameStatsLineScoreTitle. TODO: NBATitle 과의 간격 줄이고 싶음
         ) {
             URLImage(
-                url = if (homeTeamId != null) NBAUtil.teamLogoUrl(homeTeamId) else "",
+                url = NBAUtil.teamLogoUrl(homeTeamId),
                 size = URLImageSize.SMALL,
                 isSvg = true
             )
@@ -337,7 +337,7 @@ fun NBAGameStatsScoreInfoItem(
             }
 
             URLImage(
-                url = if (awayTeamId != null) NBAUtil.teamLogoUrl(awayTeamId) else "",
+                url = NBAUtil.teamLogoUrl(awayTeamId),
                 size = URLImageSize.SMALL,
                 isSvg = true
             )
