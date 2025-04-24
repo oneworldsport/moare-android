@@ -58,12 +58,10 @@ data class NBATeamInfo(
 @Serializable
 data class NBAVenue(
     @SerialName("capacity") private val _capacity: Int? = null,
-    @SerialName("krname") private val _krname: String? = null,
     @SerialName("name") private val _name: String? = null,
     @SerialName("opened") private val _opened: Int? = null,
 ) {
     val capacity: Int get() = _capacity ?: 0
-    val krname: String get() = _krname ?: ""
     val name: String get() = _name ?: ""
     val opened: Int get() = _opened ?: 0
 }

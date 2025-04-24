@@ -555,6 +555,7 @@ fun NBATeamInfoThirdItem(
     val displayModel by nbaTeamInfoViewModel.displayModel.collectAsState()
 
     displayModel?.let {
+        val team = it.team
         val venue = it.venue
 
         /* ---------------------
@@ -577,7 +578,7 @@ fun NBATeamInfoThirdItem(
             )
 
             Text(
-                text = venue.krname,
+                text = nbaTeamInfoViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
                 fontWeight = FontWeight.Medium
             )
         }

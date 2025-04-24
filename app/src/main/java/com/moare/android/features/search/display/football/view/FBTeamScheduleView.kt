@@ -187,6 +187,7 @@ fun FBTeamScheduleListItem(
     /* ---------------------
        viewmodel state
        --------------------- */
+    val displayModel by fbTeamScheduleViewModel.displayModel.collectAsState()
     val gameResultOpenedStateList by fbTeamScheduleViewModel.gameResultOpenedStateList.collectAsState()
 
     val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
@@ -260,7 +261,7 @@ fun FBTeamScheduleListItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = fbGameStatsData == null) {
-                searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data))
+                searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data, displayModel?.leagueId))
 
                 // set selected game's isOpened true
                 fbTeamScheduleViewModel.send(

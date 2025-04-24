@@ -256,7 +256,7 @@ fun NBATeamStatsTeamInfoItem(
                     )
 
                     Text(
-                        text = venue.krname,
+                        text = nbaTeamStatsViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
                         fontWeight = FontWeight.Medium
                     )
                 }
