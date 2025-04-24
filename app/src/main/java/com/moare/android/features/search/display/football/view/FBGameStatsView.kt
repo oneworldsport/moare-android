@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.MatchDescriptionConverter
@@ -116,7 +117,12 @@ fun FBGameStatsView(
     }
 
     LaunchedEffect(Unit) {
-        searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
+        displayModel?.let {
+            if (it.game.fixture.status.short != Constants.FBGameStatus.NOT_STARTED &&
+                it.game.fixture.status.short != Constants.FBGameStatus.FINISHED) {
+                searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
+            }
+        }
     }
 
     // scroll to category that matches with the keyword,
@@ -313,26 +319,29 @@ fun FBGameStatsTeamButtonContainer(
             }
 
             // refresh button
-            Row {
-                Spacer(Modifier.weight(1f))
+            if (it.game.fixture.status.short != Constants.FBGameStatus.NOT_STARTED &&
+                it.game.fixture.status.short != Constants.FBGameStatus.FINISHED) {
+                Row {
+                    Spacer(Modifier.weight(1f))
 
-                // TODO: Make it component
-                Box(
-                    Modifier
-                        .padding(end = UIConstants.Padding.DEFAULT_H_PADDING)
-                        .alpha(0.6f)
-                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
-                        .padding(2.dp)
-                        .clickable {
-                            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
-                        }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_round_refresh_24),
-                        contentDescription = null,
-                        tint = Color.Gray,
-                        modifier = Modifier.size(22.dp)
-                    )
+                    // TODO: Make it component
+                    Box(
+                        Modifier
+                            .padding(end = UIConstants.Padding.DEFAULT_H_PADDING)
+                            .alpha(0.6f)
+                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
+                            .padding(2.dp)
+                            .clickable {
+                                searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
+                            }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_round_refresh_24),
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                 }
             }
         }

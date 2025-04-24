@@ -54,4 +54,25 @@ object Constants {
         const val DET = 1610612765
         const val CHA = 1610612766
     }
+
+    object NBAGameStatus {
+        const val NOT_STARTED = 1
+        const val LIVE = 2
+        const val FINISHED = 3
+    }
+
+    object FBGameStatus {
+        const val NOT_STARTED = "NS"
+        const val FIRST_HALF = "1H"
+        const val HALF_TIME = "HT"
+        const val SECOND_HALF = "2H"
+        const val EXTRA_TIME = "ET" // 연장전
+        const val BREAK_TIME = "BT" // 연장전 전반 후 휴식시간
+        const val PENALTY_SHOOTOUT = "P" // 승부차기
+        const val FINISHED = "FT"
+        const val FINISHED_AFTER_EXTRA_TIME = "AET" // 승부차기 없이 연장전 후 경기 종료
+        const val FINISHED_AFTER_PENALTY_SHOOTOUT = "PET" // 승부차기 후 경기 종료
+        const val POSTPONED = "PST"
+        const val CANCELLED = "CANC"
+    }
 }

@@ -17,6 +17,7 @@ object StringConstants {
         const val GAME_HALF_TIME_STR = "전반 종료"
         const val GAME_SECOND_HALF_STR = "후반전"
 
+        // TODO: Should move to Constants.FBGameStatus
         const val GAME_NOT_STARTED = "NS"
         const val GAME_FIRST_HALF = "1H"
         const val GAME_HALF_TIME = "HT"

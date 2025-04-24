@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
@@ -122,7 +123,9 @@ fun NBAGameStatsView(
     }
 
     LaunchedEffect(Unit) {
-        searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
+        if (displayModel?.game?.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE) {
+            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
+        }
     }
 
     // scroll to category that matches with the keyword,
@@ -175,7 +178,7 @@ fun NBAGameStatsView(
                 .background(MaterialTheme.colors.primary)
         )
 
-        if (displayModel?.game?.gameSummary?.gameStatusId != 1) {
+        if (displayModel?.game?.gameSummary?.gameStatusId != Constants.NBAGameStatus.NOT_STARTED) {
             /* ---------------------
                team select button
                --------------------- */
@@ -247,8 +250,8 @@ fun NBAGameStatsScoreInfoItem(
        constants
        --------------------- */
     val gameStatusText = when (game?.gameSummary?.gameStatusId) {
-        1 -> StringConstants.GAME_NOT_STARTED_STR
-        2 -> if (homeTeamLineScore?.ptsOt3 != null) {
+        Constants.NBAGameStatus.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
+        Constants.NBAGameStatus.LIVE -> if (homeTeamLineScore?.ptsOt3 != null) {
             StringConstants.NBA.GAME_OT_3
         } else if (homeTeamLineScore?.ptsOt2 != null) {
             StringConstants.NBA.GAME_OT_2
@@ -265,11 +268,11 @@ fun NBAGameStatsScoreInfoItem(
         } else {
             ""
         }
-        3 -> StringConstants.GAME_FINISHED_STR
+        Constants.NBAGameStatus.FINISHED -> StringConstants.GAME_FINISHED_STR
         else -> ""
     }
 
-    val gameStatusColor = if (game?.gameSummary?.gameStatusId == 2) {
+    val gameStatusColor = if (game?.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE) {
         MaterialTheme.colors.primary
     } else {
         Color.Gray
@@ -349,7 +352,9 @@ fun NBAGameStatsScoreInfoItem(
                 NBAGameStatsLineScoreContainer(
                     homeTeamLineScore = home,
                     awayTeamLineScore = away,
-                    modifier = Modifier.height(127.dp).weight(1f) // 25 + 1 + 50 + 1 + 50
+                    modifier = Modifier
+                        .height(127.dp)
+                        .weight(1f) // 25 + 1 + 50 + 1 + 50
                 )
             }
         }
@@ -448,7 +453,9 @@ fun NBAGameStatsLineScoreTitle(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().height(25.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(25.dp)
     ) {
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
@@ -519,7 +526,9 @@ fun NBAGameStatsLineScoreItem(
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().height(nbaGameStatsViewModel.lineScoreItemHeight)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(nbaGameStatsViewModel.lineScoreItemHeight)
     ) {
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
@@ -658,22 +667,24 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
                 modifier = Modifier.weight(0.4f)
             ) {
                 // refresh button
-                Box(
-                    Modifier
-                        .padding(end = 4.dp)
-                        .alpha(0.6f)
-                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
-                        .padding(2.dp)
-                        .clickable {
-                            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
-                        }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_round_refresh_24),
-                        contentDescription = null,
-                        tint = Color.Gray,
-                        modifier = Modifier.size(22.dp)
-                    )
+                if (displayModel.game.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE) {
+                    Box(
+                        Modifier
+                            .padding(end = 4.dp)
+                            .alpha(0.6f)
+                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
+                            .padding(2.dp)
+                            .clickable {
+                                searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
+                            }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_round_refresh_24),
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                 }
 
                 Column {
