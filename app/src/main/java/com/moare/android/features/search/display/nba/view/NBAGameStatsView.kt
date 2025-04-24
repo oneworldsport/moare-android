@@ -53,6 +53,7 @@ import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.displayOrDash
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -376,13 +377,17 @@ fun NBAGameStatsLineScoreContainer(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = homeTeamLineScore.pts.toString(),
+                        text = homeTeamLineScore.pts.displayOrDash,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier
                             .padding(start = 4.dp, end = 8.dp)
                             .width(30.dp),
-                        color = if (homeTeamLineScore.pts >= awayTeamLineScore.pts) MaterialTheme.colors.primary else Color.Black
+                        color = homeTeamLineScore.pts?.let { homePts ->
+                            awayTeamLineScore.pts?.let { awayPts ->
+                                if (homePts >= awayPts) MaterialTheme.colors.primary else Color.Black
+                            }
+                        } ?: Color.Black
                     )
                 }
             }
@@ -419,13 +424,17 @@ fun NBAGameStatsLineScoreContainer(
 //            modifier = Modifier.height(nbaGameStatsViewModel.lineScoreItemHeight)
         ) {
             Text(
-                text = awayTeamLineScore.pts.toString(),
+                text = awayTeamLineScore.pts.displayOrDash,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier
                     .padding(start = 4.dp, end = 8.dp)
                     .width(30.dp),
-                color = if (awayTeamLineScore.pts >= homeTeamLineScore.pts) MaterialTheme.colors.primary else Color.Black
+                color = homeTeamLineScore.pts?.let { homePts ->
+                    awayTeamLineScore.pts?.let { awayPts ->
+                        if (awayPts >= homePts) MaterialTheme.colors.primary else Color.Black
+                    }
+                } ?: Color.Black
             )
 
             NBAGameStatsLineScoreItem(lineScore = awayTeamLineScore)
@@ -470,7 +479,7 @@ fun NBAGameStatsLineScoreTitle(
             modifier = Modifier.weight(1f)
         )
 
-        if (lineScore.ptsOt1 != 0) {
+        if (lineScore.ptsOt1 != null && lineScore.ptsOt1 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = "연장 1쿼터",
@@ -480,7 +489,7 @@ fun NBAGameStatsLineScoreTitle(
             )
         }
 
-        if (lineScore.ptsOt2 != 0) {
+        if (lineScore.ptsOt2 != null && lineScore.ptsOt2 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = "연장 2쿼터",
@@ -490,7 +499,7 @@ fun NBAGameStatsLineScoreTitle(
             )
         }
 
-        if (lineScore.ptsOt3 != 0) {
+        if (lineScore.ptsOt3 != null && lineScore.ptsOt3 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = "연장 3쿼터",
@@ -514,35 +523,35 @@ fun NBAGameStatsLineScoreItem(
     ) {
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
-            text = lineScore.ptsQtr1.toString(),
+            text = lineScore.ptsQtr1.displayOrDash,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
-            text = lineScore.ptsQtr2.toString(),
+            text = lineScore.ptsQtr2.displayOrDash,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
-            text = lineScore.ptsQtr3.toString(),
+            text = lineScore.ptsQtr3.displayOrDash,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
-            text = lineScore.ptsQtr4.toString(),
+            text = lineScore.ptsQtr4.displayOrDash,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
 
         // TODO: 홈, 원정 둘중에 하나는 0이 아닌데 다른 팀은 0일때 0인팀의 UI가 깨짐
-        if (lineScore.ptsOt1 != 0) {
+        if (lineScore.ptsOt1 != null && lineScore.ptsOt1 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = lineScore.ptsOt1.toString(),
@@ -552,7 +561,7 @@ fun NBAGameStatsLineScoreItem(
             )
         }
 
-        if (lineScore.ptsOt2 != 0) {
+        if (lineScore.ptsOt2 != null && lineScore.ptsOt2 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = lineScore.ptsOt2.toString(),
@@ -562,7 +571,7 @@ fun NBAGameStatsLineScoreItem(
             )
         }
 
-        if (lineScore.ptsOt3 != 0) {
+        if (lineScore.ptsOt3 != null && lineScore.ptsOt3 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = lineScore.ptsOt3.toString(),
