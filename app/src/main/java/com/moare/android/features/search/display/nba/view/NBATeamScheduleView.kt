@@ -347,7 +347,7 @@ fun NBATeamScheduleListItem(
 //                )
 //            } else {
                 Text(
-                    text = CalendarUtil.formatDate(data.gameSummary?.date).split(" ")[0],
+                    text = CalendarUtil.formatDate(data.gameSummary?.date).split(" ").firstOrNull() ?: "",
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 2.dp)
                 )

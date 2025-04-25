@@ -67,8 +67,8 @@ fun URLImage(
             modifier
                 .size(imageSize)
                 .clip(CircleShape)
-                .background(Color.Gray)
                 .alpha(0.6f)
+                .background(Color.Gray)
         )
     }
 }

@@ -432,7 +432,7 @@ fun FBLeagueScheduleListItem(
                 )
             } else {
                 Text(
-                    text = CalendarUtil.formatDate(data.fixture.date).split(" ")[0],
+                    text = CalendarUtil.formatDate(data.fixture.date).split(" ").firstOrNull() ?: "",
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 2.dp)
                 )

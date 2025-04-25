@@ -280,4 +280,8 @@ class ModelConverter(
     fun nbaGameStatsConverter(response: NBAGameStatsResponseModel): NBAGameStatsDisplayModel {
         return NBAGameStatsDisplayModel(response.game!!)
     }
+
+    fun nbaLeagueTournamentConverter(response: NBAGameScheduleResponseModel): NBALeagueScheduleDisplayModel {
+        return NBALeagueScheduleDisplayModel(emptyList(), response.schedule, entityInfo)
+    }
 }

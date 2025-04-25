@@ -689,7 +689,7 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
 
                 Column {
                     Text(
-                        text = "날짜: ${CalendarUtil.formatDate(displayModel.game.gameSummary?.date).split(" ")[0]}",
+                        text = "날짜: ${CalendarUtil.formatDate(displayModel.game.gameSummary?.date).split(" ").firstOrNull() ?: ""}",
                         fontSize = 12.sp,
                     )
 
