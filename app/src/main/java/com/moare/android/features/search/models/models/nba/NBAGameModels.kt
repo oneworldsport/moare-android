@@ -134,7 +134,14 @@ data class NBAGameInfo(
 
 @Serializable
 data class NBAGameSummary(
+    @SerialName("gameId") private val _gameId: String? = null,
     @SerialName("date") private val _date: String? = null,
+    @SerialName("weekNumber") private val _weekNumber: String? = null,
+    @SerialName("weekName") private val _weekName: String? = null,
+    @SerialName("seriesGameNumber") private val _seriesGameNumber: String? = null,
+    @SerialName("gameLabel") private val _gameLabel: String? = null,
+    @SerialName("gameSubLabel") private val _gameSubLabel: String? = null,
+    @SerialName("seriesText") private val _seriesText: String? = null,
     @SerialName("gamecode") private val _gameCode: String? = null,
     @SerialName("gameStatusId") private val _gameStatusId: Int? = null,
     @SerialName("gameStatusText") private val _gameStatusText: String? = null,
@@ -144,7 +151,14 @@ data class NBAGameSummary(
     @SerialName("visitorTeamId") private val _visitorTeamId: Int? = null,
     @SerialName("whStatus") private val _whStatus: Int? = null,
 ) {
+    val gameId: String get() = _gameId ?: ""
     val date: String get() = _date ?: ""
+    val weekNumber: String get() = _weekNumber ?: ""
+    val weekName: String get() = _weekName ?: ""
+    val seriesGameNumber: String get() = _seriesGameNumber ?: ""
+    val gameLabel: String get() = _gameLabel ?: ""
+    val gameSubLabel: String get() = _gameSubLabel ?: ""
+    val seriesText: String get() = _seriesText ?: ""
     val gameCode: String get() = _gameCode ?: ""
     val gameStatusId: Int get() = _gameStatusId ?: 0
     val gameStatusText: String get() = _gameStatusText ?: ""

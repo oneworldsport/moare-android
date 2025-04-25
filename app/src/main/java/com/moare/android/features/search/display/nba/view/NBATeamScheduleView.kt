@@ -44,6 +44,8 @@ import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
+import com.moare.android.ui.theme.Moare
+import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBATeamScheduleView(
@@ -339,48 +341,53 @@ fun NBATeamScheduleListItem(
             }
 
             // game date
-//            if (nbaGameStatsData != null) {
-//                Text(
-//                    text = CalendarUtil.formatDate(data.gameSummary?.date, TimeFormatType.AMPM),
-//                    fontSize = 12.sp,
-//                    modifier = Modifier.padding(vertical = 2.dp)
-//                )
-//            } else {
+            Text(
+                text = CalendarUtil.formatDate(data.gameSummary?.date).split(" ").firstOrNull() ?: "",
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+
+            Text(
+                text = CalendarUtil.formatDate(data.gameSummary?.date, TimeFormatType.AMPM),
+                fontSize = 12.sp,
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
+
+            // playoffs info
+            if (data.gameSummary != null && data.gameSummary.weekName.isEmpty()) {
+                val gameSummary = data.gameSummary
                 Text(
-                    text = CalendarUtil.formatDate(data.gameSummary?.date).split(" ").firstOrNull() ?: "",
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 2.dp)
+                    text = NBAUtil.gameType(gameSummary, true),
+                    fontSize = 11.sp
                 )
 
-                Text(
-                    text = CalendarUtil.formatDate(data.gameSummary?.date, TimeFormatType.AMPM),
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 2.dp)
-                )
-//            }
+                if (data.seasonSeries != null && !gameSummary.seriesGameNumber.isEmpty()) {
+                    val seasonSeries = data.seasonSeries
+                    CenterRow {
+                        Text(
+                            text = "시리즈 스코어: ",
+                            fontSize = 11.sp
+                        )
 
-            // venue
-//            nbaGameStatsData?.let {
-//                Text(
-//                    text = "장소: ",
-//                    fontSize = 12.sp,
-//                    fontWeight = FontWeight.Light,
-//                    maxLines = 1,
-//                    modifier = Modifier.padding(bottom = 2.dp)
-//                )
-//            }
+                        Text(
+                            text = "${seasonSeries.homeTeamWins}",
+                            fontSize = 11.sp,
+                            color = if (seasonSeries.homeTeamWins >= seasonSeries.homeTeamLosses) Moare else Color.Black
+                        )
 
-            // game type or referee
-//            Text(
-//                text = if (nbaGameStatsData != null) {
-//                    "심판: "
-//                } else {
-//                    MatchDescriptionConverter.convert(input = data.league.round)
-//                },
-//                fontSize = 12.sp,
-//                fontWeight = FontWeight.Light,
-//                maxLines = 1,
-//            )
+                        Text(
+                            text = " - ",
+                            fontSize = 11.sp
+                        )
+
+                        Text(
+                            text = "${seasonSeries.homeTeamLosses}",
+                            fontSize = 11.sp,
+                            color = if (seasonSeries.homeTeamLosses >= seasonSeries.homeTeamWins) Moare else Color.Black
+                        )
+                    }
+                }
+            }
         }
 
         /* ---------------------

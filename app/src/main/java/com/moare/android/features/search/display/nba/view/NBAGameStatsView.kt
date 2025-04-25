@@ -71,6 +71,7 @@ import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
+import com.moare.android.ui.util.CenterRow
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 
 @Composable
@@ -153,7 +154,7 @@ fun NBAGameStatsView(
            --------------------- */
         Row(
             verticalAlignment = Alignment.CenterVertically,
-//            modifier = Modifier.padding(bottom = 6.dp)
+            modifier = Modifier.padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
         ) {
             NBATitle(
                 leagueName = "NBA",
@@ -161,9 +162,18 @@ fun NBAGameStatsView(
             )
 
             Text(
-                text = " - 정규시즌",
+                text = " | ${NBAUtil.gameType(displayModel?.game?.gameSummary)}",
                 fontSize = 14.sp
             )
+
+            Spacer(Modifier.weight(1f))
+        }
+
+        /* ---------------------
+           playoffs series text
+           --------------------- */
+        if (displayModel?.game?.gameSummary?.seriesGameNumber?.isNotEmpty() == true) {
+            NBAGameStatsPlayoffsSeriesTextContainer()
         }
 
         NBAGameStatsScoreInfoItem()
@@ -1152,7 +1162,51 @@ fun NBAGameStatsDataListItem(
     )
 }
 
+@Composable
+fun NBAGameStatsPlayoffsSeriesTextContainer(
+    nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel()
+) {
+    val displayModel by nbaGameStatsViewModel.displayModel.collectAsState()
 
+    displayModel?.game?.seasonSeries?.let {
+        CenterRow(
+            modifier = Modifier.padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
+        ) {
+            // NOTE: 게임별 시리즈 스코어 정보를 가져올 방법을 찾지 못해서 일단은 현재 시리즈 스코어로 표시
+            Text(
+                text = "현재 시리즈 스코어: ",
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = nbaGameStatsViewModel.teamNameDictionary["short_${it.homeTeamId}"] ?: "",
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "${it.homeTeamWins}",
+                color = if (it.homeTeamWins >= it.homeTeamLosses) Moare else Color.Black
+            )
+
+            Text(
+                text = "-",
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "${it.homeTeamLosses}",
+                color = if (it.homeTeamLosses >= it.homeTeamWins) Moare else Color.Black
+            )
+
+            Text(
+                text = nbaGameStatsViewModel.teamNameDictionary["short_${it.visitorTeamId}"] ?: "",
+                fontSize = 14.sp
+            )
+
+            Spacer(Modifier.weight(1f))
+        }
+    }
+}
 
 
 
