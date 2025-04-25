@@ -128,6 +128,9 @@ class SearchViewModel @Inject constructor(
     private val _nbaGameStatsData = MutableStateFlow<NBAGameStatsDisplayModel?>(null)
     val nbaGameStatsData: StateFlow<NBAGameStatsDisplayModel?> = _nbaGameStatsData
 
+    private val _nbaLeagueTournamentData = MutableStateFlow<NBALeagueScheduleDisplayModel?>(null)
+    val nbaLeagueTournamentData: StateFlow<NBALeagueScheduleDisplayModel?> = _nbaLeagueTournamentData
+
     // auto complete
     private val _autoCompleteList = MutableStateFlow<List<String>>(emptyList())
     val autoCompleteList: StateFlow<List<String>> = _autoCompleteList
@@ -338,6 +341,7 @@ class SearchViewModel @Inject constructor(
             _nbaTeamScheduleData.emit(null)
             _nbaLeagueScheduleData.emit(null)
             _nbaGameStatsData.emit(null)
+            _nbaLeagueTournamentData.emit(null)
 
             when (val data = data?.data) {
                 is SportDecodableModel.FBPlayerInfo -> {
@@ -396,6 +400,9 @@ class SearchViewModel @Inject constructor(
                 }
                 is SportDecodableModel.NBAGameStats -> {
                     _nbaGameStatsData.emit(data.displayModel)
+                }
+                is SportDecodableModel.NBALeagueTournament -> {
+                    _nbaLeagueTournamentData.emit(data.displayModel)
                 }
 
                 else -> {
@@ -566,6 +573,7 @@ class SearchViewModel @Inject constructor(
                     _nbaTeamScheduleData.emit(null)
                     _nbaLeagueScheduleData.emit(null)
                     _nbaGameStatsData.emit(null)
+                    _nbaLeagueTournamentData.emit(null)
 
                     when (viewToShow) {
                         is SportDecodableModel.FBPlayerInfo -> {
@@ -630,6 +638,9 @@ class SearchViewModel @Inject constructor(
                         }
                         is SportDecodableModel.NBAGameStats -> {
                             _nbaGameStatsData.emit(viewToShow.displayModel)
+                        }
+                        is SportDecodableModel.NBALeagueTournament -> {
+                            _nbaLeagueTournamentData.emit(viewToShow.displayModel)
                         }
 
                         else -> {}
@@ -951,6 +962,7 @@ class SearchViewModel @Inject constructor(
             _nbaTeamScheduleData.emit(null)
             _nbaLeagueScheduleData.emit(null)
             _nbaGameStatsData.emit(null)
+            _nbaLeagueTournamentData.emit(null)
         }
 
         when (data) {
@@ -1008,6 +1020,9 @@ class SearchViewModel @Inject constructor(
             }
             is SportDecodableModel.NBAGameStats -> {
                 _nbaGameStatsData.emit(data.displayModel)
+            }
+            is SportDecodableModel.NBALeagueTournament -> {
+                _nbaLeagueTournamentData.emit(data.displayModel)
             }
 
             else -> {}

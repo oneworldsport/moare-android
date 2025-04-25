@@ -59,6 +59,7 @@ import com.moare.android.features.search.display.football.view.FBTeamStandingsVi
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAGameStatsView
 import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
+import com.moare.android.features.search.display.nba.view.NBALeagueTournamentView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStandingsView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
@@ -121,6 +122,7 @@ fun SearchView(
     val nbaTeamScheduleData by searchViewModel.nbaTeamScheduleData.collectAsState()
     val nbaLeagueScheduleData by searchViewModel.nbaLeagueScheduleData.collectAsState()
     val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
+    val nbaLeagueTournamentData by searchViewModel.nbaLeagueTournamentData.collectAsState()
 
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
@@ -435,6 +437,11 @@ fun SearchView(
                     // basketball_game_stats
                     nbaGameStatsData?.let {
                         NBAGameStatsView(data = it)
+                    }
+
+                    // basketball_league_tournament
+                    nbaLeagueTournamentData?.let {
+                        NBALeagueTournamentView(data = it)
                     }
                 }
             }

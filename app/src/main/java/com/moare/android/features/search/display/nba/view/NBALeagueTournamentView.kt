@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -84,9 +85,9 @@ fun NBALeagueTournamentView(
        --------------------- */
     Column(
         modifier = Modifier
-            .padding(horizontal = 10.dp)
             .horizontalScroll(rememberScrollState())
             .verticalScroll(rememberScrollState())
+            .padding(horizontal = 10.dp)
     ) {
         NBALeagueTournamentMainContainer()
     }
@@ -231,7 +232,9 @@ fun NBALeagueTournamentMainContainer(
         )
 
         // eastern conference
-        Column {
+        Column(
+            horizontalAlignment = Alignment.End
+        ) {
             // eastern 1 round - first game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
@@ -391,7 +394,7 @@ fun NBALeagueTournamentRoundContainer(
                         NBALeagueTournamentHBar(nbaLeagueTournamentViewModel.hBarWidth)
 
                         Text(
-                            text = firstTeamRecord.displayOrDash,
+                            text = "  ${firstTeamRecord.displayOrDash}",
                             color = firstTeamRecord?.let { first ->
                                 secondTeamRecord?.let { second ->
                                     if (first >= second) MaterialTheme.colors.primary else Color.Black
@@ -408,7 +411,7 @@ fun NBALeagueTournamentRoundContainer(
                         NBALeagueTournamentHBar(nbaLeagueTournamentViewModel.hBarWidth)
 
                         Text(
-                            text = secondTeamRecord.displayOrDash,
+                            text = "  ${secondTeamRecord.displayOrDash}",
                             color = firstTeamRecord?.let { first ->
                                 secondTeamRecord?.let { second ->
                                     if (second >= first) MaterialTheme.colors.primary else Color.Black
@@ -439,7 +442,7 @@ fun NBALeagueTournamentRoundContainer(
                 modifier = Modifier.padding(bottom = 2.dp)
             ) {
                 Text(
-                    text = nbaLeagueTournamentViewModel.teamNameDictionary["short_${firstTeamId}"] ?: "-",
+                    text = nbaLeagueTournamentViewModel.teamNameDictionary["short_${firstTeamId}"] ?: "-  ",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -523,7 +526,7 @@ fun NBALeagueTournamentRoundContainer(
                 modifier = Modifier.padding(top = 6.dp)
             ) {
                 Text(
-                    text = nbaLeagueTournamentViewModel.teamNameDictionary["short_${secondTeamId}"] ?: "-",
+                    text = nbaLeagueTournamentViewModel.teamNameDictionary["short_${secondTeamId}"] ?: "-  ",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -545,7 +548,7 @@ fun NBALeagueTournamentRoundContainer(
                         modifier = Modifier.height(recordTextHeight)
                     ) {
                         Text(
-                            text = firstTeamRecord.displayOrDash,
+                            text = "${firstTeamRecord.displayOrDash}  ",
                             color = firstTeamRecord?.let { first ->
                                 secondTeamRecord?.let { second ->
                                     if (first >= second) MaterialTheme.colors.primary else Color.Black
@@ -562,7 +565,7 @@ fun NBALeagueTournamentRoundContainer(
                         modifier = Modifier.height(recordTextHeight)
                     ) {
                         Text(
-                            text = secondTeamRecord.displayOrDash,
+                            text = "${secondTeamRecord.displayOrDash}  ",
                             color = firstTeamRecord?.let { first ->
                                 secondTeamRecord?.let { second ->
                                     if (second >= first) MaterialTheme.colors.primary else Color.Black
@@ -686,11 +689,10 @@ fun NBALeagueTournamentFinalContainer(
             modifier = Modifier.padding(bottom = 2.dp)
         ) {
             Row(
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.width(80.dp)
             ) {
-                CenterColumn(
-                    modifier = Modifier.width(80.dp)
-                ) {
+                CenterColumn {
                     URLImage(
                         url = NBAUtil.teamLogoUrl(firstTeamId),
                         size = URLImageSize.SMALL,
@@ -707,6 +709,7 @@ fun NBALeagueTournamentFinalContainer(
 
             Text(
                 text = firstTeamRecord.displayOrDash,
+                textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.width(30.dp),
                 color = firstTeamRecord?.let { first ->
@@ -718,11 +721,13 @@ fun NBALeagueTournamentFinalContainer(
 
             Text(
                 text = "vs",
+                textAlign = TextAlign.Center,
                 modifier = Modifier.width(30.dp)
             )
 
             Text(
                 text = secondTeamRecord.displayOrDash,
+                textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.width(30.dp),
                 color = firstTeamRecord?.let { first ->
@@ -733,11 +738,10 @@ fun NBALeagueTournamentFinalContainer(
             )
 
             Row(
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier.width(80.dp)
             ) {
-                CenterColumn(
-                    modifier = Modifier.width(80.dp)
-                ) {
+                CenterColumn {
                     URLImage(
                         url = NBAUtil.teamLogoUrl(secondTeamId),
                         size = URLImageSize.SMALL,
