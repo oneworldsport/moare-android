@@ -1,9 +1,15 @@
 package com.moare.android.ui.common.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
@@ -37,22 +43,32 @@ fun URLImage(
         URLImageSize.LARGE -> 80.dp
     }
 
-    if (isSvg) {
-        AsyncImage(
-            model = url,
-            contentDescription = null,
-            modifier = modifier
-                .size(imageSize),
-            contentScale = ContentScale.Fit,
-            imageLoader = imageLoader
-        )
+    if (url != null) {
+        if (isSvg) {
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                modifier = modifier
+                    .size(imageSize),
+                contentScale = ContentScale.Fit,
+                imageLoader = imageLoader
+            )
+        } else {
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                modifier = modifier
+                    .size(imageSize),
+                contentScale = ContentScale.Fit
+            )
+        }
     } else {
-        AsyncImage(
-            model = url,
-            contentDescription = null,
-            modifier = modifier
-                .size(imageSize),
-            contentScale = ContentScale.Fit
+        Box(
+            modifier
+                .size(imageSize)
+                .clip(CircleShape)
+                .alpha(0.6f)
+                .background(Color.Gray)
         )
     }
 }

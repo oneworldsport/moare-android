@@ -226,6 +226,11 @@ data class DataModel(
                         SportDecodableModel.NBAGameStats(responseModel, displayModel)
                     }
                 }
+                "basketball_league_tournament" -> {
+                    val responseModel: NBAGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                    val displayModel = modelConverter.nbaLeagueTournamentConverter(responseModel)
+                    SportDecodableModel.NBALeagueTournament(responseModel, displayModel)
+                }
 
                 else -> SportDecodableModel.NoResult
             }
@@ -363,6 +368,12 @@ sealed class SportDecodableModel {
     data class NBAGameStats(
         val responseModel: NBAGameStatsResponseModel,
         val displayModel: NBAGameStatsDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class NBALeagueTournament(
+        val responseModel: NBAGameScheduleResponseModel,
+        val displayModel: NBALeagueScheduleDisplayModel
     ) : SportDecodableModel()
 
     @Serializable

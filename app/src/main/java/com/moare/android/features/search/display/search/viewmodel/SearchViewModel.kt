@@ -38,6 +38,7 @@ import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
@@ -127,6 +128,9 @@ class SearchViewModel @Inject constructor(
     private val _nbaGameStatsData = MutableStateFlow<NBAGameStatsDisplayModel?>(null)
     val nbaGameStatsData: StateFlow<NBAGameStatsDisplayModel?> = _nbaGameStatsData
 
+    private val _nbaLeagueTournamentData = MutableStateFlow<NBALeagueScheduleDisplayModel?>(null)
+    val nbaLeagueTournamentData: StateFlow<NBALeagueScheduleDisplayModel?> = _nbaLeagueTournamentData
+
     // auto complete
     private val _autoCompleteList = MutableStateFlow<List<String>>(emptyList())
     val autoCompleteList: StateFlow<List<String>> = _autoCompleteList
@@ -214,7 +218,7 @@ class SearchViewModel @Inject constructor(
         data object ToggleSearchBar : Intent()
         data object ToggleAutoCompleteListVisibleState : Intent()
 
-        data class SelectFBGame(val game: FBGame) : Intent()
+        data class SelectFBGame(val game: FBGame, val leagueId: Int?) : Intent()
         data class SelectNBAGame(val game: NBAGame) : Intent()
 
         data class GoBack(val activity: Activity?) : Intent()
@@ -222,8 +226,9 @@ class SearchViewModel @Inject constructor(
         data class ShowPlayerStats(val category: String? = null, val playerId: Int) : Intent()
         data class ShowTeamStats(val teamId: Int) : Intent()
         data class ShowGameStats(val gameType: String) : Intent()
-
         data class RefreshGame(val category: String) : Intent()
+        data class SelectNBATournamentRound(val gameList: List<NBAGame>) : Intent()
+
         data class UpdateLastViewStack(val data: SportDecodableModel) : Intent()
     }
 
@@ -251,13 +256,14 @@ class SearchViewModel @Inject constructor(
                 is Intent.ToggleAutoCompleteListVisibleState -> toggleAutoCompleteListVisibleState()
                 is Intent.UpdateTextField -> updateTextField(intent.newValue, intent.updateAutoCompleteList)
                 is Intent.ToggleSearchBar -> toggleSearchBar()
-                is Intent.SelectFBGame -> selectFBGame(intent.game)
+                is Intent.SelectFBGame -> selectFBGame(intent.game, intent.leagueId)
                 is Intent.SelectNBAGame -> selectNBAGame(intent.game)
                 is Intent.GoBack -> goBack(intent.activity)
                 is Intent.ShowPlayerStats -> showPlayerStats(intent.category, intent.playerId)
                 is Intent.ShowTeamStats -> showTeamStats(intent.teamId)
                 is Intent.ShowGameStats -> showGameStats(intent.gameType)
                 is Intent.RefreshGame -> refreshGame(intent.category)
+                is Intent.SelectNBATournamentRound -> selectNBATournamentRound(intent.gameList)
                 is Intent.UpdateLastViewStack -> updateLastViewStack(intent.data)
             }
         }
@@ -335,6 +341,7 @@ class SearchViewModel @Inject constructor(
             _nbaTeamScheduleData.emit(null)
             _nbaLeagueScheduleData.emit(null)
             _nbaGameStatsData.emit(null)
+            _nbaLeagueTournamentData.emit(null)
 
             when (val data = data?.data) {
                 is SportDecodableModel.FBPlayerInfo -> {
@@ -393,6 +400,9 @@ class SearchViewModel @Inject constructor(
                 }
                 is SportDecodableModel.NBAGameStats -> {
                     _nbaGameStatsData.emit(data.displayModel)
+                }
+                is SportDecodableModel.NBALeagueTournament -> {
+                    _nbaLeagueTournamentData.emit(data.displayModel)
                 }
 
                 else -> {
@@ -484,10 +494,10 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun selectFBGame(game: FBGame) {
+    private suspend fun selectFBGame(game: FBGame, leagueId: Int?) {
         val dataModel = SportDecodableModel.FBGameStats(
             responseModel = FBGameStatsResponseModel(game = game),
-            displayModel = FBGameStatsDisplayModel(game = game)
+            displayModel = FBGameStatsDisplayModel(game = game, leagueId = leagueId)
         )
 
         // add stack before emiting _fbGameStatsData to ensure the last stack(SportDecodableModel.FBGameStats in this case) can be up to date after refreshing game data when opening FBGameStatsView
@@ -496,7 +506,7 @@ class SearchViewModel @Inject constructor(
         _viewStack.emit(stack)
         _poppedView.emit(null)
 
-        _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game))
+        _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game, leagueId = leagueId))
     }
 
     private suspend fun selectNBAGame(game: NBAGame) {
@@ -563,6 +573,7 @@ class SearchViewModel @Inject constructor(
                     _nbaTeamScheduleData.emit(null)
                     _nbaLeagueScheduleData.emit(null)
                     _nbaGameStatsData.emit(null)
+                    _nbaLeagueTournamentData.emit(null)
 
                     when (viewToShow) {
                         is SportDecodableModel.FBPlayerInfo -> {
@@ -627,6 +638,9 @@ class SearchViewModel @Inject constructor(
                         }
                         is SportDecodableModel.NBAGameStats -> {
                             _nbaGameStatsData.emit(viewToShow.displayModel)
+                        }
+                        is SportDecodableModel.NBALeagueTournament -> {
+                            _nbaLeagueTournamentData.emit(viewToShow.displayModel)
                         }
 
                         else -> {}
@@ -891,6 +905,36 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    private suspend fun selectNBATournamentRound(gameList: List<NBAGame>) {
+        val modelConverter = ModelConverter()
+
+        val dataModel: SportDecodableModel
+
+        when (val lastView = viewStack.value.lastOrNull()) {
+            is SportDecodableModel.NBALeagueTournament-> {
+                val responseModel = NBAGameScheduleResponseModel(scheduledMonths = emptyList(), schedule = gameList)
+                dataModel = SportDecodableModel.NBATeamSchedule(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.nbaTeamScheduleConverter(responseModel)
+                )
+            }
+
+            else -> return // Make it do nothing
+        }
+
+        _resultVisibleState.emit(false)
+        delay(1000)
+
+        updateMainDisplayModel(dataModel)
+
+        val stack = viewStack.value.toMutableList()
+        stack.add(dataModel)
+        _viewStack.emit(stack)
+        _poppedView.emit(null)
+
+        _resultVisibleState.emit(true)
+    }
+
     private suspend fun updateLastViewStack(data: SportDecodableModel) {
         val stack = viewStack.value.dropLast(1).toMutableList()
         stack.add(data)
@@ -918,6 +962,7 @@ class SearchViewModel @Inject constructor(
             _nbaTeamScheduleData.emit(null)
             _nbaLeagueScheduleData.emit(null)
             _nbaGameStatsData.emit(null)
+            _nbaLeagueTournamentData.emit(null)
         }
 
         when (data) {
@@ -975,6 +1020,9 @@ class SearchViewModel @Inject constructor(
             }
             is SportDecodableModel.NBAGameStats -> {
                 _nbaGameStatsData.emit(data.displayModel)
+            }
+            is SportDecodableModel.NBALeagueTournament -> {
+                _nbaLeagueTournamentData.emit(data.displayModel)
             }
 
             else -> {}

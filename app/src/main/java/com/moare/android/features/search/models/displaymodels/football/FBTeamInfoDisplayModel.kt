@@ -12,5 +12,6 @@ data class FBTeamInfoDisplayModel(
     val venue: FBVenue,
     val stats: FBTeamStats?,
     val lastGame: FBGame?,
-    val nextGame: FBGame?
+    val nextGame: FBGame?,
+    val leagueId: Int?
 )

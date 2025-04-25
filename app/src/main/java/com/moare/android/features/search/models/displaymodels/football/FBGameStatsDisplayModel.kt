@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FBGameStatsDisplayModel(
-    val game: FBGame
+    val game: FBGame,
+    val leagueId: Int?
 )

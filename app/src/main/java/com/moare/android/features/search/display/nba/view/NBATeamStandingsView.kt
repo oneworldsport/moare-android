@@ -31,9 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -213,7 +211,7 @@ fun NBATeamStandingsFirstCategoryItem(
             .height(nbaTeamStandingsViewModel.categoryItemHeight)
     ) {
         Text(
-            text = StringConstants.standingsFirstCategory,
+            text = StringConstants.STANDINGS_FIRST_CATEGORY,
             fontSize = nbaTeamStandingsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -250,7 +248,7 @@ fun NBATeamStandingsCategoryList(
             modifier = Modifier
                 .height(nbaTeamStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in StringConstants.NBA.teamStandingsCategories.withIndex()) {
+            for ((index, value) in StringConstants.NBA.TEAM_STANDINGS_CATEGORIES.withIndex()) {
                 NBATeamStandingsCategoryListItem(
                     category = value,
                     index = index
@@ -363,7 +361,7 @@ fun NBATeamStandingsDataList(
                 modifier = Modifier
                     .height(nbaTeamStandingsViewModel.dataItemHeight)
             ) {
-                for (index in 0 until StringConstants.NBA.teamStandingsCategories.size) {
+                for (index in 0 until StringConstants.NBA.TEAM_STANDINGS_CATEGORIES.size) {
                     NBATeamStandingsDataItem(
                         data = value,
                         index = index

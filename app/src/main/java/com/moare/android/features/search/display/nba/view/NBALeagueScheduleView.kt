@@ -32,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,31 +39,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.EnNameTranslationUtils
-import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
-import com.moare.android.core.util.TranslationType
-import com.moare.android.features.search.display.football.view.FBLeagueScheduleListItem
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleViewModel
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
-import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.common.components.CapsuleButton
-import com.moare.android.ui.common.components.LeagueTitle
-import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.ProgressIndicator
-import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.theme.Moare
+import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBALeagueScheduleView(
@@ -146,11 +136,11 @@ fun NBALeagueScheduleView(
 //            }
 //        }
 
-        /* ---------------------
-           calendar
-           - hides when game selected
-           --------------------- */
         if (nbaGameStatsData == null) {
+            /* ---------------------
+               calendar
+               - hides when game selected
+               --------------------- */
             CalendarList(yearMonthList, CalendarType.YEARMONTH, selectedYearMonthIndex, yearMonthCalendarScrollTrigger) { yearMonth, index ->
                 nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.SelectYearMonth(yearMonth, index) { data ->
                     // 현재 구조 콜백 수정 필요?
@@ -161,21 +151,19 @@ fun NBALeagueScheduleView(
             CalendarList(days, CalendarType.DAY, selectedDayIndex, dayCalendarScrollTrigger) { day, index ->
                 nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.SelectDay(day, index))
             }
-        }
 
-        /* ---------------------
-           all result open button
-           - hides when game selected
-           --------------------- */
-        if (nbaGameStatsData == null) {
+            /* ---------------------
+               all result open button
+               - hides when game selected
+               --------------------- */
             Row {
                 Spacer(Modifier.weight(1f))
 
                 CapsuleButton(
                     text = if (isAllResultOpened) {
-                        StringConstants.resultHide
+                        StringConstants.RESULT_HIDE
                     } else {
-                        StringConstants.resultOpen
+                        StringConstants.RESULT_OPEN
                     },
                     color = Color.Gray,
                     modifier = Modifier.padding(end = 8.dp)
@@ -227,7 +215,6 @@ fun NBALeagueScheduleView(
                --------------------- */
             Spacer(Modifier.fillMaxSize())
         }
-
     }
 }
 
@@ -294,29 +281,29 @@ fun NBALeagueScheduleListItem(
        --------------------- */
     val gameStatusText = if (isResultOpened) {
         when (data.gameSummary?.gameStatusId) {
-            1 -> StringConstants.gameNotStartedStr
+            1 -> StringConstants.GAME_NOT_STARTED_STR
             2 -> if (data.lineScore.firstOrNull()?.ptsOt3 != null) {
-                StringConstants.NBA.gameOt3
+                StringConstants.NBA.GAME_OT_3
             } else if (data.lineScore.firstOrNull()?.ptsOt2 != null) {
-                StringConstants.NBA.gameOt2
+                StringConstants.NBA.GAME_OT_2
             } else if (data.lineScore.firstOrNull()?.ptsOt1 != null) {
-                StringConstants.NBA.gameOt1
+                StringConstants.NBA.GAME_OT_1
             } else if (data.lineScore.firstOrNull()?.ptsQtr4 != null) {
-                StringConstants.NBA.gameQtr4
+                StringConstants.NBA.GAME_QTR_4
             } else if (data.lineScore.firstOrNull()?.ptsQtr3 != null) {
-                StringConstants.NBA.gameQtr3
+                StringConstants.NBA.GAME_QTR_3
             } else if (data.lineScore.firstOrNull()?.ptsQtr2 != null) {
-                StringConstants.NBA.gameQtr2
+                StringConstants.NBA.GAME_QTR_2
             } else if (data.lineScore.firstOrNull()?.ptsQtr1 != null) {
-                StringConstants.NBA.gameQtr1
+                StringConstants.NBA.GAME_QTR_1
             } else {
                 ""
             }
-            3 -> StringConstants.gameFinishedStr
+            3 -> StringConstants.GAME_FINISHED_STR
             else -> ""
         }
     } else {
-        StringConstants.resultOpen
+        StringConstants.RESULT_OPEN
     }
 
     val gameStatusColor = if (isResultOpened) {
@@ -368,7 +355,7 @@ fun NBALeagueScheduleListItem(
                 }
             }
             .padding(vertical = 8.dp)
-            .padding(horizontal = UIConstants.Padding.defaultHPadding)
+            .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
     ) {
         /* ---------------------
            home
@@ -384,7 +371,7 @@ fun NBALeagueScheduleListItem(
 //                }
         ) {
             URLImage(
-                url = if (homeTeamId != null) NBAUtil.teamLogoUrl(homeTeamId) else "",
+                url = NBAUtil.teamLogoUrl(homeTeamId),
                 size = URLImageSize.SMALL,
                 isSvg = true
             )
@@ -446,28 +433,41 @@ fun NBALeagueScheduleListItem(
                 modifier = Modifier.padding(vertical = 2.dp)
             )
 
-            // venue
-//            nbaGameStatsData?.let {
-//                Text(
-//                    text = "장소: ",
-//                    fontSize = 12.sp,
-//                    fontWeight = FontWeight.Light,
-//                    maxLines = 1,
-//                    modifier = Modifier.padding(bottom = 2.dp)
-//                )
-//            }
+            // playoffs info
+            if (data.gameSummary != null && data.gameSummary.weekName.isEmpty()) {
+                val gameSummary = data.gameSummary
+                Text(
+                    text = NBAUtil.gameType(gameSummary, true),
+                    fontSize = 11.sp
+                )
 
-            // game type or referee
-//            Text(
-//                text = if (nbaGameStatsData != null) {
-//                    "심판: "
-//                } else {
-//                    MatchDescriptionConverter.convert(input = data.league.round)
-//                },
-//                fontSize = 12.sp,
-//                fontWeight = FontWeight.Light,
-//                maxLines = 1,
-//            )
+                if (data.seasonSeries != null && !gameSummary.seriesGameNumber.isEmpty()) {
+                    val seasonSeries = data.seasonSeries
+                    CenterRow {
+                        Text(
+                            text = "시리즈 스코어: ",
+                            fontSize = 11.sp
+                        )
+
+                        Text(
+                            text = "${seasonSeries.homeTeamWins}",
+                            fontSize = 11.sp,
+                            color = if (seasonSeries.homeTeamWins >= seasonSeries.homeTeamLosses) Moare else Color.Black
+                        )
+
+                        Text(
+                            text = " - ",
+                            fontSize = 11.sp
+                        )
+
+                        Text(
+                            text = "${seasonSeries.homeTeamLosses}",
+                            fontSize = 11.sp,
+                            color = if (seasonSeries.homeTeamLosses >= seasonSeries.homeTeamWins) Moare else Color.Black
+                        )
+                    }
+                }
+            }
         }
 
         /* ---------------------
@@ -494,7 +494,7 @@ fun NBALeagueScheduleListItem(
                 .weight(1f)
         ) {
             URLImage(
-                url = if (awayTeamId != null) NBAUtil.teamLogoUrl(awayTeamId) else "",
+                url = NBAUtil.teamLogoUrl(awayTeamId),
                 size = URLImageSize.SMALL,
                 isSvg = true
             )

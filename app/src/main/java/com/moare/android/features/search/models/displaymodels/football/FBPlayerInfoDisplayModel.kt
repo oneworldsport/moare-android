@@ -12,5 +12,6 @@ data class FBPlayerInfoDisplayModel(
     val stats: FBPlayerStats?,
     val lastGame: FBGame?,
     val lastGamePlayerStats: FBGamePlayerStatsDetail?,
-    val nextGame: FBGame?
+    val nextGame: FBGame?,
+    val leagueId: Int?
 )

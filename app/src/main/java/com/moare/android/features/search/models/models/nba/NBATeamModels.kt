@@ -30,7 +30,6 @@ data class NBATeamInfo(
     @SerialName("teamCode") private val _teamCode: String? = null,
     @SerialName("teamConference") private val _teamConference: String? = null,
     @SerialName("teamDivision") private val _teamDivision: String? = null,
-    @SerialName("teamLogo") private val _teamLogo: String? = null,
     @SerialName("w") private val _w: Int? = null,
     @SerialName("yearFounded") private val _yearFounded: Int? = null,
 ) {
@@ -50,7 +49,6 @@ data class NBATeamInfo(
     val teamCode: String get() = _teamCode ?: ""
     val teamConference: String get() = _teamConference ?: ""
     val teamDivision: String get() = _teamDivision ?: ""
-    val teamLogo: String get() = _teamLogo ?: ""
     val wins: Int get() = _w ?: 0
     val yearFounded: Int get() = _yearFounded ?: 0
 }
@@ -58,12 +56,10 @@ data class NBATeamInfo(
 @Serializable
 data class NBAVenue(
     @SerialName("capacity") private val _capacity: Int? = null,
-    @SerialName("krname") private val _krname: String? = null,
     @SerialName("name") private val _name: String? = null,
     @SerialName("opened") private val _opened: Int? = null,
 ) {
     val capacity: Int get() = _capacity ?: 0
-    val krname: String get() = _krname ?: ""
     val name: String get() = _name ?: ""
     val opened: Int get() = _opened ?: 0
 }

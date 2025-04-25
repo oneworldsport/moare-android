@@ -20,10 +20,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,6 +59,7 @@ import com.moare.android.features.search.display.football.view.FBTeamStandingsVi
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAGameStatsView
 import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
+import com.moare.android.features.search.display.nba.view.NBALeagueTournamentView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStandingsView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
@@ -69,6 +70,7 @@ import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.ProgressIndicator
+import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
 import com.moare.android.ui.util.rememberKeyboardVisibility
 import kotlinx.coroutines.delay
@@ -77,6 +79,11 @@ import kotlinx.coroutines.delay
 fun SearchView(
     searchViewModel: SearchViewModel = hiltViewModel()
 ) {
+    /* ---------------------
+       constants
+       --------------------- */
+    val barHeight = 50.dp
+
     /* ---------------------
        ui state
        --------------------- */
@@ -115,6 +122,7 @@ fun SearchView(
     val nbaTeamScheduleData by searchViewModel.nbaTeamScheduleData.collectAsState()
     val nbaLeagueScheduleData by searchViewModel.nbaLeagueScheduleData.collectAsState()
     val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
+    val nbaLeagueTournamentData by searchViewModel.nbaLeagueTournamentData.collectAsState()
 
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
@@ -186,6 +194,34 @@ fun SearchView(
         contentAlignment = Alignment.Center
     ) {
         /* ---------------------
+           back button
+           --------------------- */
+        Column(
+            Modifier.zIndex(1f)
+        ) {
+            Row {
+                Box(
+                    contentAlignment = Alignment.CenterEnd,
+                    modifier = Modifier.size(width = 34.dp, height = 50.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_round_arrow_back_24),
+                        contentDescription = null,
+                        tint = Moare,
+                        modifier = Modifier
+                            .clickable {
+                                searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
+                            }
+                    )
+                }
+
+                Spacer(Modifier.weight(1f))
+            }
+
+            Spacer(Modifier.weight(1f))
+        }
+
+        /* ---------------------
            notice
            - info about providing data
            --------------------- */
@@ -213,7 +249,7 @@ fun SearchView(
                         contentDescription = null,
                         tint = Color.Gray,
                         modifier = Modifier
-                            .padding(top = UIConstants.Padding.defalutVPadding)
+                            .padding(top = UIConstants.Padding.DEFAULT_V_PADDING)
                             .size(20.dp)
                             .clickable {
                                 isNoticeOpened = !isNoticeOpened
@@ -298,117 +334,114 @@ fun SearchView(
                 enter = fadeIn(tween(durationMillis = 500)) + expandVertically(tween(durationMillis = 1000)),
                 exit = fadeOut(tween(durationMillis = 500)) + shrinkVertically(tween(durationMillis = 1000))
             ) {
-                Column {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp)
-                    ) {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            // football_player_info
-                            fbPlayerInfoData?.let {
-                                FBPlayerInfoView(data = it)
-                            }
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(top = 20.dp)
+                ) {
+                    // football_player_info
+                    fbPlayerInfoData?.let {
+                        FBPlayerInfoView(data = it)
+                    }
 
-                            // football_player_stats
-                            fbPlayerStatsData?.let {
-                                FBPlayerStatsView(data = it)
-                            }
+                    // football_player_stats
+                    fbPlayerStatsData?.let {
+                        FBPlayerStatsView(data = it)
+                    }
 
-                            // football_team_info
-                            fbTeamInfoData?.let {
-                                FBTeamInfoView(data = it)
-                            }
+                    // football_team_info
+                    fbTeamInfoData?.let {
+                        FBTeamInfoView(data = it)
+                    }
 
-                            // football_team_stats
-                            fbTeamStatsData?.let {
-                                FBTeamStatsView(data = it)
-                            }
+                    // football_team_stats
+                    fbTeamStatsData?.let {
+                        FBTeamStatsView(data = it)
+                    }
 
-                            // basketball_player_info
-                            nbaPlayerInfoData?.let {
-                                NBAPlayerInfoView(data = it )
-                            }
+                    // basketball_player_info
+                    nbaPlayerInfoData?.let {
+                        NBAPlayerInfoView(data = it )
+                    }
 
-                            // basketball_player_stats
-                            nbaPlayerStatsData?.let {
-                                NBAPlayerStatsView(data = it)
-                            }
+                    // basketball_player_stats
+                    nbaPlayerStatsData?.let {
+                        NBAPlayerStatsView(data = it)
+                    }
 
-                            // basketball_team_info
-                            nbaTeamInfoData?.let {
-                                NBATeamInfoView(data = it)
-                            }
+                    // basketball_team_info
+                    nbaTeamInfoData?.let {
+                        NBATeamInfoView(data = it)
+                    }
 
-                            // basketball_team_stats
-                            nbaTeamStatsData?.let {
-                                NBATeamStatsView(data = it)
-                            }
+                    // basketball_team_stats
+                    nbaTeamStatsData?.let {
+                        NBATeamStatsView(data = it)
+                    }
 
-                            // football_player_standings
-                            fbPlayerStandingsData?.let {
-                                FBPlayerStandingsView(
-                                    data = it
-                                )
-                            }
+                    // football_player_standings
+                    fbPlayerStandingsData?.let {
+                        FBPlayerStandingsView(
+                            data = it
+                        )
+                    }
 
-                            // football_team_standings
-                            fbTeamStandingsData?.let {
-                                FBTeamStandingsView(
-                                    data = it
-                                )
-                            }
+                    // football_team_standings
+                    fbTeamStandingsData?.let {
+                        FBTeamStandingsView(
+                            data = it
+                        )
+                    }
 
-                            // football_team_schedule
-                            fbTeamScheduleData?.let {
-                                FBTeamScheduleView(
-                                    data = it
-                                )
-                            }
+                    // football_team_schedule
+                    fbTeamScheduleData?.let {
+                        FBTeamScheduleView(
+                            data = it
+                        )
+                    }
 
-                            // football_league_schedule
-                            fbLeagueScheduleData?.let {
-                                FBLeagueScheduleView(
-                                    data = it
-                                )
-                            }
+                    // football_league_schedule
+                    fbLeagueScheduleData?.let {
+                        FBLeagueScheduleView(
+                            data = it
+                        )
+                    }
 
-                            // football_game_stats
-                            fbGameStatsData?.let {
-                                FBGameStatsView(
-                                    data = it
-                                )
-                            }
+                    // football_game_stats
+                    fbGameStatsData?.let {
+                        FBGameStatsView(
+                            data = it
+                        )
+                    }
 
-                            // basketball_player_standings
-                            nbaPlayerStandingsData?.let {
-                                NBAPlayerStandingsView(data = it)
-                            }
+                    // basketball_player_standings
+                    nbaPlayerStandingsData?.let {
+                        NBAPlayerStandingsView(data = it)
+                    }
 
-                            // basketball_team_standings
-                            nbaTeamStandingsData?.let {
-                                NBATeamStandingsView(data = it)
-                            }
+                    // basketball_team_standings
+                    nbaTeamStandingsData?.let {
+                        NBATeamStandingsView(data = it)
+                    }
 
-                            // basketball_team_schedule
-                            nbaTeamScheduleData?.let {
-                                NBATeamScheduleView(data = it)
-                            }
+                    // basketball_team_schedule
+                    nbaTeamScheduleData?.let {
+                        NBATeamScheduleView(data = it)
+                    }
 
-                            // basketball_league_schedule
-                            nbaLeagueScheduleData?.let {
-                                NBALeagueScheduleView(data = it)
-                            }
+                    // basketball_league_schedule
+                    nbaLeagueScheduleData?.let {
+                        NBALeagueScheduleView(data = it)
+                    }
 
-                            // basketball_game_stats
-                            nbaGameStatsData?.let {
-                                NBAGameStatsView(data = it)
-                            }
-                        }
+                    // basketball_game_stats
+                    nbaGameStatsData?.let {
+                        NBAGameStatsView(data = it)
+                    }
+
+                    // basketball_league_tournament
+                    nbaLeagueTournamentData?.let {
+                        NBALeagueTournamentView(data = it)
                     }
                 }
             }

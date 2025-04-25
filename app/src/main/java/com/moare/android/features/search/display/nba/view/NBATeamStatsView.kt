@@ -127,7 +127,7 @@ fun NBATeamStatsView(
                 }
                 .alpha(0f)
         ) {
-            // player info
+            // team info
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -210,7 +210,10 @@ fun NBATeamStatsTeamInfoItem(
             modifier = Modifier
                 .alpha(contentsAlpha)
         ) {
-            URLImage(url = team.teamLogo)
+            URLImage(
+                url = NBAUtil.teamLogoUrl(team.id),
+                isSvg = true
+            )
 
             // name, state and city
             Column(
@@ -256,7 +259,7 @@ fun NBATeamStatsTeamInfoItem(
                     )
 
                     Text(
-                        text = venue.krname,
+                        text = nbaTeamStatsViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
                         fontWeight = FontWeight.Medium
                     )
                 }

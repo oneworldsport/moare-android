@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
@@ -77,11 +78,6 @@ class FBPlayerStandingsViewModel @Inject constructor(
     var playerNameDictionary: Map<String, String> = emptyMap()
     var teamNameDictionary: Map<String, String> = emptyMap()
 
-    init {
-        playerNameDictionary = nameProvider.getDictionary("nba_player")
-        teamNameDictionary = nameProvider.getDictionary("nba_team")
-    }
-
     /* ---------------------
        intent
        --------------------- */
@@ -128,10 +124,30 @@ class FBPlayerStandingsViewModel @Inject constructor(
             _displayModel.emit(displayModel)
             standings = displayModel.standings
 
+            when (displayModel.leagueId) {
+                Constants.Ids.EPL -> {
+                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_PLAYER_DIC)
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_TEAM_DIC)
+                }
+                Constants.Ids.LALIGA -> {
+                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_PLAYER_DIC)
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_TEAM_DIC)
+                }
+                Constants.Ids.BUNDESLIGA -> {
+                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_PLAYER_DIC)
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_TEAM_DIC)
+                }
+                Constants.Ids.LIGUE1 -> {
+                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_PLAYER_DIC)
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
+                }
+                else -> {}
+            }
+
             val keywords = displayModel.keywords
             if (keywords.isNotEmpty()) {
                 // Check matching keyword in the order of categories, doesn't matter what keyword is in keywords
-                val index = StringConstants.Football.playerStandingsSecondCategories.indexOfFirst { category ->
+                val index = StringConstants.Football.PLAYER_STANDINGS_SECOND_CATEGORIES.indexOfFirst { category ->
                     val keyword = keywords.find { it.keyword == category }
                     keyword != null
                 }
@@ -152,8 +168,8 @@ class FBPlayerStandingsViewModel @Inject constructor(
     private suspend fun selectFirstCategory(index: Int) {
         shouldScrollCategory = true
 
-        val attackCategoriesSize = StringConstants.Football.playerStandingsAttackCategories.size
-        val defendCategoriesSize = StringConstants.Football.playerStandingsDefendCategories.size
+        val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+        val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
         var secondCategory = "득점"
 
@@ -181,8 +197,8 @@ class FBPlayerStandingsViewModel @Inject constructor(
         shouldScrollCategory = false
         _secondSelectedIndex.emit(index)
 
-        val attackCategories = StringConstants.Football.playerStandingsAttackCategories
-        val defendCategories = StringConstants.Football.playerStandingsDefendCategories
+        val attackCategories = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES
+        val defendCategories = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES
 
         when (index) {
             in attackCategories.indices -> _firstSelectedIndex.emit(0)

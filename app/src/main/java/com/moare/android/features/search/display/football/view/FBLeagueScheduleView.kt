@@ -4,10 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -18,12 +16,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -35,14 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
@@ -51,7 +43,6 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.TimeFormatType
-import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
@@ -182,9 +173,9 @@ fun FBLeagueScheduleView(
 
                 CapsuleButton(
                     text = if (isAllResultOpened) {
-                        StringConstants.resultHide
+                        StringConstants.RESULT_HIDE
                     } else {
-                        StringConstants.resultOpen
+                        StringConstants.RESULT_OPEN
                     },
                     color = Color.Gray,
                     modifier = Modifier.padding(end = 8.dp)
@@ -283,6 +274,7 @@ fun FBLeagueScheduleListItem(
     /* ---------------------
        viewmodel state
        --------------------- */
+    val displayModel by fbLeagueScheduleViewModel.displayModel.collectAsState()
     val gameResultOpenedStateList by fbLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
 
     val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
@@ -291,8 +283,8 @@ fun FBLeagueScheduleListItem(
        animation
        --------------------- */
     val scoreAlpha by animateFloatAsState(
-        targetValue = if (StringConstants.Football.gameLiveList.contains(data.fixture.status.short) ||
-            (StringConstants.Football.gameFinishedList.contains(data.fixture.status.short) && isResultOpened)) 1f else 0f,
+        targetValue = if (StringConstants.Football.GAME_LIVE_LIST.contains(data.fixture.status.short) ||
+            (StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short) && isResultOpened)) 1f else 0f,
         animationSpec = tween(
             durationMillis = 300,
             easing = LinearOutSlowInEasing
@@ -304,20 +296,20 @@ fun FBLeagueScheduleListItem(
        --------------------- */
     val gameStatusText = if (isResultOpened) {
         when (data.fixture.status.short) {
-            StringConstants.Football.gameNotStarted -> StringConstants.gameNotStartedStr
-            StringConstants.Football.gameFirstHalf -> StringConstants.Football.gameFirstHalfStr
-            StringConstants.Football.gameHalftime -> StringConstants.Football.gameHalftimeStr
-            StringConstants.Football.gameSecondHalf -> StringConstants.Football.gameSecondHalfStr
-            in StringConstants.Football.gameFinishedList -> StringConstants.gameFinishedStr
+            StringConstants.Football.GAME_NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
+            StringConstants.Football.GAME_FIRST_HALF -> StringConstants.Football.GAME_FIRST_HALF_STR
+            StringConstants.Football.GAME_HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
+            StringConstants.Football.GAME_SECOND_HALF -> StringConstants.Football.GAME_SECOND_HALF_STR
+            in StringConstants.Football.GAME_FINISHED_LIST -> StringConstants.GAME_FINISHED_STR
             else -> ""
         }
     } else {
-        StringConstants.resultOpen
+        StringConstants.RESULT_OPEN
     }
 
     val gameStatusColor = if (isResultOpened) {
         when (data.fixture.status.short) {
-            in StringConstants.Football.gameLiveList -> MaterialTheme.colors.primary
+            in StringConstants.Football.GAME_LIVE_LIST -> MaterialTheme.colors.primary
             else -> Color.Gray
         }
     } else {
@@ -328,14 +320,14 @@ fun FBLeagueScheduleListItem(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)) {
+        if (StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short)) {
             isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
         } else {
             isResultOpened = true
         }
     }
     LaunchedEffect(gameResultOpenedStateList) {
-        if (StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)) {
+        if (StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short)) {
             isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
         }
     }
@@ -356,13 +348,13 @@ fun FBLeagueScheduleListItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = fbGameStatsData == null) {
-                searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data))
+                searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data, displayModel?.leagueId))
 
                 // set selected game's isOpened true
                 fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.UpdateResultOpenedState(data.fixture.id, true))
             }
             .padding(vertical = 8.dp)
-            .padding(horizontal = UIConstants.Padding.defaultHPadding)
+            .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
     ) {
 
         /* ---------------------
@@ -426,7 +418,7 @@ fun FBLeagueScheduleListItem(
             CapsuleButton(
                 text = gameStatusText,
                 color = gameStatusColor,
-                isDisabled = fbGameStatsData != null || !StringConstants.Football.gameFinishedList.contains(data.fixture.status.short)
+                isDisabled = fbGameStatsData != null || !StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short)
             ) {
                 fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.UpdateResultOpenedState(data.fixture.id, !isResultOpened))
             }
@@ -440,7 +432,7 @@ fun FBLeagueScheduleListItem(
                 )
             } else {
                 Text(
-                    text = CalendarUtil.formatDate(data.fixture.date).split(" ")[0],
+                    text = CalendarUtil.formatDate(data.fixture.date).split(" ").firstOrNull() ?: "",
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 2.dp)
                 )

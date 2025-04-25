@@ -58,7 +58,8 @@ class ModelConverter(
             stats = stats,
             lastGame = response.lastGame,
             lastGamePlayerStats = lastGamePlayerStats,
-            nextGame = response.nextGame
+            nextGame = response.nextGame,
+            leagueId = leagueId
         )
     }
 
@@ -70,7 +71,8 @@ class ModelConverter(
         return FBPlayerStatsDisplayModel(
             player = info.player,
             team = stats?.team,
-            stats = info.statistics
+            stats = info.statistics,
+            leagueId = leagueId
         )
     }
 
@@ -91,7 +93,7 @@ class ModelConverter(
             null
         }
 
-        return FBPlayerStandingsDisplayModel(keywords, entityInfo, standings)
+        return FBPlayerStandingsDisplayModel(keywords, entityInfo, standings, leagueId)
     }
 
     fun fbTeamInfoConverter(response: FBTeamInfoResponseModel): FBTeamInfoDisplayModel {
@@ -104,7 +106,8 @@ class ModelConverter(
             venue = info.venue,
             stats = stats,
             lastGame = response.lastGame,
-            nextGame = response.nextGame
+            nextGame = response.nextGame,
+            leagueId = leagueId
         )
     }
 
@@ -114,7 +117,8 @@ class ModelConverter(
         return FBTeamStatsDisplayModel(
             team = info.team,
             venue = info.venue,
-            stats = info.statistics
+            stats = info.statistics,
+            leagueId = leagueId
         )
     }
 
@@ -143,11 +147,11 @@ class ModelConverter(
             null
         }
 
-        return FBTeamStandingsDisplayModel(keywords, league, standings)
+        return FBTeamStandingsDisplayModel(keywords, league, standings, leagueId)
     }
 
     fun fbTeamScheduleConverter(response: FBGameScheduleResponseModel): FBTeamScheduleDisplayModel {
-        return FBTeamScheduleDisplayModel(response.schedule)
+        return FBTeamScheduleDisplayModel(response.schedule, leagueId)
     }
 
     fun fbLeagueScheduleConverter(response: FBGameScheduleResponseModel): FBLeagueScheduleDisplayModel {
@@ -156,11 +160,11 @@ class ModelConverter(
             "${year.takeLast(2)}/$month"
         }
 
-        return FBLeagueScheduleDisplayModel(yearMonthList, response.schedule, entityInfo)
+        return FBLeagueScheduleDisplayModel(yearMonthList, response.schedule, entityInfo, leagueId)
     }
 
     fun fbGameStatsConverter(response: FBGameStatsResponseModel): FBGameStatsDisplayModel {
-        return FBGameStatsDisplayModel(response.game!!)
+        return FBGameStatsDisplayModel(response.game!!, leagueId)
     }
 
     /* ---------------------
@@ -275,5 +279,9 @@ class ModelConverter(
 
     fun nbaGameStatsConverter(response: NBAGameStatsResponseModel): NBAGameStatsDisplayModel {
         return NBAGameStatsDisplayModel(response.game!!)
+    }
+
+    fun nbaLeagueTournamentConverter(response: NBAGameScheduleResponseModel): NBALeagueScheduleDisplayModel {
+        return NBALeagueScheduleDisplayModel(emptyList(), response.schedule, entityInfo)
     }
 }

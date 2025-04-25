@@ -13,7 +13,6 @@ data class FBPlayer(
 data class FBPlayerInfo(
     @SerialName("id") private val _id: Int? = null,
     @SerialName("name") private val _name: String? = null,
-    @SerialName("krname") private val _krname: String? = null,
     @SerialName("firstname") private val _firstname: String? = null,
     @SerialName("lastname") private val _lastname: String? = null,
     @SerialName("age") private val _age: Int? = null,
@@ -29,9 +28,6 @@ data class FBPlayerInfo(
 
     val name: String
         get() = _name ?: ""
-
-    val krname: String
-        get() = _krname ?: ""
 
     val firstname: String
         get() = _firstname ?: ""
