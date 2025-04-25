@@ -223,7 +223,7 @@ fun FBPlayerStatsPlayerInfoItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = fbPlayerStatsViewModel.playerNameDictionary[player.name] ?: player.name,
+                    text = fbPlayerStatsViewModel.playerNameDictionary["${player.id}"] ?: player.name,
                     fontWeight = FontWeight.Medium
                 )
 

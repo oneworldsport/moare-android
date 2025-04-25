@@ -1,6 +1,7 @@
 package com.moare.android.features.search.display.football.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
@@ -34,11 +35,6 @@ class FBPlayerStatsViewModel @Inject constructor(
     var playerNameDictionary: Map<String, String> = emptyMap()
     var teamNameDictionary: Map<String, String> = emptyMap()
 
-    init {
-        playerNameDictionary = nameProvider.getDictionary("nba_player")
-        teamNameDictionary = nameProvider.getDictionary("nba_team")
-    }
-
     /* ---------------------
        intent
        --------------------- */
@@ -60,6 +56,26 @@ class FBPlayerStatsViewModel @Inject constructor(
     override fun initData(displayModel: FBPlayerStatsDisplayModel) {
         viewModelScope.launch {
             _displayModel.emit(displayModel)
+
+            when (displayModel.leagueId) {
+                Constants.Ids.EPL -> {
+                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_PLAYER_DIC)
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_TEAM_DIC)
+                }
+                Constants.Ids.LALIGA -> {
+                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_PLAYER_DIC)
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_TEAM_DIC)
+                }
+                Constants.Ids.BUNDESLIGA -> {
+                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_PLAYER_DIC)
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_TEAM_DIC)
+                }
+                Constants.Ids.LIGUE1 -> {
+                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_PLAYER_DIC)
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
+                }
+                else -> {}
+            }
         }
     }
 

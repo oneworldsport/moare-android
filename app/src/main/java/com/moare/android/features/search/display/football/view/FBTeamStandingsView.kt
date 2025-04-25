@@ -1,12 +1,10 @@
 package com.moare.android.features.search.display.football.view
 
-import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,9 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -35,8 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.EnNameTranslationUtils
-import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -160,7 +153,7 @@ fun FBTeamStandingsFirstCategoryItem(
             .height(fbTeamStandingsViewModel.categoryItemHeight)
     ) {
         Text(
-            text = StringConstants.standingsFirstCategory,
+            text = StringConstants.STANDINGS_FIRST_CATEGORY,
             fontSize = fbTeamStandingsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -207,7 +200,7 @@ fun FBTeamStandingsCategoryList(
             modifier = Modifier
                 .height(fbTeamStandingsViewModel.categoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in StringConstants.Football.teamStandingsCategories.withIndex()) {
+            for ((index, value) in StringConstants.Football.TEAM_STANDINGS_CATEGORIES.withIndex()) {
                 FBTeamStandingsCategoryListItem(
                     category = value,
                     index = index
@@ -332,7 +325,7 @@ fun FBTeamStandingsDataList(
                 modifier = Modifier
                     .height(fbTeamStandingsViewModel.dataItemHeight)
             ) {
-                for (index in 0 until StringConstants.Football.teamStandingsCategories.size) {
+                for (index in 0 until StringConstants.Football.TEAM_STANDINGS_CATEGORIES.size) {
                     FBTeamStandingsDataItem(
                         data = value,
                         index = index

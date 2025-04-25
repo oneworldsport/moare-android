@@ -41,9 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TranslationType
 import com.moare.android.core.util.toCm
 import com.moare.android.core.util.toKg
 import com.moare.android.features.search.display.components.FBStatDataItem
@@ -373,7 +371,7 @@ fun NBAPlayerInfoView(
                         itemPositions[8] = Offset(centerX - parentCenter.x, centerY - parentCenter.y)
                     }
             ) {
-                NBAPlayerInfoNinethItem()
+                NBAPlayerInfoNinthItem()
             }
         }
 
@@ -421,9 +419,9 @@ fun NBAPlayerInfoView(
             targetValue = if (aniPositions) eighthPosition else Offset.Zero,
             animationSpec = tween(1000),
         )
-        val ninethPosition = itemPositions[8] ?: Offset.Zero
-        val ninethAnimatedPosition by animateOffsetAsState(
-            targetValue = if (aniPositions) ninethPosition else Offset.Zero,
+        val ninthPosition = itemPositions[8] ?: Offset.Zero
+        val ninthAnimatedPosition by animateOffsetAsState(
+            targetValue = if (aniPositions) ninthPosition else Offset.Zero,
             animationSpec = tween(1000),
         )
 
@@ -567,15 +565,15 @@ fun NBAPlayerInfoView(
                 .size(itemSizes[8] ?: DpSize(width = screenWidthDp(), height = 150.dp))
                 .offset {
                     IntOffset(
-                        ninethAnimatedPosition.x.roundToInt(),
-                        ninethAnimatedPosition.y.roundToInt()
+                        ninthAnimatedPosition.x.roundToInt(),
+                        ninthAnimatedPosition.y.roundToInt()
                     )
                 }
                 .clickable {
                     searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
                 }
         ) {
-            NBAPlayerInfoNinethItem(contentsAlpha = contentsAlpha)
+            NBAPlayerInfoNinthItem(contentsAlpha = contentsAlpha)
         }
     }
 }
@@ -732,7 +730,7 @@ fun NBAPlayerInfoFourthItem(
             modifier = Modifier.alpha(contentsAlpha)
         ) {
             Text(
-                text = "출신 (학교 또는 팀): ",
+                text = "출신(학교 또는 팀): ",
                 fontSize = 15.sp
             )
 
@@ -985,8 +983,8 @@ fun NBAPlayerInfoEighthItem(
         lastGame?.let {
             val homeTeam = lastGame.boxScoreTraditional?.homeTeam
             val awayTeam = lastGame.boxScoreTraditional?.awayTeam
-            val homeTeamScore = lastGame.lineScore.find { it.teamId == homeTeam?.teamId }?.pts
-            val awayTeamScore = lastGame.lineScore.find { it.teamId == awayTeam?.teamId }?.pts
+            val homeTeamScore = lastGame.lineScore.find { it.teamId == homeTeam?.teamId }?.pts ?: 0
+            val awayTeamScore = lastGame.lineScore.find { it.teamId == awayTeam?.teamId }?.pts ?: 0
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1010,10 +1008,10 @@ fun NBAPlayerInfoEighthItem(
                         )
 
                         Text(
-                            text = (homeTeamScore ?: 0).toString(),
+                            text = (homeTeamScore).toString(),
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium,
-                            color = if ((homeTeamScore ?: 0) >= (awayTeamScore ?: 0)) MaterialTheme.colors.primary else Color.Black
+                            color = if (homeTeamScore >= awayTeamScore) MaterialTheme.colors.primary else Color.Black
                         )
 
                         Text(
@@ -1023,9 +1021,9 @@ fun NBAPlayerInfoEighthItem(
                         )
 
                         Text(
-                            text = (awayTeamScore ?: 0).toString(),
+                            text = (awayTeamScore).toString(),
                             fontWeight = FontWeight.Medium,
-                            color = if ((awayTeamScore ?: 0) >= (homeTeamScore ?: 0)) MaterialTheme.colors.primary else Color.Black
+                            color = if (awayTeamScore >= homeTeamScore) MaterialTheme.colors.primary else Color.Black
                         )
 
                         Text(
@@ -1091,7 +1089,7 @@ fun NBAPlayerInfoEighthItem(
 }
 
 @Composable
-fun NBAPlayerInfoNinethItem(
+fun NBAPlayerInfoNinthItem(
     nbaPlayerInfoViewModel: NBAPlayerInfoViewModel = hiltViewModel(),
     contentsAlpha: Float = 1f
 ) {
@@ -1144,7 +1142,7 @@ fun NBAPlayerInfoNinethItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(nextGame.gameSummary?.date ?: ""),
+                text = CalendarUtil.formatDate(nextGame.gameSummary?.date),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )

@@ -23,3 +23,6 @@ fun toCm(feet: Int, inches: Int, decimalPlaces: Int = 0): Double {
     val totalInches = feet * 12 + inches
     return (totalInches * 2.54).rounded(decimalPlaces)
 }
+
+val Int?.displayOrDash: String
+    get() = this?.toString() ?: "-"

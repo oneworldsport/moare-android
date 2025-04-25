@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
@@ -55,10 +56,6 @@ class FBTeamStandingsViewModel @Inject constructor(
        --------------------- */
     var teamNameDictionary: Map<String, String> = emptyMap()
 
-    init {
-        teamNameDictionary = nameProvider.getDictionary("nba_team")
-    }
-
     /* ---------------------
        intent
        --------------------- */
@@ -91,9 +88,25 @@ class FBTeamStandingsViewModel @Inject constructor(
             _displayModel.emit(displayModel)
             _standings.emit(displayModel.standings)
 
+            when (displayModel.leagueId) {
+                Constants.Ids.EPL -> {
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_TEAM_DIC)
+                }
+                Constants.Ids.LALIGA -> {
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_TEAM_DIC)
+                }
+                Constants.Ids.BUNDESLIGA -> {
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_TEAM_DIC)
+                }
+                Constants.Ids.LIGUE1 -> {
+                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
+                }
+                else -> {}
+            }
+
             val keywords = displayModel.keywords
             if (keywords.isNotEmpty()) {
-                val index = StringConstants.Football.teamStandingsCategories.indexOfFirst { category ->
+                val index = StringConstants.Football.TEAM_STANDINGS_CATEGORIES.indexOfFirst { category ->
                     val keyword = keywords.find { it.keyword == category }
                     keyword != null
                 }

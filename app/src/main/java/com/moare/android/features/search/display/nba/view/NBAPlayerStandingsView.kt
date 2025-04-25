@@ -89,8 +89,8 @@ fun NBAPlayerStandingsView(
        etc
        --------------------- */
     val secondSelectedCategoryPosition = with(LocalDensity.current) {
-        val attackCategoriesSize = StringConstants.NBA.playerStandingsAttackCategories.size
-        val defendCategoriesSize = StringConstants.NBA.playerStandingsDefendCategories.size
+        val attackCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+        val defendCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
         if (secondSelectedIndex in 0 until attackCategoriesSize) {
             (nbaPlayerStandingsViewModel.itemWidth * secondSelectedIndex).toPx()
@@ -226,7 +226,7 @@ fun NBAPlayerStandingsFirstCategoryItem(
             .height(nbaPlayerStandingsViewModel.firstCategoryItemHeight + nbaPlayerStandingsViewModel.secondCategoryItemHeight)
     ) {
         Text(
-            text = StringConstants.standingsFirstCategory,
+            text = StringConstants.STANDINGS_FIRST_CATEGORY,
             fontSize = nbaPlayerStandingsViewModel.firstCategoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -244,9 +244,9 @@ fun NBAPlayerStandingsFirstCategoryList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.NBA.playerStandingsAttackCategories.size
-    val defendCategoriesSize = StringConstants.NBA.playerStandingsDefendCategories.size
-    val commonCategoriesSize = StringConstants.NBA.playerStandingsCommonCategories.size
+    val attackCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
+    val commonCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_COMMON_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -288,13 +288,13 @@ fun NBAPlayerStandingsFirstCategoryList(
             modifier = Modifier
                 .height(nbaPlayerStandingsViewModel.firstCategoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
+            for ((index, value) in StringConstants.STATS_FIRST_CATEGORIES.withIndex()) {
                 NBAPlayerStandingsFirstCategoryListItem(
                     category = value,
                     index = index
                 )
 
-                if (index != StringConstants.statsFirstCategories.size - 1) {
+                if (index != StringConstants.STATS_FIRST_CATEGORIES.size - 1) {
                     VCapsuleBar(modifier = Modifier.alpha(0.5f))
                 }
             }
@@ -321,11 +321,11 @@ fun NBAPlayerStandingsFirstCategoryListItem(
         modifier = Modifier
             .width(
                 if (index == 0) {
-                    (itemWidth * StringConstants.NBA.playerStandingsAttackCategories.size)
+                    (itemWidth * StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES.size)
                 } else if (index == 1) {
-                    (itemWidth * StringConstants.NBA.playerStandingsDefendCategories.size)
+                    (itemWidth * StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES.size)
                 } else {
-                    (itemWidth * StringConstants.NBA.playerStandingsCommonCategories.size)
+                    (itemWidth * StringConstants.NBA.PLAYER_STANDINGS_COMMON_CATEGORIES.size)
                 }
             )
             .clickable {
@@ -348,8 +348,8 @@ fun NBAPlayerStandingsSecondCategoryList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.NBA.playerStandingsAttackCategories.size
-    val defendCategoriesSize = StringConstants.NBA.playerStandingsDefendCategories.size
+    val attackCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -379,7 +379,7 @@ fun NBAPlayerStandingsSecondCategoryList(
             modifier = Modifier
                 .height(nbaPlayerStandingsViewModel.secondCategoryItemHeight - 2.dp)
         ) {
-            for ((index, value) in StringConstants.NBA.playerStandingsSecondCategories.withIndex()) {
+            for ((index, value) in StringConstants.NBA.PLAYER_STANDINGS_SECOND_CATEGORIES.withIndex()) {
                 NBAPlayerStandingsSecondCategoryListItem(
                     category = value,
                     index = index
@@ -530,8 +530,8 @@ fun NBAPlayerStandingsDataList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.NBA.playerStandingsAttackCategories.size
-    val defendCategoriesSize = StringConstants.NBA.playerStandingsDefendCategories.size
+    val attackCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -543,7 +543,7 @@ fun NBAPlayerStandingsDataList(
     Column {
         for ((index, value) in filteredStandings.withIndex()) {
             val standingsIndex = filteredStandingsStartIndex + index
-            val categorySize = StringConstants.NBA.playerStandingsSecondCategories.size
+            val categorySize = StringConstants.NBA.PLAYER_STANDINGS_SECOND_CATEGORIES.size
             val highlightWidth = (nbaPlayerStandingsViewModel.itemWidth * categorySize) + (2.dp * 2)
 
             if (entityIndex != null && entityIndex == standingsIndex) {

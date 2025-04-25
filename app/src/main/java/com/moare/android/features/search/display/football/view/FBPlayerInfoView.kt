@@ -464,7 +464,7 @@ fun FBPlayerInfoFirstItem(
         )
 
         Text(
-            text = fbPlayerInfoViewModel.playerNameDictionary[player.name.lowercase()] ?: player.name,
+            text = fbPlayerInfoViewModel.playerNameDictionary["${player.id}"] ?: player.name,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.alpha(contentsAlpha)
         )

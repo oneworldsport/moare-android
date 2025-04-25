@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.components.FBStatDataItem
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -461,8 +462,9 @@ fun NBATeamInfoFirstItem(
         }
 
         URLImage(
-            url = team.teamLogo,
-            modifier = Modifier.alpha(contentsAlpha)
+            url = NBAUtil.teamLogoUrl(team.id),
+            modifier = Modifier.alpha(contentsAlpha),
+            isSvg = true
         )
 
         Text(
@@ -554,6 +556,7 @@ fun NBATeamInfoThirdItem(
     val displayModel by nbaTeamInfoViewModel.displayModel.collectAsState()
 
     displayModel?.let {
+        val team = it.team
         val venue = it.venue
 
         /* ---------------------
@@ -576,7 +579,7 @@ fun NBATeamInfoThirdItem(
             )
 
             Text(
-                text = venue.krname,
+                text = nbaTeamInfoViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
                 fontWeight = FontWeight.Medium
             )
         }
@@ -696,8 +699,8 @@ fun NBATeamInfoFifthItem(
         lastGame?.let {
             val homeTeam = lastGame.boxScoreTraditional?.homeTeam
             val awayTeam = lastGame.boxScoreTraditional?.awayTeam
-            val homeTeamScore = lastGame.lineScore.find { it.teamId == homeTeam?.teamId }?.pts
-            val awayTeamScore = lastGame.lineScore.find { it.teamId == awayTeam?.teamId }?.pts
+            val homeTeamScore = lastGame.lineScore.find { it.teamId == homeTeam?.teamId }?.pts ?: 0
+            val awayTeamScore = lastGame.lineScore.find { it.teamId == awayTeam?.teamId }?.pts ?: 0
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -714,12 +717,12 @@ fun NBATeamInfoFifthItem(
                 )
 
                 Text(
-                    text = (homeTeamScore ?: 0).toString(),
+                    text = (homeTeamScore).toString(),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(0.4f),
-                    color = if ((homeTeamScore ?: 0) >= (awayTeamScore ?: 0)) MaterialTheme.colors.primary else Color.Black
+                    color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
                 )
 
                 Text(
@@ -731,12 +734,12 @@ fun NBATeamInfoFifthItem(
                 )
 
                 Text(
-                    text = (awayTeamScore ?: 0).toString(),
+                    text = (awayTeamScore).toString(),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(0.4f),
-                    color = if ((awayTeamScore ?: 0) >= (homeTeamScore ?: 0)) MaterialTheme.colors.primary else Color.Black
+                    color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
                 )
 
                 Text(
@@ -750,7 +753,7 @@ fun NBATeamInfoFifthItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(lastGame.gameSummary?.date ?: ""),
+                text = CalendarUtil.formatDate(lastGame.gameSummary?.date),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )
@@ -816,7 +819,7 @@ fun NBATeamInfoSixthItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(nextGame.gameSummary?.date ?: ""),
+                text = CalendarUtil.formatDate(nextGame.gameSummary?.date),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )

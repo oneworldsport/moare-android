@@ -46,11 +46,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
-import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.MatchDescriptionConverter
-import com.moare.android.core.util.TranslationType
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -96,8 +95,8 @@ fun FBGameStatsView(
        etc
        --------------------- */
     val secondSelectedCategoryPosition = with(LocalDensity.current) {
-        val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
-        val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
+        val attackCategoriesSize = StringConstants.Football.GAME_STATS_ATTACK_CATEGORIES.size
+        val defendCategoriesSize = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES.size
 
         if (secondSelectedIndex in 0 until attackCategoriesSize) {
             (fbGameStatsViewModel.itemWidth * secondSelectedIndex).toPx()
@@ -118,7 +117,12 @@ fun FBGameStatsView(
     }
 
     LaunchedEffect(Unit) {
-        searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
+        displayModel?.let {
+            if (it.game.fixture.status.short != Constants.FBGameStatus.NOT_STARTED &&
+                it.game.fixture.status.short != Constants.FBGameStatus.FINISHED) {
+                searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
+            }
+        }
     }
 
     // scroll to category that matches with the keyword,
@@ -173,7 +177,7 @@ fun FBGameStatsView(
                 .fillMaxWidth()
                 .height(1.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .padding(horizontal = UIConstants.Padding.defaultHPadding)
+                .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
                 .background(MaterialTheme.colors.primary)
         )
 
@@ -203,7 +207,7 @@ fun FBGameStatsView(
                 )
 
                 Text(
-                    text = fbGameStatsViewModel.playerNameDictionary[coach?.name] ?: (coach?.name ?: ""),
+                    text = fbGameStatsViewModel.playerNameDictionary["${coach?.id}"] ?: (coach?.name ?: ""),
                     fontSize = 15.sp,
                     modifier = Modifier.padding(start = 4.dp)
                 )
@@ -315,26 +319,29 @@ fun FBGameStatsTeamButtonContainer(
             }
 
             // refresh button
-            Row {
-                Spacer(Modifier.weight(1f))
+            if (it.game.fixture.status.short != Constants.FBGameStatus.NOT_STARTED &&
+                it.game.fixture.status.short != Constants.FBGameStatus.FINISHED) {
+                Row {
+                    Spacer(Modifier.weight(1f))
 
-                // TODO: Make it component
-                Box(
-                    Modifier
-                        .padding(end = UIConstants.Padding.defaultHPadding)
-                        .alpha(0.6f)
-                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
-                        .padding(2.dp)
-                        .clickable {
-                            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
-                        }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_round_refresh_24),
-                        contentDescription = null,
-                        tint = Color.Gray,
-                        modifier = Modifier.size(22.dp)
-                    )
+                    // TODO: Make it component
+                    Box(
+                        Modifier
+                            .padding(end = UIConstants.Padding.DEFAULT_H_PADDING)
+                            .alpha(0.6f)
+                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
+                            .padding(2.dp)
+                            .clickable {
+                                searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
+                            }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_round_refresh_24),
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                 }
             }
         }
@@ -369,7 +376,7 @@ fun FBGameStatsFirstCategoryItem(
             .height(fbGameStatsViewModel.categoryItemHeight * 2)
     ) {
         Text(
-            text = StringConstants.gameStatsFirstCategory,
+            text = StringConstants.GAME_STATS_FIRST_CATEGORY,
             fontSize = fbGameStatsViewModel.categoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -387,9 +394,9 @@ fun FBGameStatsFirstCategoryList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
-    val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
-    val commonCategoriesSize = StringConstants.Football.gameStatsCommonCategories.size
+    val attackCategoriesSize = StringConstants.Football.GAME_STATS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES.size
+    val commonCategoriesSize = StringConstants.Football.GAME_STATS_COMMON_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -430,13 +437,13 @@ fun FBGameStatsFirstCategoryList(
         modifier = Modifier
             .height(fbGameStatsViewModel.categoryItemHeight - 2.dp)
     ) {
-        for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
+        for ((index, value) in StringConstants.STATS_FIRST_CATEGORIES.withIndex()) {
             FBGameStatsFirstCategoryListItem(
                 category = value,
                 index = index
             )
 
-            if (index != StringConstants.statsFirstCategories.size - 1) {
+            if (index != StringConstants.STATS_FIRST_CATEGORIES.size - 1) {
                 VCapsuleBar(modifier = Modifier.alpha(0.5f))
             }
         }
@@ -465,11 +472,11 @@ fun FBGameStatsFirstCategoryListItem(
         modifier = Modifier
             .width(
                 if (index == 0) {
-                    (itemWidth * StringConstants.Football.gameStatsAttackCategories.size)
+                    (itemWidth * StringConstants.Football.GAME_STATS_ATTACK_CATEGORIES.size)
                 } else if (index == 1) {
-                    (itemWidth * StringConstants.Football.gameStatsDefendCategories.size)
+                    (itemWidth * StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES.size)
                 } else {
-                    (itemWidth * StringConstants.Football.gameStatsCommonCategories.size)
+                    (itemWidth * StringConstants.Football.GAME_STATS_COMMON_CATEGORIES.size)
                 }
             )
             .clickable {
@@ -488,8 +495,8 @@ fun FBGameStatsSecondCategoryList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
-    val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
+    val attackCategoriesSize = StringConstants.Football.GAME_STATS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -518,7 +525,7 @@ fun FBGameStatsSecondCategoryList(
         modifier = Modifier
             .height(fbGameStatsViewModel.categoryItemHeight - 2.dp)
     ) {
-        for ((index, value) in StringConstants.Football.gameStatsSecondCategories.withIndex()) {
+        for ((index, value) in StringConstants.Football.GAME_STATS_SECOND_CATEGORIES.withIndex()) {
             FBGameStatsSecondCategoryListItem(
                 category = value,
                 index = index
@@ -660,7 +667,7 @@ fun FBGameStatsFirstDataListItem(
         )
 
         Text(
-            text = fbGameStatsViewModel.playerNameDictionary[data.name] ?: data.name,
+            text = fbGameStatsViewModel.playerNameDictionary["${data.id}"] ?: data.name,
             fontSize = 12.sp,
             maxLines = 2,
             modifier = Modifier.width(60.dp)
@@ -703,8 +710,8 @@ fun FBGameStatsDataList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.Football.gameStatsAttackCategories.size
-    val defendCategoriesSize = StringConstants.Football.gameStatsDefendCategories.size
+    val attackCategoriesSize = StringConstants.Football.GAME_STATS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -719,7 +726,7 @@ fun FBGameStatsDataList(
                 modifier = Modifier
                     .height(fbGameStatsViewModel.dataItemHeight)
             ) {
-                for (index in 0 until StringConstants.Football.gameStatsSecondCategories.size) {
+                for (index in 0 until StringConstants.Football.GAME_STATS_SECOND_CATEGORIES.size) {
                     item.statistics.first().let {
                         FBGameStatsDataListItem(
                             data = it,
@@ -740,7 +747,7 @@ fun FBGameStatsDataList(
             modifier = Modifier
                 .height(fbGameStatsViewModel.dataItemHeight)
         ) {
-            for (index in 0 until StringConstants.Football.gameStatsSecondCategories.size) {
+            for (index in 0 until StringConstants.Football.GAME_STATS_SECOND_CATEGORIES.size) {
                 playersTotalStats?.let {
                     FBGameStatsDataListItem(
                         data = it,

@@ -48,11 +48,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.displayOrDash
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -69,6 +71,7 @@ import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
+import com.moare.android.ui.util.CenterRow
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 
 @Composable
@@ -99,8 +102,8 @@ fun NBAGameStatsView(
        etc
        --------------------- */
     val secondSelectedCategoryPosition = with(LocalDensity.current) {
-        val attackCategoriesSize = StringConstants.NBA.gameStatsAttackCategories.size
-        val defendCategoriesSize = StringConstants.NBA.gameStatsDefendCategories.size
+        val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
+        val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
 
         if (secondSelectedIndex in 0 until attackCategoriesSize) {
             (nbaGameStatsViewModel.itemWidth * secondSelectedIndex).toPx()
@@ -121,7 +124,9 @@ fun NBAGameStatsView(
     }
 
     LaunchedEffect(Unit) {
-        searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
+        if (displayModel?.game?.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE) {
+            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
+        }
     }
 
     // scroll to category that matches with the keyword,
@@ -149,7 +154,7 @@ fun NBAGameStatsView(
            --------------------- */
         Row(
             verticalAlignment = Alignment.CenterVertically,
-//            modifier = Modifier.padding(bottom = 6.dp)
+            modifier = Modifier.padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
         ) {
             NBATitle(
                 leagueName = "NBA",
@@ -157,9 +162,18 @@ fun NBAGameStatsView(
             )
 
             Text(
-                text = " - 정규시즌",
+                text = " | ${NBAUtil.gameType(displayModel?.game?.gameSummary)}",
                 fontSize = 14.sp
             )
+
+            Spacer(Modifier.weight(1f))
+        }
+
+        /* ---------------------
+           playoffs series text
+           --------------------- */
+        if (displayModel?.game?.gameSummary?.seriesGameNumber?.isNotEmpty() == true) {
+            NBAGameStatsPlayoffsSeriesTextContainer()
         }
 
         NBAGameStatsScoreInfoItem()
@@ -170,11 +184,11 @@ fun NBAGameStatsView(
                 .padding(vertical = 4.dp)
                 .height(1.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .padding(horizontal = UIConstants.Padding.defaultHPadding)
+                .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
                 .background(MaterialTheme.colors.primary)
         )
 
-        if (displayModel?.game?.gameSummary?.gameStatusId != 1) {
+        if (displayModel?.game?.gameSummary?.gameStatusId != Constants.NBAGameStatus.NOT_STARTED) {
             /* ---------------------
                team select button
                --------------------- */
@@ -246,29 +260,29 @@ fun NBAGameStatsScoreInfoItem(
        constants
        --------------------- */
     val gameStatusText = when (game?.gameSummary?.gameStatusId) {
-        1 -> StringConstants.gameNotStartedStr
-        2 -> if (homeTeamLineScore?.ptsOt3 != null) {
-            StringConstants.NBA.gameOt3
+        Constants.NBAGameStatus.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
+        Constants.NBAGameStatus.LIVE -> if (homeTeamLineScore?.ptsOt3 != null) {
+            StringConstants.NBA.GAME_OT_3
         } else if (homeTeamLineScore?.ptsOt2 != null) {
-            StringConstants.NBA.gameOt2
+            StringConstants.NBA.GAME_OT_2
         } else if (homeTeamLineScore?.ptsOt1 != null) {
-            StringConstants.NBA.gameOt1
+            StringConstants.NBA.GAME_OT_1
         } else if (homeTeamLineScore?.ptsQtr4 != null) {
-            StringConstants.NBA.gameQtr4
+            StringConstants.NBA.GAME_QTR_4
         } else if (homeTeamLineScore?.ptsQtr3 != null) {
-            StringConstants.NBA.gameQtr3
+            StringConstants.NBA.GAME_QTR_3
         } else if (homeTeamLineScore?.ptsQtr2 != null) {
-            StringConstants.NBA.gameQtr2
+            StringConstants.NBA.GAME_QTR_2
         } else if (homeTeamLineScore?.ptsQtr1 != null) {
-            StringConstants.NBA.gameQtr1
+            StringConstants.NBA.GAME_QTR_1
         } else {
             ""
         }
-        3 -> StringConstants.gameFinishedStr
+        Constants.NBAGameStatus.FINISHED -> StringConstants.GAME_FINISHED_STR
         else -> ""
     }
 
-    val gameStatusColor = if (game?.gameSummary?.gameStatusId == 2) {
+    val gameStatusColor = if (game?.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE) {
         MaterialTheme.colors.primary
     } else {
         Color.Gray
@@ -281,7 +295,7 @@ fun NBAGameStatsScoreInfoItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = UIConstants.Padding.defaultHPadding)
+            .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -290,7 +304,7 @@ fun NBAGameStatsScoreInfoItem(
                 .padding(top = 26.dp) // for NBAGameStatsLineScoreTitle. TODO: NBATitle 과의 간격 줄이고 싶음
         ) {
             URLImage(
-                url = if (homeTeamId != null) NBAUtil.teamLogoUrl(homeTeamId) else "",
+                url = NBAUtil.teamLogoUrl(homeTeamId),
                 size = URLImageSize.SMALL,
                 isSvg = true
             )
@@ -337,7 +351,7 @@ fun NBAGameStatsScoreInfoItem(
             }
 
             URLImage(
-                url = if (awayTeamId != null) NBAUtil.teamLogoUrl(awayTeamId) else "",
+                url = NBAUtil.teamLogoUrl(awayTeamId),
                 size = URLImageSize.SMALL,
                 isSvg = true
             )
@@ -348,7 +362,9 @@ fun NBAGameStatsScoreInfoItem(
                 NBAGameStatsLineScoreContainer(
                     homeTeamLineScore = home,
                     awayTeamLineScore = away,
-                    modifier = Modifier.height(127.dp).weight(1f) // 25 + 1 + 50 + 1 + 50
+                    modifier = Modifier
+                        .height(127.dp)
+                        .weight(1f) // 25 + 1 + 50 + 1 + 50
                 )
             }
         }
@@ -376,13 +392,17 @@ fun NBAGameStatsLineScoreContainer(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = homeTeamLineScore.pts.toString(),
+                        text = homeTeamLineScore.pts.displayOrDash,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier
                             .padding(start = 4.dp, end = 8.dp)
                             .width(30.dp),
-                        color = if (homeTeamLineScore.pts >= awayTeamLineScore.pts) MaterialTheme.colors.primary else Color.Black
+                        color = homeTeamLineScore.pts?.let { homePts ->
+                            awayTeamLineScore.pts?.let { awayPts ->
+                                if (homePts >= awayPts) MaterialTheme.colors.primary else Color.Black
+                            }
+                        } ?: Color.Black
                     )
                 }
             }
@@ -419,13 +439,17 @@ fun NBAGameStatsLineScoreContainer(
 //            modifier = Modifier.height(nbaGameStatsViewModel.lineScoreItemHeight)
         ) {
             Text(
-                text = awayTeamLineScore.pts.toString(),
+                text = awayTeamLineScore.pts.displayOrDash,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier
                     .padding(start = 4.dp, end = 8.dp)
                     .width(30.dp),
-                color = if (awayTeamLineScore.pts >= homeTeamLineScore.pts) MaterialTheme.colors.primary else Color.Black
+                color = homeTeamLineScore.pts?.let { homePts ->
+                    awayTeamLineScore.pts?.let { awayPts ->
+                        if (awayPts >= homePts) MaterialTheme.colors.primary else Color.Black
+                    }
+                } ?: Color.Black
             )
 
             NBAGameStatsLineScoreItem(lineScore = awayTeamLineScore)
@@ -439,7 +463,9 @@ fun NBAGameStatsLineScoreTitle(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().height(25.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(25.dp)
     ) {
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
@@ -470,7 +496,7 @@ fun NBAGameStatsLineScoreTitle(
             modifier = Modifier.weight(1f)
         )
 
-        if (lineScore.ptsOt1 != 0) {
+        if (lineScore.ptsOt1 != null && lineScore.ptsOt1 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = "연장 1쿼터",
@@ -480,7 +506,7 @@ fun NBAGameStatsLineScoreTitle(
             )
         }
 
-        if (lineScore.ptsOt2 != 0) {
+        if (lineScore.ptsOt2 != null && lineScore.ptsOt2 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = "연장 2쿼터",
@@ -490,7 +516,7 @@ fun NBAGameStatsLineScoreTitle(
             )
         }
 
-        if (lineScore.ptsOt3 != 0) {
+        if (lineScore.ptsOt3 != null && lineScore.ptsOt3 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = "연장 3쿼터",
@@ -510,39 +536,41 @@ fun NBAGameStatsLineScoreItem(
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().height(nbaGameStatsViewModel.lineScoreItemHeight)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(nbaGameStatsViewModel.lineScoreItemHeight)
     ) {
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
-            text = lineScore.ptsQtr1.toString(),
+            text = lineScore.ptsQtr1.displayOrDash,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
-            text = lineScore.ptsQtr2.toString(),
+            text = lineScore.ptsQtr2.displayOrDash,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
-            text = lineScore.ptsQtr3.toString(),
+            text = lineScore.ptsQtr3.displayOrDash,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
-            text = lineScore.ptsQtr4.toString(),
+            text = lineScore.ptsQtr4.displayOrDash,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
 
         // TODO: 홈, 원정 둘중에 하나는 0이 아닌데 다른 팀은 0일때 0인팀의 UI가 깨짐
-        if (lineScore.ptsOt1 != 0) {
+        if (lineScore.ptsOt1 != null && lineScore.ptsOt1 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = lineScore.ptsOt1.toString(),
@@ -552,7 +580,7 @@ fun NBAGameStatsLineScoreItem(
             )
         }
 
-        if (lineScore.ptsOt2 != 0) {
+        if (lineScore.ptsOt2 != null && lineScore.ptsOt2 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = lineScore.ptsOt2.toString(),
@@ -562,7 +590,7 @@ fun NBAGameStatsLineScoreItem(
             )
         }
 
-        if (lineScore.ptsOt3 != 0) {
+        if (lineScore.ptsOt3 != null && lineScore.ptsOt3 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))
             Text(
                 text = lineScore.ptsOt3.toString(),
@@ -638,7 +666,6 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
                     )
                 }
 
-
                 HCapsuleBar(
                     modifier = Modifier.offset(x = barOffset),
                     size = HCapsuleBarSize.MEDIUM
@@ -650,27 +677,29 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
                 modifier = Modifier.weight(0.4f)
             ) {
                 // refresh button
-                Box(
-                    Modifier
-                        .padding(end = 4.dp)
-                        .alpha(0.6f)
-                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
-                        .padding(2.dp)
-                        .clickable {
-                            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
-                        }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_round_refresh_24),
-                        contentDescription = null,
-                        tint = Color.Gray,
-                        modifier = Modifier.size(22.dp)
-                    )
+                if (displayModel.game.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE) {
+                    Box(
+                        Modifier
+                            .padding(end = 4.dp)
+                            .alpha(0.6f)
+                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
+                            .padding(2.dp)
+                            .clickable {
+                                searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
+                            }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_round_refresh_24),
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                 }
 
                 Column {
                     Text(
-                        text = "날짜: ${CalendarUtil.formatDate(displayModel.game.gameSummary?.date).split(" ")[0]}",
+                        text = "날짜: ${CalendarUtil.formatDate(displayModel.game.gameSummary?.date).split(" ").firstOrNull() ?: ""}",
                         fontSize = 12.sp,
                     )
 
@@ -680,7 +709,7 @@ fun NBAGameStatsTeamButtonAdditionalInfoContainer(
                     )
 
                     Text(
-                        text = "장소: ${nbaGameStatsViewModel.teamNameDictionary["venue_${displayModel.game.gameSummary?.homeTeamId}"]}" ?: "",
+                        text = "장소: ${nbaGameStatsViewModel.teamNameDictionary["venue_${displayModel.game.gameSummary?.homeTeamId}"] ?: ""}",
                         fontSize = 12.sp,
                     )
 
@@ -738,7 +767,7 @@ fun NBAGameStatsFirstCategoryItem(
             .height(nbaGameStatsViewModel.firstCategoryItemHeight + nbaGameStatsViewModel.secondCategoryItemHeight)
     ) {
         Text(
-            text = StringConstants.gameStatsFirstCategory,
+            text = StringConstants.GAME_STATS_FIRST_CATEGORY,
             fontSize = nbaGameStatsViewModel.firstCategoryFontSize,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -756,9 +785,9 @@ fun NBAGameStatsFirstCategoryList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.NBA.gameStatsAttackCategories.size
-    val defendCategoriesSize = StringConstants.NBA.gameStatsDefendCategories.size
-    val commonCategoriesSize = StringConstants.NBA.gameStatsCommonCategories.size
+    val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
+    val commonCategoriesSize = StringConstants.NBA.GAME_STATS_COMMON_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -799,13 +828,13 @@ fun NBAGameStatsFirstCategoryList(
         modifier = Modifier
             .height(nbaGameStatsViewModel.firstCategoryItemHeight - 2.dp)
     ) {
-        for ((index, value) in StringConstants.statsFirstCategories.withIndex()) {
+        for ((index, value) in StringConstants.STATS_FIRST_CATEGORIES.withIndex()) {
             NBAGameStatsFirstCategoryListItem(
                 category = value,
                 index = index
             )
 
-            if (index != StringConstants.statsFirstCategories.size - 1) {
+            if (index != StringConstants.STATS_FIRST_CATEGORIES.size - 1) {
                 VCapsuleBar(modifier = Modifier.alpha(0.5f))
             }
         }
@@ -834,11 +863,11 @@ fun NBAGameStatsFirstCategoryListItem(
         modifier = Modifier
             .width(
                 if (index == 0) {
-                    (itemWidth * StringConstants.NBA.gameStatsAttackCategories.size)
+                    (itemWidth * StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size)
                 } else if (index == 1) {
-                    (itemWidth * StringConstants.NBA.gameStatsDefendCategories.size)
+                    (itemWidth * StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size)
                 } else {
-                    (itemWidth * StringConstants.NBA.gameStatsCommonCategories.size)
+                    (itemWidth * StringConstants.NBA.GAME_STATS_COMMON_CATEGORIES.size)
                 }
             )
             .clickable {
@@ -856,8 +885,8 @@ fun NBAGameStatsSecondCategoryList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.NBA.gameStatsAttackCategories.size
-    val defendCategoriesSize = StringConstants.NBA.gameStatsDefendCategories.size
+    val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -886,7 +915,7 @@ fun NBAGameStatsSecondCategoryList(
         modifier = Modifier
             .height(nbaGameStatsViewModel.secondCategoryItemHeight - 2.dp)
     ) {
-        for ((index, value) in StringConstants.NBA.gameStatsSecondCategories.withIndex()) {
+        for ((index, value) in StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES.withIndex()) {
             NBAGameStatsSecondCategoryListItem(
                 category = value,
                 index = index
@@ -1035,8 +1064,8 @@ fun NBAGameStatsDataList(
     /* ---------------------
        constants
        --------------------- */
-    val attackCategoriesSize = StringConstants.NBA.gameStatsAttackCategories.size
-    val defendCategoriesSize = StringConstants.NBA.gameStatsDefendCategories.size
+    val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
+    val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
 
     /* ---------------------
        viewmodel state
@@ -1051,7 +1080,7 @@ fun NBAGameStatsDataList(
                 modifier = Modifier
                     .height(nbaGameStatsViewModel.dataItemHeight)
             ) {
-                for (index in 0 until StringConstants.NBA.gameStatsSecondCategories.size) {
+                for (index in 0 until StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES.size) {
                     NBAGameStatsDataListItem(
                         data = item.statistics,
                         index = index
@@ -1070,7 +1099,7 @@ fun NBAGameStatsDataList(
             modifier = Modifier
                 .height(nbaGameStatsViewModel.dataItemHeight)
         ) {
-            for (index in 0 until StringConstants.NBA.gameStatsSecondCategories.size) {
+            for (index in 0 until StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES.size) {
                 playersTotalStats?.let {
                     NBAGameStatsDataListItem(
                         data = it,
@@ -1133,7 +1162,51 @@ fun NBAGameStatsDataListItem(
     )
 }
 
+@Composable
+fun NBAGameStatsPlayoffsSeriesTextContainer(
+    nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel()
+) {
+    val displayModel by nbaGameStatsViewModel.displayModel.collectAsState()
 
+    displayModel?.game?.seasonSeries?.let {
+        CenterRow(
+            modifier = Modifier.padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
+        ) {
+            // NOTE: 게임별 시리즈 스코어 정보를 가져올 방법을 찾지 못해서 일단은 현재 시리즈 스코어로 표시
+            Text(
+                text = "현재 시리즈 스코어: ",
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = nbaGameStatsViewModel.teamNameDictionary["short_${it.homeTeamId}"] ?: "",
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "${it.homeTeamWins}",
+                color = if (it.homeTeamWins >= it.homeTeamLosses) Moare else Color.Black
+            )
+
+            Text(
+                text = "-",
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "${it.homeTeamLosses}",
+                color = if (it.homeTeamLosses >= it.homeTeamWins) Moare else Color.Black
+            )
+
+            Text(
+                text = nbaGameStatsViewModel.teamNameDictionary["short_${it.visitorTeamId}"] ?: "",
+                fontSize = 14.sp
+            )
+
+            Spacer(Modifier.weight(1f))
+        }
+    }
+}
 
 
 
