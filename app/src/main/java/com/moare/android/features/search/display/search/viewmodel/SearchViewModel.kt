@@ -38,6 +38,7 @@ import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
@@ -222,8 +223,9 @@ class SearchViewModel @Inject constructor(
         data class ShowPlayerStats(val category: String? = null, val playerId: Int) : Intent()
         data class ShowTeamStats(val teamId: Int) : Intent()
         data class ShowGameStats(val gameType: String) : Intent()
-
         data class RefreshGame(val category: String) : Intent()
+        data class SelectNBATournamentRound(val gameList: List<NBAGame>) : Intent()
+
         data class UpdateLastViewStack(val data: SportDecodableModel) : Intent()
     }
 
@@ -258,6 +260,7 @@ class SearchViewModel @Inject constructor(
                 is Intent.ShowTeamStats -> showTeamStats(intent.teamId)
                 is Intent.ShowGameStats -> showGameStats(intent.gameType)
                 is Intent.RefreshGame -> refreshGame(intent.category)
+                is Intent.SelectNBATournamentRound -> selectNBATournamentRound(intent.gameList)
                 is Intent.UpdateLastViewStack -> updateLastViewStack(intent.data)
             }
         }
@@ -889,6 +892,36 @@ class SearchViewModel @Inject constructor(
         } catch (e: Exception) {
             Log.e("dsdf", e.localizedMessage ?: "error")
         }
+    }
+
+    private suspend fun selectNBATournamentRound(gameList: List<NBAGame>) {
+        val modelConverter = ModelConverter()
+
+        val dataModel: SportDecodableModel
+
+        when (val lastView = viewStack.value.lastOrNull()) {
+            is SportDecodableModel.NBALeagueTournament-> {
+                val responseModel = NBAGameScheduleResponseModel(scheduledMonths = emptyList(), schedule = gameList)
+                dataModel = SportDecodableModel.NBATeamSchedule(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.nbaTeamScheduleConverter(responseModel)
+                )
+            }
+
+            else -> return // Make it do nothing
+        }
+
+        _resultVisibleState.emit(false)
+        delay(1000)
+
+        updateMainDisplayModel(dataModel)
+
+        val stack = viewStack.value.toMutableList()
+        stack.add(dataModel)
+        _viewStack.emit(stack)
+        _poppedView.emit(null)
+
+        _resultVisibleState.emit(true)
     }
 
     private suspend fun updateLastViewStack(data: SportDecodableModel) {

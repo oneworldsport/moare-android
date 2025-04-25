@@ -430,7 +430,9 @@ fun NBALeagueTournamentRoundContainer(
                     }
                 }
                 .clickable {
-//                    searchViewModel.send(SearchViewModel.Intent.)
+                    gameList?.let {
+                        searchViewModel.send(SearchViewModel.Intent.SelectNBATournamentRound(it))
+                    }
                 }
         ) {
             CenterRow(
