@@ -108,12 +108,14 @@ fun CenterRow(
 
 @Composable
 fun CenterColumn(
+    verticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = verticalArrangement,
+        horizontalAlignment = horizontalAlignment,
         modifier = modifier,
         content = content
     )
