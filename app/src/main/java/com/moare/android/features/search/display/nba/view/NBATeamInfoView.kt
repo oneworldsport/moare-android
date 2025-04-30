@@ -42,7 +42,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.features.search.display.common.viewmodel.BaseInfoViewModel
 import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -94,7 +96,7 @@ fun NBATeamInfoView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBATeamInfo) {
-            nbaTeamInfoViewModel.send(NBATeamInfoViewModel.Intent.InitData(data))
+            nbaTeamInfoViewModel.send(NBATeamInfoIntent.InitData(data))
         }
     }
 

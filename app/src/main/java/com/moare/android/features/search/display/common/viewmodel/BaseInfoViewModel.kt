@@ -41,6 +41,10 @@ abstract class BaseInfoViewModel<I, T>(
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_PLAYER_DIC)
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
             }
+            Constants.Ids.NBA -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
+            }
             else -> {}
         }
     }
