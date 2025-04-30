@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.displaymodels.football
 
+import com.moare.android.features.search.models.displaymodels.LeagueIdentifiable
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.football.FBTeamInfo
 import com.moare.android.features.search.models.models.football.FBVenue
@@ -8,10 +9,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FBTeamInfoDisplayModel(
+    override val leagueId: Int,
     val team: FBTeamInfo,
     val venue: FBVenue,
     val stats: FBTeamStats?,
     val lastGame: FBGame?,
-    val nextGame: FBGame?,
-    val leagueId: Int?
-)
+    val nextGame: FBGame?
+) : LeagueIdentifiable
