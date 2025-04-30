@@ -8,6 +8,7 @@ import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.rounded
+import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsViewModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
 import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
@@ -18,10 +19,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class NBAGameStatsIntent {
+    data class InitData(val displayModel: NBAGameStatsDisplayModel) : NBAGameStatsIntent()
+    data class SelectFirstCategory(val index: Int) : NBAGameStatsIntent()
+    data class SelectSecondCategory(val index: Int) : NBAGameStatsIntent()
+    data class SelectTeam(val index: Int) : NBAGameStatsIntent()
+}
+
 @HiltViewModel
 class NBAGameStatsViewModel @Inject constructor(
     private val nameProvider: TranslatedNameProvider
-) : MVIViewModel<NBAGameStatsViewModel.Intent, NBAGameStatsDisplayModel>() {
+) : BaseGameStatsViewModel<NBAGameStatsIntent, NBAGameStatsDisplayModel>(nameProvider) {
     /* ---------------------
        constants
        --------------------- */
@@ -40,9 +48,6 @@ class NBAGameStatsViewModel @Inject constructor(
     /* ---------------------
        data state
        --------------------- */
-    private val _displayModel = MutableStateFlow<NBAGameStatsDisplayModel?>(null)
-    val displayModel: StateFlow<NBAGameStatsDisplayModel?> = _displayModel
-
     private val _homeTeamLineScore = MutableStateFlow<NBALineScore?>(null)
     val homeTeamLineScore: StateFlow<NBALineScore?> = _homeTeamLineScore
 
@@ -56,49 +61,17 @@ class NBAGameStatsViewModel @Inject constructor(
     val playersTotalStats: StateFlow<NBAGameBoxScoreStats?> = _playersTotalStats
 
     /* ---------------------
-       ui state
-       --------------------- */
-    private var _firstSelectedIndex = MutableStateFlow(0)
-    val firstSelectedIndex: StateFlow<Int> = _firstSelectedIndex
-
-    private var _secondSelectedIndex = MutableStateFlow(0)
-    val secondSelectedIndex: StateFlow<Int> = _secondSelectedIndex
-
-    private var _selectedTeamIndex = MutableStateFlow(0)
-    val selectedTeamIndex: StateFlow<Int> = _selectedTeamIndex
-
-    /* ---------------------
        etc
        --------------------- */
-    var shouldScrollCategory = false
     private var homeTeamId = 0
     private var awayTeamId = 0
-    var playerNameDictionary: Map<String, String> = emptyMap()
-    var teamNameDictionary: Map<String, String> = emptyMap()
 
-    init {
-        playerNameDictionary = nameProvider.getDictionary("nba_player")
-        teamNameDictionary = nameProvider.getDictionary("nba_team")
-    }
-
-    /* ---------------------
-       intent
-       --------------------- */
-    sealed class Intent {
-        data class InitData(val displayModel: NBAGameStatsDisplayModel) : Intent()
-        data class SelectFirstCategory(val index: Int) : Intent()
-        data class SelectSecondCategory(val index: Int) : Intent()
-        data class SelectTeam(val index: Int) : Intent()
-    }
-
-    override fun send(intent: Intent) {
-        viewModelScope.launch {
-            when (intent) {
-                is Intent.InitData -> initData(intent.displayModel)
-                is Intent.SelectFirstCategory -> selectFirstCategory(intent.index)
-                is Intent.SelectSecondCategory -> selectSecondCategory(intent.index)
-                is Intent.SelectTeam -> selectTeam(intent.index)
-            }
+    override fun send(intent: NBAGameStatsIntent) {
+        when (intent) {
+            is NBAGameStatsIntent.InitData -> initData(intent.displayModel)
+            is NBAGameStatsIntent.SelectFirstCategory -> selectFirstCategory(intent.index)
+            is NBAGameStatsIntent.SelectSecondCategory -> selectSecondCategory(intent.index)
+            is NBAGameStatsIntent.SelectTeam -> selectTeam(intent.index)
         }
     }
 
@@ -106,93 +79,80 @@ class NBAGameStatsViewModel @Inject constructor(
        init
        --------------------- */
     override fun initData(displayModel: NBAGameStatsDisplayModel) {
-        viewModelScope.launch {
-            // init with default value
-            _homeTeamLineScore.emit(null)
-            _awayTeamLineScore.emit(null)
-            _playersStats.emit(emptyList())
-            _playersTotalStats.emit(null)
-            _firstSelectedIndex.emit(0)
-            _secondSelectedIndex.emit(0)
-            _selectedTeamIndex.emit(0)
-            shouldScrollCategory = false
-            homeTeamId = 0
-            awayTeamId = 0
+        // init with default value
+        _homeTeamLineScore.value = null
+        _awayTeamLineScore.value = null
+        _playersStats.value = emptyList()
+        _playersTotalStats.value = null
 
-            // init data
-            _displayModel.emit(displayModel)
+        homeTeamId = 0
+        awayTeamId = 0
 
-            displayModel.game.gameSummary?.let {
-                homeTeamId = it.homeTeamId
-                awayTeamId = it.visitorTeamId
-            }
+        displayModel.game.gameSummary?.let {
+            homeTeamId = it.homeTeamId
+            awayTeamId = it.visitorTeamId
+        }
 
-            // set lineScore
-            _homeTeamLineScore.emit(displayModel.game.lineScore.find { it.teamId == homeTeamId })
-            _awayTeamLineScore.emit(displayModel.game.lineScore.find { it.teamId == awayTeamId })
+        // set lineScore
+        _homeTeamLineScore.value = displayModel.game.lineScore.find { it.teamId == homeTeamId }
+        _awayTeamLineScore.value = displayModel.game.lineScore.find { it.teamId == awayTeamId }
 
-            displayModel.game.boxScoreTraditional?.let {
-                // set current(home) team's players stats
-                selectTeam(0)
-//                _playersStats.emit(it.homeTeam.players)
-//                setPlayersTotalStats()
-//
-//                sortPlayers()
-            }
+        displayModel.game.boxScoreTraditional?.let {
+            // set current(home) team's players stats
+            selectTeam(0)
         }
     }
 
     /* ---------------------
        implements
        --------------------- */
-    private suspend fun selectFirstCategory(index: Int) {
-        shouldScrollCategory = true
+    override fun selectFirstCategory(index: Int) {
+        super.selectFirstCategory(index)
 
         val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
         val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
 
         when (index) {
-            0 -> _secondSelectedIndex.emit(0)
-            1 -> _secondSelectedIndex.emit(attackCategoriesSize)
-            2 -> _secondSelectedIndex.emit(attackCategoriesSize + defendCategoriesSize)
+            0 -> _secondSelectedIndex.value = 0
+            1 -> _secondSelectedIndex.value = attackCategoriesSize
+            2 -> _secondSelectedIndex.value = attackCategoriesSize + defendCategoriesSize
         }
 
-        _firstSelectedIndex.emit(index)
+        _firstSelectedIndex.value = index
 
         sortPlayers()
     }
 
-    private suspend fun selectSecondCategory(index: Int) {
-        shouldScrollCategory = false
-        _secondSelectedIndex.emit(index)
+    override fun selectSecondCategory(index: Int) {
+        super.selectSecondCategory(index)
 
         val attackCategories = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES
         val defendCategories = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES
 
         when (index) {
-            in attackCategories.indices -> _firstSelectedIndex.emit(0)
-            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstSelectedIndex.emit(1)
-            else -> _firstSelectedIndex.emit(2)
+            in attackCategories.indices -> _firstSelectedIndex.value = 0
+            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstSelectedIndex.value = 1
+            else -> _firstSelectedIndex.value = 2
         }
 
         sortPlayers()
     }
 
-    private suspend fun selectTeam(index: Int) {
-        _selectedTeamIndex.emit(index)
+    override fun selectTeam(index: Int) {
+        super.selectTeam(index)
 
         // set selected team's players stats
-        _playersStats.emit(if (index == 0) {
+        _playersStats.value = if (index == 0) {
             displayModel.value?.game?.boxScoreTraditional?.homeTeam?.players ?: emptyList()
         } else {
             displayModel.value?.game?.boxScoreTraditional?.awayTeam?.players ?: emptyList()
-        })
-        setPlayersTotalStats()
+        }
 
+        setPlayersTotalStats()
         sortPlayers()
     }
 
-    private suspend fun sortPlayers() {
+    override fun sortPlayers() {
         val playerStats = playerStats.value.toMutableList()
 
         when (secondSelectedIndex.value) {
@@ -219,11 +179,10 @@ class NBAGameStatsViewModel @Inject constructor(
             else -> {}
         }
 
-        _playersStats.emit(playerStats)
-//        setPlayersTotalStats()
+        _playersStats.value = playerStats
     }
 
-    private suspend fun setPlayersTotalStats() {
+    override fun setPlayersTotalStats() {
         val playersTotalStats = playerStats.value.map { it.statistics }
             .fold(
                 NBAGameBoxScoreStats()
@@ -263,7 +222,7 @@ class NBAGameStatsViewModel @Inject constructor(
             (awayTeamLineScore.value?.pts ?: 0) - (homeTeamLineScore.value?.pts ?: 0)
         }
 
-        _playersTotalStats.emit(playersTotalStats)
+        _playersTotalStats.value = playersTotalStats
     }
 }
 

@@ -55,6 +55,7 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.displayOrDash
+import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -119,7 +120,7 @@ fun NBAGameStatsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBAGameStats) {
-            nbaGameStatsViewModel.send(NBAGameStatsViewModel.Intent.InitData(data))
+            nbaGameStatsViewModel.send(NBAGameStatsIntent.InitData(data))
         }
     }
 
@@ -751,7 +752,7 @@ fun NBAGameStatsTeamButton(
         maxLines = 2,
         modifier = modifier
             .clickable {
-                nbaGameStatsViewModel.send(NBAGameStatsViewModel.Intent.SelectTeam(index))
+                nbaGameStatsViewModel.send(NBAGameStatsIntent.SelectTeam(index))
             }
 //            .width(nbaGameStatsViewModel.teamButtonWidth)
     )
@@ -872,7 +873,7 @@ fun NBAGameStatsFirstCategoryListItem(
             )
             .clickable {
                 nbaGameStatsViewModel.send(
-                    NBAGameStatsViewModel.Intent.SelectFirstCategory(index)
+                    NBAGameStatsIntent.SelectFirstCategory(index)
                 )
             }
     )
@@ -948,7 +949,7 @@ fun NBAGameStatsSecondCategoryListItem(
         modifier = Modifier
             .width(nbaGameStatsViewModel.itemWidth)
             .clickable {
-                nbaGameStatsViewModel.send(NBAGameStatsViewModel.Intent.SelectSecondCategory(index))
+                nbaGameStatsViewModel.send(NBAGameStatsIntent.SelectSecondCategory(index))
             }
     )
 }

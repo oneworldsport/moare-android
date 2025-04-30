@@ -51,6 +51,7 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.percentageOf
+import com.moare.android.features.search.display.football.viewmodel.FBGameStatsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -112,7 +113,7 @@ fun FBGameStatsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.FBGameStats) {
-            fbGameStatsViewModel.send(FBGameStatsViewModel.Intent.InitData(data))
+            fbGameStatsViewModel.send(FBGameStatsIntent.InitData(data))
         }
     }
 
@@ -360,7 +361,7 @@ fun FBGameStatsTeamButton(
         maxLines = 2,
         modifier = Modifier
             .clickable {
-                fbGameStatsViewModel.send(FBGameStatsViewModel.Intent.SelectTeam(index))
+                fbGameStatsViewModel.send(FBGameStatsIntent.SelectTeam(index))
             }
             .width(fbGameStatsViewModel.teamButtonWidth)
     )
@@ -481,7 +482,7 @@ fun FBGameStatsFirstCategoryListItem(
             )
             .clickable {
                 fbGameStatsViewModel.send(
-                    FBGameStatsViewModel.Intent.SelectFirstCategory(index)
+                    FBGameStatsIntent.SelectFirstCategory(index)
                 )
             }
     )
@@ -564,7 +565,7 @@ fun FBGameStatsSecondCategoryListItem(
         modifier = Modifier
             .width(fbGameStatsViewModel.itemWidth)
             .clickable {
-                fbGameStatsViewModel.send(FBGameStatsViewModel.Intent.SelectSecondCategory(index))
+                fbGameStatsViewModel.send(FBGameStatsIntent.SelectSecondCategory(index))
             }
     )
 }
