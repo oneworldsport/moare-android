@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -80,7 +81,7 @@ fun NBATeamStandingsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBATeamStandings) {
-            nbaTeamStandingsViewModel.send(NBATeamStandingsViewModel.Intent.InitData(data))
+            nbaTeamStandingsViewModel.send(NBATeamStandingsIntent.InitData(data))
         }
     }
 
@@ -181,7 +182,7 @@ fun NBAConferenceButtonContainer(
                         .weight(1f)
                         .clickable {
                             nbaTeamStandingsViewModel.send(
-                                NBATeamStandingsViewModel.Intent.SelectConference(
+                                NBATeamStandingsIntent.SelectConference(
                                     index
                                 )
                             )
@@ -281,7 +282,7 @@ fun NBATeamStandingsCategoryListItem(
         modifier = Modifier
             .width(nbaTeamStandingsViewModel.dataItemWidth)
             .clickable {
-                nbaTeamStandingsViewModel.send(NBATeamStandingsViewModel.Intent.SelectCagetory(index))
+                nbaTeamStandingsViewModel.send(NBATeamStandingsIntent.SelectCategory(index))
             }
     )
 }
