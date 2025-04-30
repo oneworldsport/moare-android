@@ -3,6 +3,7 @@ package com.moare.android.features.search.display.nba.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.features.search.display.common.viewmodel.BaseScheduleViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
@@ -13,53 +14,33 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class NBATeamScheduleIntent {
+    data class InitData(val displayModel: NBATeamScheduleDisplayModel) : NBATeamScheduleIntent()
+    data object ToggleAllResult : NBATeamScheduleIntent()
+    data class UpdateResultOpenedState(val gameCode: String, val isOpened: Boolean) : NBATeamScheduleIntent()
+}
+
 @HiltViewModel
 class NBATeamScheduleViewModel @Inject constructor(
     private val nameProvider: TranslatedNameProvider
-) : MVIViewModel<NBATeamScheduleViewModel.Intent, NBATeamScheduleDisplayModel>() {
+) : BaseScheduleViewModel<NBATeamScheduleIntent, NBATeamScheduleDisplayModel>(nameProvider) {
     /* ---------------------
        data state
        --------------------- */
-    private val _displayModel = MutableStateFlow<NBATeamScheduleDisplayModel?>(null)
-    val displayModel: StateFlow<NBATeamScheduleDisplayModel?> = _displayModel
-
     private val _games = MutableStateFlow<List<NBAGame>>(emptyList())
     val games: StateFlow<List<NBAGame>> = _games
 
     /* ---------------------
        ui state
        --------------------- */
-    private val _isAllResultOpened = MutableStateFlow(false)
-    val isAllResultOpened: StateFlow<Boolean> = _isAllResultOpened
-
     private val _gameResultOpenedStateList = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     val gameResultOpenedStateList: StateFlow<Map<String, Boolean>> = _gameResultOpenedStateList
 
-    /* ---------------------
-       etc
-       --------------------- */
-    var teamNameDictionary: Map<String, String> = emptyMap()
-
-    init {
-        teamNameDictionary = nameProvider.getDictionary("nba_team")
-    }
-
-    /* ---------------------
-       intent
-       --------------------- */
-    sealed class Intent {
-        data class InitData(val displayModel: NBATeamScheduleDisplayModel) : Intent()
-        data object ToggleAllResult : Intent()
-        data class UpdateResultOpenedState(val gameCode: String, val isOpened: Boolean) : Intent()
-    }
-
-    override fun send(intent: Intent) {
-        viewModelScope.launch {
-            when (intent) {
-                is Intent.InitData -> initData(intent.displayModel)
-                is Intent.ToggleAllResult -> toggleAllResult()
-                is Intent.UpdateResultOpenedState -> updateResultOpenedState(intent.gameCode, intent.isOpened)
-            }
+    override fun send(intent: NBATeamScheduleIntent) {
+        when (intent) {
+            is NBATeamScheduleIntent.InitData -> initData(intent.displayModel)
+            is NBATeamScheduleIntent.ToggleAllResult -> toggleAllResult()
+            is NBATeamScheduleIntent.UpdateResultOpenedState -> updateResultOpenedState(intent.gameCode, intent.isOpened)
         }
     }
 
@@ -67,31 +48,26 @@ class NBATeamScheduleViewModel @Inject constructor(
        init
        --------------------- */
     override fun initData(displayModel: NBATeamScheduleDisplayModel) {
-        viewModelScope.launch {
-            // init with default value
-            _isAllResultOpened.emit(false)
+        // init data
+        _games.value = displayModel.games
 
-            // init data
-            _displayModel.emit(displayModel)
-            _games.emit(displayModel.games)
+        val gameResultOpenedStateList = games.value.associate { (it.gameSummary?.gameCode ?: "") to false }
+        _gameResultOpenedStateList.value = gameResultOpenedStateList
 
-            val gameResultOpenedStateList = games.value.associate { (it.gameSummary?.gameCode ?: "") to false }
-            _gameResultOpenedStateList.emit(gameResultOpenedStateList)
-        }
     }
 
     /* ---------------------
        implements
        --------------------- */
-    private suspend fun toggleAllResult() {
-        val newState = !isAllResultOpened.value
-        _isAllResultOpened.emit(newState)
-        _gameResultOpenedStateList.emit(gameResultOpenedStateList.value.mapValues { newState })
+    override fun toggleAllResult() {
+        super.toggleAllResult()
+
+        _gameResultOpenedStateList.value = gameResultOpenedStateList.value.mapValues { !isAllResultOpened.value }
     }
 
-    private suspend fun updateResultOpenedState(gameCode: String, isOpened: Boolean) {
+    private fun updateResultOpenedState(gameCode: String, isOpened: Boolean) {
         val newMap = gameResultOpenedStateList.value.toMutableMap()
         newMap[gameCode] = isOpened
-        _gameResultOpenedStateList.emit(newMap)
+        _gameResultOpenedStateList.value = newMap
     }
 }

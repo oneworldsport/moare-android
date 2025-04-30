@@ -38,6 +38,7 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.features.search.display.football.viewmodel.FBTeamScheduleIntent
 import com.moare.android.features.search.display.football.viewmodel.FBTeamScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -81,7 +82,7 @@ fun FBTeamScheduleView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.FBTeamSchedule) {
-            fbTeamScheduleViewModel.send(FBTeamScheduleViewModel.Intent.InitData(data))
+            fbTeamScheduleViewModel.send(FBTeamScheduleIntent.InitData(data))
         }
     }
 
@@ -131,7 +132,7 @@ fun FBTeamScheduleView(
                     color = Color.Gray,
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    fbTeamScheduleViewModel.send(FBTeamScheduleViewModel.Intent.ToggleAllResult)
+                    fbTeamScheduleViewModel.send(FBTeamScheduleIntent.ToggleAllResult)
                 }
             }
         }
@@ -265,7 +266,7 @@ fun FBTeamScheduleListItem(
 
                 // set selected game's isOpened true
                 fbTeamScheduleViewModel.send(
-                    FBTeamScheduleViewModel.Intent.UpdateResultOpenedState(
+                    FBTeamScheduleIntent.UpdateResultOpenedState(
                         data.fixture.id,
                         true
                     )
@@ -339,7 +340,7 @@ fun FBTeamScheduleListItem(
                 color = gameStatusColor,
                 isDisabled = fbGameStatsData != null || !StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short)
             ) {
-                fbTeamScheduleViewModel.send(FBTeamScheduleViewModel.Intent.UpdateResultOpenedState(data.fixture.id, !isResultOpened))
+                fbTeamScheduleViewModel.send(FBTeamScheduleIntent.UpdateResultOpenedState(data.fixture.id, !isResultOpened))
             }
 
             // game date

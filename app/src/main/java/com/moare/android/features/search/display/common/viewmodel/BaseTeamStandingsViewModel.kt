@@ -55,7 +55,6 @@ abstract class BaseTeamStandingsViewModel<I, T>(
                 }
             }
         }
-
     }
 
     private fun loadDictionaries(leagueId: Int) {

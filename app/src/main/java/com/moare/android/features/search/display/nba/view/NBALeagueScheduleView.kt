@@ -41,6 +41,7 @@ import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
@@ -91,7 +92,7 @@ fun NBALeagueScheduleView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBALeagueSchedule) {
-            nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.InitData(data))
+            nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.InitData(data))
         }
     }
 
@@ -102,7 +103,7 @@ fun NBALeagueScheduleView(
 
             poppedView?.let {
                 if (it is SportDecodableModel.NBAGameStats) {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.UpdateGamesData(nbaLeagueSchedule, it) { data ->
+                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateGamesData(nbaLeagueSchedule, it) { data ->
                         searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
                     })
                 }
@@ -142,14 +143,14 @@ fun NBALeagueScheduleView(
                - hides when game selected
                --------------------- */
             CalendarList(yearMonthList, CalendarType.YEARMONTH, selectedYearMonthIndex, yearMonthCalendarScrollTrigger) { yearMonth, index ->
-                nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.SelectYearMonth(yearMonth, index) { data ->
+                nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.SelectYearMonth(yearMonth, index) { data ->
                     // 현재 구조 콜백 수정 필요?
                     searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
                 })
             }
 
             CalendarList(days, CalendarType.DAY, selectedDayIndex, dayCalendarScrollTrigger) { day, index ->
-                nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.SelectDay(day, index))
+                nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.SelectDay(day, index))
             }
 
             /* ---------------------
@@ -168,7 +169,7 @@ fun NBALeagueScheduleView(
                     color = Color.Gray,
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.ToggleAllResult)
+                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.ToggleAllResult)
                 }
             }
 
@@ -351,7 +352,7 @@ fun NBALeagueScheduleListItem(
 
                 // set selected game's isOpened true
                 data.gameSummary?.let {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, true))
+                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateResultOpenedState(it.gameCode, true))
                 }
             }
             .padding(vertical = 8.dp)
@@ -422,7 +423,7 @@ fun NBALeagueScheduleListItem(
                 isDisabled = data.gameSummary?.gameStatusId != 3
             ) {
                 data.gameSummary?.let {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, !isResultOpened))
+                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateResultOpenedState(it.gameCode, !isResultOpened))
                 }
             }
 
