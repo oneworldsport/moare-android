@@ -46,6 +46,7 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoIntent
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -99,7 +100,7 @@ fun FBPlayerInfoView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.FBPlayerInfo) {
-            fbPlayerInfoViewModel.send(FBPlayerInfoViewModel.Intent.InitData(data))
+            fbPlayerInfoViewModel.send(FBPlayerInfoIntent.InitData(data))
         }
     }
 

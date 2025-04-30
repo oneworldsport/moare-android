@@ -11,3 +11,7 @@ abstract class MVIViewModel<I, T> : ViewModel() {
 //    open val _displayModel = MutableStateFlow<T?>(null)
 //    open val displayModel: StateFlow<T?> = _displayModel
 }
+
+//sealed class MVIIntent {
+//    data class InitData<T>(val displayModel: T) : MVIIntent()
+//}
