@@ -355,14 +355,14 @@ fun NBATeamScheduleListItem(
             )
 
             // playoffs info
-            if (data.gameSummary != null && data.gameSummary.weekName.isEmpty()) {
+            if (data.gameSummary != null && data.gameSummary.seriesText.isNotEmpty()) {
                 val gameSummary = data.gameSummary
                 Text(
                     text = NBAUtil.gameType(gameSummary, true),
                     fontSize = 11.sp
                 )
 
-                if (data.seasonSeries != null && !gameSummary.seriesGameNumber.isEmpty()) {
+                if (data.seasonSeries != null && gameSummary.seriesGameNumber.isNotEmpty()) {
                     val seasonSeries = data.seasonSeries
                     CenterRow {
                         Text(
