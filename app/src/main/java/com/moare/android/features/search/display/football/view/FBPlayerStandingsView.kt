@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.rounded
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
@@ -109,7 +110,7 @@ fun FBPlayerStandingsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.FBPlayerStandings) {
-            fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.InitData(data))
+            fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.InitData(data))
         }
     }
 
@@ -136,10 +137,10 @@ fun FBPlayerStandingsView(
 
         when (verticalScrollState.value) {
             0 -> {
-                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.ShowMoreStandings(true))
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.ShowMoreStandings(true))
             }
             verticalScrollState.maxValue -> {
-                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.ShowMoreStandings(false))
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.ShowMoreStandings(false))
             }
         }
     }
@@ -335,7 +336,7 @@ fun FBPlayerStandingsFirstCategoryListItem(
                 }
             )
             .clickable {
-                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.SelectFirstCategory(index))
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.SelectFirstCategory(index))
             }
     ) {
         Text(
@@ -424,7 +425,7 @@ fun FBPlayerStandingsSecondCategoryListItem(
             .width(fbPlayerStandingsViewModel.itemWidth)
             .clickable {
                 fbPlayerStandingsViewModel.send(
-                    FBPlayerStandingsViewModel.Intent.SelectSecondCategory(index, category)
+                    FBPlayerStandingsIntent.SelectSecondCategory(index, category)
                 )
             }
     )

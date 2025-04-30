@@ -154,10 +154,8 @@ class NBALeagueTournamentViewModel @Inject constructor(
     }
 
     override fun send(intent: Intent) {
-        viewModelScope.launch {
-            when (intent) {
-                is Intent.InitData -> initData(intent.displayModel)
-            }
+        when (intent) {
+            is Intent.InitData -> initData(intent.displayModel)
         }
     }
 
@@ -165,264 +163,232 @@ class NBALeagueTournamentViewModel @Inject constructor(
        init
        --------------------- */
     override fun initData(displayModel: NBALeagueScheduleDisplayModel) {
-        viewModelScope.launch {
-            // init data
-            _displayModel.emit(displayModel)
+        // init data
+        _displayModel.value = displayModel
 
-            // western first round
-            _westFirstRoundFirstGameList.emit(
-                displayModel.games.filter {
-                    (it.gameSummary?.homeTeamId == Constants.Ids.OKC && it.gameSummary.visitorTeamId == Constants.Ids.MEM) ||
-                            (it.gameSummary?.homeTeamId == Constants.Ids.MEM && it.gameSummary.visitorTeamId == Constants.Ids.OKC)
-                }
-            )
-            _westFirstRoundSecondGameList.emit(
-                displayModel.games.filter {
-                    (it.gameSummary?.homeTeamId == Constants.Ids.DEN && it.gameSummary.visitorTeamId == Constants.Ids.LAC) ||
-                            (it.gameSummary?.homeTeamId == Constants.Ids.LAC && it.gameSummary.visitorTeamId == Constants.Ids.DEN)
-                }
-            )
-            _westFirstRoundThirdGameList.emit(
-                displayModel.games.filter {
-                    (it.gameSummary?.homeTeamId == Constants.Ids.LAL && it.gameSummary.visitorTeamId == Constants.Ids.MIN) ||
-                            (it.gameSummary?.homeTeamId == Constants.Ids.MIN && it.gameSummary.visitorTeamId == Constants.Ids.LAL)
-                }
-            )
-            _westFirstRoundFourthGameList.emit(
-                displayModel.games.filter {
-                    (it.gameSummary?.homeTeamId == Constants.Ids.HOU && it.gameSummary.visitorTeamId == Constants.Ids.GSW) ||
-                            (it.gameSummary?.homeTeamId == Constants.Ids.GSW && it.gameSummary.visitorTeamId == Constants.Ids.HOU)
-                }
-            )
+        // western first round
+        _westFirstRoundFirstGameList.value = displayModel.games.filter {
+            (it.gameSummary?.homeTeamId == Constants.Ids.OKC && it.gameSummary.visitorTeamId == Constants.Ids.MEM) ||
+                    (it.gameSummary?.homeTeamId == Constants.Ids.MEM && it.gameSummary.visitorTeamId == Constants.Ids.OKC)
+        }
+        _westFirstRoundSecondGameList.value = displayModel.games.filter {
+            (it.gameSummary?.homeTeamId == Constants.Ids.DEN && it.gameSummary.visitorTeamId == Constants.Ids.LAC) ||
+                    (it.gameSummary?.homeTeamId == Constants.Ids.LAC && it.gameSummary.visitorTeamId == Constants.Ids.DEN)
+        }
+        _westFirstRoundThirdGameList.value = displayModel.games.filter {
+            (it.gameSummary?.homeTeamId == Constants.Ids.LAL && it.gameSummary.visitorTeamId == Constants.Ids.MIN) ||
+                    (it.gameSummary?.homeTeamId == Constants.Ids.MIN && it.gameSummary.visitorTeamId == Constants.Ids.LAL)
+        }
+        _westFirstRoundFourthGameList.value = displayModel.games.filter {
+            (it.gameSummary?.homeTeamId == Constants.Ids.HOU && it.gameSummary.visitorTeamId == Constants.Ids.GSW) ||
+                    (it.gameSummary?.homeTeamId == Constants.Ids.GSW && it.gameSummary.visitorTeamId == Constants.Ids.HOU)
+        }
 
-            // eastern first round
-            _eastFirstRoundFirstGameList.emit(
-                displayModel.games.filter {
-                    (it.gameSummary?.homeTeamId == Constants.Ids.CLE && it.gameSummary.visitorTeamId == Constants.Ids.MIA) ||
-                            (it.gameSummary?.homeTeamId == Constants.Ids.MIA && it.gameSummary.visitorTeamId == Constants.Ids.CLE)
-                }
-            )
-            _eastFirstRoundSecondGameList.emit(
-                displayModel.games.filter {
-                    (it.gameSummary?.homeTeamId == Constants.Ids.IND && it.gameSummary.visitorTeamId == Constants.Ids.MIL) ||
-                            (it.gameSummary?.homeTeamId == Constants.Ids.MIL && it.gameSummary.visitorTeamId == Constants.Ids.IND)
-                }
-            )
-            _eastFirstRoundThirdGameList.emit(
-                displayModel.games.filter {
-                    (it.gameSummary?.homeTeamId == Constants.Ids.NYK && it.gameSummary.visitorTeamId == Constants.Ids.DET) ||
-                            (it.gameSummary?.homeTeamId == Constants.Ids.DET && it.gameSummary.visitorTeamId == Constants.Ids.NYK)
-                }
-            )
-            _eastFirstRoundFourthGameList.emit(
-                displayModel.games.filter {
-                    (it.gameSummary?.homeTeamId == Constants.Ids.BOS && it.gameSummary.visitorTeamId == Constants.Ids.ORL) ||
-                            (it.gameSummary?.homeTeamId == Constants.Ids.ORL && it.gameSummary.visitorTeamId == Constants.Ids.BOS)
-                }
-            )
+        // eastern first round
+        _eastFirstRoundFirstGameList.value = displayModel.games.filter {
+            (it.gameSummary?.homeTeamId == Constants.Ids.CLE && it.gameSummary.visitorTeamId == Constants.Ids.MIA) ||
+                    (it.gameSummary?.homeTeamId == Constants.Ids.MIA && it.gameSummary.visitorTeamId == Constants.Ids.CLE)
+        }
+        _eastFirstRoundSecondGameList.value = displayModel.games.filter {
+            (it.gameSummary?.homeTeamId == Constants.Ids.IND && it.gameSummary.visitorTeamId == Constants.Ids.MIL) ||
+                    (it.gameSummary?.homeTeamId == Constants.Ids.MIL && it.gameSummary.visitorTeamId == Constants.Ids.IND)
+        }
+        _eastFirstRoundThirdGameList.value = displayModel.games.filter {
+            (it.gameSummary?.homeTeamId == Constants.Ids.NYK && it.gameSummary.visitorTeamId == Constants.Ids.DET) ||
+                    (it.gameSummary?.homeTeamId == Constants.Ids.DET && it.gameSummary.visitorTeamId == Constants.Ids.NYK)
+        }
+        _eastFirstRoundFourthGameList.value = displayModel.games.filter {
+            (it.gameSummary?.homeTeamId == Constants.Ids.BOS && it.gameSummary.visitorTeamId == Constants.Ids.ORL) ||
+                    (it.gameSummary?.homeTeamId == Constants.Ids.ORL && it.gameSummary.visitorTeamId == Constants.Ids.BOS)
+        }
 
-            // western second round
-            getGameSeries(westFirstRoundFirstGameList.value)?.let { firstGameSeries ->
-                // western second round first game first team id
-                if (firstGameSeries.seasonSeries?.homeTeamWins == 4) {
-                    _westSecondRoundFirstGameFirstTeamId.emit(firstGameSeries.seasonSeries.homeTeamId)
-                } else if (firstGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                    _westSecondRoundFirstGameFirstTeamId.emit(firstGameSeries.seasonSeries.visitorTeamId)
-                }
-
-                // western second round first game second team id
-                getGameSeries(westFirstRoundSecondGameList.value)?.let { secondGameSeries ->
-                    if (secondGameSeries.seasonSeries?.homeTeamWins == 4) {
-                        _westSecondRoundFirstGameSecondTeamId.emit(secondGameSeries.seasonSeries.homeTeamId)
-                    } else if (secondGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                        _westSecondRoundFirstGameSecondTeamId.emit(secondGameSeries.seasonSeries.visitorTeamId)
-                    }
-                }
-
-                westSecondRoundFirstGameFirstTeamId.value?.let { first ->
-                    westSecondRoundFirstGameSecondTeamId.value?.let {  second ->
-                        _westSecondRoundFirstGameList.emit(
-                            displayModel.games.filter {
-                                (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
-                                        (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
-                            }
-                        )
-                    }
-                }
+        // western second round
+        getGameSeries(westFirstRoundFirstGameList.value)?.let { firstGameSeries ->
+            // western second round first game first team id
+            if (firstGameSeries.seasonSeries?.homeTeamWins == 4) {
+                _westSecondRoundFirstGameFirstTeamId.value = firstGameSeries.seasonSeries.homeTeamId
+            } else if (firstGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                _westSecondRoundFirstGameFirstTeamId.value = firstGameSeries.seasonSeries.visitorTeamId
             }
-            getGameSeries(westFirstRoundThirdGameList.value)?.let { thirdGameSeries ->
-                // western second round second game first team id
-                if (thirdGameSeries.seasonSeries?.homeTeamWins == 4) {
-                    _westSecondRoundSecondGameFirstTeamId.emit(thirdGameSeries.seasonSeries.homeTeamId)
-                } else if (thirdGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                    _westSecondRoundSecondGameFirstTeamId.emit(thirdGameSeries.seasonSeries.visitorTeamId)
-                }
 
-                // western second round second game second team id
-                getGameSeries(westFirstRoundFourthGameList.value)?.let { fourthGameSeries ->
-                    if (fourthGameSeries.seasonSeries?.homeTeamWins == 4) {
-                        _westSecondRoundSecondGameSecondTeamId.emit(fourthGameSeries.seasonSeries.homeTeamId)
-                    } else if (fourthGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                        _westSecondRoundSecondGameSecondTeamId.emit(fourthGameSeries.seasonSeries.visitorTeamId)
-                    }
-                }
-
-                westSecondRoundSecondGameFirstTeamId.value?.let { first ->
-                    westSecondRoundSecondGameSecondTeamId.value?.let {  second ->
-                        _westSecondRoundSecondGameList.emit(
-                            displayModel.games.filter {
-                                (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
-                                        (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
-                            }
-                        )
-                    }
+            // western second round first game second team id
+            getGameSeries(westFirstRoundSecondGameList.value)?.let { secondGameSeries ->
+                if (secondGameSeries.seasonSeries?.homeTeamWins == 4) {
+                    _westSecondRoundFirstGameSecondTeamId.value = secondGameSeries.seasonSeries.homeTeamId
+                } else if (secondGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                    _westSecondRoundFirstGameSecondTeamId.value = secondGameSeries.seasonSeries.visitorTeamId
                 }
             }
 
-            // eastern second round
-            getGameSeries(eastFirstRoundFirstGameList.value)?.let { firstGameSeries ->
-                // eastern second round first game first team id
-                if (firstGameSeries.seasonSeries?.homeTeamWins == 4) {
-                    _eastSecondRoundFirstGameFirstTeamId.emit(firstGameSeries.seasonSeries.homeTeamId)
-                } else if (firstGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                    _eastSecondRoundFirstGameFirstTeamId.emit(firstGameSeries.seasonSeries.visitorTeamId)
-                }
-
-                // eastern second round first game second team id
-                getGameSeries(eastFirstRoundSecondGameList.value)?.let { secondGameSeries ->
-                    if (secondGameSeries.seasonSeries?.homeTeamWins == 4) {
-                        _eastSecondRoundFirstGameSecondTeamId.emit(secondGameSeries.seasonSeries.homeTeamId)
-                    } else if (secondGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                        _eastSecondRoundFirstGameSecondTeamId.emit(secondGameSeries.seasonSeries.visitorTeamId)
-                    }
-                }
-
-                eastSecondRoundFirstGameFirstTeamId.value?.let { first ->
-                    eastSecondRoundFirstGameSecondTeamId.value?.let {  second ->
-                        _eastSecondRoundFirstGameList.emit(
-                            displayModel.games.filter {
-                                (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
-                                        (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
-                            }
-                        )
+            westSecondRoundFirstGameFirstTeamId.value?.let { first ->
+                westSecondRoundFirstGameSecondTeamId.value?.let {  second ->
+                    _westSecondRoundFirstGameList.value = displayModel.games.filter {
+                        (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
+                                (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
                     }
                 }
             }
-            getGameSeries(eastFirstRoundThirdGameList.value)?.let { thirdGameSeries ->
-                // eastern second round second game first team id
-                if (thirdGameSeries.seasonSeries?.homeTeamWins == 4) {
-                    _eastSecondRoundSecondGameFirstTeamId.emit(thirdGameSeries.seasonSeries.homeTeamId)
-                } else if (thirdGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                    _eastSecondRoundSecondGameFirstTeamId.emit(thirdGameSeries.seasonSeries.visitorTeamId)
-                }
+        }
+        getGameSeries(westFirstRoundThirdGameList.value)?.let { thirdGameSeries ->
+            // western second round second game first team id
+            if (thirdGameSeries.seasonSeries?.homeTeamWins == 4) {
+                _westSecondRoundSecondGameFirstTeamId.value = thirdGameSeries.seasonSeries.homeTeamId
+            } else if (thirdGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                _westSecondRoundSecondGameFirstTeamId.value = thirdGameSeries.seasonSeries.visitorTeamId
+            }
 
-                // eastern second round second game second team id
-                getGameSeries(eastFirstRoundFourthGameList.value)?.let { fourthGameSeries ->
-                    if (fourthGameSeries.seasonSeries?.homeTeamWins == 4) {
-                        _eastSecondRoundSecondGameSecondTeamId.emit(fourthGameSeries.seasonSeries.homeTeamId)
-                    } else if (fourthGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                        _eastSecondRoundSecondGameSecondTeamId.emit(fourthGameSeries.seasonSeries.visitorTeamId)
-                    }
-                }
-
-                eastSecondRoundSecondGameFirstTeamId.value?.let { first ->
-                    eastSecondRoundSecondGameSecondTeamId.value?.let {  second ->
-                        _eastSecondRoundSecondGameList.emit(
-                            displayModel.games.filter {
-                                (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
-                                        (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
-                            }
-                        )
-                    }
+            // western second round second game second team id
+            getGameSeries(westFirstRoundFourthGameList.value)?.let { fourthGameSeries ->
+                if (fourthGameSeries.seasonSeries?.homeTeamWins == 4) {
+                    _westSecondRoundSecondGameSecondTeamId.value = fourthGameSeries.seasonSeries.homeTeamId
+                } else if (fourthGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                    _westSecondRoundSecondGameSecondTeamId.value = fourthGameSeries.seasonSeries.visitorTeamId
                 }
             }
 
-            // western final round
-            getGameSeries(westSecondRoundFirstGameList.value)?.let { firstGameSeries ->
-                // western final round first team id
-                if (firstGameSeries.seasonSeries?.homeTeamWins == 4) {
-                    _westFinalRoundGameFirstTeamId.emit(firstGameSeries.seasonSeries.homeTeamId)
-                } else if (firstGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                    _westFinalRoundGameFirstTeamId.emit(firstGameSeries.seasonSeries.visitorTeamId)
-                }
-
-                // western final round second team id
-                getGameSeries(westSecondRoundSecondGameList.value)?.let { secondGameSeries ->
-                    if (secondGameSeries.seasonSeries?.homeTeamWins == 4) {
-                        _westFinalRoundGameSecondTeamId.emit(secondGameSeries.seasonSeries.homeTeamId)
-                    } else if (secondGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                        _westFinalRoundGameSecondTeamId.emit(secondGameSeries.seasonSeries.visitorTeamId)
-                    }
-                }
-
-                westFinalRoundGameFirstTeamId.value?.let { first ->
-                    westFinalRoundGameSecondTeamId.value?.let { second ->
-                        _westFinalRoundGameList.emit(
-                            displayModel.games.filter {
-                                (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
-                                        (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
-                            }
-                        )
+            westSecondRoundSecondGameFirstTeamId.value?.let { first ->
+                westSecondRoundSecondGameSecondTeamId.value?.let {  second ->
+                    _westSecondRoundSecondGameList.value = displayModel.games.filter {
+                        (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
+                                (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
                     }
                 }
             }
+        }
 
-            // eastern final round
-            getGameSeries(eastSecondRoundFirstGameList.value)?.let { firstGameSeries ->
-                // eastern final round first team id
-                if (firstGameSeries.seasonSeries?.homeTeamWins == 4) {
-                    _eastFinalRoundGameFirstTeamId.emit(firstGameSeries.seasonSeries.homeTeamId)
-                } else if (firstGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                    _eastFinalRoundGameFirstTeamId.emit(firstGameSeries.seasonSeries.visitorTeamId)
-                }
+        // eastern second round
+        getGameSeries(eastFirstRoundFirstGameList.value)?.let { firstGameSeries ->
+            // eastern second round first game first team id
+            if (firstGameSeries.seasonSeries?.homeTeamWins == 4) {
+                _eastSecondRoundFirstGameFirstTeamId.value = firstGameSeries.seasonSeries.homeTeamId
+            } else if (firstGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                _eastSecondRoundFirstGameFirstTeamId.value = firstGameSeries.seasonSeries.visitorTeamId
+            }
 
-                // eastern final round second team id
-                getGameSeries(eastSecondRoundSecondGameList.value)?.let { secondGameSeries ->
-                    if (secondGameSeries.seasonSeries?.homeTeamWins == 4) {
-                        _eastFinalRoundGameSecondTeamId.emit(secondGameSeries.seasonSeries.homeTeamId)
-                    } else if (secondGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                        _eastFinalRoundGameSecondTeamId.emit(secondGameSeries.seasonSeries.visitorTeamId)
-                    }
-                }
-
-                eastFinalRoundGameFirstTeamId.value?.let { first ->
-                    eastFinalRoundGameSecondTeamId.value?.let { second ->
-                        _eastFinalRoundGameList.emit(
-                            displayModel.games.filter {
-                                (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
-                                        (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
-                            }
-                        )
-                    }
+            // eastern second round first game second team id
+            getGameSeries(eastFirstRoundSecondGameList.value)?.let { secondGameSeries ->
+                if (secondGameSeries.seasonSeries?.homeTeamWins == 4) {
+                    _eastSecondRoundFirstGameSecondTeamId.value = secondGameSeries.seasonSeries.homeTeamId
+                } else if (secondGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                    _eastSecondRoundFirstGameSecondTeamId.value = secondGameSeries.seasonSeries.visitorTeamId
                 }
             }
 
-            // final round
-            getGameSeries(westFinalRoundGameList.value)?.let { westGameSeries ->
-                // final round first team id
-                if (westGameSeries.seasonSeries?.homeTeamWins == 4) {
-                    _finalRoundGameFirstTeamId.emit(westGameSeries.seasonSeries.homeTeamId)
-                } else if (westGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                    _finalRoundGameFirstTeamId.emit(westGameSeries.seasonSeries.visitorTeamId)
-                }
-
-                // final round second team id
-                getGameSeries(eastFinalRoundGameList.value)?.let { eastGameSeries ->
-                    if (eastGameSeries.seasonSeries?.homeTeamWins == 4) {
-                        _finalRoundGameSecondTeamId.emit(eastGameSeries.seasonSeries.homeTeamId)
-                    } else if (eastGameSeries.seasonSeries?.homeTeamLosses == 4) {
-                        _finalRoundGameSecondTeamId.emit(eastGameSeries.seasonSeries.visitorTeamId)
+            eastSecondRoundFirstGameFirstTeamId.value?.let { first ->
+                eastSecondRoundFirstGameSecondTeamId.value?.let { second ->
+                    _eastSecondRoundFirstGameList.value = displayModel.games.filter {
+                        (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
+                                (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
                     }
                 }
+            }
+        }
+        getGameSeries(eastFirstRoundThirdGameList.value)?.let { thirdGameSeries ->
+            // eastern second round second game first team id
+            if (thirdGameSeries.seasonSeries?.homeTeamWins == 4) {
+                _eastSecondRoundSecondGameFirstTeamId.value = thirdGameSeries.seasonSeries.homeTeamId
+            } else if (thirdGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                _eastSecondRoundSecondGameFirstTeamId.value = thirdGameSeries.seasonSeries.visitorTeamId
+            }
 
-                finalRoundGameFirstTeamId.value?.let { first ->
-                    finalRoundGameSecondTeamId.value?.let { second ->
-                        _finalRoundGameList.emit(
-                            displayModel.games.filter {
-                                (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
-                                        (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
-                            }
-                        )
+            // eastern second round second game second team id
+            getGameSeries(eastFirstRoundFourthGameList.value)?.let { fourthGameSeries ->
+                if (fourthGameSeries.seasonSeries?.homeTeamWins == 4) {
+                    _eastSecondRoundSecondGameSecondTeamId.value = fourthGameSeries.seasonSeries.homeTeamId
+                } else if (fourthGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                    _eastSecondRoundSecondGameSecondTeamId.value = fourthGameSeries.seasonSeries.visitorTeamId
+                }
+            }
+
+            eastSecondRoundSecondGameFirstTeamId.value?.let { first ->
+                eastSecondRoundSecondGameSecondTeamId.value?.let {  second ->
+                    _eastSecondRoundSecondGameList.value = displayModel.games.filter {
+                        (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
+                                (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
+                    }
+                }
+            }
+        }
+
+        // western final round
+        getGameSeries(westSecondRoundFirstGameList.value)?.let { firstGameSeries ->
+            // western final round first team id
+            if (firstGameSeries.seasonSeries?.homeTeamWins == 4) {
+                _westFinalRoundGameFirstTeamId.value = firstGameSeries.seasonSeries.homeTeamId
+            } else if (firstGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                _westFinalRoundGameFirstTeamId.value = firstGameSeries.seasonSeries.visitorTeamId
+            }
+
+            // western final round second team id
+            getGameSeries(westSecondRoundSecondGameList.value)?.let { secondGameSeries ->
+                if (secondGameSeries.seasonSeries?.homeTeamWins == 4) {
+                    _westFinalRoundGameSecondTeamId.value = secondGameSeries.seasonSeries.homeTeamId
+                } else if (secondGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                    _westFinalRoundGameSecondTeamId.value = secondGameSeries.seasonSeries.visitorTeamId
+                }
+            }
+
+            westFinalRoundGameFirstTeamId.value?.let { first ->
+                westFinalRoundGameSecondTeamId.value?.let { second ->
+                    _westFinalRoundGameList.value = displayModel.games.filter {
+                        (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
+                                (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
+                    }
+                }
+            }
+        }
+
+        // eastern final round
+        getGameSeries(eastSecondRoundFirstGameList.value)?.let { firstGameSeries ->
+            // eastern final round first team id
+            if (firstGameSeries.seasonSeries?.homeTeamWins == 4) {
+                _eastFinalRoundGameFirstTeamId.value = firstGameSeries.seasonSeries.homeTeamId
+            } else if (firstGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                _eastFinalRoundGameFirstTeamId.value = firstGameSeries.seasonSeries.visitorTeamId
+            }
+
+            // eastern final round second team id
+            getGameSeries(eastSecondRoundSecondGameList.value)?.let { secondGameSeries ->
+                if (secondGameSeries.seasonSeries?.homeTeamWins == 4) {
+                    _eastFinalRoundGameSecondTeamId.value = secondGameSeries.seasonSeries.homeTeamId
+                } else if (secondGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                    _eastFinalRoundGameSecondTeamId.value = secondGameSeries.seasonSeries.visitorTeamId
+                }
+            }
+
+            eastFinalRoundGameFirstTeamId.value?.let { first ->
+                eastFinalRoundGameSecondTeamId.value?.let { second ->
+                    _eastFinalRoundGameList.value = displayModel.games.filter {
+                        (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
+                                (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
+                    }
+                }
+            }
+        }
+
+        // final round
+        getGameSeries(westFinalRoundGameList.value)?.let { westGameSeries ->
+            // final round first team id
+            if (westGameSeries.seasonSeries?.homeTeamWins == 4) {
+                _finalRoundGameFirstTeamId.value = westGameSeries.seasonSeries.homeTeamId
+            } else if (westGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                _finalRoundGameFirstTeamId.value = westGameSeries.seasonSeries.visitorTeamId
+            }
+
+            // final round second team id
+            getGameSeries(eastFinalRoundGameList.value)?.let { eastGameSeries ->
+                if (eastGameSeries.seasonSeries?.homeTeamWins == 4) {
+                    _finalRoundGameSecondTeamId.value = eastGameSeries.seasonSeries.homeTeamId
+                } else if (eastGameSeries.seasonSeries?.homeTeamLosses == 4) {
+                    _finalRoundGameSecondTeamId.value = eastGameSeries.seasonSeries.visitorTeamId
+                }
+            }
+
+            finalRoundGameFirstTeamId.value?.let { first ->
+                finalRoundGameSecondTeamId.value?.let { second ->
+                    _finalRoundGameList.value = displayModel.games.filter {
+                        (it.gameSummary?.homeTeamId == first && it.gameSummary.visitorTeamId == second) ||
+                                (it.gameSummary?.homeTeamId == second && it.gameSummary.visitorTeamId == first)
                     }
                 }
             }

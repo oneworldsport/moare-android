@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models
 
+import com.moare.android.core.constants.Constants
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
@@ -54,12 +55,14 @@ class ModelConverter(
         val lastGamePlayerStats = lastGameTeamPlayers?.players?.find { it.player.id == entityInfo.firstOrNull()?.playerId }?.statistics?.firstOrNull()
 
         return FBPlayerInfoDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
             info = info.player,
             stats = stats,
             lastGame = response.lastGame,
             lastGamePlayerStats = lastGamePlayerStats,
-            nextGame = response.nextGame,
-            leagueId = leagueId
+            nextGame = response.nextGame
         )
     }
 
@@ -69,10 +72,12 @@ class ModelConverter(
         val stats = info.statistics.find { it.league.id == leagueId }
 
         return FBPlayerStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
             player = info.player,
             team = stats?.team,
-            stats = info.statistics,
-            leagueId = leagueId
+            stats = info.statistics
         )
     }
 
@@ -93,7 +98,12 @@ class ModelConverter(
             null
         }
 
-        return FBPlayerStandingsDisplayModel(keywords, entityInfo, standings, leagueId)
+        return FBPlayerStandingsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            standings = standings
+        )
     }
 
     fun fbTeamInfoConverter(response: FBTeamInfoResponseModel): FBTeamInfoDisplayModel {
@@ -102,12 +112,14 @@ class ModelConverter(
         val stats = info.statistics.find { it.league.id == leagueId }
 
         return FBTeamInfoDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
             team = info.team,
             venue = info.venue,
             stats = stats,
             lastGame = response.lastGame,
-            nextGame = response.nextGame,
-            leagueId = leagueId
+            nextGame = response.nextGame
         )
     }
 
@@ -115,10 +127,12 @@ class ModelConverter(
         val info = response.info!!
 
         return FBTeamStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
             team = info.team,
             venue = info.venue,
-            stats = info.statistics,
-            leagueId = leagueId
+            stats = info.statistics
         )
     }
 
@@ -147,11 +161,22 @@ class ModelConverter(
             null
         }
 
-        return FBTeamStandingsDisplayModel(keywords, league, standings, leagueId)
+        return FBTeamStandingsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            league = league,
+            standings = standings
+        )
     }
 
     fun fbTeamScheduleConverter(response: FBGameScheduleResponseModel): FBTeamScheduleDisplayModel {
-        return FBTeamScheduleDisplayModel(response.schedule, leagueId)
+        return FBTeamScheduleDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            games = response.schedule
+        )
     }
 
     fun fbLeagueScheduleConverter(response: FBGameScheduleResponseModel): FBLeagueScheduleDisplayModel {
@@ -160,11 +185,22 @@ class ModelConverter(
             "${year.takeLast(2)}/$month"
         }
 
-        return FBLeagueScheduleDisplayModel(yearMonthList, response.schedule, entityInfo, leagueId)
+        return FBLeagueScheduleDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            yearMonthList = yearMonthList,
+            games = response.schedule
+        )
     }
 
     fun fbGameStatsConverter(response: FBGameStatsResponseModel): FBGameStatsDisplayModel {
-        return FBGameStatsDisplayModel(response.game!!, leagueId)
+        return FBGameStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            game = response.game!!
+        )
     }
 
     /* ---------------------
@@ -184,6 +220,9 @@ class ModelConverter(
         val lastGamePlayerStats = lastGameTeam?.players?.find { it.personId == entityInfo.firstOrNull()?.playerId }
 
         return NBAPlayerInfoDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
             info = info.player,
             stats = stats,
             lastGame = response.lastGame,
@@ -196,6 +235,9 @@ class ModelConverter(
         val info = response.info!!
 
         return NBAPlayerStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
             player = info.player,
             stats = info.statistics,
         )
@@ -218,7 +260,12 @@ class ModelConverter(
             null
         }
 
-        return NBAPlayerStandingsDisplayModel(keywords, entityInfo, standings)
+        return NBAPlayerStandingsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            standings = standings
+        )
     }
 
     fun nbaTeamInfoConverter(response: NBATeamInfoResponseModel): NBATeamInfoDisplayModel {
@@ -227,6 +274,9 @@ class ModelConverter(
         val stats = info.statistics.find { it.seasonType == "Regular Season" }
 
         return NBATeamInfoDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
             team = info.team,
             venue = info.venue,
             stats = stats,
@@ -239,6 +289,9 @@ class ModelConverter(
         val info = response.info!!
 
         return NBATeamStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
             team = info.team,
             venue = info.venue,
             stats = info.statistics
@@ -261,11 +314,21 @@ class ModelConverter(
             null
         }
 
-        return NBATeamStandingsDisplayModel(keywords, entityInfo, standings)
+        return NBATeamStandingsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            standings = standings
+        )
     }
 
     fun nbaTeamScheduleConverter(response: NBAGameScheduleResponseModel): NBATeamScheduleDisplayModel {
-        return NBATeamScheduleDisplayModel(response.schedule)
+        return NBATeamScheduleDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            games = response.schedule
+        )
     }
 
     fun nbaLeagueScheduleConverter(response: NBAGameScheduleResponseModel): NBALeagueScheduleDisplayModel {
@@ -274,14 +337,31 @@ class ModelConverter(
             "${year.takeLast(2)}/$month"
         }
 
-        return NBALeagueScheduleDisplayModel(yearMonthList, response.schedule, entityInfo)
+        return NBALeagueScheduleDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            yearMonthList = yearMonthList,
+            games = response.schedule,
+        )
     }
 
     fun nbaGameStatsConverter(response: NBAGameStatsResponseModel): NBAGameStatsDisplayModel {
-        return NBAGameStatsDisplayModel(response.game!!)
+        return NBAGameStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            game = response.game!!
+        )
     }
 
     fun nbaLeagueTournamentConverter(response: NBAGameScheduleResponseModel): NBALeagueScheduleDisplayModel {
-        return NBALeagueScheduleDisplayModel(emptyList(), response.schedule, entityInfo)
+        return NBALeagueScheduleDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            yearMonthList = emptyList(),
+            games = response.schedule
+        )
     }
 }

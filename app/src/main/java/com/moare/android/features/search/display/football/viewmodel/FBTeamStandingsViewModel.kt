@@ -4,10 +4,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
-import com.moare.android.core.constants.Constants
-import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.models.football.FBTeamStatsFixtures
@@ -17,10 +15,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class FBTeamStandingsIntent {
+    data class InitData(val displayModel: FBTeamStandingsDisplayModel) : FBTeamStandingsIntent()
+    data class SelectCategory(val index: Int) : FBTeamStandingsIntent()
+}
+
 @HiltViewModel
 class FBTeamStandingsViewModel @Inject constructor(
     private val nameProvider: TranslatedNameProvider
-) : MVIViewModel<FBTeamStandingsViewModel.Intent, FBTeamStandingsDisplayModel>() {
+) : BaseTeamStandingsViewModel<FBTeamStandingsIntent, FBTeamStandingsDisplayModel>(nameProvider) {
     /* ---------------------
        constants
        --------------------- */
@@ -36,104 +39,40 @@ class FBTeamStandingsViewModel @Inject constructor(
     /* ---------------------
        data state
        --------------------- */
-    private var _displayModel = MutableStateFlow<FBTeamStandingsDisplayModel?>(null)
-    val displayModel: StateFlow<FBTeamStandingsDisplayModel?> = _displayModel
-
     private var _standings = MutableStateFlow<List<FBTeamStandingsDisplay>>(emptyList())
     val standings: StateFlow<List<FBTeamStandingsDisplay>> = _standings
 
-    /* ---------------------
-       ui state
-       --------------------- */
-    private var _selectedIndex = MutableStateFlow(0)
-    val selectedIndex: StateFlow<Int> = _selectedIndex
-
-    private var _isKeyword = MutableStateFlow(false)
-    val isKeyword: StateFlow<Boolean> = _isKeyword
-
-    /* ---------------------
-       etc
-       --------------------- */
-    var teamNameDictionary: Map<String, String> = emptyMap()
-
-    /* ---------------------
-       intent
-       --------------------- */
-    sealed class Intent {
-        data class InitData(val displayModel: FBTeamStandingsDisplayModel) : Intent()
-        data class SelectCagetory(val index: Int) : Intent()
-        data object SortStandings : Intent()
-    }
-
-    override fun send(intent: Intent) {
+    override fun send(intent: FBTeamStandingsIntent) {
         viewModelScope.launch {
             when (intent) {
-                is Intent.InitData -> initData(intent.displayModel)
-                is Intent.SelectCagetory -> selectCategory(intent.index)
-                is Intent.SortStandings -> sortStandings()
+                is FBTeamStandingsIntent.InitData -> initData(intent.displayModel)
+                is FBTeamStandingsIntent.SelectCategory -> selectCategory(intent.index)
             }
         }
     }
 
-    /* ---------------------
-       init
-       --------------------- */
     override fun initData(displayModel: FBTeamStandingsDisplayModel) {
-        viewModelScope.launch {
-            // init with default value
-            _selectedIndex.emit(0)
-            _isKeyword.emit(false)
+        super.initData(displayModel)
 
-            // init data
-            _displayModel.emit(displayModel)
-            _standings.emit(displayModel.standings)
+        // init data
+        _standings.value = displayModel.standings
 
-            when (displayModel.leagueId) {
-                Constants.Ids.EPL -> {
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_TEAM_DIC)
-                }
-                Constants.Ids.LALIGA -> {
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_TEAM_DIC)
-                }
-                Constants.Ids.BUNDESLIGA -> {
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_TEAM_DIC)
-                }
-                Constants.Ids.LIGUE1 -> {
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
-                }
-                else -> {}
-            }
-
-            val keywords = displayModel.keywords
-            if (keywords.isNotEmpty()) {
-                val index = StringConstants.Football.TEAM_STANDINGS_CATEGORIES.indexOfFirst { category ->
-                    val keyword = keywords.find { it.keyword == category }
-                    keyword != null
-                }
-
-                if (index != -1) {
-                    _selectedIndex.emit(index)
-                    _isKeyword.emit(true)
-                }
-            }
-
-            sortStandings()
-        }
+        sortStandings()
     }
 
     /* ---------------------
        implements
        --------------------- */
-    private suspend fun selectCategory(index: Int) {
-        _selectedIndex.emit(index)
+    override fun selectCategory(index: Int) {
+        super.selectCategory(index)
 
         sortStandings()
     }
 
-    private suspend fun sortStandings() {
+    private fun sortStandings() {
         var standings = standings.value.toMutableList()
 
-        when (selectedIndex.value) {
+        when (selectedCategoryIndex.value) {
             0 -> standings.sortByDescending { calculatePoints(it.homeAwayStats) }
             1 -> standings.sortByDescending { it.homeAwayStats.wins.total }
             2 -> standings.sortByDescending { it.homeAwayStats.draws.total }
@@ -146,7 +85,7 @@ class FBTeamStandingsViewModel @Inject constructor(
             9 -> standings.sortByDescending { calculateAwayPoints(it.homeAwayStats) }
         }
 
-        _standings.emit(standings)
+        _standings.value = standings
     }
 
     // TODO: Should move to util or make it as intent(mvi)

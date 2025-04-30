@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsViewModel
+import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
 import com.moare.android.features.search.models.models.nba.NBATeamStats
@@ -15,10 +17,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class NBATeamStandingsIntent {
+    data class InitData(val displayModel: NBATeamStandingsDisplayModel) : NBATeamStandingsIntent()
+    data class SelectConference(val index: Int) : NBATeamStandingsIntent()
+    data class SelectCategory(val index: Int) : NBATeamStandingsIntent()
+}
+
 @HiltViewModel
 class NBATeamStandingsViewModel @Inject constructor(
     private val nameProvider: TranslatedNameProvider
-) : MVIViewModel<NBATeamStandingsViewModel.Intent, NBATeamStandingsDisplayModel>() {
+) : BaseTeamStandingsViewModel<NBATeamStandingsIntent, NBATeamStandingsDisplayModel>(nameProvider) {
     /* ---------------------
        constants
        --------------------- */
@@ -32,9 +40,6 @@ class NBATeamStandingsViewModel @Inject constructor(
     /* ---------------------
        data state
        --------------------- */
-    private var _displayModel = MutableStateFlow<NBATeamStandingsDisplayModel?>(null)
-    val displayModel: StateFlow<NBATeamStandingsDisplayModel?> = _displayModel
-
     private var _standings = MutableStateFlow<List<NBATeamStandingsDisplay>>(emptyList())
     val standings: StateFlow<List<NBATeamStandingsDisplay>> = _standings
 
@@ -44,40 +49,12 @@ class NBATeamStandingsViewModel @Inject constructor(
     private var _selectedConferenceIndex = MutableStateFlow(0)
     val selectedConferenceIndex: StateFlow<Int> = _selectedConferenceIndex
 
-    private var _selectedCategoryIndex = MutableStateFlow(1) // defalue category is "승률"
-    val selectedCategoryIndex: StateFlow<Int> = _selectedCategoryIndex
-
-    private var _isKeyword = MutableStateFlow(false)
-    val isKeyword: StateFlow<Boolean> = _isKeyword
-
-    /* ---------------------
-       etc
-       --------------------- */
-    var teamNameDictionary: Map<String, String> = emptyMap()
-
-    init {
-        teamNameDictionary = nameProvider.getDictionary("nba_team")
-    }
-
-    /* ---------------------
-       intent
-       --------------------- */
-    sealed class Intent {
-        data class InitData(val displayModel: NBATeamStandingsDisplayModel) : Intent()
-        data class SelectConference(val index: Int) : Intent()
-        data class SelectCagetory(val index: Int) : Intent()
-
-        // TODO: viewmodel에서만 쓰여서 지워도 될 것 같은데, TCA와 구조를 완전히 동일하게 가져가려면 지금처럼 선언을 하고 사용할때는 send(Intent.SortStandings)로 사용해야함. 근데 굳이..?
-        data object SortStandings : Intent()
-    }
-
-    override fun send(intent: Intent) {
+    override fun send(intent: NBATeamStandingsIntent) {
         viewModelScope.launch {
             when (intent) {
-                is Intent.InitData -> initData(intent.displayModel)
-                is Intent.SelectConference -> selectConference(intent.index)
-                is Intent.SelectCagetory -> selectCategory(intent.index)
-                is Intent.SortStandings -> sortStandings()
+                is NBATeamStandingsIntent.InitData -> initData(intent.displayModel)
+                is NBATeamStandingsIntent.SelectConference -> selectConference(intent.index)
+                is NBATeamStandingsIntent.SelectCategory -> selectCategory(intent.index)
             }
         }
     }
@@ -86,37 +63,20 @@ class NBATeamStandingsViewModel @Inject constructor(
        init
        --------------------- */
     override fun initData(displayModel: NBATeamStandingsDisplayModel) {
-        viewModelScope.launch {
-            // init with default value
-            _selectedConferenceIndex.emit(0)
-            _selectedCategoryIndex.emit(1)
-            _isKeyword.emit(false)
-            _standings.emit(emptyList())
+        super.initData(displayModel)
 
-            // init data
-            _displayModel.emit(displayModel)
+        // init with default value
+        _selectedConferenceIndex.value = 0
+        _selectedCategoryIndex.value = 1 // defalue category is "승률"
+        _standings.value = emptyList()
 
-            val keywords = displayModel.keywords
-            if (keywords.isNotEmpty()) {
-                val index = StringConstants.NBA.TEAM_STANDINGS_CATEGORIES.indexOfFirst { category ->
-                    val keyword = keywords.find { it.keyword == category }
-                    keyword != null
-                }
-
-                if (index != -1) {
-                    _selectedCategoryIndex.emit(index)
-                    _isKeyword.emit(true)
-                }
-            }
-
-            selectConference(isInit = true)
-        }
+        selectConference(isInit = true)
     }
 
     /* ---------------------
        implements
        --------------------- */
-    private suspend fun selectConference(index: Int = 0, isInit: Boolean = false) {
+    private fun selectConference(index: Int = 0, isInit: Boolean = false) {
         val standings = if (isInit) {
             val entityTeam = displayModel.value?.standings?.firstOrNull { team ->
                 // Any first team that matches with any team in entityInfo
@@ -126,7 +86,7 @@ class NBATeamStandingsViewModel @Inject constructor(
             // When init, if entity's conference is east, set index 1.
             // Otherwise do nothing, which would be set as default(0).
             if (entityTeam?.team?.teamConference?.lowercase() == "east") {
-                _selectedConferenceIndex.emit(1)
+                _selectedConferenceIndex.value = 1
             }
 
             displayModel.value?.standings?.filter {
@@ -137,7 +97,7 @@ class NBATeamStandingsViewModel @Inject constructor(
                 }
             }
         } else {
-            _selectedConferenceIndex.emit(index)
+            _selectedConferenceIndex.value = index
 
             displayModel.value?.standings?.filter {
                 if (index == 0) {
@@ -148,18 +108,18 @@ class NBATeamStandingsViewModel @Inject constructor(
             }
         }
 
-        _standings.emit(standings ?: emptyList())
+        _standings.value = standings ?: emptyList()
 
         sortStandings()
     }
 
-    private suspend fun selectCategory(index: Int) {
-        _selectedCategoryIndex.emit(index)
+    override fun selectCategory(index: Int) {
+        super.selectCategory(index)
 
         sortStandings()
     }
 
-    private suspend fun sortStandings() {
+    private fun sortStandings() {
         var standings = standings.value.toMutableList()
 
         when (selectedCategoryIndex.value) {
@@ -183,7 +143,7 @@ class NBATeamStandingsViewModel @Inject constructor(
             15 -> standings.sortBy { it.stats.pfPG }
         }
 
-        _standings.emit(standings)
+        _standings.value = standings
     }
 
     // TODO: Should move to util

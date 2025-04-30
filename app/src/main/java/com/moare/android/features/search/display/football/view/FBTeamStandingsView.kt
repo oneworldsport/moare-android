@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -56,7 +57,7 @@ fun FBTeamStandingsView(
        viewmodel state
        --------------------- */
     val displayModel by fbTeamStandingsViewModel.displayModel.collectAsState()
-    val selectedIndex by fbTeamStandingsViewModel.selectedIndex.collectAsState()
+    val selectedCategoryIndex by fbTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
     val isKeyword by fbTeamStandingsViewModel.isKeyword.collectAsState()
 
     val league = displayModel?.league
@@ -67,10 +68,10 @@ fun FBTeamStandingsView(
        etc
        --------------------- */
     val selectedCategoryPosition = with(LocalDensity.current) {
-        val position = if (selectedIndex == 9) {
+        val position = if (selectedCategoryIndex == 9) {
             (fbTeamStandingsViewModel.intDataItemWidth * 8) + fbTeamStandingsViewModel.stringDataItemWidth
         } else {
-            fbTeamStandingsViewModel.intDataItemWidth * selectedIndex
+            fbTeamStandingsViewModel.intDataItemWidth * selectedCategoryIndex
         }
 
         position.toPx()
@@ -81,7 +82,7 @@ fun FBTeamStandingsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.FBTeamStandings) {
-            fbTeamStandingsViewModel.send(FBTeamStandingsViewModel.Intent.InitData(data))
+            fbTeamStandingsViewModel.send(FBTeamStandingsIntent.InitData(data))
         }
     }
 
@@ -171,7 +172,7 @@ fun FBTeamStandingsCategoryList(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val selectedIndex by fbTeamStandingsViewModel.selectedIndex.collectAsState()
+    val selectedIndex by fbTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
 
     /* ---------------------
        animation
@@ -229,7 +230,7 @@ fun FBTeamStandingsCategoryListItem(
         modifier = Modifier
             .width(fbTeamStandingsViewModel.getItemWidth(index))
             .clickable {
-                fbTeamStandingsViewModel.send(FBTeamStandingsViewModel.Intent.SelectCagetory(index))
+                fbTeamStandingsViewModel.send(FBTeamStandingsIntent.SelectCategory(index))
             }
     )
 }

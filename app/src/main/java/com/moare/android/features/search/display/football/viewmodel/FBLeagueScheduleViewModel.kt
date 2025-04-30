@@ -9,6 +9,7 @@ import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.features.search.display.common.viewmodel.BaseScheduleViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.SportDecodableModel
@@ -22,92 +23,45 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
+sealed class FBLeagueScheduleIntent {
+    data class InitData(val displayModel: FBLeagueScheduleDisplayModel) : FBLeagueScheduleIntent()
+    data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int, val updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) : FBLeagueScheduleIntent()
+    data class SelectDay(val day: DayInfo, val selectedIndex: Int) : FBLeagueScheduleIntent()
+    data object ToggleAllResult : FBLeagueScheduleIntent()
+    data class UpdateResultOpenedState(val fixtureId: Int, val isOpened: Boolean) : FBLeagueScheduleIntent()
+    data class UpdateGamesData(
+        val fbLeagueScheduleData: SportDecodableModel.FBLeagueSchedule,
+        val fbGameStatsData: SportDecodableModel.FBGameStats,
+        val updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit
+    ) : FBLeagueScheduleIntent()
+}
+
 @HiltViewModel
 class FBLeagueScheduleViewModel @Inject constructor(
     private val searchClient: SearchClient,
     private val nameProvider: TranslatedNameProvider
-) : MVIViewModel<FBLeagueScheduleViewModel.Intent, FBLeagueScheduleDisplayModel>() {
-    /* ---------------------
-       constants
-       --------------------- */
-    val itemHeight = 100.dp
-
+) : BaseScheduleViewModel<FBLeagueScheduleIntent, FBLeagueScheduleDisplayModel>(nameProvider) {
     /* ---------------------
        data state
        --------------------- */
-    private val _displayModel = MutableStateFlow<FBLeagueScheduleDisplayModel?>(null)
-    val displayModel: StateFlow<FBLeagueScheduleDisplayModel?> = _displayModel
-
-    private val _displayDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
-    val displayDataState: StateFlow<ApiFetchState> = _displayDataState
-
-    private val _yearMonthList = MutableStateFlow<List<String>>(emptyList())
-    val yearMonthList: StateFlow<List<String>> = _yearMonthList
-
-    private val _days = MutableStateFlow<List<DayInfo>>(emptyList())
-    val days: StateFlow<List<DayInfo>> = _days
-
     private val _filteredGames = MutableStateFlow<Map<Int, List<FBGame>>>(emptyMap())
     val filteredGames: StateFlow<Map<Int, List<FBGame>>> = _filteredGames
 
     /* ---------------------
        ui state
        --------------------- */
-    private val _selectedYearMonth = MutableStateFlow("")
-    val selectedYearMonth: StateFlow<String> = _selectedYearMonth
-
-    private val _selectedDay = MutableStateFlow<DayInfo?>(null)
-    val selectedDay: StateFlow<DayInfo?> = _selectedDay
-
-    private val _selectedYearMonthIndex = MutableStateFlow(0)
-    val selectedYearMonthIndex: StateFlow<Int> = _selectedYearMonthIndex
-
-    private val _selectedDayIndex = MutableStateFlow(0)
-    val selectedDayIndex: StateFlow<Int> = _selectedDayIndex
-
-    private val _yearMonthCalendarScrollTrigger = MutableStateFlow(UUID.randomUUID().toString())
-    val yearMonthCalendarScrollTrigger: StateFlow<String> = _yearMonthCalendarScrollTrigger
-
-    private val _dayCalendarScrollTrigger = MutableStateFlow(UUID.randomUUID().toString())
-    val dayCalendarScrollTrigger: StateFlow<String> = _dayCalendarScrollTrigger
-
-    private val _isAllResultOpened = MutableStateFlow(false)
-    val isAllResultOpened: StateFlow<Boolean> = _isAllResultOpened
-
     private val _gameResultOpenedStateList = MutableStateFlow<Map<Int, Boolean>>(emptyMap())
     val gameResultOpenedStateList: StateFlow<Map<Int, Boolean>> = _gameResultOpenedStateList
 
-    /* ---------------------
-       etc
-       --------------------- */
-    var teamNameDictionary: Map<String, String> = emptyMap()
 
-    /* ---------------------
-       intent
-       --------------------- */
-    sealed class Intent {
-        data class InitData(val displayModel: FBLeagueScheduleDisplayModel) : Intent()
-        data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int, val updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) : Intent()
-        data class SelectDay(val day: DayInfo, val selectedIndex: Int) : Intent()
-        data object ToggleAllResult : Intent()
-        data class UpdateResultOpenedState(val fixtureId: Int, val isOpened: Boolean) : Intent()
-        data class UpdateGamesData(
-            val fbLeagueScheduleData: SportDecodableModel.FBLeagueSchedule,
-            val fbGameStatsData: SportDecodableModel.FBGameStats,
-            val updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit
-        ) : Intent()
-    }
-
-    override fun send(intent: Intent) {
-        viewModelScope.launch {
-            when (intent) {
-                is Intent.InitData -> initData(intent.displayModel)
-                is Intent.SelectYearMonth -> selectYearMonth(intent.yearMonth, intent.selectedIndex, intent.updateViewStack)
-                is Intent.SelectDay -> selectDay(intent.day, intent.selectedIndex)
-                is Intent.ToggleAllResult -> toggleAllResult()
-                is Intent.UpdateResultOpenedState -> updateResultOpenedState(intent.fixtureId, intent.isOpened)
-                is Intent.UpdateGamesData -> updateGamesData(intent.fbLeagueScheduleData, intent.fbGameStatsData, intent.updateViewStack)
-            }
+    override fun send(intent: FBLeagueScheduleIntent) {
+        when (intent) {
+            is FBLeagueScheduleIntent.InitData -> initData(intent.displayModel)
+            is FBLeagueScheduleIntent.SelectYearMonth -> selectYearMonth(intent.yearMonth, intent.selectedIndex, intent.updateViewStack)
+            is FBLeagueScheduleIntent.SelectDay -> selectDay(intent.day, intent.selectedIndex)
+            is FBLeagueScheduleIntent.ToggleAllResult -> toggleAllResult()
+            is FBLeagueScheduleIntent.UpdateResultOpenedState -> updateResultOpenedState(intent.fixtureId, intent.isOpened)
+            is FBLeagueScheduleIntent.UpdateGamesData -> updateGamesData(intent.fbLeagueScheduleData, intent.fbGameStatsData, intent.updateViewStack)
         }
     }
 
@@ -115,75 +69,44 @@ class FBLeagueScheduleViewModel @Inject constructor(
        init
        --------------------- */
     override fun initData(displayModel: FBLeagueScheduleDisplayModel) {
-        viewModelScope.launch {
-            // init with default value
-            _displayModel.emit(null)
-            _displayDataState.emit(ApiFetchState.Idle)
-            _yearMonthList.emit(emptyList())
-            _days.emit(emptyList())
-            _filteredGames.emit(emptyMap())
-            _selectedYearMonth.emit("")
-            _selectedDay.emit(null)
-            _selectedYearMonthIndex.emit(0)
-            _selectedDayIndex.emit(0)
-            _isAllResultOpened.emit(false)
-            _gameResultOpenedStateList.emit(emptyMap())
+        super.initData(displayModel)
 
-            // init data
-            _displayModel.emit(displayModel)
-            _yearMonthList.emit(displayModel.yearMonthList)
+        // init with default value
+        _filteredGames.value = emptyMap()
+        _gameResultOpenedStateList.value = emptyMap()
 
-            when (displayModel.leagueId) {
-                Constants.Ids.EPL -> {
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_TEAM_DIC)
-                }
-                Constants.Ids.LALIGA -> {
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_TEAM_DIC)
-                }
-                Constants.Ids.BUNDESLIGA -> {
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_TEAM_DIC)
-                }
-                Constants.Ids.LIGUE1 -> {
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
-                }
-                else -> {}
-            }
+        // init data
+        _yearMonthList.value = displayModel.yearMonthList
 
-            // select default yearMonth
-            displayModel.games.firstOrNull()?.fixture?.date?.let {
-                val defaultYearMonth = CalendarUtil.formatDate(it, TimeFormatType.YEAR_MONTH)
-                val defaultYearMonthIndex = yearMonthList.value.withIndex().first{ (_, value) -> value == defaultYearMonth }
-                _selectedYearMonth.emit(defaultYearMonth)
-                _selectedYearMonthIndex.emit(defaultYearMonthIndex.index)
-                _yearMonthCalendarScrollTrigger.emit(UUID.randomUUID().toString())
-            }
-
-            setDays(true)
+        // select default yearMonth
+        displayModel.games.firstOrNull()?.fixture?.date?.let {
+            val defaultYearMonth = CalendarUtil.formatDate(it, TimeFormatType.YEAR_MONTH)
+            val defaultYearMonthIndex = yearMonthList.value.withIndex().first{ (_, value) -> value == defaultYearMonth }
+            _selectedYearMonth.value = defaultYearMonth
+            _selectedYearMonthIndex.value = defaultYearMonthIndex.index
+            _yearMonthCalendarScrollTrigger.value = UUID.randomUUID().toString()
         }
+
+        setDays(true)
     }
 
     /* ---------------------
        implements
        --------------------- */
-    private suspend fun selectYearMonth(yearMonth: String, selectedIndex: Int, updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) {
-        _selectedYearMonth.emit(yearMonth)
-        _selectedYearMonthIndex.emit(selectedIndex)
+    private fun selectYearMonth(yearMonth: String, selectedIndex: Int, updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) {
+        _selectedYearMonth.value = yearMonth
+        _selectedYearMonthIndex.value = selectedIndex
 
         fetchGames(updateViewStack)
     }
 
-    private suspend fun selectDay(day: DayInfo, selectedIndex: Int) {
-        _selectedDay.emit(day)
-        _selectedDayIndex.emit(selectedIndex)
-    }
-
-    private suspend fun toggleAllResult() {
+    override fun toggleAllResult() {
         val newState = !isAllResultOpened.value
-        _isAllResultOpened.emit(newState)
-        _gameResultOpenedStateList.emit(gameResultOpenedStateList.value.mapValues { newState })
+        _isAllResultOpened.value = newState
+        _gameResultOpenedStateList.value = gameResultOpenedStateList.value.mapValues { newState }
     }
 
-    private suspend fun setDays(isInit: Boolean = false) {
+    override fun setDays(isInit: Boolean) {
         // set filtered games to each day
         val yearMonth = selectedYearMonth.value.split("/")
         val year = ("20" + (yearMonth.firstOrNull() ?: "25")).toInt()
@@ -215,81 +138,83 @@ class FBLeagueScheduleViewModel @Inject constructor(
 
             // ui operation order
             // 1. Set default 'isOpened' value as false to every games, before 'filteredGames' show.
-            _gameResultOpenedStateList.emit(isResultOpenedStateList)
+            _gameResultOpenedStateList.value = isResultOpenedStateList
 
             // 2. Set days to days calendar.
-            _days.emit(days)
+            _days.value = days
 
             // 3. Move bar and scroll the days calendar.
             if (isInit) {
                 // select default day
                 val defaultDay = CalendarUtil.getDefaultDay(selectedYearMonth.value, days)
                 defaultDay?.let {
-                    _selectedDay.emit(defaultDay.second)
-                    _selectedDayIndex.emit(defaultDay.first)
-                    _dayCalendarScrollTrigger.emit(UUID.randomUUID().toString())
+                    _selectedDay.value = defaultDay.second
+                    _selectedDayIndex.value = defaultDay.first
+                    _dayCalendarScrollTrigger.value = UUID.randomUUID().toString()
                 }
             } else {
                 // select first day that has games
                 for ((index, day) in days.withIndex()) {
                     if (!day.isDataEmpty) {
-                        _selectedDay.emit(day)
-                        _selectedDayIndex.emit(index)
-                        _dayCalendarScrollTrigger.emit(UUID.randomUUID().toString())
+                        _selectedDay.value = day
+                        _selectedDayIndex.value = index
+                        _dayCalendarScrollTrigger.value = UUID.randomUUID().toString()
                         break
                     }
                 }
             }
 
             // 4. Remove loading.
-            _displayDataState.emit(ApiFetchState.Success)
+            _displayDataState.value = ApiFetchState.Success
 
             // 5. Show 'filteredGames'
-            _filteredGames.emit(newFilteredGames)
+            _filteredGames.value = newFilteredGames
         } // month?.let
 
         // added to prevent any gaps
         if (displayDataState.value != ApiFetchState.Success) {
-            _displayDataState.emit(ApiFetchState.Success)
+            _displayDataState.value = ApiFetchState.Success
         }
     }
 
-    private suspend fun fetchGames(updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) {
-        _displayDataState.emit(ApiFetchState.Fetching)
+    private fun fetchGames(updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) {
+        _displayDataState.value = ApiFetchState.Fetching
 
-        try {
-            val selectedYearMonth = selectedYearMonth.value.split("/")
-            val yearMonth = selectedYearMonth[0] + selectedYearMonth[1]
+        viewModelScope.launch {
+            try {
+                val selectedYearMonth = selectedYearMonth.value.split("/")
+                val yearMonth = selectedYearMonth[0] + selectedYearMonth[1]
 
-            val entity = displayModel.value?.entityInfo?.firstOrNull() ?: EntityInfo(
-                entityId = 39,
-                entityName = "프리미어리그",
-                category = "football",
-                entityType = "league",
-                leagueId = 39
-            )
+                val entity = displayModel.value?.entityInfo?.firstOrNull() ?: EntityInfo(
+                    entityId = 39,
+                    entityName = "프리미어리그",
+                    category = "football",
+                    entityType = "league",
+                    leagueId = 39
+                )
 
-            val result = searchClient.fetchLeagueSchedule(entity, yearMonth)
+                val result = searchClient.fetchLeagueSchedule(entity, yearMonth)
 
-            if (result.data is SportDecodableModel.FBLeagueSchedule) {
-                val data = result.data
-                _displayModel.emit(data.displayModel)
-                updateViewStack(data)
-                setDays()
+                if (result.data is SportDecodableModel.FBLeagueSchedule) {
+                    val data = result.data
+                    _displayModel.value = data.displayModel
+                    updateViewStack(data)
+                    setDays()
+                }
+            } catch (e: Exception) {
+                _displayDataState.value = ApiFetchState.Error("데이터를 불러오는데 실패하였습니다.")
+                Log.e("dsdf", e.localizedMessage ?: "error")
             }
-        } catch (e: Exception) {
-            _displayDataState.emit(ApiFetchState.Error("데이터를 불러오는데 실패하였습니다."))
-            Log.e("dsdf", e.localizedMessage ?: "error")
         }
     }
 
-    private suspend fun updateResultOpenedState(fixtureId: Int, isOpened: Boolean) {
+    private fun updateResultOpenedState(fixtureId: Int, isOpened: Boolean) {
         val newMap = gameResultOpenedStateList.value.toMutableMap()
         newMap[fixtureId] = isOpened
-        _gameResultOpenedStateList.emit(newMap)
+        _gameResultOpenedStateList.value = newMap
     }
 
-    private suspend fun updateGamesData(
+    private fun updateGamesData(
         fbLeagueScheduleData: SportDecodableModel.FBLeagueSchedule,
         fbGameStatsData: SportDecodableModel.FBGameStats,
         updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit
@@ -300,14 +225,14 @@ class FBLeagueScheduleViewModel @Inject constructor(
 
         var newData = fbLeagueScheduleData
         newData.displayModel.games = newGames
-        _displayModel.emit(newData.displayModel)
+        _displayModel.value = newData.displayModel
 
         val newFilteredGames = filteredGames.value.toMutableMap()
         newFilteredGames[selectedDayIndex.value] = newData.displayModel.games.filter { game ->
             CalendarUtil.isSameDate(game.fixture.date, selectedYearMonth.value, selectedDayIndex.value + 1)
         }
 
-        _filteredGames.emit(newFilteredGames)
+        _filteredGames.value = newFilteredGames
 
         updateViewStack(newData)
     }

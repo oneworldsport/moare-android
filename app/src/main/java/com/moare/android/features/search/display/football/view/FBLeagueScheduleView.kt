@@ -43,6 +43,7 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleIntent
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
@@ -99,7 +100,7 @@ fun FBLeagueScheduleView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.FBLeagueSchedule) {
-            fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.InitData(data))
+            fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.InitData(data))
         }
     }
 
@@ -110,7 +111,7 @@ fun FBLeagueScheduleView(
 
             poppedView?.let {
                 if (it is SportDecodableModel.FBGameStats) {
-                    fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.UpdateGamesData(fbLeagueSchedule, it) { data ->
+                    fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.UpdateGamesData(fbLeagueSchedule, it) { data ->
                         searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
                     })
                 }
@@ -151,14 +152,14 @@ fun FBLeagueScheduleView(
            --------------------- */
         if (fbGameStatsData == null) {
             CalendarList(yearMonthList, CalendarType.YEARMONTH, selectedYearMonthIndex, yearMonthCalendarScrollTrigger) { yearMonth, index ->
-                fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.SelectYearMonth(yearMonth, index) { data ->
+                fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.SelectYearMonth(yearMonth, index) { data ->
                     // 현재 구조 콜백 수정 필요?
                     searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
                 })
             }
 
             CalendarList(days, CalendarType.DAY, selectedDayIndex, dayCalendarScrollTrigger) { day, index ->
-                fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.SelectDay(day, index))
+                fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.SelectDay(day, index))
             }
         }
 
@@ -180,7 +181,7 @@ fun FBLeagueScheduleView(
                     color = Color.Gray,
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.ToggleAllResult)
+                    fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.ToggleAllResult)
                 }
             }
         }
@@ -348,10 +349,12 @@ fun FBLeagueScheduleListItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = fbGameStatsData == null) {
-                searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data, displayModel?.leagueId))
+                displayModel?.let {
+                    searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data, it.leagueId))
+                }
 
                 // set selected game's isOpened true
-                fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.UpdateResultOpenedState(data.fixture.id, true))
+                fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.UpdateResultOpenedState(data.fixture.id, true))
             }
             .padding(vertical = 8.dp)
             .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
@@ -420,7 +423,7 @@ fun FBLeagueScheduleListItem(
                 color = gameStatusColor,
                 isDisabled = fbGameStatsData != null || !StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short)
             ) {
-                fbLeagueScheduleViewModel.send(FBLeagueScheduleViewModel.Intent.UpdateResultOpenedState(data.fixture.id, !isResultOpened))
+                fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.UpdateResultOpenedState(data.fixture.id, !isResultOpened))
             }
 
             // game date
