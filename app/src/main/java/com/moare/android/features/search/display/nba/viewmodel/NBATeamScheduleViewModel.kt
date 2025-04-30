@@ -48,21 +48,22 @@ class NBATeamScheduleViewModel @Inject constructor(
        init
        --------------------- */
     override fun initData(displayModel: NBATeamScheduleDisplayModel) {
+        super.initData(displayModel)
+
         // init data
         _games.value = displayModel.games
 
         val gameResultOpenedStateList = games.value.associate { (it.gameSummary?.gameCode ?: "") to false }
         _gameResultOpenedStateList.value = gameResultOpenedStateList
-
     }
 
     /* ---------------------
        implements
        --------------------- */
     override fun toggleAllResult() {
-        super.toggleAllResult()
-
-        _gameResultOpenedStateList.value = gameResultOpenedStateList.value.mapValues { !isAllResultOpened.value }
+        val newState = !isAllResultOpened.value
+        _isAllResultOpened.value = newState
+        _gameResultOpenedStateList.value = gameResultOpenedStateList.value.mapValues { newState }
     }
 
     private fun updateResultOpenedState(gameCode: String, isOpened: Boolean) {

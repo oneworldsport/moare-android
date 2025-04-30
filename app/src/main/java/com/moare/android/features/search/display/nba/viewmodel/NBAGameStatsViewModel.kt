@@ -79,6 +79,8 @@ class NBAGameStatsViewModel @Inject constructor(
        init
        --------------------- */
     override fun initData(displayModel: NBAGameStatsDisplayModel) {
+        super.initData(displayModel)
+
         // init with default value
         _homeTeamLineScore.value = null
         _awayTeamLineScore.value = null

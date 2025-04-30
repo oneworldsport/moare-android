@@ -105,9 +105,7 @@ abstract class BaseScheduleViewModel<I, T>(
         _selectedDayIndex.value = selectedIndex
     }
 
-    open fun toggleAllResult() {
-        _isAllResultOpened.value = !isAllResultOpened.value
-    }
-
     open fun setDays(isInit: Boolean = false) {}
+
+    abstract fun toggleAllResult()
 }

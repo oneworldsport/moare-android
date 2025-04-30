@@ -81,6 +81,8 @@ class FBGameStatsViewModel @Inject constructor(
        init
        --------------------- */
     override fun initData(displayModel: FBGameStatsDisplayModel) {
+        super.initData(displayModel)
+
         // init with default value
         _playersStats.value = emptyList()
         _playersTotalStats.value = null

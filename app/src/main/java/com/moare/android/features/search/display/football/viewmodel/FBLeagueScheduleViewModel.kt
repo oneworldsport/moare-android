@@ -101,9 +101,9 @@ class FBLeagueScheduleViewModel @Inject constructor(
     }
 
     override fun toggleAllResult() {
-        super.toggleAllResult()
-
-        _gameResultOpenedStateList.value = gameResultOpenedStateList.value.mapValues { !isAllResultOpened.value }
+        val newState = !isAllResultOpened.value
+        _isAllResultOpened.value = newState
+        _gameResultOpenedStateList.value = gameResultOpenedStateList.value.mapValues { newState }
     }
 
     override fun setDays(isInit: Boolean) {

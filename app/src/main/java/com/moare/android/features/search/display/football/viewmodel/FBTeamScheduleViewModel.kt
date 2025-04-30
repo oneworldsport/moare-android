@@ -54,6 +54,8 @@ class FBTeamScheduleViewModel @Inject constructor(
        init
        --------------------- */
     override fun initData(displayModel: FBTeamScheduleDisplayModel) {
+        super.initData(displayModel)
+
         // init data
         _games.value = displayModel.games
 
@@ -67,9 +69,9 @@ class FBTeamScheduleViewModel @Inject constructor(
        implements
        --------------------- */
     override fun toggleAllResult() {
-        super.toggleAllResult()
-
-        _gameResultOpenedStateList.value = gameResultOpenedStateList.value.mapValues { !isAllResultOpened.value }
+        val newState = !isAllResultOpened.value
+        _isAllResultOpened.value = newState
+        _gameResultOpenedStateList.value = gameResultOpenedStateList.value.mapValues { newState }
     }
 
     private fun updateResultOpenedState(fixtureId: Int, isOpened: Boolean) {
