@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
@@ -109,7 +110,7 @@ fun NBAPlayerStandingsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBAPlayerStandings) {
-            nbaPlayerStandingsViewModel.send(NBAPlayerStandingsViewModel.Intent.InitData(data))
+            nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.InitData(data))
         }
     }
 
@@ -136,10 +137,10 @@ fun NBAPlayerStandingsView(
 
         when (verticalScrollState.value) {
             0 -> {
-                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsViewModel.Intent.ShowMoreStandings(true))
+                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.ShowMoreStandings(true))
             }
             verticalScrollState.maxValue -> {
-                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsViewModel.Intent.ShowMoreStandings(false))
+                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.ShowMoreStandings(false))
             }
         }
     }
@@ -329,7 +330,7 @@ fun NBAPlayerStandingsFirstCategoryListItem(
                 }
             )
             .clickable {
-                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsViewModel.Intent.SelectFirstCategory(index))
+                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.SelectFirstCategory(index))
             }
     ) {
         Text(
@@ -417,7 +418,7 @@ fun NBAPlayerStandingsSecondCategoryListItem(
             .width(nbaPlayerStandingsViewModel.itemWidth)
             .clickable {
                 nbaPlayerStandingsViewModel.send(
-                    NBAPlayerStandingsViewModel.Intent.SelectSecondCategory(index, category)
+                    NBAPlayerStandingsIntent.SelectSecondCategory(index, category)
                 )
             }
     )

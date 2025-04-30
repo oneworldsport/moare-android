@@ -1,13 +1,11 @@
 package com.moare.android.features.search.display.common.viewmodel
 
-import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
-import com.moare.android.features.search.models.displaymodels.LeagueIdentifiable
+import com.moare.android.features.search.models.displaymodels.DisplayModelBase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 abstract class BaseInfoViewModel<I, T>(
     private val nameProvider: TranslatedNameProvider
@@ -21,7 +19,7 @@ abstract class BaseInfoViewModel<I, T>(
     override fun initData(displayModel: T) {
         _displayModel.value = displayModel
 
-        if (displayModel is LeagueIdentifiable) {
+        if (displayModel is DisplayModelBase) {
             loadDictionaries(displayModel.leagueId)
         }
     }

@@ -1,7 +1,8 @@
 package com.moare.android.features.search.models.displaymodels.football
 
+import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
-import com.moare.android.features.search.models.displaymodels.LeagueIdentifiable
+import com.moare.android.features.search.models.displaymodels.DisplayModelBase
 import com.moare.android.features.search.models.models.football.FBLeague
 import com.moare.android.features.search.models.models.football.FBTeamInfo
 import com.moare.android.features.search.models.models.football.FBHomeAwayIntStats
@@ -11,10 +12,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class FBTeamStandingsDisplayModel(
     override val leagueId: Int,
-    val keywords: List<Keyword>,
+    override val keywords: List<Keyword>,
+    override val entityInfo: List<EntityInfo>,
     val league: FBLeague?,
     val standings: List<FBTeamStandingsDisplay>
-) : LeagueIdentifiable
+) : DisplayModelBase
 
 @Serializable
 data class FBTeamStandingsDisplay(

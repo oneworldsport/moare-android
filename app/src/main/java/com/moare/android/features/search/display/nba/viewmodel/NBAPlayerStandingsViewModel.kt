@@ -8,11 +8,13 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.CalendarUtil
+import com.moare.android.features.search.display.common.viewmodel.BasePlayerStandingsViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
 import com.moare.android.features.search.networking.SearchClient
@@ -22,11 +24,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class NBAPlayerStandingsIntent {
+    data class InitData(val displayModel: NBAPlayerStandingsDisplayModel) : NBAPlayerStandingsIntent()
+    data class SelectFirstCategory(val index: Int) : NBAPlayerStandingsIntent()
+    data class SelectSecondCategory(val index: Int, val category: String) : NBAPlayerStandingsIntent()
+    data class ShowMoreStandings(val isUp: Boolean) : NBAPlayerStandingsIntent()
+}
+
 @HiltViewModel
 class NBAPlayerStandingsViewModel @Inject constructor(
     private val searchClient: SearchClient,
     private val nameProvider: TranslatedNameProvider
-) : MVIViewModel<NBAPlayerStandingsViewModel.Intent, NBAPlayerStandingsDisplayModel>() {
+) : BasePlayerStandingsViewModel<NBAPlayerStandingsIntent, NBAPlayerStandingsDisplayModel>(nameProvider) {
     /* ---------------------
        constants
        --------------------- */
@@ -44,137 +53,61 @@ class NBAPlayerStandingsViewModel @Inject constructor(
     /* ---------------------
        data state
        --------------------- */
-    private var _displayModel = MutableStateFlow<NBAPlayerStandingsDisplayModel?>(null)
-    val displayModel: StateFlow<NBAPlayerStandingsDisplayModel?> = _displayModel
-
-    private val _displayDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
-    val displayDataState: StateFlow<ApiFetchState> = _displayDataState
-
     private var _filteredStandings = MutableStateFlow<List<NBAPlayerStandingsDisplay>>(emptyList())
     val filteredStandings: StateFlow<List<NBAPlayerStandingsDisplay>> = _filteredStandings
 
     /* ---------------------
-       ui state
-       --------------------- */
-    private var _firstSelectedIndex = MutableStateFlow(0)
-    val firstSelectedIndex: StateFlow<Int> = _firstSelectedIndex
-
-    private var _secondSelectedIndex = MutableStateFlow(0)
-    val secondSelectedIndex: StateFlow<Int> = _secondSelectedIndex
-
-    private var _isKeyword = MutableStateFlow(false)
-    val isKeyword: StateFlow<Boolean> = _isKeyword
-
-    private var _entityIndex = MutableStateFlow<Int?>(null)
-    val entityIndex: StateFlow<Int?> = _entityIndex
-
-    private var _filteredStandingsStartIndex = MutableStateFlow(0)
-    val filteredStandingsStartIndex: StateFlow<Int> = _filteredStandingsStartIndex
-
-    /* ---------------------
        etc
        --------------------- */
-    var shouldScrollCategory = true
     var standings: List<NBAPlayerStandingsDisplay> = emptyList()
-    private var selectedEntity: EntityInfo? = null
-    private var filteredStandingsEndIndex = 0 // NOTE: one bigger then actual showing end item's index. Because of subList.
-    var playerNameDictionary: Map<String, String> = emptyMap()
-    var teamNameDictionary: Map<String, String> = emptyMap()
 
-    init {
-        // TODO: object에서 EntryPoint를 통해 가져와 사용하는 방법은 지양해야함. 그렇다면 ViewModel마다 주입하지 않고 사용할 수 있는 더 나은 방법이 있을지 고민해볼 필요 있음.
-        playerNameDictionary = nameProvider.getDictionary("nba_player")
-        teamNameDictionary = nameProvider.getDictionary("nba_team")
-    }
-
-    /* ---------------------
-       intent
-       --------------------- */
-    sealed class Intent {
-        data class InitData(val displayModel: NBAPlayerStandingsDisplayModel) : Intent()
-        data class SelectFirstCategory(val index: Int) : Intent()
-        data class SelectSecondCategory(val index: Int, val category: String) : Intent()
-        data class ShowMoreStandings(val isUp: Boolean) : Intent()
-        data object SortStandings : Intent()
-    }
-
-    override fun send(intent: Intent) {
+    override fun send(intent: NBAPlayerStandingsIntent) {
         viewModelScope.launch {
             when (intent) {
-                is Intent.InitData -> initData(intent.displayModel)
-                is Intent.SelectFirstCategory -> selectFirstCategory(intent.index)
-                is Intent.SelectSecondCategory -> selectSecondCategory(intent.index, intent.category)
-                is Intent.ShowMoreStandings -> addStandings(intent.isUp)
-                is Intent.SortStandings -> sortStandings()
+                is NBAPlayerStandingsIntent.InitData -> initData(intent.displayModel)
+                is NBAPlayerStandingsIntent.SelectFirstCategory -> selectFirstCategory(intent.index)
+                is NBAPlayerStandingsIntent.SelectSecondCategory -> selectSecondCategory(intent.index, intent.category)
+                is NBAPlayerStandingsIntent.ShowMoreStandings -> addStandings(intent.isUp)
             }
         }
     }
 
-    /* ---------------------
-       init
-       --------------------- */
     override fun initData(displayModel: NBAPlayerStandingsDisplayModel) {
-        viewModelScope.launch {
-            // init with default value
-            _displayModel.emit(null)
-            _displayDataState.emit(ApiFetchState.Idle)
-            _filteredStandings.emit(emptyList())
-            _firstSelectedIndex.emit(0)
-            _secondSelectedIndex.emit(0)
-            _isKeyword.emit(false)
-            _entityIndex.emit(null)
-            _filteredStandingsStartIndex.emit(0)
-            shouldScrollCategory = true
-            standings = emptyList()
-            selectedEntity = null
-            filteredStandingsEndIndex = 0
+        super.initData(displayModel)
 
-            // init data
-            _displayModel.emit(displayModel)
-            standings = displayModel.standings
+        // init with default value
+        _filteredStandings.value = emptyList()
+        standings = emptyList()
 
-            val keywords = displayModel.keywords
-            if (keywords.isNotEmpty()) {
-                // Check matching keyword in the order of categories, doesn't matter what keyword is in keywords
-                val index = StringConstants.NBA.PLAYER_STANDINGS_SECOND_CATEGORIES.indexOfFirst { category ->
-                    val keyword = keywords.find { it.keyword == category }
-                    keyword != null
-                }
+        // init data
+        standings = displayModel.standings
 
-                if (index != -1) {
-                    _secondSelectedIndex.emit(index)
-                    _isKeyword.emit(true)
-                }
-            }
-
-            sortStandings()
-        }
+        sortStandings()
     }
 
     /* ---------------------
        implements
        --------------------- */
-    private suspend fun selectFirstCategory(index: Int) {
+    override fun selectFirstCategory(index: Int) {
+        super.selectFirstCategory(index)
+
         val beforeSecondSelectedIndex = secondSelectedIndex.value
-
-        shouldScrollCategory = true
-
         val attackCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
         val defendCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
         when (index) {
             0 -> {
-                _secondSelectedIndex.emit(0)
+                _secondSelectedIndex.value = 0
             }
             1 -> {
-                _secondSelectedIndex.emit(attackCategoriesSize)
+                _secondSelectedIndex.value = attackCategoriesSize
             }
             2 -> {
-                _secondSelectedIndex.emit(attackCategoriesSize + defendCategoriesSize)
+                _secondSelectedIndex.value = attackCategoriesSize + defendCategoriesSize
             }
         }
 
-        _firstSelectedIndex.emit(index)
+        _firstSelectedIndex.value = index
 
         when (beforeSecondSelectedIndex) {
             in fetchCategoryIndexList -> fetchStandings("득점") // 경기당(PG) 데이터 아닌 카테고리에서 first 카테고리를 눌렀을때는 fetch 해야함. (PG 데이터로 fetch)
@@ -182,19 +115,17 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun selectSecondCategory(index: Int, category: String) {
+    override fun selectSecondCategory(index: Int, category: String) {
+        super.selectSecondCategory(index, category)
+
         val beforeSecondSelectedIndex = secondSelectedIndex.value
-
-        shouldScrollCategory = false
-        _secondSelectedIndex.emit(index)
-
         val attackCategories = StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES
         val defendCategories = StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES
 
         when (index) {
-            in attackCategories.indices -> _firstSelectedIndex.emit(0)
-            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstSelectedIndex.emit(1)
-            else -> _firstSelectedIndex.emit(2)
+            in attackCategories.indices -> _firstSelectedIndex.value = 0
+            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstSelectedIndex.value = 1
+            else -> _firstSelectedIndex.value = 2
         }
 
         when (beforeSecondSelectedIndex) {
@@ -206,7 +137,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun sortStandings() {
+    private fun sortStandings() {
         standings = when (secondSelectedIndex.value) {
             0 -> standings.sortedByDescending { it.stats.ptsPG }
             1 -> standings.sortedByDescending { it.stats.astPG }
@@ -234,7 +165,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         filterStandings()
     }
 
-    private suspend fun filterStandings() {
+    override fun filterStandings() {
         // Get the first entity(player) matching in the standings.(Process works in the order of standings)
         val index = standings.indexOfFirst { player ->
             val entity = displayModel.value?.entityInfo?.find { it.playerId == player.player.personId }
@@ -245,7 +176,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         }
 
         if (index != -1) {
-            _entityIndex.emit(index)
+            _entityIndex.value = index
         }
 
         // Get 20 items based on index
@@ -256,16 +187,16 @@ class NBAPlayerStandingsViewModel @Inject constructor(
         val newStandings = standings.subList(startIndex, endIndex)
 
         filteredStandingsEndIndex = endIndex
-        _filteredStandingsStartIndex.emit(startIndex)
+        _filteredStandingsStartIndex.value = startIndex
 
         // remove loading
-        _displayDataState.emit(ApiFetchState.Success)
+        _displayDataState.value = ApiFetchState.Success
 
         // show 'filteredStandings'
-        _filteredStandings.emit(newStandings)
+        _filteredStandings.value = newStandings
     }
 
-    private suspend fun addStandings(isUp: Boolean) {
+    override fun addStandings(isUp: Boolean) {
         // get 10 more standings
         if (isUp) {
             val newStartIndex = maxOf(0, filteredStandingsStartIndex.value - 10)
@@ -276,8 +207,8 @@ class NBAPlayerStandingsViewModel @Inject constructor(
 
             val newStandings = standings.subList(newStartIndex, filteredStandingsEndIndex)
 
-            _filteredStandingsStartIndex.emit(newStartIndex)
-            _filteredStandings.emit(newStandings)
+            _filteredStandingsStartIndex.value = newStartIndex
+            _filteredStandings.value = newStandings
         } else {
             val newEndIndex = minOf(standings.size, filteredStandingsEndIndex + 10)
 
@@ -288,34 +219,36 @@ class NBAPlayerStandingsViewModel @Inject constructor(
             val newStandings = standings.subList(filteredStandingsStartIndex.value, newEndIndex)
 
             filteredStandingsEndIndex = newEndIndex
-            _filteredStandings.emit(newStandings)
+            _filteredStandings.value = newStandings
         }
     }
 
-    private suspend fun fetchStandings(category: String) {
-        _displayDataState.emit(ApiFetchState.Fetching)
+    override fun fetchStandings(category: String) {
+        super.fetchStandings(category)
 
-        try {
-            // TODO: Structure should be updated(Temporary code)
-            val standingsKeyword = displayModel.value?.keywords?.first { it.id == "standings" }
-            val keywords = listOf(standingsKeyword!!, Keyword(keyword = category, id = "", priority = 100))
-            val entities = if (selectedEntity != null) listOf(selectedEntity!!) else emptyList()
-            val keywordInfo = KeywordInfo(
-                keyword = category,
-                keywords = keywords,
-                entities = entities
-            )
+        viewModelScope.launch {
+            try {
+                // TODO: Structure should be updated(Temporary code)
+                val standingsKeyword = displayModel.value?.keywords?.first { it.id == "standings" }
+                val keywords = listOf(standingsKeyword!!, Keyword(keyword = category, id = "", priority = 100))
+                val entities = if (selectedEntity != null) listOf(selectedEntity!!) else emptyList()
+                val keywordInfo = KeywordInfo(
+                    keyword = category,
+                    keywords = keywords,
+                    entities = entities
+                )
 
-            val result = searchClient.fetchDataByKeyword(keywordInfo)
+                val result = searchClient.fetchDataByKeyword(keywordInfo)
 
-            if (result.data is SportDecodableModel.NBAPlayerStandings) {
-                _displayModel.emit(result.data.displayModel)
-                standings = result.data.displayModel.standings
-                sortStandings()
+                if (result.data is SportDecodableModel.NBAPlayerStandings) {
+                    _displayModel.value = result.data.displayModel
+                    standings = result.data.displayModel.standings
+                    sortStandings()
+                }
+            } catch (e: Exception) {
+                _displayDataState.value = ApiFetchState.Error("데이터를 불러오는데 실패하였습니다.")
+                Log.e("dsdf", e.localizedMessage ?: "error")
             }
-        } catch (e: Exception) {
-            _displayDataState.emit(ApiFetchState.Error("데이터를 불러오는데 실패하였습니다."))
-            Log.e("dsdf", e.localizedMessage ?: "error")
         }
     }
 }
