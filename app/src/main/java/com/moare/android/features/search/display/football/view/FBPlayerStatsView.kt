@@ -38,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -89,7 +90,7 @@ fun FBPlayerStatsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.FBPlayerStats) {
-            fbPlayerStatsViewModel.send(FBPlayerStatsViewModel.Intent.InitData(data))
+            fbPlayerStatsViewModel.send(FBPlayerStatsIntent.InitData(data))
         }
     }
 

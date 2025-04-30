@@ -218,7 +218,7 @@ class SearchViewModel @Inject constructor(
         data object ToggleSearchBar : Intent()
         data object ToggleAutoCompleteListVisibleState : Intent()
 
-        data class SelectFBGame(val game: FBGame, val leagueId: Int?) : Intent()
+        data class SelectFBGame(val game: FBGame, val leagueId: Int) : Intent()
         data class SelectNBAGame(val game: NBAGame) : Intent()
 
         data class GoBack(val activity: Activity?) : Intent()
@@ -494,7 +494,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun selectFBGame(game: FBGame, leagueId: Int?) {
+    private suspend fun selectFBGame(game: FBGame, leagueId: Int) {
         val dataModel = SportDecodableModel.FBGameStats(
             responseModel = FBGameStatsResponseModel(game = game),
             displayModel = FBGameStatsDisplayModel(game = game, leagueId = leagueId)
@@ -506,13 +506,13 @@ class SearchViewModel @Inject constructor(
         _viewStack.emit(stack)
         _poppedView.emit(null)
 
-        _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game, leagueId = leagueId))
+        _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game, leagueId = leagueId ))
     }
 
     private suspend fun selectNBAGame(game: NBAGame) {
         val dataModel = SportDecodableModel.NBAGameStats(
             responseModel = NBAGameStatsResponseModel(game = game),
-            displayModel = NBAGameStatsDisplayModel(game = game)
+            displayModel = NBAGameStatsDisplayModel(leagueId = 90001, game = game)
         )
 
         val stack = viewStack.value.toMutableList()
@@ -520,7 +520,7 @@ class SearchViewModel @Inject constructor(
         _viewStack.emit(stack)
         _poppedView.emit(null)
 
-        _nbaGameStatsData.emit(NBAGameStatsDisplayModel(game = game))
+        _nbaGameStatsData.emit(NBAGameStatsDisplayModel(leagueId = 90001, game = game))
     }
 
     private suspend fun goBack(activity: Activity?) {

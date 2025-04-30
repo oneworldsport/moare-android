@@ -36,6 +36,7 @@ import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamScheduleIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -69,7 +70,7 @@ fun NBATeamScheduleView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBATeamSchedule) {
-            nbaTeamScheduleViewModel.send(NBATeamScheduleViewModel.Intent.InitData(data))
+            nbaTeamScheduleViewModel.send(NBATeamScheduleIntent.InitData(data))
         }
     }
 
@@ -116,7 +117,7 @@ fun NBATeamScheduleView(
                     color = Color.Gray,
                     modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    nbaTeamScheduleViewModel.send(NBATeamScheduleViewModel.Intent.ToggleAllResult)
+                    nbaTeamScheduleViewModel.send(NBATeamScheduleIntent.ToggleAllResult)
                 }
             }
 
@@ -263,7 +264,7 @@ fun NBATeamScheduleListItem(
 
                 // set selected game's isOpened true
                 data.gameSummary?.let {
-                    nbaTeamScheduleViewModel.send(NBATeamScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, true))
+                    nbaTeamScheduleViewModel.send(NBATeamScheduleIntent.UpdateResultOpenedState(it.gameCode, true))
                 }
             }
             .padding(vertical = 8.dp)
@@ -336,7 +337,7 @@ fun NBATeamScheduleListItem(
                 isDisabled = data.gameSummary?.gameStatusId != 3
             ) {
                 data.gameSummary?.let {
-                    nbaTeamScheduleViewModel.send(NBATeamScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, !isResultOpened))
+                    nbaTeamScheduleViewModel.send(NBATeamScheduleIntent.UpdateResultOpenedState(it.gameCode, !isResultOpened))
                 }
             }
 
@@ -354,14 +355,14 @@ fun NBATeamScheduleListItem(
             )
 
             // playoffs info
-            if (data.gameSummary != null && data.gameSummary.weekName.isEmpty()) {
+            if (data.gameSummary != null && data.gameSummary.seriesText.isNotEmpty()) {
                 val gameSummary = data.gameSummary
                 Text(
                     text = NBAUtil.gameType(gameSummary, true),
                     fontSize = 11.sp
                 )
 
-                if (data.seasonSeries != null && !gameSummary.seriesGameNumber.isEmpty()) {
+                if (data.seasonSeries != null && gameSummary.seriesGameNumber.isNotEmpty()) {
                     val seasonSeries = data.seasonSeries
                     CenterRow {
                         Text(

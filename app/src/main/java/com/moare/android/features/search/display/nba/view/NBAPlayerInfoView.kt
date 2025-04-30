@@ -45,6 +45,7 @@ import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.toCm
 import com.moare.android.core.util.toKg
 import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -96,7 +97,7 @@ fun NBAPlayerInfoView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBAPlayerInfo) {
-            nbaPlayerInfoViewModel.send(NBAPlayerInfoViewModel.Intent.InitData(data))
+            nbaPlayerInfoViewModel.send(NBAPlayerInfoIntent.InitData(data))
         }
     }
 
