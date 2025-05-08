@@ -54,8 +54,6 @@ fun FBPlayerInfoView(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by fbPlayerInfoViewModel.displayModel.collectAsState()
-
     val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
@@ -67,7 +65,7 @@ fun FBPlayerInfoView(
         }
     }
 
-    InfoViewContainer(measureContent = {
+    InfoViewContainer(itemCount = 6, measureContent = {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxWidth()

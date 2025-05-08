@@ -35,6 +35,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun InfoViewContainer(
     searchViewModel: SearchViewModel = hiltViewModel(),
+    itemCount: Int,
+    modifier: Modifier = Modifier,
     measureContent: @Composable InfoViewScope.() -> Unit,
     displayContent: @Composable InfoViewScope.() -> Unit
 ) {
@@ -82,7 +84,7 @@ fun InfoViewContainer(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(itemPositions.size) {
-        if (itemPositions.size == 6) {
+        if (itemPositions.size == itemCount) {
             aniPositions = true
             delay(1000)
             showContents = true
@@ -92,7 +94,10 @@ fun InfoViewContainer(
     /* ---------------------
        ui
        --------------------- */
-    Box(contentAlignment = Alignment.Center) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
