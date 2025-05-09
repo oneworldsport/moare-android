@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -30,12 +31,15 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
+import com.moare.android.features.search.display.common.container.InfoViewContainer
+import com.moare.android.features.search.display.common.container.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsViewModel
@@ -46,6 +50,7 @@ import com.moare.android.features.search.models.models.football.FBTeamStats
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.util.screenHeightPx
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -59,26 +64,9 @@ fun FBTeamStatsView(
        viewmodel state
        --------------------- */
     val displayModel by fbTeamStatsViewModel.displayModel.collectAsState()
-
     val statsList = displayModel?.stats
 
     val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       animation
-       --------------------- */
-    var parentPosition by remember { mutableStateOf(Offset.Zero) }
-    var parentCenter by remember { mutableStateOf(Offset.Zero) }
-    val itemPositions = remember { mutableStateMapOf<Int, Offset>() }
-    var aniPositions by remember { mutableStateOf(false) }
-    var showContents by remember { mutableStateOf(false) }
-    val contentsAlpha by animateFloatAsState(
-        targetValue = if (showContents) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = 500,
-            easing = LinearOutSlowInEasing
-        )
-    )
 
     /* ---------------------
        LaunchedEffect
@@ -89,106 +77,49 @@ fun FBTeamStatsView(
         }
     }
 
-    LaunchedEffect(itemPositions) {
-        if (itemPositions.size == (statsList?.size ?: 0) + 1) {
-            aniPositions = true
-            delay(1000)
-            showContents = true
-        }
-    }
-
-    /* ---------------------
-       ui
-       --------------------- */
-    Box(
-        contentAlignment = Alignment.Center,
+    InfoViewContainer(
+        itemCount = (statsList?.size ?: 0) + 1,
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
-    ) {
-        /* ---------------------
-           invisible ui
-           - for position
-           --------------------- */
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .onGloballyPositioned { parentCoordinates ->
-                    parentPosition = parentCoordinates.positionInWindow()
-                    parentCenter = Offset(
-                        x = parentCoordinates.size.width / 2f,
-                        y = parentCoordinates.size.height / 2f
-                    )
-                }
-                .alpha(0f)
-        ) {
-            // team info
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .onGloballyPositioned { layoutCoordinates ->
-                        val itemSize = layoutCoordinates.size
-                        val position = layoutCoordinates.positionInWindow()
-                        val relativeY = position.y - parentPosition.y
-                        val centerY = relativeY + itemSize.height / 2f
-
-                        itemPositions[0] = Offset(0f, centerY - parentCenter.y)
-                    }
-            ) {
-                FBTeamStatsTeamInfoItem()
+            .verticalScroll(rememberScrollState()),
+        measureContent = {
+            FBTeamStatsTeamInfoItem { index, coordinates ->
+                updateItemPosition(index, coordinates)
             }
 
-            // team stats list
-            FBTeamStatsList(
-                addItemPosition = { index, layoutCoordinates ->
-                    val itemSize = layoutCoordinates.size
-                    val position = layoutCoordinates.positionInWindow()
-                    val relativeY = position.y - parentPosition.y
-                    val centerY = relativeY + itemSize.height / 2f
+            FBTeamStatsList { index, coordinates ->
+                updateItemPosition(index, coordinates)
+            }
+        }, displayContent = {
+            FBTeamStatsTeamInfoItem(
+                isAniItem = true,
+                itemSize = itemSizes[0],
+                itemPosition = itemPositions[0],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
 
-                    itemPositions[index] = Offset(0f, centerY - parentCenter.y)
-                }
+            FBTeamStatsList(
+                isAniItem = true,
+                itemSizes = itemSizes,
+                itemPositions = itemPositions,
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
             )
         }
-
-        /* ---------------------
-           visible ui
-           - with animation effect
-           --------------------- */
-        val firstPosition = itemPositions[0] ?: Offset.Zero
-        val firstAnimatedPosition by animateOffsetAsState(
-            targetValue = if (aniPositions) firstPosition else Offset.Zero,
-            animationSpec = tween(1000),
-        )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .offset {
-                    IntOffset(
-                        firstAnimatedPosition.x.roundToInt(),
-                        firstAnimatedPosition.y.roundToInt()
-                    )
-                }
-        ) {
-            FBTeamStatsTeamInfoItem(contentsAlpha = contentsAlpha)
-        }
-
-        FBTeamStatsList(
-            isAniList = true,
-            itemPositions = itemPositions,
-            aniPositions = aniPositions,
-            contentsAlpha = contentsAlpha
-        )
-    }
+    )
 }
 
+// team info
 @Composable
 fun FBTeamStatsTeamInfoItem(
     fbTeamStatsViewModel: FBTeamStatsViewModel = hiltViewModel(),
-    contentsAlpha: Float = 1f
+    isAniItem: Boolean = false,
+    itemSize: DpSize? = null,
+    itemPosition: Offset? = null,
+    aniPosition: Boolean = true,
+    contentsAlpha: Float = 0f,
+    containerModifier: Modifier = Modifier,
+    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by fbTeamStatsViewModel.displayModel.collectAsState()
 
@@ -196,81 +127,92 @@ fun FBTeamStatsTeamInfoItem(
         val team = it.team
         val venue = it.venue
 
-        /* ---------------------
-           ui
-           --------------------- */
-        HCapsuleBar()
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .alpha(contentsAlpha)
+        MovingCapsuleItemContainer(
+            isAniItem = isAniItem,
+            itemSize = itemSize,
+            itemPosition = itemPosition,
+            aniPosition = aniPosition,
+            updateItemPosition = { coordinates ->
+                updateItemPosition?.let { it(0, coordinates) }
+            },
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = containerModifier.fillMaxWidth()
         ) {
-            URLImage(url = team.logo)
+            HCapsuleBar()
 
-            // name
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .alpha(contentsAlpha)
             ) {
-                Text(
-                    text = fbTeamStatsViewModel.teamNameDictionary["full_${team.id}"] ?: team.name,
-                    fontWeight = FontWeight.Medium
-                )
+                URLImage(url = team.logo)
 
-                Text(
-                    text = team.name,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Light,
-                    maxLines = 2
-                )
-            }
-
-            // venue
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+                // name
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = "연고지: ",
-                        fontSize = 15.sp
+                        text = fbTeamStatsViewModel.teamNameDictionary["full_${team.id}"] ?: team.name,
+                        fontWeight = FontWeight.Medium
                     )
 
                     Text(
-                        text = venue.city,
-                        fontWeight = FontWeight.Medium
+                        text = team.name,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Light,
+                        maxLines = 2
                     )
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+                // venue
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text(
-                        text = "홈구장: ",
-                        fontSize = 15.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "연고지: ",
+                            fontSize = 15.sp
+                        )
 
-                    Text(
-                        text = fbTeamStatsViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
-                        fontWeight = FontWeight.Medium
-                    )
+                        Text(
+                            text = venue.city,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "홈구장: ",
+                            fontSize = 15.sp
+                        )
+
+                        Text(
+                            text = fbTeamStatsViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
         }
     }
-
 }
 
+// team stats list
 @Composable
 fun FBTeamStatsList(
     fbTeamStatsViewModel: FBTeamStatsViewModel = hiltViewModel(),
-    isAniList: Boolean = false,
+    isAniItem: Boolean = false,
+    itemSizes: Map<Int, DpSize>? = null,
     itemPositions: Map<Int, Offset>? = null,
-    aniPositions: Boolean = true,
-    contentsAlpha: Float = 1f,
-    addItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
+    aniPosition: Boolean = true,
+    contentsAlpha: Float = 0f,
+    containerModifier: Modifier = Modifier,
+    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by fbTeamStatsViewModel.displayModel.collectAsState()
 
@@ -284,11 +226,13 @@ fun FBTeamStatsList(
             FBTeamStatsListItem(
                 index = index,
                 data = value,
-                isAniList = isAniList,
+                isAniItem = isAniItem,
+                itemSizes = itemSizes,
                 itemPositions = itemPositions,
-                aniPositions = aniPositions,
+                aniPosition = aniPosition,
                 contentsAlpha = contentsAlpha,
-                addItemPosition = addItemPosition
+                containerModifier = containerModifier,
+                updateItemPosition = updateItemPosition
             )
         }
     }
@@ -298,39 +242,27 @@ fun FBTeamStatsList(
 fun FBTeamStatsListItem(
     index: Int,
     data: FBTeamStats,
-    isAniList: Boolean,
-    itemPositions: Map<Int, Offset>?,
-    aniPositions: Boolean,
-    contentsAlpha: Float,
-    addItemPosition: ((Int, LayoutCoordinates) -> Unit)?
+    isAniItem: Boolean = false,
+    itemSizes: Map<Int, DpSize>? = null,
+    itemPositions: Map<Int, Offset>? = null,
+    aniPosition: Boolean = true,
+    contentsAlpha: Float = 0f,
+    containerModifier: Modifier = Modifier,
+    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val position = if (itemPositions != null) {
-        itemPositions[index + 1] ?: Offset.Zero
-    } else {
-        Offset.Zero
-    }
-    val animatedPosition by animateOffsetAsState(
-        targetValue = if (aniPositions) position else Offset.Zero,
-        animationSpec = tween(1000),
-    )
-
-    Column(
-//        verticalArrangement = Arrangement.spacedBy(6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(top = if (isAniList) 0.dp else 12.dp)
-            .padding(horizontal = 4.dp)
-            .onGloballyPositioned { layoutCoordinates ->
-                if (!isAniList && addItemPosition != null) {
-                    addItemPosition(index + 1, layoutCoordinates)
-                }
-            }
-            .offset {
-                IntOffset(
-                    animatedPosition.x.roundToInt(),
-                    animatedPosition.y.roundToInt()
-                )
-            }
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSizes?.get(index + 1),
+        itemPosition = itemPositions?.get(index + 1),
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(index + 1, coordinates) }
+        },
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = containerModifier
+            .padding(top = if (isAniItem) 0.dp else 12.dp)
+            .padding(horizontal = if (isAniItem) 0.dp else 4.dp)
+            .fillMaxWidth()
     ) {
         FBTeamStatsItem(
             data = data,

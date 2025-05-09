@@ -15,8 +15,11 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
+import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.ui.util.CenterColumn
+import com.moare.android.ui.util.nullableOptionalClickable
 import com.moare.android.ui.util.nullableSize
+import com.moare.android.ui.util.optionalClickable
 import com.moare.android.ui.util.optionalFillMaxWidth
 import kotlin.math.roundToInt
 
@@ -25,16 +28,19 @@ fun MovingCapsuleItemContainer(
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
+    startPosition: Offset = Offset.Zero,
     aniPosition: Boolean = true,
     updateItemPosition: ((LayoutCoordinates) -> Unit)? = null,
     verticalArrangement: Arrangement.Vertical = Arrangement.Center,
     horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val position = itemPosition ?: Offset.Zero
+    val effectiveStartPosition = if (isAniItem) startPosition else Offset.Zero
+    val position = itemPosition ?: effectiveStartPosition
     val animatedPosition by animateOffsetAsState(
-        targetValue = if (aniPosition) position else Offset.Zero,
+        targetValue = if (aniPosition) position else effectiveStartPosition,
         animationSpec = tween(1000),
     )
 
@@ -55,8 +61,8 @@ fun MovingCapsuleItemContainer(
                     animatedPosition.y.roundToInt()
                 )
             }
+            .nullableOptionalClickable(apply = isAniItem, onClick = onClick)
     ) {
         this.content()
     }
-
 }

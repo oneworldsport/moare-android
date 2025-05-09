@@ -421,10 +421,10 @@ fun FBTeamInfoFourthItem(
             },
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
-                .padding(top = if (isAniItem) 0.dp else 12.dp)
-                .optionalClickable(apply = isAniItem) {
-                    searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
-                }
+                .padding(top = if (isAniItem) 0.dp else 12.dp),
+            onClick = {
+                searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
+            }
         ) {
             HCapsuleBar()
 
@@ -499,10 +499,10 @@ fun FBTeamInfoFifthItem(
                 updateItemPosition?.let { it(4, coordinates) }
             },
             verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = containerModifier
-                .optionalClickable(apply = isAniItem) {
-                    searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
-                }
+            modifier = containerModifier,
+            onClick = {
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
+            }
         ) {
             HCapsuleBar()
 
@@ -601,10 +601,10 @@ fun FBTeamInfoSixthItem(
                 updateItemPosition?.let { it(5, coordinates) }
             },
             verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = containerModifier
-                .optionalClickable(apply = isAniItem) {
-                    searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
-                }
+            modifier = containerModifier,
+            onClick = {
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
+            }
         ) {
             HCapsuleBar()
 

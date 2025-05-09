@@ -397,10 +397,10 @@ fun FBPlayerInfoFourthItem(
             },
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
-                .padding(top = if (isAniItem) 0.dp else 12.dp)
-                .optionalClickable(apply = isAniItem) {
-                    searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(playerId = displayModel.info.id))
-                }
+                .padding(top = if (isAniItem) 0.dp else 12.dp),
+            onClick = {
+                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(playerId = displayModel.info.id))
+            }
         ) {
             HCapsuleBar()
 
@@ -494,10 +494,10 @@ fun FBPlayerInfoFifthItem(
             },
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
-                .padding(top = if (isAniItem) 0.dp else 12.dp)
-                .optionalClickable(apply = isAniItem) {
-                    searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
-                }
+                .padding(top = if (isAniItem) 0.dp else 12.dp),
+            onClick = {
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
+            }
         ) {
             HCapsuleBar()
 
@@ -622,10 +622,10 @@ fun FBPlayerInfoSixthItem(
             },
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
-                .padding(top = if (isAniItem) 0.dp else 12.dp)
-                .optionalClickable(apply = isAniItem) {
-                    searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
-                }
+                .padding(top = if (isAniItem) 0.dp else 12.dp),
+            onClick = {
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
+            }
         ) {
             HCapsuleBar()
 

@@ -112,7 +112,7 @@ fun InfoViewContainer(
         ) {
             scope.measureContent()
         }
-
+        
         scope.displayContent()
     }
 }

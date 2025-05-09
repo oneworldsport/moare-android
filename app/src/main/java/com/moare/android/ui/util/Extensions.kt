@@ -58,6 +58,10 @@ fun Modifier.optionalClickable(apply: Boolean, onClick: (() -> Unit)): Modifier 
     return if (apply) this.clickable(onClick = onClick) else this
 }
 
+fun Modifier.nullableOptionalClickable(apply: Boolean, onClick: (() -> Unit)?): Modifier {
+    return onClick?.let { if (apply) this.clickable(onClick = onClick) else this } ?: this
+}
+
 /**
  * Since this is not a Modifier extension, it must be used to create Modifier initially,
  * rather than chaining onto an existing Modifier.
