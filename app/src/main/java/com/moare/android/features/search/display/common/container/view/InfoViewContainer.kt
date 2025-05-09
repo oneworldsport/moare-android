@@ -1,4 +1,4 @@
-package com.moare.android.features.search.display.common.container
+package com.moare.android.features.search.display.common.container.view
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -112,7 +112,7 @@ fun InfoViewContainer(
         ) {
             scope.measureContent()
         }
-        
+
         scope.displayContent()
     }
 }

@@ -31,8 +31,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
-import com.moare.android.features.search.display.common.container.InfoViewContainer
-import com.moare.android.features.search.display.common.container.MovingCapsuleItemContainer
+import com.moare.android.features.search.display.common.container.view.InfoViewContainer
+import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoIntent
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoViewModel
@@ -43,7 +43,6 @@ import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
-import com.moare.android.ui.util.optionalClickable
 
 @Composable
 fun FBPlayerInfoView(

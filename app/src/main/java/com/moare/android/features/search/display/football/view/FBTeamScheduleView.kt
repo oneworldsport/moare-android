@@ -38,6 +38,15 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.features.search.display.common.container.component.ScheduleGameItemContainer
+import com.moare.android.features.search.display.common.container.state.CalendarUiActions
+import com.moare.android.features.search.display.common.container.state.CalendarUiState
+import com.moare.android.features.search.display.common.container.state.ScheduleContainerActions
+import com.moare.android.features.search.display.common.container.state.ScheduleContainerState
+import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
+import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
+import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
+import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleIntent
 import com.moare.android.features.search.display.football.viewmodel.FBTeamScheduleIntent
 import com.moare.android.features.search.display.football.viewmodel.FBTeamScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -86,70 +95,43 @@ fun FBTeamScheduleView(
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Column(
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        /* ---------------------
-           game title
-           - shows when game selected
-           --------------------- */
-        fbGameStatsData?.let {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                LeagueTitle(
-                    url = it.game.league.logo,
-                    leagueName = it.game.league.name,
-                    leagueSeason = it.game.league.season
-                )
-
-                Text(
-                    text = " - " + if (fbGameStatsData?.game?.league?.round != null) {
-                        MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = fbGameStatsData?.game?.league?.round!!)
-                    } else { "" },
-                    fontSize = 14.sp
-                )
+    ScheduleViewContainer(
+        state = ScheduleContainerState(
+            shouldShowCalendar = false,
+            shouldShowAllResultToggleButton = fbGameStatsData == null,
+            shouldFetchSchedule = false,
+            shouldFillBelow = fbGameStatsData == null,
+            isAllResultOpened = isAllResultOpened
+        ),
+        actions = ScheduleContainerActions(
+            allResultButtonAction = {
+                fbTeamScheduleViewModel.send(FBTeamScheduleIntent.ToggleAllResult)
             }
-        }
-
-        /* ---------------------
-           all result open button
-           - hides when game selected
-           --------------------- */
-        if (fbGameStatsData == null) {
-            Row {
-                Spacer(Modifier.weight(1f))
-
-                CapsuleButton(
-                    text = if (isAllResultOpened) {
-                        StringConstants.RESULT_HIDE
-                    } else {
-                        StringConstants.RESULT_OPEN
-                    },
-                    color = Color.Gray,
-                    modifier = Modifier.padding(end = 8.dp)
+        ),
+        titleContent = {
+            fbGameStatsData?.let {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    fbTeamScheduleViewModel.send(FBTeamScheduleIntent.ToggleAllResult)
+                    LeagueTitle(
+                        url = it.game.league.logo,
+                        leagueName = it.game.league.name,
+                        leagueSeason = it.game.league.season
+                    )
+
+                    Text(
+                        text = " - " + if (fbGameStatsData?.game?.league?.round != null) {
+                            MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = fbGameStatsData?.game?.league?.round!!)
+                        } else { "" },
+                        fontSize = 14.sp
+                    )
                 }
             }
+        },
+        gameListContent = {
+            FBTeamScheduleList()
         }
-
-        /* ---------------------
-           schedule
-           --------------------- */
-        FBTeamScheduleList()
-
-        /* ---------------------
-           bottom empty space
-           - hides when game selected
-           --------------------- */
-        if (fbGameStatsData == null) {
-            Spacer(Modifier.fillMaxSize())
-        }
-    }
+    )
 }
 
 @Composable
@@ -253,15 +235,34 @@ fun FBTeamScheduleListItem(
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = fbGameStatsData == null) {
+    ScheduleGameItemContainer(
+        state = ScheduleGameItemState(
+            isClickEnabled = fbGameStatsData == null,
+            homeTeamLogo = data.teams.home.logo,
+            homeTeamName = fbTeamScheduleViewModel.teamNameDictionary["short_${data.teams.home.id}"] ?: data.teams.home.name,
+            homeTeamScore = data.goals.home,
+            awayTeamLogo = data.teams.away.logo,
+            awayTeamName = fbTeamScheduleViewModel.teamNameDictionary["short_${data.teams.away.id}"] ?: data.teams.away.name,
+            awayTeamScore = data.goals.away,
+            scoreAlpha = scoreAlpha,
+            isResultOpened = isResultOpened,
+            gameStatusText = gameStatusText,
+            gameStatusColor = gameStatusColor,
+            isCapsuleButtonDisabled = fbGameStatsData != null || !StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short),
+            date = CalendarUtil.formatDate(data.fixture.date).split(" ").firstOrNull() ?: "",
+            dateTime = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
+            venue = fbTeamScheduleViewModel.teamNameDictionary["venue_${data.teams.home.id}"] ?: (fbGameStatsData?.game?.fixture?.venue?.name ?: ""),
+            gameType = MatchDescriptionConverter.convert(input = data.league.round),
+            referee = refereeKrName,
+            shouldShowOnlyDateTime = false,
+            shouldShowVenue = fbGameStatsData != null,
+            shouldShowGameType = fbGameStatsData == null,
+            shouldShowReferee = fbGameStatsData != null,
+            shouldShowHomeLabel = fbGameStatsData != null,
+            shouldShowAwayLabel = fbGameStatsData != null
+        ),
+        actions = ScheduleGameItemActions(
+            onGameItemClick = {
                 displayModel?.let {
                     searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data, it.leagueId))
                 }
@@ -273,158 +274,10 @@ fun FBTeamScheduleListItem(
                         true
                     )
                 )
-            }
-            .padding(vertical = 8.dp)
-            .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
-    ) {
-
-        /* ---------------------
-           home
-           --------------------- */
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .weight(1f)
-//                .clickable(enabled = fbGameStatsData != null) {
-//                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue = TextFieldValue(text = "토트넘")))
-//                    searchViewModel.send(SearchViewModel.Intent.PerformSearch())
-//                }
-        ) {
-            URLImage(
-                url = data.teams.home.logo,
-                size = URLImageSize.SMALL
-            )
-
-            Text(
-                text = fbTeamScheduleViewModel.teamNameDictionary["short_${data.teams.home.id}"] ?: data.teams.home.name,
-                fontSize = 13.sp,
-                maxLines = 2
-            )
-
-            fbGameStatsData?.let {
-                RoundedBorderText(
-                    text = "홈",
-                    fontSize = 11.sp,
-                    radius = 4.dp,
-                    textColor = Moare,
-                    borderColor = Moare
-                )
-            }
-        }
-
-        // Add space to both sides of each score to place the score in the middle
-        Spacer(Modifier.weight(0.3f))
-
-        // score
-        Text(
-            text = data.goals.home.toString(),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .width(20.dp)
-                .alpha(scoreAlpha),
-            color = if (data.goals.home >= data.goals.away) MaterialTheme.colors.primary else Color.Black
-        )
-
-        // Add space to both sides of each score to place the score in the middle
-        Spacer(Modifier.weight(0.3f))
-
-        /* ---------------------
-           game info
-           --------------------- */
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // game status
-            CapsuleButton(
-                text = gameStatusText,
-                color = gameStatusColor,
-                isDisabled = fbGameStatsData != null || !StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short)
-            ) {
+            },
+            onCapsuleButtonClick = {
                 fbTeamScheduleViewModel.send(FBTeamScheduleIntent.UpdateResultOpenedState(data.fixture.id, !isResultOpened))
             }
-
-            // game date
-            Text(
-                text = CalendarUtil.formatDate(data.fixture.date).split(" ").firstOrNull() ?: "",
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 2.dp)
-            )
-
-            Text(
-                text = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
-
-            // venue
-            fbGameStatsData?.let {
-                Text(
-                    text = "장소: ${fbTeamScheduleViewModel.teamNameDictionary["venue_${data.teams.home.id}"] ?: it.game.fixture.venue.name}",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Light,
-                    maxLines = 1,
-                    modifier = Modifier.padding(bottom = 2.dp)
-                )
-            }
-
-            // game type or referee
-            Text(
-                text = if (fbGameStatsData != null) {
-                    "심판: $refereeKrName"
-                } else {
-                    MatchDescriptionConverter.convert(input = data.league.round)
-                },
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Light,
-                maxLines = 1,
-            )
-        }
-
-        /* ---------------------
-           away
-           --------------------- */
-        Spacer(Modifier.weight(0.3f))
-
-        // score
-        Text(
-            text = data.goals.away.toString(),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .width(20.dp)
-                .alpha(scoreAlpha),
-            color = if (data.goals.away >= data.goals.home) MaterialTheme.colors.primary else Color.Black
         )
-
-        Spacer(Modifier.weight(0.3f))
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .weight(1f)
-        ) {
-            URLImage(
-                url = data.teams.away.logo,
-                size = URLImageSize.SMALL
-            )
-
-            Text(
-                text = fbTeamScheduleViewModel.teamNameDictionary["short_${data.teams.away.id}"] ?: data.teams.away.name,
-                fontSize = 13.sp,
-                maxLines = 2
-            )
-
-            fbGameStatsData?.let {
-                RoundedBorderText(
-                    text = "원정",
-                    fontSize = 11.sp,
-                    radius = 4.dp,
-                    textColor = Color.Gray,
-                    borderColor = Color.Gray
-                )
-            }
-        }
-    }
+    )
 }
