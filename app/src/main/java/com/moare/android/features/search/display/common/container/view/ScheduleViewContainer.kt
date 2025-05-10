@@ -34,7 +34,6 @@ import com.moare.android.ui.util.CenterColumn
 
 @Composable
 fun ScheduleViewContainer(
-    searchViewModel: SearchViewModel = hiltViewModel(),
     state: ScheduleContainerState,
     actions: ScheduleContainerActions,
     titleContent: @Composable ColumnScope.() -> Unit,

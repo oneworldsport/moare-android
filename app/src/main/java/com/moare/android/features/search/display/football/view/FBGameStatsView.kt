@@ -51,6 +51,8 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.percentageOf
+import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
+import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -140,19 +142,14 @@ fun FBGameStatsView(
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Column(
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        /* ---------------------
-           game title, info
-           - hides when game selected by schedule
-           --------------------- */
-        if (fbLeagueScheduleData == null && fbTeamScheduleData == null) {
+    GameStatsViewContainer(
+        state = GameStatsContainerState(
+            shouldShowTitle = fbLeagueScheduleData == null && fbTeamScheduleData == null,
+            shouldShowGameItem = fbLeagueScheduleData == null && fbTeamScheduleData == null,
+            shouldShowStats = displayModel?.game?.fixture?.status?.short != "NS",
+            shouldShowCoach = true
+        ),
+        titleContent = {
             displayModel?.game?.let { game ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -168,29 +165,17 @@ fun FBGameStatsView(
                         fontSize = 14.sp
                     )
                 }
-
+            }
+        },
+        gameContent = {
+            displayModel?.game?.let { game ->
                 FBLeagueScheduleListItem(data = game)
             }
-        }
-
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
-                .background(MaterialTheme.colors.primary)
-        )
-
-        if (displayModel?.game?.fixture?.status?.short != "NS") {
-            /* ---------------------
-               team select button
-               --------------------- */
+        },
+        teamButtonContent = {
             FBGameStatsTeamButtonContainer()
-
-            /* ---------------------
-               coach
-               --------------------- */
+        },
+        coachContent = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -213,53 +198,23 @@ fun FBGameStatsView(
                     modifier = Modifier.padding(start = 4.dp)
                 )
             }
-
-            /* ---------------------
-               players stats
-               --------------------- */
-            Box {
-                // category
-                Row {
-                    FBGameStatsFirstCategoryItem()
-
-                    Row(
-                        Modifier.horizontalScroll(horizontalScrollState)
-                    ) {
-                        Column {
-                            FBGameStatsFirstCategoryList()
-                            FBGameStatsSecondCategoryList()
-                        }
-                    }
-                }
-
-                // stats data
-                Column(
-                    modifier = Modifier
-                        .padding(top = fbGameStatsViewModel.categoryItemHeight * 2)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    Row {
-                        FBGameStatsFirstDataList()
-
-                        Row(
-                            Modifier.horizontalScroll(horizontalScrollState)
-                        ) {
-                            FBGameStatsDataList()
-                        }
-                    }
-                }
+        },
+        firstCategoryContent = {
+            FBGameStatsFirstCategoryItem()
+        },
+        categoryListContent = {
+            Column {
+                FBGameStatsFirstCategoryList()
+                FBGameStatsSecondCategoryList()
             }
-        } else {
-            Text(
-                text = "경기 시작 후 데이터가 업데이트됩니다.",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.Gray
-            )
-
-            Spacer(Modifier.weight(1f))
+        },
+        standingsFirstDataContent = {
+            FBGameStatsFirstDataList()
+        },
+        standingsDataContent = {
+            FBGameStatsDataList()
         }
-    }
+    )
 }
 
 @Composable
