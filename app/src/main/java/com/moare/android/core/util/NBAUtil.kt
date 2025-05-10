@@ -26,11 +26,11 @@ object NBAUtil {
     fun gameType(gameSummary: NBAGameSummary?, isShort: Boolean = false): String {
         if (gameSummary == null) return ""
 
-        return if (gameSummary.weekName.lowercase().contains("week") && gameSummary.seriesGameNumber.isEmpty()) {
+        return if (gameSummary.seriesGameNumber.isEmpty()) {
             "정규시즌"
-        } else if (gameSummary.weekName.isEmpty() && gameSummary.gameLabel.lowercase().contains("play-in")) {
+        } else if (gameSummary.gameLabel.lowercase().contains("play-in")) {
             "플레이인 토너먼트"
-        } else if (gameSummary.weekName.isEmpty() && !gameSummary.seriesGameNumber.isEmpty()) {
+        } else if (!gameSummary.seriesGameNumber.isEmpty()) {
             val label = gameSummary.gameLabel.lowercase()
             val subLabel = gameSummary.gameSubLabel
             val conference = if (label.contains("west")) "서부" else "동부"

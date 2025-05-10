@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.rounded
+import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -154,73 +155,33 @@ fun FBPlayerStandingsView(
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Column(
-        // NOTE: If set fillMaxSize, AnimatedVisibility works fine on first show.
-        // But if fillMaxSize not set, AnimatedVisibility doesn't work on first show.
-        // Not sure why yet
-        modifier = Modifier.fillMaxSize()
-    ) {
-        league?.let {
-            LeagueTitle(
-                url = league.logo,
-                leagueName = league.name,
-                leagueSeason = league.season
-            )
-        }
-
-        // category
-        Row(
-            modifier = Modifier.padding(top = 6.dp)
-        ) {
+    StandingsViewContainer(
+        displayDataState = displayDataState,
+        titleContent = {
+            league?.let {
+                LeagueTitle(
+                    url = league.logo,
+                    leagueName = league.name,
+                    leagueSeason = league.season
+                )
+            }
+        },
+        firstCategoryContent = {
             FBPlayerStandingsFirstCategoryItem()
-
-            Row(
-                Modifier.horizontalScroll(horizontalScrollState)
-            ) {
-                Column {
-                    FBPlayerStandingsFirstCategoryList()
-                    FBPlayerStandingsSecondCategoryList()
-                }
+        },
+        categoryListContent = {
+            Column {
+                FBPlayerStandingsFirstCategoryList()
+                FBPlayerStandingsSecondCategoryList()
             }
+        },
+        standingsFirstDataContent = {
+            FBPlayerStandingsFirstDataList()
+        },
+        standingsDataContent = {
+            FBPlayerStandingsDataList()
         }
-
-        // loading
-        AnimatedVisibility(
-            visible = displayDataState == ApiFetchState.Fetching,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                ProgressIndicator()
-            }
-        }
-
-        // standings data
-        AnimatedVisibility(
-            visible = displayDataState == ApiFetchState.Success
-        ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(verticalScrollState)
-            ) {
-                Row {
-                    FBPlayerStandingsFirstDataList()
-
-                    Row(
-                        Modifier.horizontalScroll(horizontalScrollState)
-                    ) {
-                        FBPlayerStandingsDataList()
-                    }
-                }
-            }
-        }
-    }
+    )
 }
 
 @Composable

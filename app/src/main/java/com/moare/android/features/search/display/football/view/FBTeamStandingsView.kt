@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -99,49 +100,29 @@ fun FBTeamStandingsView(
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        league?.let {
-            LeagueTitle(
-                url = league.logo,
-                leagueName = league.name,
-                leagueSeason = league.season
-            )
-        }
-
-        // category
-        Row(
-            modifier = Modifier.padding(top = 6.dp)
-        ) {
+    StandingsViewContainer(
+        titleContent = {
+            league?.let {
+                LeagueTitle(
+                    url = league.logo,
+                    leagueName = league.name,
+                    leagueSeason = league.season
+                )
+            }
+        },
+        firstCategoryContent = {
             FBTeamStandingsFirstCategoryItem()
-
-            Row(
-                Modifier.horizontalScroll(horizontalScrollState)
-            ) {
-                FBTeamStandingsCategoryList()
-            }
+        },
+        categoryListContent = {
+            FBTeamStandingsCategoryList()
+        },
+        standingsFirstDataContent = {
+            FBTeamStandingsFirstDataList()
+        },
+        standingsDataContent = {
+            FBTeamStandingsDataList()
         }
-
-        // standings data
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-        ) {
-            Row {
-                FBTeamStandingsFirstDataList()
-
-                Row(
-                    Modifier.horizontalScroll(horizontalScrollState)
-                ) {
-                    FBTeamStandingsDataList()
-                }
-            }
-        }
-    }
+    )
 }
 
 @Composable
