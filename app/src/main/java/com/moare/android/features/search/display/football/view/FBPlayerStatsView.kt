@@ -253,14 +253,14 @@ fun FBPlayerStatsList(
 fun FBPlayerStatsListItem(
     index: Int,
     data: FBPlayerStats,
-    isAniItem: Boolean = false,
-    itemSizes: Map<Int, DpSize>? = null,
-    itemPositions: Map<Int, Offset>? = null,
+    isAniItem: Boolean,
+    itemSizes: Map<Int, DpSize>?,
+    itemPositions: Map<Int, Offset>?,
     startPosition: Offset,
-    aniPosition: Boolean = true,
-    contentsAlpha: Float = 0f,
+    aniPosition: Boolean,
+    contentsAlpha: Float,
     containerModifier: Modifier = Modifier,
-    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
+    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)?
 ) {
     MovingCapsuleItemContainer(
         isAniItem = isAniItem,
