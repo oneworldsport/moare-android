@@ -64,90 +64,94 @@ fun FBPlayerInfoView(
         }
     }
 
-    InfoViewContainer(itemCount = 6, measureContent = {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            FBPlayerInfoFirstItem(
-                containerModifier = Modifier.weight(1f)
-            ) { index, coordinates ->
+    InfoViewContainer(
+        itemCount = 6,
+        measureContent = {
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                FBPlayerInfoFirstItem(
+                    containerModifier = Modifier.weight(1f)
+                ) { index, coordinates ->
+                    updateItemPosition(index, coordinates)
+                }
+
+                FBPlayerInfoSecondItem(
+                    containerModifier = Modifier.weight(1f)
+                ) { index, coordinates ->
+                    updateItemPosition(index, coordinates)
+                }
+
+                FBPlayerInfoThirdItem(
+                    containerModifier = Modifier.weight(1f)
+                ) { index, coordinates ->
+                    updateItemPosition(index, coordinates)
+                }
+            }
+
+            FBPlayerInfoFourthItem { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
+
+            FBPlayerInfoFifthItem { index, coordinates ->
+                updateItemPosition(index, coordinates)
+            }
+
+            FBPlayerInfoSixthItem { index, coordinates ->
+                updateItemPosition(index, coordinates)
+            }
+        },
+        displayContent = {
+            FBPlayerInfoFirstItem(
+                isAniItem = true,
+                itemSize = itemSizes[0],
+                itemPosition = itemPositions[0],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
 
             FBPlayerInfoSecondItem(
-                containerModifier = Modifier.weight(1f)
-            ) { index, coordinates ->
-                updateItemPosition(index, coordinates)
-            }
+                isAniItem = true,
+                itemSize = itemSizes[1],
+                itemPosition = itemPositions[1],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
 
             FBPlayerInfoThirdItem(
-                containerModifier = Modifier.weight(1f)
-            ) { index, coordinates ->
-                updateItemPosition(index, coordinates)
-            }
+                isAniItem = true,
+                itemSize = itemSizes[2],
+                itemPosition = itemPositions[2],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
+
+            FBPlayerInfoFourthItem(
+                isAniItem = true,
+                itemSize = itemSizes[3],
+                itemPosition = itemPositions[3],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
+
+            FBPlayerInfoFifthItem(
+                isAniItem = true,
+                itemSize = itemSizes[4],
+                itemPosition = itemPositions[4],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
+
+            FBPlayerInfoSixthItem(
+                isAniItem = true,
+                itemSize = itemSizes[5],
+                itemPosition = itemPositions[5],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
         }
-
-        FBPlayerInfoFourthItem { index, coordinates ->
-            updateItemPosition(index, coordinates)
-        }
-
-        FBPlayerInfoFifthItem { index, coordinates ->
-            updateItemPosition(index, coordinates)
-        }
-
-        FBPlayerInfoSixthItem { index, coordinates ->
-            updateItemPosition(index, coordinates)
-        }
-    }, displayContent = {
-        FBPlayerInfoFirstItem(
-            isAniItem = true,
-            itemSize = itemSizes[0],
-            itemPosition = itemPositions[0],
-            aniPosition = aniPositions,
-            contentsAlpha = contentsAlpha
-        )
-
-        FBPlayerInfoSecondItem(
-            isAniItem = true,
-            itemSize = itemSizes[1],
-            itemPosition = itemPositions[1],
-            aniPosition = aniPositions,
-            contentsAlpha = contentsAlpha
-        )
-
-        FBPlayerInfoThirdItem(
-            isAniItem = true,
-            itemSize = itemSizes[2],
-            itemPosition = itemPositions[2],
-            aniPosition = aniPositions,
-            contentsAlpha = contentsAlpha
-        )
-
-        FBPlayerInfoFourthItem(
-            isAniItem = true,
-            itemSize = itemSizes[3],
-            itemPosition = itemPositions[3],
-            aniPosition = aniPositions,
-            contentsAlpha = contentsAlpha
-        )
-
-        FBPlayerInfoFifthItem(
-            isAniItem = true,
-            itemSize = itemSizes[4],
-            itemPosition = itemPositions[4],
-            aniPosition = aniPositions,
-            contentsAlpha = contentsAlpha
-        )
-
-        FBPlayerInfoSixthItem(
-            isAniItem = true,
-            itemSize = itemSizes[5],
-            itemPosition = itemPositions[5],
-            aniPosition = aniPositions,
-            contentsAlpha = contentsAlpha
-        )
-    })
+    )
 }
 
 

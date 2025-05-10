@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,6 +22,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.features.search.display.common.scope.InfoViewScope
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -46,7 +48,7 @@ fun InfoViewContainer(
     val density = LocalDensity.current
     var parentPosition by remember { mutableStateOf(Offset.Zero) }
     var parentCenter by remember { mutableStateOf(Offset.Zero) }
-    val itemSizes = remember { mutableStateMapOf<Int, DpSize>() }
+    val itemSizes = remember { mutableStateMapOf<Int, DpSize>() } // NOTE: parentCenter를 기준으로 이동해야할 각 아이템들의 offset
     val itemPositions = remember { mutableStateMapOf<Int, Offset>() }
     var aniPositions by remember { mutableStateOf(false) }
     var showContents by remember { mutableStateOf(false) }
@@ -101,6 +103,7 @@ fun InfoViewContainer(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
+                .padding(horizontal = 8.dp)
                 .onGloballyPositioned { coordinates ->
                     parentPosition = coordinates.positionInWindow()
                     parentCenter = Offset(
