@@ -9,6 +9,14 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamInf
 import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
@@ -24,6 +32,12 @@ import com.moare.android.features.search.models.responsemodels.football.FBPlayer
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOGameScheduleResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
@@ -232,6 +246,88 @@ data class DataModel(
                     SportDecodableModel.NBALeagueTournament(responseModel, displayModel)
                 }
 
+                // baseball
+                "baseball_player_info" -> {
+                    val responseModel: KBOPlayerInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.info == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.kboPlayerInfoConverter(responseModel)
+                        SportDecodableModel.KBOPlayerInfo(responseModel, displayModel)
+                    }
+                }
+                "baseball_player_stats" -> {
+                    val responseModel: KBOPlayerInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.info == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.kboPlayerStatsConverter(responseModel)
+                        SportDecodableModel.KBOPlayerStats(responseModel, displayModel)
+                    }
+                }
+                "baseball_player_standings" -> {
+                    val responseModel: KBOPlayerStandingsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.standings.isEmpty()) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.kboPlayerStandingsConverter(responseModel)
+                        SportDecodableModel.KBOPlayerStandings(responseModel, displayModel)
+                    }
+                }
+                "baseball_team_info" -> {
+                    val responseModel: KBOTeamInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.info == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.kboTeamInfoConverter(responseModel)
+                        SportDecodableModel.KBOTeamInfo(responseModel, displayModel)
+                    }
+                }
+                "baseball_team_stats" -> {
+                    val responseModel: KBOTeamInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.info == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.kboTeamStatsConverter(responseModel)
+                        SportDecodableModel.KBOTeamStats(responseModel, displayModel)
+                    }
+                }
+                "baseball_team_standings" -> {
+                    val responseModel: KBOTeamStandingsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.standings.isEmpty()) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.kboTeamStandingsConverter(responseModel)
+                        SportDecodableModel.KBOTeamStandings(responseModel, displayModel)
+                    }
+                }
+//                "baseball_team_schedule" -> {
+//                    val responseModel: KBOGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+//                    val displayModel = modelConverter.kboTeamScheduleConverter(responseModel)
+//                    SportDecodableModel.KBOTeamSchedule(responseModel, displayModel)
+//                }
+                "baseball_league_schedule" -> {
+                    val responseModel: KBOGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                    val displayModel = modelConverter.kboLeagueScheduleConverter(responseModel)
+                    SportDecodableModel.KBOLeagueSchedule(responseModel, displayModel)
+                }
+                "baseball_game_stats" -> {
+                    val responseModel: KBOGameStatsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.game == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = modelConverter.kboGameStatsConverter(responseModel)
+                        SportDecodableModel.KBOGameStats(responseModel, displayModel)
+                    }
+                }
+
                 else -> SportDecodableModel.NoResult
             }
 
@@ -374,6 +470,61 @@ sealed class SportDecodableModel {
     data class NBALeagueTournament(
         val responseModel: NBAGameScheduleResponseModel,
         val displayModel: NBALeagueScheduleDisplayModel
+    ) : SportDecodableModel()
+
+    // kbo
+    @Serializable
+    data class KBOPlayerInfo(
+        val responseModel: KBOPlayerInfoResponseModel,
+        val displayModel: KBOPlayerInfoDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class KBOPlayerStats(
+        val responseModel: KBOPlayerInfoResponseModel,
+        val displayModel: KBOPlayerStatsDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class KBOPlayerStandings(
+        val responseModel: KBOPlayerStandingsResponseModel,
+        val displayModel: KBOPlayerStandingsDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class KBOTeamInfo(
+        val responseModel: KBOTeamInfoResponseModel,
+        val displayModel: KBOTeamInfoDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class KBOTeamStats(
+        val responseModel: KBOTeamInfoResponseModel,
+        val displayModel: KBOTeamStatsDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class KBOTeamStandings(
+        val responseModel: KBOTeamStandingsResponseModel,
+        val displayModel: KBOTeamStandingsDisplayModel
+    ) : SportDecodableModel()
+
+//    @Serializable
+//    data class KBOTeamSchedule(
+//        val responseModel: KBOGameScheduleResponseModel,
+//        val displayModel: KBOTeamScheduleDisplayModel
+//    ) : SportDecodableModel()
+
+    @Serializable
+    data class KBOLeagueSchedule(
+        val responseModel: KBOGameScheduleResponseModel,
+        val displayModel: KBOLeagueScheduleDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class KBOGameStats(
+        val responseModel: KBOGameStatsResponseModel,
+        val displayModel: KBOGameStatsDisplayModel
     ) : SportDecodableModel()
 
     @Serializable

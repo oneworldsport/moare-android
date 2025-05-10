@@ -124,6 +124,9 @@ fun SearchView(
     val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
     val nbaLeagueTournamentData by searchViewModel.nbaLeagueTournamentData.collectAsState()
 
+    // kbo
+    val kboPlayerInfoData by searchViewModel.kboPlayerInfoData.collectAsState()
+
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
     val autoCompleteListVisibleState by searchViewModel.autoCompleteListVisibleState.collectAsState()
@@ -442,6 +445,11 @@ fun SearchView(
                     // basketball_league_tournament
                     nbaLeagueTournamentData?.let {
                         NBALeagueTournamentView(data = it)
+                    }
+
+                    // baseball_player_info
+                    kboPlayerInfoData?.let {
+                        Text(it.info.name)
                     }
                 }
             }

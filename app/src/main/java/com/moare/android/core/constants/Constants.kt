@@ -21,6 +21,8 @@ object Constants {
         const val BUNDESLIGA = 78
         const val LIGUE1 = 61
         const val NBA = 90001
+        const val KBO = 90101
+        const val MLB = 90102
 
         // nba team
         const val ATL = 1610612737

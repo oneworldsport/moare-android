@@ -33,6 +33,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamSch
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.NoticeModel
 import com.moare.android.features.search.models.TrendingKeywords
+import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
@@ -130,6 +131,10 @@ class SearchViewModel @Inject constructor(
 
     private val _nbaLeagueTournamentData = MutableStateFlow<NBALeagueScheduleDisplayModel?>(null)
     val nbaLeagueTournamentData: StateFlow<NBALeagueScheduleDisplayModel?> = _nbaLeagueTournamentData
+
+    // kbo
+    private val _kboPlayerInfoData = MutableStateFlow<KBOPlayerInfoDisplayModel?>(null)
+    val kboPlayerInfoData: StateFlow<KBOPlayerInfoDisplayModel?> = _kboPlayerInfoData
 
     // auto complete
     private val _autoCompleteList = MutableStateFlow<List<String>>(emptyList())
@@ -343,6 +348,8 @@ class SearchViewModel @Inject constructor(
             _nbaGameStatsData.emit(null)
             _nbaLeagueTournamentData.emit(null)
 
+            _kboPlayerInfoData.emit(null)
+
             when (val data = data?.data) {
                 is SportDecodableModel.FBPlayerInfo -> {
                     _fbPlayerInfoData.emit(data.displayModel)
@@ -403,6 +410,35 @@ class SearchViewModel @Inject constructor(
                 }
                 is SportDecodableModel.NBALeagueTournament -> {
                     _nbaLeagueTournamentData.emit(data.displayModel)
+                }
+
+                is SportDecodableModel.KBOPlayerInfo -> {
+                    _kboPlayerInfoData.emit(data.displayModel)
+                }
+                is SportDecodableModel.KBOPlayerStats -> {
+//                    _nbaPlayerStatsData.emit(data.displayModel)
+                }
+                is SportDecodableModel.KBOPlayerStandings -> {
+//                    _nbaPlayerStandingsData.emit(data.displayModel)
+                }
+                is SportDecodableModel.KBOTeamInfo -> {
+//                    _nbaTeamInfoData.emit(data.displayModel)
+                }
+                is SportDecodableModel.KBOTeamStats -> {
+//                    _nbaTeamStatsData.emit(data.displayModel)
+                }
+                is SportDecodableModel.KBOTeamStandings -> {
+//                    _nbaTeamStandingsData.emit(data.displayModel)
+                }
+//                is SportDecodableModel.KBOTeamSchedule -> {
+//                    _nbaTeamScheduleData.emit(data.displayModel)
+//                }
+                is SportDecodableModel.KBOLeagueSchedule -> {
+//                    _nbaLeagueScheduleData.emit(data.displayModel)
+//                    initialKBOLeagueScheduleData = data.displayModel
+                }
+                is SportDecodableModel.KBOGameStats -> {
+//                    _nbaGameStatsData.emit(data.displayModel)
                 }
 
                 else -> {
@@ -575,6 +611,8 @@ class SearchViewModel @Inject constructor(
                     _nbaGameStatsData.emit(null)
                     _nbaLeagueTournamentData.emit(null)
 
+                    _kboPlayerInfoData.emit(null)
+
                     when (viewToShow) {
                         is SportDecodableModel.FBPlayerInfo -> {
                             _fbPlayerInfoData.emit(viewToShow.displayModel)
@@ -641,6 +679,35 @@ class SearchViewModel @Inject constructor(
                         }
                         is SportDecodableModel.NBALeagueTournament -> {
                             _nbaLeagueTournamentData.emit(viewToShow.displayModel)
+                        }
+
+                        is SportDecodableModel.KBOPlayerInfo -> {
+                            _kboPlayerInfoData.emit(viewToShow.displayModel)
+                        }
+                        is SportDecodableModel.KBOPlayerStats -> {
+//                    _nbaPlayerStatsData.emit(data.displayModel)
+                        }
+                        is SportDecodableModel.KBOPlayerStandings -> {
+//                    _nbaPlayerStandingsData.emit(data.displayModel)
+                        }
+                        is SportDecodableModel.KBOTeamInfo -> {
+//                    _nbaTeamInfoData.emit(data.displayModel)
+                        }
+                        is SportDecodableModel.KBOTeamStats -> {
+//                    _nbaTeamStatsData.emit(data.displayModel)
+                        }
+                        is SportDecodableModel.KBOTeamStandings -> {
+//                    _nbaTeamStandingsData.emit(data.displayModel)
+                        }
+//                is SportDecodableModel.KBOTeamSchedule -> {
+//                    _nbaTeamScheduleData.emit(data.displayModel)
+//                }
+                        is SportDecodableModel.KBOLeagueSchedule -> {
+//                    _nbaLeagueScheduleData.emit(data.displayModel)
+//                    initialKBOLeagueScheduleData = data.displayModel
+                        }
+                        is SportDecodableModel.KBOGameStats -> {
+//                    _nbaGameStatsData.emit(data.displayModel)
                         }
 
                         else -> {}
@@ -963,6 +1030,8 @@ class SearchViewModel @Inject constructor(
             _nbaLeagueScheduleData.emit(null)
             _nbaGameStatsData.emit(null)
             _nbaLeagueTournamentData.emit(null)
+
+            _kboPlayerInfoData.emit(null)
         }
 
         when (data) {
@@ -1023,6 +1092,35 @@ class SearchViewModel @Inject constructor(
             }
             is SportDecodableModel.NBALeagueTournament -> {
                 _nbaLeagueTournamentData.emit(data.displayModel)
+            }
+
+            is SportDecodableModel.KBOPlayerInfo -> {
+                _kboPlayerInfoData.emit(data.displayModel)
+            }
+            is SportDecodableModel.KBOPlayerStats -> {
+//                    _nbaPlayerStatsData.emit(data.displayModel)
+            }
+            is SportDecodableModel.KBOPlayerStandings -> {
+//                    _nbaPlayerStandingsData.emit(data.displayModel)
+            }
+            is SportDecodableModel.KBOTeamInfo -> {
+//                    _nbaTeamInfoData.emit(data.displayModel)
+            }
+            is SportDecodableModel.KBOTeamStats -> {
+//                    _nbaTeamStatsData.emit(data.displayModel)
+            }
+            is SportDecodableModel.KBOTeamStandings -> {
+//                    _nbaTeamStandingsData.emit(data.displayModel)
+            }
+//                is SportDecodableModel.KBOTeamSchedule -> {
+//                    _nbaTeamScheduleData.emit(data.displayModel)
+//                }
+            is SportDecodableModel.KBOLeagueSchedule -> {
+//                    _nbaLeagueScheduleData.emit(data.displayModel)
+//                    initialKBOLeagueScheduleData = data.displayModel
+            }
+            is SportDecodableModel.KBOGameStats -> {
+//                    _nbaGameStatsData.emit(data.displayModel)
             }
 
             else -> {}

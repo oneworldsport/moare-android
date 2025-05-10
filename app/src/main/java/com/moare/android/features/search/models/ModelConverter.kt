@@ -12,6 +12,16 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamSch
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStandingsDisplay
+import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
@@ -30,6 +40,12 @@ import com.moare.android.features.search.models.responsemodels.football.FBPlayer
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOGameScheduleResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
@@ -362,6 +378,160 @@ class ModelConverter(
             entityInfo = entityInfo,
             yearMonthList = emptyList(),
             games = response.schedule
+        )
+    }
+
+    /* ---------------------
+       kbo
+       --------------------- */
+    fun kboPlayerInfoConverter(response: KBOPlayerInfoResponseModel): KBOPlayerInfoDisplayModel {
+        val info = response.info!!
+
+        val stats = info.statistics.find { it.seasonType == "Regular Season" }
+
+//        val lastGameTeam = if (response.lastGame?.boxScoreTraditional?.homeTeamId == entityInfo.firstOrNull()?.teamId) {
+//            response.lastGame?.boxScoreTraditional?.homeTeam
+//        } else {
+//            response.lastGame?.boxScoreTraditional?.awayTeam
+//        }
+
+//        val lastGamePlayerStats = lastGameTeam?.players?.find { it.personId == entityInfo.firstOrNull()?.playerId }
+
+        return KBOPlayerInfoDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            info = info.player,
+            stats = stats,
+            lastGame = response.lastGame,
+//            lastGamePlayerStats = lastGamePlayerStats,
+            nextGame = response.nextGame
+        )
+    }
+
+    fun kboPlayerStatsConverter(response: KBOPlayerInfoResponseModel): KBOPlayerStatsDisplayModel {
+        val info = response.info!!
+
+        return KBOPlayerStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            player = info.player,
+            stats = info.statistics,
+        )
+    }
+
+    fun kboPlayerStandingsConverter(response: KBOPlayerStandingsResponseModel): KBOPlayerStandingsDisplayModel {
+        val standings: List<KBOPlayerStandingsDisplay> = response.standings.mapNotNull { playerInfo ->
+            val player = playerInfo.player
+            val statsList = playerInfo.statistics
+
+            for (item in statsList) {
+                if (item.seasonType == "Regular Season") {
+                    return@mapNotNull KBOPlayerStandingsDisplay(
+                        player = player,
+                        stats = item
+                    )
+                }
+            }
+
+            null
+        }
+
+        return KBOPlayerStandingsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            standings = standings
+        )
+    }
+
+    fun kboTeamInfoConverter(response: KBOTeamInfoResponseModel): KBOTeamInfoDisplayModel {
+        val info = response.info!!
+
+        // TODO: statistics에 season정보 추가
+//        val stats = info.statistics.find { it.seasonType == "Regular Season" }
+
+        return KBOTeamInfoDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            team = info.team,
+            venue = info.venue,
+            stats = info.statistics.firstOrNull(),
+            lastGame = response.lastGame,
+            nextGame = response.nextGame
+        )
+    }
+
+    fun kboTeamStatsConverter(response: KBOTeamInfoResponseModel): KBOTeamStatsDisplayModel {
+        val info = response.info!!
+
+        return KBOTeamStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            team = info.team,
+            venue = info.venue,
+            stats = info.statistics
+        )
+    }
+
+    fun kboTeamStandingsConverter(response: KBOTeamStandingsResponseModel): KBOTeamStandingsDisplayModel {
+        val standings: List<KBOTeamStandingsDisplay> = response.standings.mapNotNull { teamInfo ->
+//            val statsList = teamInfo.statistics
+            val stats = teamInfo.statistics.firstOrNull()
+
+//            for (item in statsList) {
+//                if (item.seasonType == "Regular Season") {
+                    return@mapNotNull KBOTeamStandingsDisplay(
+                        team = teamInfo.team,
+                        stats = stats!!
+                    )
+//                }
+//            }
+
+//            null
+        }
+
+        return KBOTeamStandingsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            standings = standings
+        )
+    }
+
+//    fun kboTeamScheduleConverter(response: KBOGameScheduleResponseModel): KBOTeamScheduleDisplayModel {
+//        return KBOTeamScheduleDisplayModel(
+//            leagueId = leagueId ?: Constants.Ids.KBO,
+//            keywords = keywords,
+//            entityInfo = entityInfo,
+//            games = response.schedule
+//        )
+//    }
+
+    fun kboLeagueScheduleConverter(response: KBOGameScheduleResponseModel): KBOLeagueScheduleDisplayModel {
+        val yearMonthList = response.scheduledMonths.map {
+            val (year, month) = it.split("-")
+            "${year.takeLast(2)}/$month"
+        }
+
+        return KBOLeagueScheduleDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            yearMonthList = yearMonthList,
+            games = response.schedule,
+        )
+    }
+
+    fun kboGameStatsConverter(response: KBOGameStatsResponseModel): KBOGameStatsDisplayModel {
+        return KBOGameStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            game = response.game!!
         )
     }
 }

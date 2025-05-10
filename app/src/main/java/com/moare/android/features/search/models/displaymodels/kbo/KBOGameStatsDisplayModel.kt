@@ -1,15 +1,15 @@
-package com.moare.android.features.search.models.displaymodels.nba
+package com.moare.android.features.search.models.displaymodels.kbo
 
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.displaymodels.DisplayModelBase
-import com.moare.android.features.search.models.models.nba.NBAGame
+import com.moare.android.features.search.models.models.kbo.KBOGame
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class NBAGameStatsDisplayModel(
+data class KBOGameStatsDisplayModel(
     override val leagueId: Int,
-    override val keywords: List<Keyword> = emptyList(), // NOTE: default value is added for usage in SearchViewModel
+    override val keywords: List<Keyword> = emptyList(),
     override val entityInfo: List<EntityInfo> = emptyList(),
-    val game: NBAGame
+    val game: KBOGame
 ) : DisplayModelBase
