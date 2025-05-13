@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class KBOTeam(
     val team: KBOTeamInfo,
-    val venue: KBOVenue,
-    val statistics: List<KBOTeamStats>,
+    val venue: KBOTeamVenue,
+    val statistics: List<KBOTeamStats>
 )
 
 @Serializable
@@ -28,7 +28,7 @@ data class KBOTeamInfo(
 }
 
 @Serializable
-data class KBOVenue(
+data class KBOTeamVenue(
     @SerialName("capacity") private val _capacity: Int? = null,
     @SerialName("name") private val _name: String? = null,
     @SerialName("opened") private val _opened: Int? = null,

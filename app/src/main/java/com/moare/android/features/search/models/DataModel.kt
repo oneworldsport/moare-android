@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models
 
+import com.moare.android.core.constants.Constants
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
@@ -17,6 +18,7 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStats
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
@@ -38,6 +40,7 @@ import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerInfo
 import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
@@ -72,6 +75,7 @@ data class DataModel(
             // TODO: data, keywords, entityInfo null 일때 처리
             val keywords: List<Keyword> = json.decodeFromJsonElement(jsonObject["keywords"]!!)
             val entityInfo: List<EntityInfo> = json.decodeFromJsonElement(jsonObject["entityInfo"]!!)
+            val leagueId = entityInfo.firstOrNull()?.leagueId
 
             // TODO: entityInfo 로 nba 인지 basketball 인지 판단?
             val modelConverter = ModelConverter(keywords, entityInfo)
@@ -248,13 +252,26 @@ data class DataModel(
 
                 // baseball
                 "baseball_player_info" -> {
-                    val responseModel: KBOPlayerInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                    if (leagueId == Constants.Ids.KBO) {
+                        val responseModel: KBOPlayerInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
 
-                    if (responseModel.info == null) {
-                        SportDecodableModel.NoResult
+                        if (responseModel.info == null) {
+                            SportDecodableModel.NoResult
+                        } else {
+                            val displayModel = modelConverter.kboPlayerInfoConverter(responseModel)
+                            SportDecodableModel.KBOPlayerInfo(responseModel, displayModel)
+                        }
+                    } else if (leagueId == Constants.Ids.MLB) {
+                        val responseModel: MLBPlayerInfoResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                        if (responseModel.info == null) {
+                            SportDecodableModel.NoResult
+                        } else {
+                            val displayModel = modelConverter.mlbPlayerInfoConverter(responseModel)
+                            SportDecodableModel.MLBPlayerInfo(responseModel, displayModel)
+                        }
                     } else {
-                        val displayModel = modelConverter.kboPlayerInfoConverter(responseModel)
-                        SportDecodableModel.KBOPlayerInfo(responseModel, displayModel)
+                        SportDecodableModel.NoResult
                     }
                 }
                 "baseball_player_stats" -> {
@@ -526,6 +543,61 @@ sealed class SportDecodableModel {
         val responseModel: KBOGameStatsResponseModel,
         val displayModel: KBOGameStatsDisplayModel
     ) : SportDecodableModel()
+
+    // mlb
+    @Serializable
+    data class MLBPlayerInfo(
+        val responseModel: MLBPlayerInfoResponseModel,
+        val displayModel: MLBPlayerInfoDisplayModel
+    ) : SportDecodableModel()
+
+//    @Serializable
+//    data class MLBPlayerStats(
+//        val responseModel: MLBPlayerInfoResponseModel,
+//        val displayModel: MLBPlayerStatsDisplayModel
+//    ) : SportDecodableModel()
+//
+//    @Serializable
+//    data class MLBPlayerStandings(
+//        val responseModel: MLBPlayerStandingsResponseModel,
+//        val displayModel: MLBPlayerStandingsDisplayModel
+//    ) : SportDecodableModel()
+//
+//    @Serializable
+//    data class MLBTeamInfo(
+//        val responseModel: MLBTeamInfoResponseModel,
+//        val displayModel: MLBTeamInfoDisplayModel
+//    ) : SportDecodableModel()
+//
+//    @Serializable
+//    data class MLBTeamStats(
+//        val responseModel: MLBTeamInfoResponseModel,
+//        val displayModel: MLBTeamStatsDisplayModel
+//    ) : SportDecodableModel()
+//
+//    @Serializable
+//    data class MLBTeamStandings(
+//        val responseModel: MLBTeamStandingsResponseModel,
+//        val displayModel: MLBTeamStandingsDisplayModel
+//    ) : SportDecodableModel()
+//
+////    @Serializable
+////    data class MLBTeamSchedule(
+////        val responseModel: MLBGameScheduleResponseModel,
+////        val displayModel: MLBTeamScheduleDisplayModel
+////    ) : SportDecodableModel()
+//
+//    @Serializable
+//    data class MLBLeagueSchedule(
+//        val responseModel: MLBGameScheduleResponseModel,
+//        val displayModel: MLBLeagueScheduleDisplayModel
+//    ) : SportDecodableModel()
+//
+//    @Serializable
+//    data class MLBGameStats(
+//        val responseModel: MLBGameStatsResponseModel,
+//        val displayModel: MLBGameStatsDisplayModel
+//    ) : SportDecodableModel()
 
     @Serializable
     data object NoResult : SportDecodableModel()

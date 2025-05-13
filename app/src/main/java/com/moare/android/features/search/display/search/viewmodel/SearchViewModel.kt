@@ -34,6 +34,7 @@ import com.moare.android.features.search.models.displaymodels.nba.NBALeagueSched
 import com.moare.android.features.search.models.NoticeModel
 import com.moare.android.features.search.models.TrendingKeywords
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
@@ -135,6 +136,10 @@ class SearchViewModel @Inject constructor(
     // kbo
     private val _kboPlayerInfoData = MutableStateFlow<KBOPlayerInfoDisplayModel?>(null)
     val kboPlayerInfoData: StateFlow<KBOPlayerInfoDisplayModel?> = _kboPlayerInfoData
+
+    // mlb
+    private val _mlbPlayerInfoData = MutableStateFlow<MLBPlayerInfoDisplayModel?>(null)
+    val mlbPlayerInfoData: StateFlow<MLBPlayerInfoDisplayModel?> = _mlbPlayerInfoData
 
     // auto complete
     private val _autoCompleteList = MutableStateFlow<List<String>>(emptyList())
@@ -350,6 +355,8 @@ class SearchViewModel @Inject constructor(
 
             _kboPlayerInfoData.emit(null)
 
+            _mlbPlayerInfoData.emit(null)
+
             when (val data = data?.data) {
                 is SportDecodableModel.FBPlayerInfo -> {
                     _fbPlayerInfoData.emit(data.displayModel)
@@ -439,6 +446,10 @@ class SearchViewModel @Inject constructor(
                 }
                 is SportDecodableModel.KBOGameStats -> {
 //                    _nbaGameStatsData.emit(data.displayModel)
+                }
+
+                is SportDecodableModel.MLBPlayerInfo -> {
+                    _mlbPlayerInfoData.emit(data.displayModel)
                 }
 
                 else -> {
@@ -613,6 +624,8 @@ class SearchViewModel @Inject constructor(
 
                     _kboPlayerInfoData.emit(null)
 
+                    _mlbPlayerInfoData.emit(null)
+
                     when (viewToShow) {
                         is SportDecodableModel.FBPlayerInfo -> {
                             _fbPlayerInfoData.emit(viewToShow.displayModel)
@@ -708,6 +721,10 @@ class SearchViewModel @Inject constructor(
                         }
                         is SportDecodableModel.KBOGameStats -> {
 //                    _nbaGameStatsData.emit(data.displayModel)
+                        }
+
+                        is SportDecodableModel.MLBPlayerInfo -> {
+                            _mlbPlayerInfoData.emit(viewToShow.displayModel)
                         }
 
                         else -> {}
@@ -1032,6 +1049,8 @@ class SearchViewModel @Inject constructor(
             _nbaLeagueTournamentData.emit(null)
 
             _kboPlayerInfoData.emit(null)
+
+            _mlbPlayerInfoData.emit(null)
         }
 
         when (data) {
@@ -1121,6 +1140,10 @@ class SearchViewModel @Inject constructor(
             }
             is SportDecodableModel.KBOGameStats -> {
 //                    _nbaGameStatsData.emit(data.displayModel)
+            }
+
+            is SportDecodableModel.MLBPlayerInfo -> {
+                _mlbPlayerInfoData.emit(data.displayModel)
             }
 
             else -> {}

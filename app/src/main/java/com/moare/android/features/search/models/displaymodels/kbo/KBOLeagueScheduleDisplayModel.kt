@@ -4,9 +4,6 @@ import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.displaymodels.DisplayModelBase
 import com.moare.android.features.search.models.models.kbo.KBOGame
-import com.moare.android.features.search.models.models.kbo.KBOTeamInfo
-import com.moare.android.features.search.models.models.kbo.KBOTeamStats
-import com.moare.android.features.search.models.models.kbo.KBOVenue
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -127,6 +127,9 @@ fun SearchView(
     // kbo
     val kboPlayerInfoData by searchViewModel.kboPlayerInfoData.collectAsState()
 
+    // mlb
+    val mlbPlayerInfoData by searchViewModel.mlbPlayerInfoData.collectAsState()
+
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
     val autoCompleteListVisibleState by searchViewModel.autoCompleteListVisibleState.collectAsState()
@@ -450,6 +453,9 @@ fun SearchView(
                     // baseball_player_info
                     kboPlayerInfoData?.let {
                         Text(it.info.name)
+                    }
+                    mlbPlayerInfoData?.let {
+                        Text(it.info.fullName)
                     }
                 }
             }
