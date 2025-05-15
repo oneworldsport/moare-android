@@ -22,7 +22,16 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDis
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStandingsDisplay
+import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
@@ -47,7 +56,12 @@ import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerInfo
 import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBGameScheduleResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBPlayerInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBPlayerStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
@@ -565,129 +579,129 @@ class ModelConverter(
         )
     }
 
-//    fun mlbPlayerStatsConverter(response: MLBPlayerInfoResponseModel): MLBPlayerStatsDisplayModel {
-//        val info = response.info!!
-//
-//        return MLBPlayerStatsDisplayModel(
-//            leagueId = leagueId ?: Constants.Ids.MLB,
-//            keywords = keywords,
-//            entityInfo = entityInfo,
-//            player = info.player,
-//            stats = info.statistics,
-//        )
-//    }
-//
-//    fun mlbPlayerStandingsConverter(response: MLBPlayerStandingsResponseModel): MLBPlayerStandingsDisplayModel {
-//        val standings: List<MLBPlayerStandingsDisplay> = response.standings.mapNotNull { playerInfo ->
-//            val player = playerInfo.player
-//            val statsList = playerInfo.statistics
-//
+    fun mlbPlayerStatsConverter(response: MLBPlayerInfoResponseModel): MLBPlayerStatsDisplayModel {
+        val info = response.info!!
+
+        return MLBPlayerStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.MLB,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            player = info.player,
+            stats = info.statistics,
+        )
+    }
+
+    fun mlbPlayerStandingsConverter(response: MLBPlayerStandingsResponseModel): MLBPlayerStandingsDisplayModel {
+        val standings: List<MLBPlayerStandingsDisplay> = response.standings.mapNotNull { playerInfo ->
+            val player = playerInfo.player
+            val statsList = playerInfo.statistics
+
+            for (item in statsList) {
+                if (item.type == "season") {
+                    return@mapNotNull MLBPlayerStandingsDisplay(
+                        player = player,
+                        stats = item
+                    )
+                }
+            }
+
+            null
+        }
+
+        return MLBPlayerStandingsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.MLB,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            standings = standings
+        )
+    }
+
+    fun mlbTeamInfoConverter(response: MLBTeamInfoResponseModel): MLBTeamInfoDisplayModel {
+        val info = response.info!!
+
+        // TODO: statistics에 season정보 추가
+//        val stats = info.statistics.find { it.seasonType == "Regular Season" }
+
+        return MLBTeamInfoDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.MLB,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            team = info.team,
+            venue = info.venue,
+            stats = info.statistics.firstOrNull(),
+            lastGame = response.lastGame,
+            nextGame = response.nextGame
+        )
+    }
+
+    fun mlbTeamStatsConverter(response: MLBTeamInfoResponseModel): MLBTeamStatsDisplayModel {
+        val info = response.info!!
+
+        return MLBTeamStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.MLB,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            team = info.team,
+            venue = info.venue,
+            stats = info.statistics
+        )
+    }
+
+    fun mlbTeamStandingsConverter(response: MLBTeamStandingsResponseModel): MLBTeamStandingsDisplayModel {
+        val standings: List<MLBTeamStandingsDisplay> = response.standings.mapNotNull { teamInfo ->
+//            val statsList = teamInfo.statistics
+            val stats = teamInfo.statistics.firstOrNull()
+
 //            for (item in statsList) {
 //                if (item.seasonType == "Regular Season") {
-//                    return@mapNotNull MLBPlayerStandingsDisplay(
-//                        player = player,
-//                        stats = item
-//                    )
+            return@mapNotNull MLBTeamStandingsDisplay(
+                team = teamInfo.team,
+                stats = stats!!
+            )
 //                }
 //            }
-//
+
 //            null
-//        }
-//
-//        return MLBPlayerStandingsDisplayModel(
+        }
+
+        return MLBTeamStandingsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.MLB,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            standings = standings
+        )
+    }
+
+//    fun mlbTeamScheduleConverter(response: MLBGameScheduleResponseModel): MLBTeamScheduleDisplayModel {
+//        return MLBTeamScheduleDisplayModel(
 //            leagueId = leagueId ?: Constants.Ids.MLB,
 //            keywords = keywords,
 //            entityInfo = entityInfo,
-//            standings = standings
+//            games = response.schedule
 //        )
 //    }
-//
-//    fun mlbTeamInfoConverter(response: MLBTeamInfoResponseModel): MLBTeamInfoDisplayModel {
-//        val info = response.info!!
-//
-//        // TODO: statistics에 season정보 추가
-////        val stats = info.statistics.find { it.seasonType == "Regular Season" }
-//
-//        return MLBTeamInfoDisplayModel(
-//            leagueId = leagueId ?: Constants.Ids.MLB,
-//            keywords = keywords,
-//            entityInfo = entityInfo,
-//            team = info.team,
-//            venue = info.venue,
-//            stats = info.statistics.firstOrNull(),
-//            lastGame = response.lastGame,
-//            nextGame = response.nextGame
-//        )
-//    }
-//
-//    fun mlbTeamStatsConverter(response: MLBTeamInfoResponseModel): MLBTeamStatsDisplayModel {
-//        val info = response.info!!
-//
-//        return MLBTeamStatsDisplayModel(
-//            leagueId = leagueId ?: Constants.Ids.MLB,
-//            keywords = keywords,
-//            entityInfo = entityInfo,
-//            team = info.team,
-//            venue = info.venue,
-//            stats = info.statistics
-//        )
-//    }
-//
-//    fun mlbTeamStandingsConverter(response: MLBTeamStandingsResponseModel): MLBTeamStandingsDisplayModel {
-//        val standings: List<MLBTeamStandingsDisplay> = response.standings.mapNotNull { teamInfo ->
-////            val statsList = teamInfo.statistics
-//            val stats = teamInfo.statistics.firstOrNull()
-//
-////            for (item in statsList) {
-////                if (item.seasonType == "Regular Season") {
-//            return@mapNotNull MLBTeamStandingsDisplay(
-//                team = teamInfo.team,
-//                stats = stats!!
-//            )
-////                }
-////            }
-//
-////            null
-//        }
-//
-//        return MLBTeamStandingsDisplayModel(
-//            leagueId = leagueId ?: Constants.Ids.MLB,
-//            keywords = keywords,
-//            entityInfo = entityInfo,
-//            standings = standings
-//        )
-//    }
-//
-////    fun mlbTeamScheduleConverter(response: MLBGameScheduleResponseModel): MLBTeamScheduleDisplayModel {
-////        return MLBTeamScheduleDisplayModel(
-////            leagueId = leagueId ?: Constants.Ids.MLB,
-////            keywords = keywords,
-////            entityInfo = entityInfo,
-////            games = response.schedule
-////        )
-////    }
-//
-//    fun mlbLeagueScheduleConverter(response: MLBGameScheduleResponseModel): MLBLeagueScheduleDisplayModel {
-//        val yearMonthList = response.scheduledMonths.map {
-//            val (year, month) = it.split("-")
-//            "${year.takeLast(2)}/$month"
-//        }
-//
-//        return MLBLeagueScheduleDisplayModel(
-//            leagueId = leagueId ?: Constants.Ids.MLB,
-//            keywords = keywords,
-//            entityInfo = entityInfo,
-//            yearMonthList = yearMonthList,
-//            games = response.schedule,
-//        )
-//    }
-//
-//    fun mlbGameStatsConverter(response: MLBGameStatsResponseModel): MLBGameStatsDisplayModel {
-//        return MLBGameStatsDisplayModel(
-//            leagueId = leagueId ?: Constants.Ids.MLB,
-//            keywords = keywords,
-//            entityInfo = entityInfo,
-//            game = response.game!!
-//        )
-//    }
+
+    fun mlbLeagueScheduleConverter(response: MLBGameScheduleResponseModel): MLBLeagueScheduleDisplayModel {
+        val yearMonthList = response.scheduledMonths.map {
+            val (year, month) = it.split("-")
+            "${year.takeLast(2)}/$month"
+        }
+
+        return MLBLeagueScheduleDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.MLB,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            yearMonthList = yearMonthList,
+            games = response.schedule,
+        )
+    }
+
+    fun mlbGameStatsConverter(response: MLBGameStatsResponseModel): MLBGameStatsDisplayModel {
+        return MLBGameStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.MLB,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            game = response.game!!
+        )
+    }
 }

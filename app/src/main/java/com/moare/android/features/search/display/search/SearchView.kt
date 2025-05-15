@@ -126,9 +126,23 @@ fun SearchView(
 
     // kbo
     val kboPlayerInfoData by searchViewModel.kboPlayerInfoData.collectAsState()
+    val kboPlayerStatsData by searchViewModel.kboPlayerStatsData.collectAsState()
+    val kboPlayerStandingsData by searchViewModel.kboPlayerStandingsData.collectAsState()
+    val kboTeamInfoData by searchViewModel.kboTeamInfoData.collectAsState()
+    val kboTeamStatsData by searchViewModel.kboTeamStatsData.collectAsState()
+    val kboTeamStandingsData by searchViewModel.kboTeamStandingsData.collectAsState()
+    val kboLeagueScheduleData by searchViewModel.kboLeagueScheduleData.collectAsState()
+    val kboGameStatsData by searchViewModel.kboGameStatsData.collectAsState()
 
     // mlb
     val mlbPlayerInfoData by searchViewModel.mlbPlayerInfoData.collectAsState()
+    val mlbPlayerStatsData by searchViewModel.mlbPlayerStatsData.collectAsState()
+    val mlbPlayerStandingsData by searchViewModel.mlbPlayerStandingsData.collectAsState()
+    val mlbTeamInfoData by searchViewModel.mlbTeamInfoData.collectAsState()
+    val mlbTeamStatsData by searchViewModel.mlbTeamStatsData.collectAsState()
+    val mlbTeamStandingsData by searchViewModel.mlbTeamStandingsData.collectAsState()
+    val mlbLeagueScheduleData by searchViewModel.mlbLeagueScheduleData.collectAsState()
+    val mlbGameStatsData by searchViewModel.mlbGameStatsData.collectAsState()
 
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
@@ -345,117 +359,83 @@ fun SearchView(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(top = 20.dp)
                 ) {
-                    // football_player_info
+                    // football
                     fbPlayerInfoData?.let {
                         FBPlayerInfoView(data = it)
                     }
-
-                    // football_player_stats
                     fbPlayerStatsData?.let {
                         FBPlayerStatsView(data = it)
                     }
-
-                    // football_team_info
-                    fbTeamInfoData?.let {
-                        FBTeamInfoView(data = it)
-                    }
-
-                    // football_team_stats
-                    fbTeamStatsData?.let {
-                        FBTeamStatsView(data = it)
-                    }
-
-                    // basketball_player_info
-                    nbaPlayerInfoData?.let {
-                        NBAPlayerInfoView(data = it )
-                    }
-
-                    // basketball_player_stats
-                    nbaPlayerStatsData?.let {
-                        NBAPlayerStatsView(data = it)
-                    }
-
-                    // basketball_team_info
-                    nbaTeamInfoData?.let {
-                        NBATeamInfoView(data = it)
-                    }
-
-                    // basketball_team_stats
-                    nbaTeamStatsData?.let {
-                        NBATeamStatsView(data = it)
-                    }
-
-                    // football_player_standings
                     fbPlayerStandingsData?.let {
                         FBPlayerStandingsView(
                             data = it
                         )
                     }
-
-                    // football_team_standings
+                    fbTeamInfoData?.let {
+                        FBTeamInfoView(data = it)
+                    }
+                    fbTeamStatsData?.let {
+                        FBTeamStatsView(data = it)
+                    }
                     fbTeamStandingsData?.let {
                         FBTeamStandingsView(
                             data = it
                         )
                     }
-
-                    // football_team_schedule
                     fbTeamScheduleData?.let {
                         FBTeamScheduleView(
                             data = it
                         )
                     }
-
-                    // football_league_schedule
                     fbLeagueScheduleData?.let {
                         FBLeagueScheduleView(
                             data = it
                         )
                     }
-
-                    // football_game_stats
                     fbGameStatsData?.let {
                         FBGameStatsView(
                             data = it
                         )
                     }
 
-                    // basketball_player_standings
+                    // nba
+                    nbaPlayerInfoData?.let {
+                        NBAPlayerInfoView(data = it )
+                    }
+                    nbaPlayerStatsData?.let {
+                        NBAPlayerStatsView(data = it)
+                    }
                     nbaPlayerStandingsData?.let {
                         NBAPlayerStandingsView(data = it)
                     }
-
-                    // basketball_team_standings
+                    nbaTeamInfoData?.let {
+                        NBATeamInfoView(data = it)
+                    }
+                    nbaTeamStatsData?.let {
+                        NBATeamStatsView(data = it)
+                    }
                     nbaTeamStandingsData?.let {
                         NBATeamStandingsView(data = it)
                     }
-
-                    // basketball_team_schedule
                     nbaTeamScheduleData?.let {
                         NBATeamScheduleView(data = it)
                     }
-
-                    // basketball_league_schedule
                     nbaLeagueScheduleData?.let {
                         NBALeagueScheduleView(data = it)
                     }
-
-                    // basketball_game_stats
                     nbaGameStatsData?.let {
                         NBAGameStatsView(data = it)
                     }
-
-                    // basketball_league_tournament
                     nbaLeagueTournamentData?.let {
                         NBALeagueTournamentView(data = it)
                     }
 
-                    // baseball_player_info
+                    // kbo
                     kboPlayerInfoData?.let {
-                        Text(it.info.name)
                     }
+
+                    // mlb
                     mlbPlayerInfoData?.let {
-                        Text(it.info.fullName)
                     }
                 }
             }
