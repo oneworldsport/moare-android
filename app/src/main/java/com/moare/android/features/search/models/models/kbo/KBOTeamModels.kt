@@ -45,7 +45,12 @@ data class KBOTeamStats(
     val pitcherData: KBOTeamPitcherData,
     val rankData: KBOTeamRankData,
     val runnerData: KBOTeamRunnerData,
-)
+    @SerialName("season") private val _season: Int? = null,
+    @SerialName("seasonType") private val _seasonType: String? = null,
+) {
+    val season: Int get() = _season ?: 0
+    val seasonType: String get() = _seasonType ?: ""
+}
 
 @Serializable
 data class KBOTeamDefenseData(
@@ -60,6 +65,8 @@ data class KBOTeamDefenseData(
     @SerialName("pko") private val _pko: String? = null,
     @SerialName("po") private val _po: String? = null,
     @SerialName("sb") private val _sb: String? = null,
+    @SerialName("rank") private val _rank: String? = null,
+    @SerialName("teamName") private val _teamName: String? = null
 ) {
     val a: String get() = _a ?: ""
     val cs: String get() = _cs ?: ""
@@ -72,6 +79,8 @@ data class KBOTeamDefenseData(
     val pko: String get() = _pko ?: ""
     val po: String get() = _po ?: ""
     val sb: String get() = _sb ?: ""
+    val rank: String get() = _rank ?: ""
+    val teamName: String get() = _teamName ?: ""
 }
 
 @Serializable
@@ -100,6 +109,8 @@ data class KBOTeamHitterData(
     @SerialName("slg") private val _slg: String? = null,
     @SerialName("so") private val _so: String? = null,
     @SerialName("tb") private val _tb: String? = null,
+    @SerialName("rank") private val _rank: String? = null,
+    @SerialName("teamName") private val _teamName: String? = null
 ) {
     val double: String get() = _double ?: ""
     val triple: String get() = _triple ?: ""
@@ -125,6 +136,8 @@ data class KBOTeamHitterData(
     val slg: String get() = _slg ?: ""
     val so: String get() = _so ?: ""
     val tb: String get() = _tb ?: ""
+    val rank: String get() = _rank ?: ""
+    val teamName: String get() = _teamName ?: ""
 }
 
 @Serializable
@@ -159,6 +172,8 @@ data class KBOTeamPitcherData(
     @SerialName("whip") private val _whip: String? = null,
     @SerialName("wp") private val _wp: String? = null,
     @SerialName("wpct") private val _wpct: String? = null,
+    @SerialName("rank") private val _rank: String? = null,
+    @SerialName("teamName") private val _teamName: String? = null
 ) {
     val double: String get() = _double ?: ""
     val triple: String get() = _triple ?: ""
@@ -190,6 +205,8 @@ data class KBOTeamPitcherData(
     val whip: String get() = _whip ?: ""
     val wp: String get() = _wp ?: ""
     val wpct: String get() = _wpct ?: ""
+    val rank: String get() = _rank ?: ""
+    val teamName: String get() = _teamName ?: ""
 }
 
 @Serializable
@@ -201,6 +218,8 @@ data class KBOTeamRunnerData(
     @SerialName("sb") private val _sb: String? = null,
     @SerialName("sb%") private val _sbPercent: String? = null,
     @SerialName("sba") private val _sba: String? = null,
+    @SerialName("rank") private val _rank: String? = null,
+    @SerialName("teamName") private val _teamName: String? = null
 ) {
     val cs: String get() = _cs ?: ""
     val g: String get() = _g ?: ""
@@ -209,6 +228,8 @@ data class KBOTeamRunnerData(
     val sb: String get() = _sb ?: ""
     val sbPercent: String get() = _sbPercent ?: ""
     val sba: String get() = _sba ?: ""
+    val rank: String get() = _rank ?: ""
+    val teamName: String get() = _teamName ?: ""
 }
 
 @Serializable
@@ -223,6 +244,8 @@ data class KBOTeamRankData(
     @SerialName("streak") private val _streak: String? = null,
     @SerialName("winpct") private val _winpct: String? = null,
     @SerialName("wins") private val _wins: String? = null,
+    @SerialName("rank") private val _rank: String? = null,
+    @SerialName("teamName") private val _teamName: String? = null
 ) {
     val awayrecord: String get() = _awayrecord ?: ""
     val draws: String get() = _draws ?: ""
@@ -234,5 +257,7 @@ data class KBOTeamRankData(
     val streak: String get() = _streak ?: ""
     val winpct: String get() = _winpct ?: ""
     val wins: String get() = _wins ?: ""
+    val rank: String get() = _rank ?: ""
+    val teamName: String get() = _teamName ?: ""
 }
 

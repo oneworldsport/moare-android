@@ -455,7 +455,7 @@ fun NBATeamInfoFourthItem(
                         .alpha(contentsAlpha)
                 ) {
                     FBStatDataItem(
-                        category = "서부 컨퍼런스 순위",
+                        category = "${NBAUtil.translateEastWest(team.teamConference)} 컨퍼런스 순위",
                         data = team.confRank.toString(),
                         customCategoryFontSize = 13,
                         modifier = Modifier.weight(1f)

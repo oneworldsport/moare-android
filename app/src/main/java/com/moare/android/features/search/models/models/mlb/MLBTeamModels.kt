@@ -49,10 +49,11 @@ data class MLBTeamInfo(
 
 @Serializable
 data class MLBTeamStats(
-    val catching: MLBTeamCatchingStats,
-    val fielding: MLBTeamFieldingStats,
-    val hitting: MLBTeamHittingStats,
-    val pitching: MLBTeamPitchingStats,
+    val catching: MLBTeamCatchingStats?,
+    val fielding: MLBTeamFieldingStats?,
+    val hitting: MLBTeamHittingStats?,
+    val pitching: MLBTeamPitchingStats?,
+    val recordData: MLBTeamRecordData?
 )
 
 @Serializable
@@ -355,3 +356,59 @@ data class MLBTeamPitchingStats(
     val wins: Int get() = _wins ?: 0
 }
 
+@Serializable
+data class MLBTeamRecordData(
+    @SerialName("conferenceGamesBack") private val _conferenceGamesBack: String? = null,
+    @SerialName("divisionGamesBack") private val _divisionGamesBack: String? = null,
+    @SerialName("divisionRank") private val _divisionRank: String? = null,
+    @SerialName("gamesBack") private val _gamesBack: String? = null,
+    @SerialName("gamesPlayed") private val _gamesPlayed: Int? = null,
+    @SerialName("lastUpdated") private val _lastUpdated: String? = null,
+    @SerialName("leagueGamesBack") private val _leagueGamesBack: String? = null,
+    @SerialName("leagueRank") private val _leagueRank: String? = null,
+    val leagueRecord: MLBGameTeamLeagueRecord,
+    @SerialName("losses") private val _losses: Int? = null,
+    @SerialName("runDifferential") private val _runDifferential: Int? = null,
+    @SerialName("runsAllowed") private val _runsAllowed: Int? = null,
+    @SerialName("runsScored") private val _runsScored: Int? = null,
+    @SerialName("season") private val _season: String? = null,
+    @SerialName("sportGamesBack") private val _sportGamesBack: String? = null,
+    @SerialName("sportRank") private val _sportRank: String? = null,
+    val streak: MLBTeamRecordStreak,
+    val team: MLBNameObj,
+    @SerialName("wildCardGamesBack") private val _wildCardGamesBack: String? = null,
+    @SerialName("wildCardRank") private val _wildCardRank: String? = null,
+    @SerialName("winningPercentage") private val _winningPercentage: String? = null,
+    @SerialName("wins") private val _wins: Int? = null,
+) {
+    val conferenceGamesBack: String get() = _conferenceGamesBack ?: "-"
+    val divisionGamesBack: String get() = _divisionGamesBack ?: "-"
+    val divisionRank: String get() = _divisionRank ?: ""
+    val gamesBack: String get() = _gamesBack ?: "-"
+    val gamesPlayed: Int get() = _gamesPlayed ?: 0
+    val lastUpdated: String get() = _lastUpdated ?: ""
+    val leagueGamesBack: String get() = _leagueGamesBack ?: "-"
+    val leagueRank: String get() = _leagueRank ?: ""
+    val losses: Int get() = _losses ?: 0
+    val runDifferential: Int get() = _runDifferential ?: 0
+    val runsAllowed: Int get() = _runsAllowed ?: 0
+    val runsScored: Int get() = _runsScored ?: 0
+    val season: String get() = _season ?: ""
+    val sportGamesBack: String get() = _sportGamesBack ?: "-"
+    val sportRank: String get() = _sportRank ?: ""
+    val wildCardGamesBack: String get() = _wildCardGamesBack ?: "-"
+    val wildCardRank: String get() = _wildCardRank ?: ""
+    val winningPercentage: String get() = _winningPercentage ?: ""
+    val wins: Int get() = _wins ?: 0
+}
+
+@Serializable
+data class MLBTeamRecordStreak(
+    @SerialName("streakCode") private val _streakCode: String? = null,
+    @SerialName("streakNumber") private val _streakNumber: Int? = null,
+    @SerialName("streakType") private val _streakType: String? = null,
+) {
+    val streakCode: String get() = _streakCode ?: ""
+    val streakNumber: Int get() = _streakNumber ?: 0
+    val streakType: String get() = _streakType ?: ""
+}
