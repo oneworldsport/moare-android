@@ -4,6 +4,9 @@ import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.displaymodels.DisplayModelBase
 import com.moare.android.features.search.models.models.kbo.KBOGame
+import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
+import com.moare.android.features.search.models.models.kbo.KBOGamePitcherStats
+import com.moare.android.features.search.models.models.kbo.KBOPlayerHitterStats
 import com.moare.android.features.search.models.models.kbo.KBOPlayerInfo
 import com.moare.android.features.search.models.models.kbo.KBOPlayerStats
 import kotlinx.serialization.Serializable
@@ -16,6 +19,7 @@ data class KBOPlayerInfoDisplayModel(
     val info: KBOPlayerInfo,
     val stats: KBOPlayerStats?,
     val lastGame: KBOGame?,
-//    val lastGamePlayerStats: NBABoxScoreTeamPlayer?,
+    val lastGamePlayerHitterStats: KBOGameHitterStats?,
+    val lastGamePlayerPitcherStats: KBOGamePitcherStats?,
     val nextGame: KBOGame?
 ) : DisplayModelBase

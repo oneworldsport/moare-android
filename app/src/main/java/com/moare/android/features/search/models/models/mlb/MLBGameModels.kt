@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MLBGame(
-    val boxScore: MLBGameBoxscore,
-    val decisions: MLBGameDecisions,
+    val boxScore: MLBGameBoxscore? = null,
+    val decisions: MLBGameDecisions? = null,
     val game: MLBGameData,
     val gameInfo: MLBGameInfo,
     val linescore: MLBGameLineScore,
@@ -105,9 +105,9 @@ data class MLBGameBoxscorePlayerStatus(
 
 @Serializable
 data class MLBGameBoxscoreStats(
-    val batting: MLBPlayerHittingStats,
-    val fielding: MLBPlayerFieldingStats,
-    val pitching: MLBPlayerPitchingStats,
+    val batting: MLBPlayerHittingStats?,
+    val fielding: MLBPlayerFieldingStats?,
+    val pitching: MLBPlayerPitchingStats?,
 )
 
 @Serializable
@@ -161,10 +161,12 @@ data class MLBGameInfo(
     @SerialName("attendance") private val _attendance: Int? = null,
     @SerialName("firstPitch") private val _firstPitch: String? = null,
     @SerialName("gameDurationMinutes") private val _gameDurationMinutes: Int? = null,
+    @SerialName("gameDate") private val _gameDate: String? = null
 ) {
     val attendance: Int get() = _attendance ?: 0
     val firstPitch: String get() = _firstPitch ?: ""
     val gameDurationMinutes: Int get() = _gameDurationMinutes ?: 0
+    val gameDate: String get() = _gameDate ?: ""
 }
 
 @Serializable
@@ -196,11 +198,11 @@ data class MLBGameLineScore(
 
 @Serializable
 data class MLBGameLineScoreDefense(
-    val batter: MLBFullNameObj,
+    val batter: MLBFullNameObj? = null,
     @SerialName("battingOrder") private val _battingOrder: Int? = null,
-    val onDeck: MLBFullNameObj,
-    val inHole: MLBFullNameObj,
-    val pitcher: MLBFullNameObj,
+    val onDeck: MLBFullNameObj? = null,
+    val inHole: MLBFullNameObj? = null,
+    val pitcher: MLBFullNameObj? = null,
     val team: MLBNameObj,
     val catcher: MLBFullNameObj? = null,
     val center: MLBFullNameObj? = null,
@@ -261,8 +263,8 @@ data class MLBGameRemainingUsed(
 
 @Serializable
 data class MLBGameProbablePitchers(
-    val away: MLBFullNameObj,
-    val home: MLBFullNameObj
+    val away: MLBFullNameObj? = null,
+    val home: MLBFullNameObj? = null
 )
 
 @Serializable

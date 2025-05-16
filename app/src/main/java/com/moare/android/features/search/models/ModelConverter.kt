@@ -44,6 +44,8 @@ import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandin
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBLeague
+import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
+import com.moare.android.features.search.models.models.kbo.KBOGamePitcherStats
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
@@ -405,13 +407,23 @@ class ModelConverter(
 
         val stats = info.statistics.find { it.seasonType == "Regular Season" }
 
-//        val lastGameTeam = if (response.lastGame?.boxScoreTraditional?.homeTeamId == entityInfo.firstOrNull()?.teamId) {
-//            response.lastGame?.boxScoreTraditional?.homeTeam
-//        } else {
-//            response.lastGame?.boxScoreTraditional?.awayTeam
-//        }
+        val lastGame = response.lastGame
+        val isHome = lastGame?.gameInfo?.homeTeamId?.toInt() == info.player.teamId
 
-//        val lastGamePlayerStats = lastGameTeam?.players?.find { it.personId == entityInfo.firstOrNull()?.playerId }
+        var lastGamePlayerHitterStats: KBOGameHitterStats? = null
+        var lastGamePlayerPitcherStats: KBOGamePitcherStats? = null
+
+        if (isHome) {
+            lastGamePlayerHitterStats = lastGame?.lineup?.home?.hitters?.find { it.playerName == info.player.name }
+            if (lastGamePlayerHitterStats == null) {
+                lastGamePlayerPitcherStats = lastGame?.lineup?.home?.pitchers?.find { it.playerName == info.player.name }
+            }
+        } else {
+            lastGamePlayerHitterStats = lastGame?.lineup?.home?.hitters?.find { it.playerName == info.player.name }
+            if (lastGamePlayerHitterStats == null) {
+                lastGamePlayerPitcherStats = lastGame?.lineup?.home?.pitchers?.find { it.playerName == info.player.name }
+            }
+        }
 
         return KBOPlayerInfoDisplayModel(
             leagueId = leagueId ?: Constants.Ids.KBO,
@@ -420,7 +432,8 @@ class ModelConverter(
             info = info.player,
             stats = stats,
             lastGame = response.lastGame,
-//            lastGamePlayerStats = lastGamePlayerStats,
+            lastGamePlayerHitterStats = lastGamePlayerHitterStats,
+            lastGamePlayerPitcherStats = lastGamePlayerPitcherStats,
             nextGame = response.nextGame
         )
     }
@@ -558,23 +571,31 @@ class ModelConverter(
         val info = response.info!!
 
         val stats = info.statistics.find { it.type == "season" }
+        val teamId: Int? = when {
+            stats?.hitting != null -> stats.hitting.team.id
+            stats?.fielding != null -> stats.fielding.team.id
+            stats?.catching != null -> stats.catching.team.id
+            stats?.pitching != null -> stats.pitching.team.id
+            else -> null
+        }
 
-//        val lastGameTeam = if (response.lastGame?.boxScoreTraditional?.homeTeamId == entityInfo.firstOrNull()?.teamId) {
-//            response.lastGame?.boxScoreTraditional?.homeTeam
-//        } else {
-//            response.lastGame?.boxScoreTraditional?.awayTeam
-//        }
-
-//        val lastGamePlayerStats = lastGameTeam?.players?.find { it.personId == entityInfo.firstOrNull()?.playerId }
+        val lastGamePlayerStats = if (response.lastGame?.teams?.home?.id == teamId) {
+            response.lastGame?.boxScore?.teams?.home?.players?.get("ID${info.player.id}")
+        } else if (response.lastGame?.teams?.away?.id == teamId) {
+            response.lastGame?.boxScore?.teams?.away?.players?.get("ID${info.player.id}")
+        } else {
+            null
+        }
 
         return MLBPlayerInfoDisplayModel(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
             info = info.player,
+            teamId = teamId,
             stats = stats,
             lastGame = response.lastGame,
-//            lastGamePlayerStats = lastGamePlayerStats,
+            lastGamePlayerStats = lastGamePlayerStats,
             nextGame = response.nextGame
         )
     }

@@ -108,7 +108,9 @@ fun NBAPlayerInfoView(
 
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
             ) {
                 NBAPlayerInfoFourthItem(
                     containerModifier = Modifier.weight(1f)

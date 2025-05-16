@@ -57,6 +57,8 @@ import com.moare.android.features.search.display.football.view.FBTeamInfoView
 import com.moare.android.features.search.display.football.view.FBTeamScheduleView
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
+import com.moare.android.features.search.display.kbo.view.KBOPlayerInfoView
+import com.moare.android.features.search.display.mlb.view.MLBPlayerInfoView
 import com.moare.android.features.search.display.nba.view.NBAGameStatsView
 import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
 import com.moare.android.features.search.display.nba.view.NBALeagueTournamentView
@@ -367,9 +369,7 @@ fun SearchView(
                         FBPlayerStatsView(data = it)
                     }
                     fbPlayerStandingsData?.let {
-                        FBPlayerStandingsView(
-                            data = it
-                        )
+                        FBPlayerStandingsView(data = it)
                     }
                     fbTeamInfoData?.let {
                         FBTeamInfoView(data = it)
@@ -378,24 +378,16 @@ fun SearchView(
                         FBTeamStatsView(data = it)
                     }
                     fbTeamStandingsData?.let {
-                        FBTeamStandingsView(
-                            data = it
-                        )
+                        FBTeamStandingsView(data = it)
                     }
                     fbTeamScheduleData?.let {
-                        FBTeamScheduleView(
-                            data = it
-                        )
+                        FBTeamScheduleView(data = it)
                     }
                     fbLeagueScheduleData?.let {
-                        FBLeagueScheduleView(
-                            data = it
-                        )
+                        FBLeagueScheduleView(data = it)
                     }
                     fbGameStatsData?.let {
-                        FBGameStatsView(
-                            data = it
-                        )
+                        FBGameStatsView(data = it)
                     }
 
                     // nba
@@ -432,11 +424,55 @@ fun SearchView(
 
                     // kbo
                     kboPlayerInfoData?.let {
+                        KBOPlayerInfoView(data = it)
                     }
+//                    kboPlayerStatsData?.let {
+//                        KBOPlayerStatsView(data = it)
+//                    }
+//                    kboPlayerStandingsData?.let {
+//                        KBOPlayerStandingsView(data = it)
+//                    }
+//                    kboTeamInfoData?.let {
+//                        KBOTeamInfoView(data = it)
+//                    }
+//                    kboTeamStatsData?.let {
+//                        KBOTeamStatsView(data = it)
+//                    }
+//                    kboTeamStandingsData?.let {
+//                        KBOTeamStandingsView(data = it)
+//                    }
+//                    kboLeagueScheduleData?.let {
+//                        KBOLeagueScheduleView(data = it)
+//                    }
+//                    kboGameStatsData?.let {
+//                        KBOGameStatsView(data = it)
+//                    }
 
                     // mlb
                     mlbPlayerInfoData?.let {
+                        MLBPlayerInfoView(data = it)
                     }
+//                    mlbPlayerStatsData?.let {
+//                        MLBPlayerStatsView(data = it)
+//                    }
+//                    mlbPlayerStandingsData?.let {
+//                        MLBPlayerStandingsView(data = it)
+//                    }
+//                    mlbTeamInfoData?.let {
+//                        MLBTeamInfoView(data = it)
+//                    }
+//                    mlbTeamStatsData?.let {
+//                        MLBTeamStatsView(data = it)
+//                    }
+//                    mlbTeamStandingsData?.let {
+//                        MLBTeamStandingsView(data = it)
+//                    }
+//                    mlbLeagueScheduleData?.let {
+//                        MLBLeagueScheduleView(data = it)
+//                    }
+//                    mlbGameStatsData?.let {
+//                        MLBGameStatsView(data = it)
+//                    }
                 }
             }
 

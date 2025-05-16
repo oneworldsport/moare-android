@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class KBOGame(
     val gameInfo: KBOGameInfo?,
-    val lineScore: List<KBOGameLineScoreInfo>,
-    val lineup: List<KBOGameLineupInfo>
+    val lineScore: KBOGameLineScoreInfo,
+    val lineup: KBOGameLineupInfo
 )
 
 @Serializable
@@ -103,18 +103,18 @@ data class KBOGameHitterStats(
     @SerialName("sf") private val _sf: String? = null,
     @SerialName("so") private val _so: String? = null,
 ) {
-    val ab: String get() = _ab ?: ""
-    val bb: String get() = _bb ?: ""
-    val e: String get() = _e ?: ""
-    val gdp: String get() = _gdp ?: ""
-    val h: String get() = _h ?: ""
-    val hr: String get() = _hr ?: ""
+    val ab: String get() = _ab ?: "" // 타수
+    val bb: String get() = _bb ?: "" // 볼넷
+    val e: String get() = _e ?: "" // 실책
+    val gdp: String get() = _gdp ?: "" // 병살타
+    val h: String get() = _h ?: "" // 안타
+    val hr: String get() = _hr ?: "" // 홈런
     val playerName: String get() = _playerName ?: ""
-    val r: String get() = _r ?: ""
-    val rbi: String get() = _rbi ?: ""
-    val sb: String get() = _sb ?: ""
-    val sf: String get() = _sf ?: ""
-    val so: String get() = _so ?: ""
+    val r: String get() = _r ?: "" // 득점
+    val rbi: String get() = _rbi ?: "" // 타점
+    val sb: String get() = _sb ?: "" // 도루
+    val sf: String get() = _sf ?: "" // 희생플라이
+    val so: String get() = _so ?: "" // 삼진
 }
 
 @Serializable
@@ -132,17 +132,17 @@ data class KBOGamePitcherStats(
     @SerialName("so") private val _so: String? = null,
     @SerialName("tbf") private val _tbf: String? = null,
 ) {
-    val ab: String get() = _ab ?: ""
-    val bb: String get() = _bb ?: ""
-    val er: String get() = _er ?: ""
-    val h: String get() = _h ?: ""
-    val hr: String get() = _hr ?: ""
-    val ip: String get() = _ip ?: ""
-    val np: String get() = _np ?: ""
+    val ab: String get() = _ab ?: "" // 타수
+    val bb: String get() = _bb ?: "" // 볼넷
+    val er: String get() = _er ?: "" // 자책
+    val h: String get() = _h ?: "" // 피안타
+    val hr: String get() = _hr ?: "" // 피홈런
+    val ip: String get() = _ip ?: "" // 이닝
+    val np: String get() = _np ?: "" // 투구수
     val playerName: String get() = _playerName ?: ""
-    val r: String get() = _r ?: ""
-    val sf: String get() = _sf ?: ""
-    val so: String get() = _so ?: ""
-    val tbf: String get() = _tbf ?: ""
+    val r: String get() = _r ?: "" // 실점
+    val sf: String get() = _sf ?: "" // 희생타
+    val so: String get() = _so ?: "" // 삼진
+    val tbf: String get() = _tbf ?: "" // 타자수
 }
 
