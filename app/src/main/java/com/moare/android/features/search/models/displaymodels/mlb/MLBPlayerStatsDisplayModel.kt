@@ -16,5 +16,6 @@ data class MLBPlayerStatsDisplayModel(
     override val keywords: List<Keyword>,
     override val entityInfo: List<EntityInfo>,
     val player: MLBPlayerInfo,
+    val teamId: Int?,
     val stats: List<MLBPlayerStats>
 ) : DisplayModelBase

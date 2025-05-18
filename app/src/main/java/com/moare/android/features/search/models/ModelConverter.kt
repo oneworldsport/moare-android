@@ -603,11 +603,21 @@ class ModelConverter(
     fun mlbPlayerStatsConverter(response: MLBPlayerInfoResponseModel): MLBPlayerStatsDisplayModel {
         val info = response.info!!
 
+        val stats = info.statistics.find { it.type == "season" }
+        val teamId: Int? = when {
+            stats?.hitting != null -> stats.hitting.team.id
+            stats?.fielding != null -> stats.fielding.team.id
+            stats?.catching != null -> stats.catching.team.id
+            stats?.pitching != null -> stats.pitching.team.id
+            else -> null
+        }
+
         return MLBPlayerStatsDisplayModel(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
             player = info.player,
+            teamId = teamId,
             stats = info.statistics,
         )
     }

@@ -332,8 +332,8 @@ data class MLBPlayerPitchingStats(
     val groundIntoDoublePlay: Int get() = _groundIntoDoublePlay ?: 0 // 병살타
     val groundOuts: Int get() = _groundOuts ?: 0 // 땅볼 아웃
     val groundOutsToAirouts: String get() = _groundOutsToAirouts ?: "" // 땅볼 대비 뜬공 비율
-    val hitBatsmen: Int get() = _hitBatsmen ?: 0 // 몸맞는공
-    val hitByPitch: Int get() = _hitByPitch ?: 0 // 몸맞는공
+    val hitBatsmen: Int get() = _hitBatsmen ?: 0 // 몸맞는공?
+    val hitByPitch: Int get() = _hitByPitch ?: 0 // 몸맞는공?
     val hits: Int get() = _hits ?: 0 // 피안타
     val hitsPer9Inn: String get() = _hitsPer9Inn ?: "" // 9이닝당 피안타
     val holds: Int get() = _holds ?: 0 // 홀드
