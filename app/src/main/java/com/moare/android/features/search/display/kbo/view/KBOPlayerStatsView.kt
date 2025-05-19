@@ -289,12 +289,13 @@ fun KBOPlayerStatsItem(
     HCapsuleBar()
 
     data.hitter?.let {
-        CenterRow {
+        CenterRow(
+            modifier = Modifier.alpha(contentsAlpha)
+        ) {
             BaseballLeagueTitle(
                 url = KBOUtil.kboLogoUrl,
                 leagueName = "KBO",
-                leagueSeason = data.season,
-                modifier = Modifier.alpha(contentsAlpha)
+                leagueSeason = data.season
             )
             Text(" - [타자]")
         }
@@ -492,12 +493,13 @@ fun KBOPlayerStatsItem(
     }
 
     data.pitcher?.let {
-        CenterRow {
+        CenterRow(
+            modifier = Modifier.alpha(contentsAlpha)
+        ) {
             BaseballLeagueTitle(
                 url = KBOUtil.kboLogoUrl,
                 leagueName = "KBO",
-                leagueSeason = data.season,
-                modifier = Modifier.alpha(contentsAlpha)
+                leagueSeason = data.season
             )
             Text(" - [투수]")
         }

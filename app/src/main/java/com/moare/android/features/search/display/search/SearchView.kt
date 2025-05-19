@@ -60,9 +60,11 @@ import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerInfoView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerStatsView
 import com.moare.android.features.search.display.kbo.view.KBOTeamInfoView
+import com.moare.android.features.search.display.kbo.view.KBOTeamStatsView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerInfoView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerStatsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamInfoView
+import com.moare.android.features.search.display.mlb.view.MLBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAGameStatsView
 import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
 import com.moare.android.features.search.display.nba.view.NBALeagueTournamentView
@@ -439,9 +441,9 @@ fun SearchView(
                     kboTeamInfoData?.let {
                         KBOTeamInfoView(data = it)
                     }
-//                    kboTeamStatsData?.let {
-//                        KBOTeamStatsView(data = it)
-//                    }
+                    kboTeamStatsData?.let {
+                        KBOTeamStatsView(data = it)
+                    }
 //                    kboTeamStandingsData?.let {
 //                        KBOTeamStandingsView(data = it)
 //                    }
@@ -465,9 +467,9 @@ fun SearchView(
                     mlbTeamInfoData?.let {
                         MLBTeamInfoView(data = it)
                     }
-//                    mlbTeamStatsData?.let {
-//                        MLBTeamStatsView(data = it)
-//                    }
+                    mlbTeamStatsData?.let {
+                        MLBTeamStatsView(data = it)
+                    }
 //                    mlbTeamStandingsData?.let {
 //                        MLBTeamStandingsView(data = it)
 //                    }

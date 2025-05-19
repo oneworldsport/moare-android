@@ -293,12 +293,13 @@ fun MLBPlayerStatsItem(
     HCapsuleBar()
 
     data.hitting?.stat?.let {
-        CenterRow {
+        CenterRow(
+            modifier = Modifier.alpha(contentsAlpha)
+        ) {
             BaseballLeagueTitle(
                 url = MLBUtil.mlbLogoUrl,
                 leagueName = "MLB",
-                leagueSeason = season?.toIntOrNull() ?: 2025,
-                modifier = Modifier.alpha(contentsAlpha)
+                leagueSeason = season?.toIntOrNull() ?: 2025
             )
             Text(" - [타자]")
         }
@@ -496,12 +497,13 @@ fun MLBPlayerStatsItem(
     }
 
     data.pitching?.stat?.let {
-        CenterRow {
+        CenterRow(
+            modifier = Modifier.alpha(contentsAlpha)
+        ) {
             BaseballLeagueTitle(
                 url = MLBUtil.mlbLogoUrl,
                 leagueName = "MLB",
-                leagueSeason = season?.toIntOrNull() ?: 2025,
-                modifier = Modifier.alpha(contentsAlpha)
+                leagueSeason = season?.toIntOrNull() ?: 2025
             )
             Text(" - [투수]")
         }

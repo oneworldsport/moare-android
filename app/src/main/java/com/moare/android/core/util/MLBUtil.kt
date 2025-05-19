@@ -10,6 +10,10 @@ object MLBUtil {
 //        "H" to "타자"
     )
 
+    val leagueDivisionMap = mapOf(
+        0 to ""
+    )
+
     fun playerPhotoUrl(id: Int?): String? {
         return id?.let { "https://img.mlbstatic.com/mlb-photos/image/upload/v1/people/$it/headshot/67/current.png" }
     }

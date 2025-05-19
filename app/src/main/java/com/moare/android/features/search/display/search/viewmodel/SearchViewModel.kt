@@ -935,6 +935,19 @@ class SearchViewModel @Inject constructor(
                 )
             }
 
+            is SportDecodableModel.KBOPlayerInfo -> {
+                dataModel = SportDecodableModel.KBOPlayerStats(
+                    responseModel = lastView.responseModel,
+                    displayModel = modelConverter.kboPlayerStatsConverter(lastView.responseModel)
+                )
+            }
+            is SportDecodableModel.MLBPlayerInfo -> {
+                dataModel = SportDecodableModel.MLBPlayerStats(
+                    responseModel = lastView.responseModel,
+                    displayModel = modelConverter.mlbPlayerStatsConverter(lastView.responseModel)
+                )
+            }
+
              else -> return // Make it do nothing
         }
 
@@ -990,6 +1003,19 @@ class SearchViewModel @Inject constructor(
                 dataModel = SportDecodableModel.NBATeamStats(
                     responseModel = lastView.responseModel,
                     displayModel = modelConverter.nbaTeamStatsConverter(lastView.responseModel)
+                )
+            }
+
+            is SportDecodableModel.KBOTeamInfo -> {
+                dataModel = SportDecodableModel.KBOTeamStats(
+                    responseModel = lastView.responseModel,
+                    displayModel = modelConverter.kboTeamStatsConverter(lastView.responseModel)
+                )
+            }
+            is SportDecodableModel.MLBTeamInfo -> {
+                dataModel = SportDecodableModel.MLBTeamStats(
+                    responseModel = lastView.responseModel,
+                    displayModel = modelConverter.mlbTeamStatsConverter(lastView.responseModel)
                 )
             }
 
