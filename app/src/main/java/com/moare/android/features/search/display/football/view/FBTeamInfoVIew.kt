@@ -31,7 +31,7 @@ import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
-import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoIntent
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel

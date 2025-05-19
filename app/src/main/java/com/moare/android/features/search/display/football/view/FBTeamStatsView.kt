@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
-import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel

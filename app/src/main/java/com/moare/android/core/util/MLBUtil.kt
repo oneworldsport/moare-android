@@ -1,5 +1,6 @@
 package com.moare.android.core.util
 
+import com.moare.android.core.constants.Constants
 import com.moare.android.features.search.models.models.nba.NBAGameSummary
 
 object MLBUtil {
@@ -11,7 +12,14 @@ object MLBUtil {
     )
 
     val leagueDivisionMap = mapOf(
-        0 to ""
+        Constants.Ids.AMERICAN_LEAGUE to "아메리칸리그",
+        Constants.Ids.NATIONAL_LEAGUE to "내셔널리그",
+        Constants.Ids.AMERICAN_LEAGUE_WEST to "아메리칸 서부",
+        Constants.Ids.AMERICAN_LEAGUE_EAST to "아메리칸 동부",
+        Constants.Ids.AMERICAN_LEAGUE_CENTRAL to "아메리칸 중부",
+        Constants.Ids.NATIONAL_LEAGUE_WEST to "내셔널 서부",
+        Constants.Ids.NATIONAL_LEAGUE_EAST to "내셔널 동부",
+        Constants.Ids.NATIONAL_LEAGUE_CENTRAL to "내셔널 중부",
     )
 
     fun playerPhotoUrl(id: Int?): String? {

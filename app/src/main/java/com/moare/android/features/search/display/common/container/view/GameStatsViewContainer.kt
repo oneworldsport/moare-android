@@ -1,10 +1,8 @@
 package com.moare.android.features.search.display.common.container.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -13,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -27,23 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.UIConstants
-import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
-import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsViewModel
-import com.moare.android.features.search.display.football.view.FBGameStatsDataList
-import com.moare.android.features.search.display.football.view.FBGameStatsFirstCategoryItem
-import com.moare.android.features.search.display.football.view.FBGameStatsFirstCategoryList
-import com.moare.android.features.search.display.football.view.FBGameStatsFirstDataList
-import com.moare.android.features.search.display.football.view.FBGameStatsSecondCategoryList
-import com.moare.android.features.search.display.football.view.FBGameStatsTeamButtonContainer
-import com.moare.android.features.search.display.football.view.FBLeagueScheduleListItem
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsDataList
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsFirstCategoryItem
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsFirstCategoryList
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsFirstDataList
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsSecondCategoryList
-import com.moare.android.ui.common.components.LeagueTitle
-import com.moare.android.ui.common.components.URLImage
+import com.moare.android.features.search.display.common.container.state.StandingsContainerState
 import com.moare.android.ui.util.CenterColumn
 
 @Composable
@@ -53,7 +34,6 @@ fun GameStatsViewContainer(
     gameContent: @Composable ColumnScope.() -> Unit,
     teamButtonContent: @Composable ColumnScope.() -> Unit,
     coachContent: @Composable ColumnScope.() -> Unit = {},
-    firstCategoryContent: @Composable RowScope.() -> Unit,
     categoryListContent: @Composable RowScope.() -> Unit,
     standingsFirstDataContent: @Composable RowScope.() -> Unit,
     standingsDataContent: @Composable RowScope.() -> Unit,
@@ -94,10 +74,10 @@ fun GameStatsViewContainer(
                players stats
                --------------------- */
             StandingsViewContainer(
-                titleContent = {},
-                firstCategoryContent = {
-                    this.firstCategoryContent()
-                },
+                state = StandingsContainerState(
+                    firstCategoryItemHeight = state.firstCategoryItemHeight
+                ),
+                headerContent = {},
                 categoryListContent = {
                     this.categoryListContent()
                 },

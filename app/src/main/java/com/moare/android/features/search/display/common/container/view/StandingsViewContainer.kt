@@ -17,21 +17,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsDataList
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsFirstCategoryItem
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsFirstCategoryList
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsFirstDataList
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsSecondCategoryList
+import com.moare.android.features.search.display.common.container.component.StandingsFirstCategoryItem
+import com.moare.android.features.search.display.common.container.state.StandingsContainerState
 import com.moare.android.features.search.models.ApiFetchState
-import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.util.CenterColumn
 
 @Composable
 fun StandingsViewContainer(
-    displayDataState: ApiFetchState? = null,
-    titleContent: @Composable ColumnScope.() -> Unit,
-    firstCategoryContent: @Composable RowScope.() -> Unit,
+    state: StandingsContainerState,
+    headerContent: @Composable ColumnScope.() -> Unit,
     categoryListContent: @Composable RowScope.() -> Unit,
     standingsFirstDataContent: @Composable RowScope.() -> Unit,
     standingsDataContent: @Composable RowScope.() -> Unit,
@@ -45,13 +40,13 @@ fun StandingsViewContainer(
         // Not sure why yet
         modifier = Modifier.fillMaxSize()
     ) {
-        this.titleContent()
+        this.headerContent()
 
         // category
         Row(
-            modifier = Modifier.padding(top = 6.dp)
+            modifier = Modifier.padding(top = if (state.isTopPaddingOnHeader) 6.dp else 0.dp)
         ) {
-            this.firstCategoryContent()
+            StandingsFirstCategoryItem(height = state.firstCategoryItemHeight)
 
             Row(
                 Modifier.horizontalScroll(horizontalScrollState)
@@ -62,7 +57,7 @@ fun StandingsViewContainer(
 
         // loading
         AnimatedVisibility(
-            visible = displayDataState == ApiFetchState.Fetching,
+            visible = state.displayDataState == ApiFetchState.Fetching,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
@@ -76,10 +71,10 @@ fun StandingsViewContainer(
 
         // standings data
         AnimatedVisibility(
-            visible = if (displayDataState == null) {
+            visible = if (state.displayDataState == null) {
                 true
             } else {
-                displayDataState == ApiFetchState.Success
+                state.displayDataState == ApiFetchState.Success
             }
         ) {
             Column(

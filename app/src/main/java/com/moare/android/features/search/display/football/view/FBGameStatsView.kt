@@ -147,7 +147,8 @@ fun FBGameStatsView(
             shouldShowTitle = fbLeagueScheduleData == null && fbTeamScheduleData == null,
             shouldShowGameItem = fbLeagueScheduleData == null && fbTeamScheduleData == null,
             shouldShowStats = displayModel?.game?.fixture?.status?.short != "NS",
-            shouldShowCoach = true
+            shouldShowCoach = true,
+            firstCategoryItemHeight = fbGameStatsViewModel.categoryItemHeight * 2
         ),
         titleContent = {
             displayModel?.game?.let { game ->
@@ -198,9 +199,6 @@ fun FBGameStatsView(
                     modifier = Modifier.padding(start = 4.dp)
                 )
             }
-        },
-        firstCategoryContent = {
-            FBGameStatsFirstCategoryItem()
         },
         categoryListContent = {
             Column {
@@ -320,27 +318,6 @@ fun FBGameStatsTeamButton(
             }
             .width(fbGameStatsViewModel.teamButtonWidth)
     )
-}
-
-@Composable
-fun FBGameStatsFirstCategoryItem(
-    fbGameStatsViewModel: FBGameStatsViewModel = hiltViewModel()
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(fbGameStatsViewModel.categoryItemHeight * 2)
-    ) {
-        Text(
-            text = StringConstants.GAME_STATS_FIRST_CATEGORY,
-            fontSize = fbGameStatsViewModel.categoryFontSize,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(130.dp)
-        )
-
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-    }
 }
 
 @Composable

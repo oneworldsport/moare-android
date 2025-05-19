@@ -28,7 +28,7 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
-import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamInfoIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel

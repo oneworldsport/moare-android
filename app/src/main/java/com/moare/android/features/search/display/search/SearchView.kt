@@ -64,6 +64,7 @@ import com.moare.android.features.search.display.kbo.view.KBOTeamStatsView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerInfoView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerStatsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamInfoView
+import com.moare.android.features.search.display.mlb.view.MLBTeamStandingsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAGameStatsView
 import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
@@ -470,9 +471,9 @@ fun SearchView(
                     mlbTeamStatsData?.let {
                         MLBTeamStatsView(data = it)
                     }
-//                    mlbTeamStandingsData?.let {
-//                        MLBTeamStandingsView(data = it)
-//                    }
+                    mlbTeamStandingsData?.let {
+                        MLBTeamStandingsView(data = it)
+                    }
 //                    mlbLeagueScheduleData?.let {
 //                        MLBLeagueScheduleView(data = it)
 //                    }

@@ -24,7 +24,7 @@ import com.moare.android.core.util.MLBUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
-import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsViewModel
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsIntent

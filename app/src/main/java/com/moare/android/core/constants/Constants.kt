@@ -55,6 +55,16 @@ object Constants {
         const val WAS = 1610612764
         const val DET = 1610612765
         const val CHA = 1610612766
+
+        // mlb league, division
+        const val AMERICAN_LEAGUE = 103
+        const val NATIONAL_LEAGUE = 104
+        const val AMERICAN_LEAGUE_WEST = 200
+        const val AMERICAN_LEAGUE_EAST = 201
+        const val AMERICAN_LEAGUE_CENTRAL = 202
+        const val NATIONAL_LEAGUE_WEST = 203
+        const val NATIONAL_LEAGUE_EAST = 204
+        const val NATIONAL_LEAGUE_CENTRAL = 205
     }
 
     object NBAGameStatus {

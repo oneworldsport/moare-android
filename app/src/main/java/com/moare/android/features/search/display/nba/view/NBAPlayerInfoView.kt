@@ -47,7 +47,7 @@ import com.moare.android.core.util.toCm
 import com.moare.android.core.util.toKg
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
-import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel

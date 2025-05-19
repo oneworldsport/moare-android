@@ -30,7 +30,7 @@ import com.moare.android.core.util.KBOUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
-import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoIntent
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoViewModel
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoEighthItem
