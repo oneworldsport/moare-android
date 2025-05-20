@@ -1,5 +1,15 @@
 package com.moare.android.core.constants
 
+import com.moare.android.core.constants.StringConstants.Football.GAME_BREAK_TIME
+import com.moare.android.core.constants.StringConstants.Football.GAME_EXTRA_TIME
+import com.moare.android.core.constants.StringConstants.Football.GAME_FINISHED
+import com.moare.android.core.constants.StringConstants.Football.GAME_FINISHED_AFTER_EXTRA_TIME
+import com.moare.android.core.constants.StringConstants.Football.GAME_FINISHED_AFTER_PENALTY_SHOOTOUT
+import com.moare.android.core.constants.StringConstants.Football.GAME_FIRST_HALF
+import com.moare.android.core.constants.StringConstants.Football.GAME_HALF_TIME
+import com.moare.android.core.constants.StringConstants.Football.GAME_PENALTY_SHOOTOUT
+import com.moare.android.core.constants.StringConstants.Football.GAME_SECOND_HALF
+
 object StringConstants {
     // TODO: 대문자로 바꾸기
     const val RESULT_OPEN = "결과 보기"
@@ -73,6 +83,9 @@ object StringConstants {
     }
 
     object MLB {
+        val GAME_LIVE_LIST = listOf("I")
+        val GAME_FINISHED_LIST = listOf("F")
+
         val DIVISION_CATEGORY = listOf("내셔널 서부", "내셔널 동부", "내셔널 중부", "아메리칸 서부", "아메리칸 동부", "아메리칸 중부")
 
         val TEAM_STANDINGS_CATEGORIES = listOf("승률", "게임차", "승", "패", "경기수", "연속", "타율", "안타", "홈런", "장타율", "득점", "평균자책", "피안타율", "피안타", "피홈런", "실점", "도루성공률")

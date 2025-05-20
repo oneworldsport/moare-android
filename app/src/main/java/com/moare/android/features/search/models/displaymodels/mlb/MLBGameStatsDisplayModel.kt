@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MLBGameStatsDisplayModel(
     override val leagueId: Int,
-    override val keywords: List<Keyword>,
-    override val entityInfo: List<EntityInfo>,
+    override val keywords: List<Keyword> = emptyList(),
+    override val entityInfo: List<EntityInfo> = emptyList(),
     val game: MLBGame
 ) : DisplayModelBase

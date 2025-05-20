@@ -127,7 +127,7 @@ data class MLBGameBoxsocreTeamInfo(
 @Serializable
 data class MLBGameDecisions(
     val loser: MLBFullNameObj,
-    val save: MLBFullNameObj,
+    val save: MLBFullNameObj? = null,
     val winner: MLBFullNameObj
 )
 

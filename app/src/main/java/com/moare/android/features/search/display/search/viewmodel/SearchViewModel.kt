@@ -50,10 +50,14 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDis
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
+import com.moare.android.features.search.models.models.kbo.KBOGame
+import com.moare.android.features.search.models.models.mlb.MLBGame
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
@@ -288,6 +292,8 @@ class SearchViewModel @Inject constructor(
 
         data class SelectFBGame(val game: FBGame, val leagueId: Int) : Intent()
         data class SelectNBAGame(val game: NBAGame) : Intent()
+        data class SelectKBOGame(val game: KBOGame) : Intent()
+        data class SelectMLBGame(val game: MLBGame) : Intent()
 
         data class GoBack(val activity: Activity?) : Intent()
 
@@ -326,6 +332,8 @@ class SearchViewModel @Inject constructor(
                 is Intent.ToggleSearchBar -> toggleSearchBar()
                 is Intent.SelectFBGame -> selectFBGame(intent.game, intent.leagueId)
                 is Intent.SelectNBAGame -> selectNBAGame(intent.game)
+                is Intent.SelectKBOGame -> selectKBOGame(intent.game)
+                is Intent.SelectMLBGame -> selectMLBGame(intent.game)
                 is Intent.GoBack -> goBack(intent.activity)
                 is Intent.ShowPlayerStats -> showPlayerStats(intent.category, intent.playerId)
                 is Intent.ShowTeamStats -> showTeamStats(intent.teamId)
@@ -636,9 +644,10 @@ class SearchViewModel @Inject constructor(
     }
 
     private suspend fun selectFBGame(game: FBGame, leagueId: Int) {
+        val displayModel = FBGameStatsDisplayModel(game = game, leagueId = leagueId)
         val dataModel = SportDecodableModel.FBGameStats(
             responseModel = FBGameStatsResponseModel(game = game),
-            displayModel = FBGameStatsDisplayModel(game = game, leagueId = leagueId)
+            displayModel = displayModel
         )
 
         // add stack before emiting _fbGameStatsData to ensure the last stack(SportDecodableModel.FBGameStats in this case) can be up to date after refreshing game data when opening FBGameStatsView
@@ -647,13 +656,14 @@ class SearchViewModel @Inject constructor(
         _viewStack.emit(stack)
         _poppedView.emit(null)
 
-        _fbGameStatsData.emit(FBGameStatsDisplayModel(game = game, leagueId = leagueId ))
+        _fbGameStatsData.emit(displayModel)
     }
 
     private suspend fun selectNBAGame(game: NBAGame) {
+        val displayModel = NBAGameStatsDisplayModel(leagueId = 90001, game = game)
         val dataModel = SportDecodableModel.NBAGameStats(
             responseModel = NBAGameStatsResponseModel(game = game),
-            displayModel = NBAGameStatsDisplayModel(leagueId = 90001, game = game)
+            displayModel = displayModel
         )
 
         val stack = viewStack.value.toMutableList()
@@ -661,7 +671,37 @@ class SearchViewModel @Inject constructor(
         _viewStack.emit(stack)
         _poppedView.emit(null)
 
-        _nbaGameStatsData.emit(NBAGameStatsDisplayModel(leagueId = 90001, game = game))
+        _nbaGameStatsData.emit(displayModel)
+    }
+
+    private suspend fun selectKBOGame(game: KBOGame) {
+        val displayModel = KBOGameStatsDisplayModel(leagueId = 90101, game = game)
+        val dataModel = SportDecodableModel.KBOGameStats(
+            responseModel = KBOGameStatsResponseModel(game = game),
+            displayModel = displayModel
+        )
+
+        val stack = viewStack.value.toMutableList()
+        stack.add(dataModel)
+        _viewStack.emit(stack)
+        _poppedView.emit(null)
+
+        _kboGameStatsData.emit(displayModel)
+    }
+
+    private suspend fun selectMLBGame(game: MLBGame) {
+        val displayModel = MLBGameStatsDisplayModel(leagueId = 90102, game = game)
+        val dataModel = SportDecodableModel.MLBGameStats(
+            responseModel = MLBGameStatsResponseModel(game = game),
+            displayModel = displayModel
+        )
+
+        val stack = viewStack.value.toMutableList()
+        stack.add(dataModel)
+        _viewStack.emit(stack)
+        _poppedView.emit(null)
+
+        _mlbGameStatsData.emit(displayModel)
     }
 
     private suspend fun goBack(activity: Activity?) {
