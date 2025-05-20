@@ -64,7 +64,7 @@ class MLBTeamStandingsViewModel @Inject constructor(
 
         // init with default value
         _selectedDivisionIndex.value = 0
-        _selectedCategoryIndex.value = 1 // defalue category is "승률"
+        _selectedCategoryIndex.value = 0 // defalue category is "승률"
         _standings.value = emptyList()
 
         selectDivision(isInit = true)
