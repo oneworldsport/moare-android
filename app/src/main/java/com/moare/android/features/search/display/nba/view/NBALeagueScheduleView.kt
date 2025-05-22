@@ -39,8 +39,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.features.search.display.common.container.state.CalendarUiActions
+import com.moare.android.features.search.display.common.container.state.CalendarUiState
+import com.moare.android.features.search.display.common.container.state.ScheduleContainerActions
+import com.moare.android.features.search.display.common.container.state.ScheduleContainerState
+import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
+import com.moare.android.features.search.display.football.view.FBLeagueScheduleList
+import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleIntent
+import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
@@ -50,6 +59,7 @@ import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
@@ -91,7 +101,7 @@ fun NBALeagueScheduleView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBALeagueSchedule) {
-            nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.InitData(data))
+            nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.InitData(data))
         }
     }
 
@@ -102,7 +112,7 @@ fun NBALeagueScheduleView(
 
             poppedView?.let {
                 if (it is SportDecodableModel.NBAGameStats) {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.UpdateGamesData(nbaLeagueSchedule, it) { data ->
+                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateGamesData(nbaLeagueSchedule, it) { data ->
                         searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
                     })
                 }
@@ -110,112 +120,43 @@ fun NBALeagueScheduleView(
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Column(
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        /* ---------------------
-           game title
-           - shows when game selected
-           --------------------- */
-//        nbaGameStatsData?.let {
-//            Row(
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                NBATitle(
-//                    leagueName = "NBA",
-//                    leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
-//                )
-//
-//                Text(
-//                    text = " - 정규시즌",
-//                    fontSize = 14.sp
-//                )
-//            }
-//        }
-
-        if (nbaGameStatsData == null) {
-            /* ---------------------
-               calendar
-               - hides when game selected
-               --------------------- */
-            CalendarList(yearMonthList, CalendarType.YEARMONTH, selectedYearMonthIndex, yearMonthCalendarScrollTrigger) { yearMonth, index ->
-                nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.SelectYearMonth(yearMonth, index) { data ->
-                    // 현재 구조 콜백 수정 필요?
-                    searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
-                })
-            }
-
-            CalendarList(days, CalendarType.DAY, selectedDayIndex, dayCalendarScrollTrigger) { day, index ->
-                nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.SelectDay(day, index))
-            }
-
-            /* ---------------------
-               all result open button
-               - hides when game selected
-               --------------------- */
-            Row {
-                Spacer(Modifier.weight(1f))
-
-                CapsuleButton(
-                    text = if (isAllResultOpened) {
-                        StringConstants.RESULT_HIDE
-                    } else {
-                        StringConstants.RESULT_OPEN
-                    },
-                    color = Color.Gray,
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.ToggleAllResult)
+    ScheduleViewContainer(
+        state = ScheduleContainerState(
+            shouldShowCalendar = nbaGameStatsData == null,
+            shouldShowAllResultToggleButton = nbaGameStatsData == null,
+            displayDataState = displayDataState,
+            shouldFillBelow = nbaGameStatsData == null,
+            calendarUiState = CalendarUiState(
+                yearMonthList,
+                days,
+                selectedYearMonthIndex,
+                selectedDayIndex,
+                yearMonthCalendarScrollTrigger,
+                dayCalendarScrollTrigger
+            ),
+            isAllResultOpened = isAllResultOpened
+        ),
+        actions = ScheduleContainerActions(
+            calendarUiActions = CalendarUiActions(
+                onSelectYearMonth = { yearMonth, index ->
+                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.SelectYearMonth(yearMonth, index) { data ->
+                        // 현재 구조 콜백 수정 필요?
+                        searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
+                    })
+                },
+                onSelectDay = { day, index ->
+                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.SelectDay(day, index))
                 }
+            ),
+            allResultButtonAction = {
+                nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.ToggleAllResult)
             }
-
-            // NOTE: In most situations, loading should be used in Box for smooth animation.
-            Box {
-                // loading
-                this@Column.AnimatedVisibility(
-                    visible = displayDataState == ApiFetchState.Fetching,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        ProgressIndicator()
-                    }
-                }
-
-                /* ---------------------
-                   schedule
-                   --------------------- */
-                this@Column.AnimatedVisibility(
-                    visible = displayDataState == ApiFetchState.Success
-                ) {
-                    NBALeagueScheduleList()
-                }
-            }
-
-            // no result / error
-            AnimatedVisibility(
-                visible = displayDataState is ApiFetchState.Error,
-//            enter = fadeIn()
-            ) {
-                val error = displayDataState as? ApiFetchState.Error
-                error?.let {
-                    Text(error.message)
-                }
-            }
-
-            /* ---------------------
-               bottom empty space
-               - hides when game selected
-               --------------------- */
-            Spacer(Modifier.fillMaxSize())
+        ),
+        titleContent = {},
+        gameListContent = {
+            NBALeagueScheduleList()
         }
-    }
+    )
 }
 
 @Composable
@@ -351,7 +292,7 @@ fun NBALeagueScheduleListItem(
 
                 // set selected game's isOpened true
                 data.gameSummary?.let {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, true))
+                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateResultOpenedState(it.gameCode, true))
                 }
             }
             .padding(vertical = 8.dp)
@@ -422,7 +363,7 @@ fun NBALeagueScheduleListItem(
                 isDisabled = data.gameSummary?.gameStatusId != 3
             ) {
                 data.gameSummary?.let {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleViewModel.Intent.UpdateResultOpenedState(it.gameCode, !isResultOpened))
+                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateResultOpenedState(it.gameCode, !isResultOpened))
                 }
             }
 
@@ -434,14 +375,14 @@ fun NBALeagueScheduleListItem(
             )
 
             // playoffs info
-            if (data.gameSummary != null && data.gameSummary.weekName.isEmpty()) {
+            if (data.gameSummary != null && data.gameSummary.seriesText.isNotEmpty()) {
                 val gameSummary = data.gameSummary
                 Text(
                     text = NBAUtil.gameType(gameSummary, true),
                     fontSize = 11.sp
                 )
 
-                if (data.seasonSeries != null && !gameSummary.seriesGameNumber.isEmpty()) {
+                if (data.seasonSeries != null && gameSummary.seriesGameNumber.isNotEmpty()) {
                     val seasonSeries = data.seasonSeries
                     CenterRow {
                         Text(

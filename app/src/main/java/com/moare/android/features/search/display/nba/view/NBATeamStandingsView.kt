@@ -4,17 +4,14 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +29,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.features.search.display.common.container.state.StandingsContainerState
+import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -59,7 +59,6 @@ fun NBATeamStandingsView(
        viewmodel state
        --------------------- */
     val displayModel by nbaTeamStandingsViewModel.displayModel.collectAsState()
-    val selectedConferenceIndex by nbaTeamStandingsViewModel.selectedConferenceIndex.collectAsState()
     val selectedCategoryIndex by nbaTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
     val isKeyword by nbaTeamStandingsViewModel.isKeyword.collectAsState()
 
@@ -80,7 +79,7 @@ fun NBATeamStandingsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBATeamStandings) {
-            nbaTeamStandingsViewModel.send(NBATeamStandingsViewModel.Intent.InitData(data))
+            nbaTeamStandingsViewModel.send(NBATeamStandingsIntent.InitData(data))
         }
     }
 
@@ -97,51 +96,34 @@ fun NBATeamStandingsView(
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        NBATitle(
-            leagueName = "NBA 정규시즌",
-            leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
-        )
+    StandingsViewContainer(
+        state = StandingsContainerState(
+            firstCategoryItemHeight = nbaTeamStandingsViewModel.categoryItemHeight,
+            isTopPaddingOnHeader = false
+        ),
+        headerContent = {
+            NBATitle(
+                leagueName = "NBA 정규시즌",
+                leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
+            )
 
-        // conference
-        Row(
-            modifier = Modifier.padding(top = 6.dp)
-        ) {
-            NBAConferenceButtonContainer()
-        }
-
-        // category
-        Row {
-            NBATeamStandingsFirstCategoryItem()
-
+            // conference
             Row(
-                Modifier.horizontalScroll(horizontalScrollState)
+                modifier = Modifier.padding(top = 6.dp)
             ) {
-                NBATeamStandingsCategoryList()
+                NBAConferenceButtonContainer()
             }
+        },
+        categoryListContent = {
+            NBATeamStandingsCategoryList()
+        },
+        standingsFirstDataContent = {
+            NBATeamStandingsFirstDataList()
+        },
+        standingsDataContent = {
+            NBATeamStandingsDataList()
         }
-
-        // standings data
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-        ) {
-            Row {
-                NBATeamStandingsFirstDataList()
-
-                Row(
-                    Modifier.horizontalScroll(horizontalScrollState)
-                ) {
-                    NBATeamStandingsDataList()
-                }
-            }
-        }
-    }
+    )
 }
 
 @Composable
@@ -181,7 +163,7 @@ fun NBAConferenceButtonContainer(
                         .weight(1f)
                         .clickable {
                             nbaTeamStandingsViewModel.send(
-                                NBATeamStandingsViewModel.Intent.SelectConference(
+                                NBATeamStandingsIntent.SelectConference(
                                     index
                                 )
                             )
@@ -198,27 +180,6 @@ fun NBAConferenceButtonContainer(
             modifier = Modifier
                 .offset(x = barOffset)
         )
-    }
-}
-
-@Composable
-fun NBATeamStandingsFirstCategoryItem(
-    nbaTeamStandingsViewModel: NBATeamStandingsViewModel = hiltViewModel()
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(nbaTeamStandingsViewModel.categoryItemHeight)
-    ) {
-        Text(
-            text = StringConstants.STANDINGS_FIRST_CATEGORY,
-            fontSize = nbaTeamStandingsViewModel.categoryFontSize,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(130.dp)
-        )
-
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
     }
 }
 
@@ -281,7 +242,7 @@ fun NBATeamStandingsCategoryListItem(
         modifier = Modifier
             .width(nbaTeamStandingsViewModel.dataItemWidth)
             .clickable {
-                nbaTeamStandingsViewModel.send(NBATeamStandingsViewModel.Intent.SelectCagetory(index))
+                nbaTeamStandingsViewModel.send(NBATeamStandingsIntent.SelectCategory(index))
             }
     )
 }

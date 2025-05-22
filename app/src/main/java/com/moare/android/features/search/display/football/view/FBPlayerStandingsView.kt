@@ -1,25 +1,19 @@
 package com.moare.android.features.search.display.football.view
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,16 +35,17 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.rounded
+import com.moare.android.features.search.display.common.container.state.StandingsContainerState
+import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.LeagueTitle
-import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
@@ -109,7 +104,7 @@ fun FBPlayerStandingsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.FBPlayerStandings) {
-            fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.InitData(data))
+            fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.InitData(data))
         }
     }
 
@@ -136,10 +131,10 @@ fun FBPlayerStandingsView(
 
         when (verticalScrollState.value) {
             0 -> {
-                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.ShowMoreStandings(true))
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.ShowMoreStandings(true))
             }
             verticalScrollState.maxValue -> {
-                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.ShowMoreStandings(false))
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.ShowMoreStandings(false))
             }
         }
     }
@@ -153,94 +148,33 @@ fun FBPlayerStandingsView(
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Column(
-        // NOTE: If set fillMaxSize, AnimatedVisibility works fine on first show.
-        // But if fillMaxSize not set, AnimatedVisibility doesn't work on first show.
-        // Not sure why yet
-        modifier = Modifier.fillMaxSize()
-    ) {
-        league?.let {
-            LeagueTitle(
-                url = league.logo,
-                leagueName = league.name,
-                leagueSeason = league.season
-            )
-        }
-
-        // category
-        Row(
-            modifier = Modifier.padding(top = 6.dp)
-        ) {
-            FBPlayerStandingsFirstCategoryItem()
-
-            Row(
-                Modifier.horizontalScroll(horizontalScrollState)
-            ) {
-                Column {
-                    FBPlayerStandingsFirstCategoryList()
-                    FBPlayerStandingsSecondCategoryList()
-                }
+    StandingsViewContainer(
+        state = StandingsContainerState(
+            displayDataState = displayDataState,
+            firstCategoryItemHeight = fbPlayerStandingsViewModel.categoryItemHeight * 2
+        ),
+        headerContent = {
+            league?.let {
+                LeagueTitle(
+                    url = league.logo,
+                    leagueName = league.name,
+                    leagueSeason = league.season
+                )
             }
-        }
-
-        // loading
-        AnimatedVisibility(
-            visible = displayDataState == ApiFetchState.Fetching,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                ProgressIndicator()
+        },
+        categoryListContent = {
+            Column {
+                FBPlayerStandingsFirstCategoryList()
+                FBPlayerStandingsSecondCategoryList()
             }
+        },
+        standingsFirstDataContent = {
+            FBPlayerStandingsFirstDataList()
+        },
+        standingsDataContent = {
+            FBPlayerStandingsDataList()
         }
-
-        // standings data
-        AnimatedVisibility(
-            visible = displayDataState == ApiFetchState.Success
-        ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(verticalScrollState)
-            ) {
-                Row {
-                    FBPlayerStandingsFirstDataList()
-
-                    Row(
-                        Modifier.horizontalScroll(horizontalScrollState)
-                    ) {
-                        FBPlayerStandingsDataList()
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun FBPlayerStandingsFirstCategoryItem(
-    fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(fbPlayerStandingsViewModel.categoryItemHeight * 2)
-    ) {
-        Text(
-            text = StringConstants.STANDINGS_FIRST_CATEGORY,
-            fontSize = fbPlayerStandingsViewModel.categoryFontSize,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(130.dp)
-        )
-
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-    }
+    )
 }
 
 @Composable
@@ -335,7 +269,7 @@ fun FBPlayerStandingsFirstCategoryListItem(
                 }
             )
             .clickable {
-                fbPlayerStandingsViewModel.send(FBPlayerStandingsViewModel.Intent.SelectFirstCategory(index))
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.SelectFirstCategory(index))
             }
     ) {
         Text(
@@ -424,7 +358,7 @@ fun FBPlayerStandingsSecondCategoryListItem(
             .width(fbPlayerStandingsViewModel.itemWidth)
             .clickable {
                 fbPlayerStandingsViewModel.send(
-                    FBPlayerStandingsViewModel.Intent.SelectSecondCategory(index, category)
+                    FBPlayerStandingsIntent.SelectSecondCategory(index, category)
                 )
             }
     )

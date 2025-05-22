@@ -82,6 +82,31 @@ fun NBATitle(
 }
 
 @Composable
+fun BaseballLeagueTitle(
+    url: String,
+    leagueName: String,
+    leagueSeason: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
+        URLImage(
+            url = url,
+            size = URLImageSize.SMALL,
+            modifier = Modifier.padding(horizontal = 4.dp),
+            isSvg = url.contains(".svg")
+        )
+
+        Text(
+            text = "${leagueName} $leagueSeason",
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
 fun RoundedBorderText(
     text: String,
     modifier: Modifier = Modifier,
@@ -109,12 +134,17 @@ fun TextComponentPreview() {
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center
         ) {
-            RoundedBorderText(
-                text = "홈",
-                fontSize = 11.sp,
-                radius = 4.dp,
-                textColor = Moare,
-                borderColor = Moare
+//            RoundedBorderText(
+//                text = "홈",
+//                fontSize = 11.sp,
+//                radius = 4.dp,
+//                textColor = Moare,
+//                borderColor = Moare
+//            )
+            LeagueTitle(
+                url = "",
+                leagueName = "ss",
+                leagueSeason = 22
             )
         }
     }

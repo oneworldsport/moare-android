@@ -1,0 +1,70 @@
+{
+  "dataType": "football_team_stats",
+  "keywords": [],
+  "entityInfo": [
+    {
+      "category": "football",
+      "entityType": "player",
+      "entityName": "손흥민",
+      "leagueId": 39,
+      "teamId": 47,
+      "playerId": 186
+    }
+  ],
+  "data": {
+    "info": {
+      "player": {
+        "birthdate": "2001-09-16",
+        "career": "호암초(의정부리틀)-구리인창중-유신고",
+        "draftRound": "20 KT 1차",
+        "fromYear": "20KT",
+        "height": "189cm",
+        "id": 50030,
+        "jersey": "30",
+        "name": "소형준",
+        "position": "투수(우투우타)",
+        "salary": "22000만원",
+        "signingBonus": "36000만원",
+        "teamId": 0,
+        "weight": "92kg"
+      },
+      "statistics": [
+        {
+          "2b": "4",
+          "3b": "1",
+          "avg": "0.218",
+          "bb": "7",
+          "bk": "0",
+          "bsv": "0",
+          "cg": "0",
+          "er": "7",
+          "era": "1.70",
+          "g": "6",
+          "h": "29",
+          "hld": "0",
+          "hr": "0",
+          "ibb": "0",
+          "ip": "37",
+          "l": "1",
+          "np": "514",
+          "qs": "5",
+          "r": "8",
+          "sac": "1",
+          "season": 2025,
+          "seasonType": "Regular Season",
+          "sf": "1",
+          "sho": "0",
+          "so": "41",
+          "sv": "0",
+          "tbf": "143",
+          "w": "2",
+          "whip": "0.97",
+          "wp": "2",
+          "wpct": "0.667"
+        }
+      ]
+    },
+    "lastGame": [],
+    "nextGame": []
+  }
+}

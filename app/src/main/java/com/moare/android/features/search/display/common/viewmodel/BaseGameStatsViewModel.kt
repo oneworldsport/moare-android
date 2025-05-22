@@ -1,0 +1,102 @@
+package com.moare.android.features.search.display.common.viewmodel
+
+import com.moare.android.core.constants.Constants
+import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.di.TranslatedNameProvider
+import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.features.search.models.ApiFetchState
+import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
+abstract class BaseGameStatsViewModel<I, T>(
+    private val nameProvider: TranslatedNameProvider
+) : MVIViewModel<I, T>() {
+    /* ---------------------
+       data state
+       --------------------- */
+    protected val _displayModel = MutableStateFlow<T?>(null)
+    val displayModel: StateFlow<T?> = _displayModel
+
+    protected val _displayDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
+    val displayDataState: StateFlow<ApiFetchState> = _displayDataState
+
+    /* ---------------------
+       ui state
+       --------------------- */
+    protected var _firstSelectedIndex = MutableStateFlow(0)
+    val firstSelectedIndex: StateFlow<Int> = _firstSelectedIndex
+
+    protected var _secondSelectedIndex = MutableStateFlow(0)
+    val secondSelectedIndex: StateFlow<Int> = _secondSelectedIndex
+
+    protected var _selectedTeamIndex = MutableStateFlow(0)
+    val selectedTeamIndex: StateFlow<Int> = _selectedTeamIndex
+
+    /* ---------------------
+       etc
+       --------------------- */
+    var shouldScrollCategory = false
+    var playerNameDictionary: Map<String, String> = emptyMap()
+    var teamNameDictionary: Map<String, String> = emptyMap()
+
+    override fun initData(displayModel: T) {
+        // init with default value
+        _displayDataState.value = ApiFetchState.Idle
+
+        _firstSelectedIndex.value = 0
+        _secondSelectedIndex.value = 0
+        _selectedTeamIndex.value = 0
+
+        shouldScrollCategory = false
+
+        // init data
+        _displayModel.value = displayModel
+
+        if (displayModel is DisplayModelBase) {
+            loadDictionaries(displayModel.leagueId)
+        }
+    }
+
+    private fun loadDictionaries(leagueId: Int) {
+        when (leagueId) {
+            Constants.Ids.EPL -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_TEAM_DIC)
+            }
+            Constants.Ids.LALIGA -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_TEAM_DIC)
+            }
+            Constants.Ids.BUNDESLIGA -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_TEAM_DIC)
+            }
+            Constants.Ids.LIGUE1 -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
+            }
+            Constants.Ids.NBA -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
+            }
+            else -> {}
+        }
+    }
+
+    open fun selectFirstCategory(index: Int) {
+        shouldScrollCategory = true
+    }
+
+    open fun selectSecondCategory(index: Int) {
+        shouldScrollCategory = false
+        _secondSelectedIndex.value = index
+    }
+
+    open fun selectTeam(index: Int) {
+        _selectedTeamIndex.value = index
+    }
+
+    abstract fun sortPlayers()
+    abstract fun setPlayersTotalStats()
+}

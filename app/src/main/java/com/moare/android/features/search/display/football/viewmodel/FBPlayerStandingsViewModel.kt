@@ -8,6 +8,7 @@ import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.features.search.display.common.viewmodel.BasePlayerStandingsViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
@@ -15,6 +16,7 @@ import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,11 +24,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class FBPlayerStandingsIntent {
+    data class InitData(val displayModel: FBPlayerStandingsDisplayModel) : FBPlayerStandingsIntent()
+    data class SelectFirstCategory(val index: Int) : FBPlayerStandingsIntent()
+    data class SelectSecondCategory(val index: Int, val category: String) : FBPlayerStandingsIntent()
+    data class ShowMoreStandings(val isUp: Boolean) : FBPlayerStandingsIntent()
+}
+
 @HiltViewModel
 class FBPlayerStandingsViewModel @Inject constructor(
     private val searchClient: SearchClient,
     private val nameProvider: TranslatedNameProvider
-) : MVIViewModel<FBPlayerStandingsViewModel.Intent, FBPlayerStandingsDisplayModel>() {
+) : BasePlayerStandingsViewModel<FBPlayerStandingsIntent, FBPlayerStandingsDisplayModel>(nameProvider) {
     /* ---------------------
        constants
        --------------------- */
@@ -41,132 +50,41 @@ class FBPlayerStandingsViewModel @Inject constructor(
     /* ---------------------
        data state
        --------------------- */
-    private var _displayModel = MutableStateFlow<FBPlayerStandingsDisplayModel?>(null)
-    val displayModel: StateFlow<FBPlayerStandingsDisplayModel?> = _displayModel
-
-    private val _displayDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
-    val displayDataState: StateFlow<ApiFetchState> = _displayDataState
-
     private var _filteredStandings = MutableStateFlow<List<FBPlayerStandingsDisplay>>(emptyList())
     val filteredStandings: StateFlow<List<FBPlayerStandingsDisplay>> = _filteredStandings
 
     /* ---------------------
-       ui state
-       --------------------- */
-    private var _firstSelectedIndex = MutableStateFlow(0)
-    val firstSelectedIndex: StateFlow<Int> = _firstSelectedIndex
-
-    private var _secondSelectedIndex = MutableStateFlow(0)
-    val secondSelectedIndex: StateFlow<Int> = _secondSelectedIndex
-
-    private var _isKeyword = MutableStateFlow(false)
-    val isKeyword: StateFlow<Boolean> = _isKeyword
-
-    private var _entityIndex = MutableStateFlow<Int?>(null)
-    val entityIndex: StateFlow<Int?> = _entityIndex
-
-    private var _filteredStandingsStartIndex = MutableStateFlow(0)
-    val filteredStandingsStartIndex: StateFlow<Int> = _filteredStandingsStartIndex
-
-    /* ---------------------
        etc
        --------------------- */
-    var shouldScrollCategory = true
     var standings: List<FBPlayerStandingsDisplay> = emptyList()
-    private var selectedEntity: EntityInfo? = null
-    private var filteredStandingsEndIndex = 0 // NOTE: one bigger then actual showing end item's index. Because of subList.
-    var playerNameDictionary: Map<String, String> = emptyMap()
-    var teamNameDictionary: Map<String, String> = emptyMap()
 
-    /* ---------------------
-       intent
-       --------------------- */
-    sealed class Intent {
-        data class InitData(val displayModel: FBPlayerStandingsDisplayModel) : Intent()
-        data class SelectFirstCategory(val index: Int) : Intent()
-        data class SelectSecondCategory(val index: Int, val category: String) : Intent()
-        data object SortStandings : Intent()
-        data class ShowMoreStandings(val isUp: Boolean) : Intent()
-    }
-
-    override fun send(intent: Intent) {
-        viewModelScope.launch {
-            when (intent) {
-                is Intent.InitData -> initData(intent.displayModel)
-                is Intent.SelectFirstCategory -> selectFirstCategory(intent.index)
-                is Intent.SelectSecondCategory -> selectSecondCategory(intent.index, intent.category)
-                is Intent.SortStandings -> sortStandings()
-                is Intent.ShowMoreStandings -> addStandings(intent.isUp)
-            }
+    override fun send(intent: FBPlayerStandingsIntent) {
+        when (intent) {
+            is FBPlayerStandingsIntent.InitData -> initData(intent.displayModel)
+            is FBPlayerStandingsIntent.SelectFirstCategory -> selectFirstCategory(intent.index)
+            is FBPlayerStandingsIntent.SelectSecondCategory -> selectSecondCategory(intent.index, intent.category)
+            is FBPlayerStandingsIntent.ShowMoreStandings -> addStandings(intent.isUp)
         }
     }
 
-    /* ---------------------
-       init
-       --------------------- */
     override fun initData(displayModel: FBPlayerStandingsDisplayModel) {
-        viewModelScope.launch {
-            // init with default value
-            _displayModel.emit(null)
-            _displayDataState.emit(ApiFetchState.Idle)
-            _filteredStandings.emit(emptyList())
-            _firstSelectedIndex.emit(0)
-            _secondSelectedIndex.emit(0)
-            _isKeyword.emit(false)
-            _entityIndex.emit(null)
-            _filteredStandingsStartIndex.emit(0)
-            shouldScrollCategory = true
-            standings = emptyList()
-            selectedEntity = null
-            filteredStandingsEndIndex = 0
+        super.initData(displayModel)
 
-            // init data
-            _displayModel.emit(displayModel)
-            standings = displayModel.standings
+        // init with default value
+        _filteredStandings.value = emptyList()
+        standings = emptyList()
 
-            when (displayModel.leagueId) {
-                Constants.Ids.EPL -> {
-                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_PLAYER_DIC)
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_TEAM_DIC)
-                }
-                Constants.Ids.LALIGA -> {
-                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_PLAYER_DIC)
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_TEAM_DIC)
-                }
-                Constants.Ids.BUNDESLIGA -> {
-                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_PLAYER_DIC)
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_TEAM_DIC)
-                }
-                Constants.Ids.LIGUE1 -> {
-                    playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_PLAYER_DIC)
-                    teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
-                }
-                else -> {}
-            }
+        // init data
+        standings = displayModel.standings
 
-            val keywords = displayModel.keywords
-            if (keywords.isNotEmpty()) {
-                // Check matching keyword in the order of categories, doesn't matter what keyword is in keywords
-                val index = StringConstants.Football.PLAYER_STANDINGS_SECOND_CATEGORIES.indexOfFirst { category ->
-                    val keyword = keywords.find { it.keyword == category }
-                    keyword != null
-                }
-
-                if (index != -1) {
-                    _secondSelectedIndex.emit(index)
-                    _isKeyword.emit(true)
-                }
-            }
-
-            filterStandings()
-        }
+        filterStandings()
     }
 
     /* ---------------------
        implements
        --------------------- */
-    private suspend fun selectFirstCategory(index: Int) {
-        shouldScrollCategory = true
+    override fun selectFirstCategory(index: Int) {
+        super.selectFirstCategory(index)
 
         val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
         val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
@@ -175,41 +93,40 @@ class FBPlayerStandingsViewModel @Inject constructor(
 
         when (index) {
             0 -> {
-                _secondSelectedIndex.emit(0)
+                _secondSelectedIndex.value = 0
                 secondCategory = "득점"
             }
             1 -> {
-                _secondSelectedIndex.emit(attackCategoriesSize)
+                _secondSelectedIndex.value = attackCategoriesSize
                 secondCategory = "태클 시도"
             }
             2 -> {
-                _secondSelectedIndex.emit(attackCategoriesSize + defendCategoriesSize)
+                _secondSelectedIndex.value = attackCategoriesSize + defendCategoriesSize
                 secondCategory = "패스 시도"
             }
         }
 
-        _firstSelectedIndex.emit(index)
+        _firstSelectedIndex.value = index
 
         fetchStandings(secondCategory)
     }
 
-    private suspend fun selectSecondCategory(index: Int, category: String) {
-        shouldScrollCategory = false
-        _secondSelectedIndex.emit(index)
+    override fun selectSecondCategory(index: Int, category: String) {
+        super.selectSecondCategory(index, category)
 
         val attackCategories = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES
         val defendCategories = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES
 
         when (index) {
-            in attackCategories.indices -> _firstSelectedIndex.emit(0)
-            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstSelectedIndex.emit(1)
-            else -> _firstSelectedIndex.emit(2)
+            in attackCategories.indices -> _firstSelectedIndex.value = 0
+            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstSelectedIndex.value = 1
+            else -> _firstSelectedIndex.value = 2
         }
 
         fetchStandings(category)
     }
 
-    private suspend fun filterStandings() {
+    override fun filterStandings() {
         // Get the first entity(player) matching in the standings.(Process works in the order of standings)
         val index = standings.indexOfFirst { player ->
             val entity = displayModel.value?.entityInfo?.find { it.playerId == player.player.id }
@@ -220,7 +137,7 @@ class FBPlayerStandingsViewModel @Inject constructor(
         }
 
         if (index != -1) {
-            _entityIndex.emit(index)
+            _entityIndex.value = index
         }
 
         // Get 20 items based on index
@@ -231,16 +148,16 @@ class FBPlayerStandingsViewModel @Inject constructor(
         val newStandings = standings.subList(startIndex, endIndex)
 
         filteredStandingsEndIndex = endIndex
-        _filteredStandingsStartIndex.emit(startIndex)
+        _filteredStandingsStartIndex.value = startIndex
 
         // remove loading
-        _displayDataState.emit(ApiFetchState.Success)
+        _displayDataState.value = ApiFetchState.Success
 
         // show 'filteredStandings'
-        _filteredStandings.emit(newStandings)
+        _filteredStandings.value = newStandings
     }
 
-    private suspend fun addStandings(isUp: Boolean) {
+    override fun addStandings(isUp: Boolean) {
         // get 10 more standings
         if (isUp) {
             val newStartIndex = maxOf(0, filteredStandingsStartIndex.value - 10)
@@ -251,8 +168,8 @@ class FBPlayerStandingsViewModel @Inject constructor(
 
             val newStandings = standings.subList(newStartIndex, filteredStandingsEndIndex)
 
-            _filteredStandingsStartIndex.emit(newStartIndex)
-            _filteredStandings.emit(newStandings)
+            _filteredStandingsStartIndex.value = newStartIndex
+            _filteredStandings.value = newStandings
         } else {
             val newEndIndex = minOf(standings.size, filteredStandingsEndIndex + 10)
 
@@ -263,62 +180,36 @@ class FBPlayerStandingsViewModel @Inject constructor(
             val newStandings = standings.subList(filteredStandingsStartIndex.value, newEndIndex)
 
             filteredStandingsEndIndex = newEndIndex
-            _filteredStandings.emit(newStandings)
+            _filteredStandings.value = newStandings
         }
     }
 
-    private suspend fun fetchStandings(category: String) {
-        _displayDataState.emit(ApiFetchState.Fetching)
+    override fun fetchStandings(category: String) {
+        super.fetchStandings(category)
 
-        try {
-            // TODO: Structure should be updated(Temporary code)
-            val standingsKeyword = displayModel.value?.keywords?.first { it.id == "standings" }
-            val keywords = listOf(standingsKeyword!!, Keyword(keyword = category, id = "", priority = 100))
-            val entities = if (selectedEntity != null) listOf(selectedEntity!!) else emptyList()
-            val keywordInfo = KeywordInfo(
-                keyword = category,
-                keywords = keywords,
-                entities = entities
-            )
+        viewModelScope.launch {
+            try {
+                // TODO: Structure should be updated(Temporary code)
+                val standingsKeyword = displayModel.value?.keywords?.first { it.id == "standings" }
+                val keywords = listOf(standingsKeyword!!, Keyword(keyword = category, id = "", priority = 100))
+                val entities = if (selectedEntity != null) listOf(selectedEntity!!) else emptyList()
+                val keywordInfo = KeywordInfo(
+                    keyword = category,
+                    keywords = keywords,
+                    entities = entities
+                )
 
-            val result = searchClient.fetchDataByKeyword(keywordInfo)
+                val result = searchClient.fetchDataByKeyword(keywordInfo)
 
-            if (result.data is SportDecodableModel.FBPlayerStandings) {
-                _displayModel.emit(result.data.displayModel)
-                standings = result.data.displayModel.standings
-                filterStandings()
+                if (result.data is SportDecodableModel.FBPlayerStandings) {
+                    _displayModel.value = result.data.displayModel
+                    standings = result.data.displayModel.standings
+                    filterStandings()
+                }
+            } catch (e: Exception) {
+                _displayDataState.value = ApiFetchState.Error("데이터를 불러오는데 실패하였습니다.")
+                Log.e("dsdf", e.localizedMessage ?: "error")
             }
-        } catch (e: Exception) {
-            _displayDataState.emit(ApiFetchState.Error("데이터를 불러오는데 실패하였습니다."))
-            Log.e("dsdf", e.localizedMessage ?: "error")
         }
-    }
-
-    private suspend fun sortStandings() {
-        var standings = filteredStandings.value.toMutableList()
-
-        when (secondSelectedIndex.value) {
-            0 -> standings.sortByDescending { it.stats.goals.total }
-            1 -> standings.sortByDescending { it.stats.goals.assists }
-            2 -> standings.sortByDescending { it.stats.goals.total + it.stats.goals.assists }
-            3 -> standings.sortByDescending { it.stats.shots.total }
-            4 -> standings.sortByDescending { it.stats.shots.on }
-            5 -> standings.sortByDescending { it.stats.passes.key }
-            6 -> standings.sortByDescending { it.stats.dribbles.success }
-            7 -> standings.sortByDescending { it.stats.penalty.scored }
-            8 -> standings.sortByDescending { it.stats.tackles.total }
-            9 -> standings.sortByDescending { it.stats.duels.won }
-            10 -> standings.sortByDescending { it.stats.passes.total }
-            11 -> standings.sortByDescending { it.stats.fouls.committed }
-            12 -> standings.sortByDescending { it.stats.cards.yellow }
-            13 -> standings.sortByDescending { it.stats.cards.red }
-            14 -> standings.sortByDescending { it.stats.games.appearences }
-            15 -> standings.sortByDescending { it.stats.games.lineups }
-            16 -> standings.sortByDescending { it.stats.substitutes.substituteIn }
-            17 -> standings.sortByDescending { it.stats.games.minutes }
-            18 -> standings.sortByDescending { it.stats.games.rating.toDoubleOrNull() ?: 0.0 }
-        }
-
-        _filteredStandings.emit(standings)
     }
 }

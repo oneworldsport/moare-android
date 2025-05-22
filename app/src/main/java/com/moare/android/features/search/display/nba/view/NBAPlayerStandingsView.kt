@@ -41,6 +41,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.features.search.display.common.container.state.StandingsContainerState
+import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
+import com.moare.android.features.search.display.football.view.FBPlayerStandingsDataList
+import com.moare.android.features.search.display.football.view.FBPlayerStandingsFirstCategoryList
+import com.moare.android.features.search.display.football.view.FBPlayerStandingsFirstDataList
+import com.moare.android.features.search.display.football.view.FBPlayerStandingsSecondCategoryList
+import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
@@ -49,6 +56,7 @@ import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStand
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
+import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.common.components.URLImage
@@ -109,7 +117,7 @@ fun NBAPlayerStandingsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBAPlayerStandings) {
-            nbaPlayerStandingsViewModel.send(NBAPlayerStandingsViewModel.Intent.InitData(data))
+            nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.InitData(data))
         }
     }
 
@@ -136,10 +144,10 @@ fun NBAPlayerStandingsView(
 
         when (verticalScrollState.value) {
             0 -> {
-                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsViewModel.Intent.ShowMoreStandings(true))
+                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.ShowMoreStandings(true))
             }
             verticalScrollState.maxValue -> {
-                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsViewModel.Intent.ShowMoreStandings(false))
+                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.ShowMoreStandings(false))
             }
         }
     }
@@ -153,88 +161,30 @@ fun NBAPlayerStandingsView(
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        NBATitle(
-            leagueName = "NBA 정규시즌",
-            leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
-        )
-
-        // category
-        Row(
-            Modifier.padding(top = 6.dp)
-        ) {
-            NBAPlayerStandingsFirstCategoryItem()
-
-            Row(
-                Modifier.horizontalScroll(horizontalScrollState)
-            ) {
-                Column {
-                    NBAPlayerStandingsFirstCategoryList()
-                    NBAPlayerStandingsSecondCategoryList()
-                }
+    StandingsViewContainer(
+        state = StandingsContainerState(
+            displayDataState = displayDataState,
+            firstCategoryItemHeight = nbaPlayerStandingsViewModel.firstCategoryItemHeight + nbaPlayerStandingsViewModel.secondCategoryItemHeight
+        ),
+        headerContent = {
+            NBATitle(
+                leagueName = "NBA 정규시즌",
+                leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
+            )
+        },
+        categoryListContent = {
+            Column {
+                NBAPlayerStandingsFirstCategoryList()
+                NBAPlayerStandingsSecondCategoryList()
             }
+        },
+        standingsFirstDataContent = {
+            NBAPlayerStandingsFirstDataList()
+        },
+        standingsDataContent = {
+            NBAPlayerStandingsDataList()
         }
-
-        // loading
-        AnimatedVisibility(
-            visible = displayDataState == ApiFetchState.Fetching,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                ProgressIndicator()
-            }
-        }
-
-        // standings data
-        AnimatedVisibility(
-            visible = displayDataState == ApiFetchState.Success
-        ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(verticalScrollState)
-            ) {
-                Row {
-                    NBAPlayerStandingsFirstDataList()
-
-                    Row(
-                        Modifier.horizontalScroll(horizontalScrollState)
-                    ) {
-                        NBAPlayerStandingsDataList()
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NBAPlayerStandingsFirstCategoryItem(
-    nbaPlayerStandingsViewModel: NBAPlayerStandingsViewModel = hiltViewModel()
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(nbaPlayerStandingsViewModel.firstCategoryItemHeight + nbaPlayerStandingsViewModel.secondCategoryItemHeight)
-    ) {
-        Text(
-            text = StringConstants.STANDINGS_FIRST_CATEGORY,
-            fontSize = nbaPlayerStandingsViewModel.firstCategoryFontSize,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(130.dp)
-        )
-
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-    }
+    )
 }
 
 @Composable
@@ -329,7 +279,7 @@ fun NBAPlayerStandingsFirstCategoryListItem(
                 }
             )
             .clickable {
-                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsViewModel.Intent.SelectFirstCategory(index))
+                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.SelectFirstCategory(index))
             }
     ) {
         Text(
@@ -417,7 +367,7 @@ fun NBAPlayerStandingsSecondCategoryListItem(
             .width(nbaPlayerStandingsViewModel.itemWidth)
             .clickable {
                 nbaPlayerStandingsViewModel.send(
-                    NBAPlayerStandingsViewModel.Intent.SelectSecondCategory(index, category)
+                    NBAPlayerStandingsIntent.SelectSecondCategory(index, category)
                 )
             }
     )

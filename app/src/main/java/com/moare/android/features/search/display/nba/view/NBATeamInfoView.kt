@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
@@ -42,7 +43,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
+import com.moare.android.features.search.display.common.container.view.InfoViewContainer
+import com.moare.android.features.search.display.common.viewmodel.BaseInfoViewModel
+import com.moare.android.features.search.display.common.components.FBStatDataItem
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -61,179 +66,47 @@ fun NBATeamInfoView(
     data: NBATeamInfoDisplayModel
 ) {
     /* ---------------------
-       ui state
-       --------------------- */
-    val density = LocalDensity.current
-    val itemSizes = remember { mutableStateMapOf<Int, DpSize>() }
-
-    /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by nbaTeamInfoViewModel.displayModel.collectAsState()
-
     val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       animation
-       --------------------- */
-    var parentPosition by remember { mutableStateOf(Offset.Zero) }
-    var parentCenter by remember { mutableStateOf(Offset.Zero) }
-    val itemPositions = remember { mutableStateMapOf<Int, Offset>() }
-    var aniPositions by remember { mutableStateOf(false) }
-    var showContents by remember { mutableStateOf(false) }
-    val contentsAlpha by animateFloatAsState(
-        targetValue = if (showContents) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = 500,
-            easing = LinearOutSlowInEasing
-        )
-    )
 
     /* ---------------------
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBATeamInfo) {
-            nbaTeamInfoViewModel.send(NBATeamInfoViewModel.Intent.InitData(data))
+            nbaTeamInfoViewModel.send(NBATeamInfoIntent.InitData(data))
         }
     }
 
-    LaunchedEffect(itemPositions) {
-        if (itemPositions.size == 6) {
-            aniPositions = true
-            delay(1000)
-            showContents = true
-        }
-    }
-
-    Box(
-        contentAlignment = Alignment.Center,
-    ) {
-        /* ---------------------
-           invisible ui
-           - for position
-           --------------------- */
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .onGloballyPositioned { parentCoordinates ->
-                    parentPosition = parentCoordinates.positionInWindow()
-                    parentCenter = Offset(
-                        x = parentCoordinates.size.width / 2f,
-                        y = parentCoordinates.size.height / 2f
-                    )
-                }
-                .alpha(0f)
-        ) {
+    InfoViewContainer(
+        itemCount = 6,
+        measureContent = {
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // logo, team, name
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .onGloballyPositioned { layoutCoordinates ->
-                            val itemSize = layoutCoordinates.size
-                            val position = layoutCoordinates.positionInWindow()
-
-                            val relativeX = position.x - parentPosition.x
-                            val relativeY = position.y - parentPosition.y
-
-                            // Calculate the center of the InfoItem
-                            val centerX = relativeX + itemSize.width / 2f
-                            val centerY = relativeY + itemSize.height / 2f
-
-                            itemSizes[0] = with(density) {
-                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                            }
-                            itemPositions[0] =
-                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
-                        }
-                        .widthIn(max = 130.dp)
-                ) {
-                    NBATeamInfoFirstItem()
+                NBATeamInfoFirstItem(
+                    containerModifier = Modifier.weight(1f)
+                ) { index, coordinates ->
+                    updateItemPosition(index, coordinates)
                 }
 
-                // founded, state and city, conference and division
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .onGloballyPositioned { layoutCoordinates ->
-                            val itemSize = layoutCoordinates.size
-                            val position = layoutCoordinates.positionInWindow()
-
-                            val relativeX = position.x - parentPosition.x
-                            val relativeY = position.y - parentPosition.y
-
-                            // Calculate the center of the InfoItem
-                            val centerX = relativeX + itemSize.width / 2f
-                            val centerY = relativeY + itemSize.height / 2f
-
-                            itemSizes[1] = with(density) {
-                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                            }
-                            itemPositions[1] =
-                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
-                        }
-                        .widthIn(max = 130.dp)
-                ) {
-                    NBATeamInfoSecondItem()
+                NBATeamInfoSecondItem(
+                    containerModifier = Modifier.weight(1f)
+                ) { index, coordinates ->
+                    updateItemPosition(index, coordinates)
                 }
 
-                // venue
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .onGloballyPositioned { layoutCoordinates ->
-                            val itemSize = layoutCoordinates.size
-                            val position = layoutCoordinates.positionInWindow()
-
-                            val relativeX = position.x - parentPosition.x
-                            val relativeY = position.y - parentPosition.y
-
-                            // Calculate the center of the InfoItem
-                            val centerX = relativeX + itemSize.width / 2f
-                            val centerY = relativeY + itemSize.height / 2f
-
-                            itemSizes[2] = with(density) {
-                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                            }
-                            itemPositions[2] =
-                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
-                        }
-                        .widthIn(max = 130.dp)
-                ) {
-                    NBATeamInfoThirdItem()
+                NBATeamInfoThirdItem(
+                    containerModifier = Modifier.weight(1f)
+                ) { index, coordinates ->
+                    updateItemPosition(index, coordinates)
                 }
             }
 
-            // league stats
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .padding(top = 12.dp)
-                    .onGloballyPositioned { layoutCoordinates ->
-                        val itemSize = layoutCoordinates.size
-                        val position = layoutCoordinates.positionInWindow()
-
-                        val relativeX = position.x - parentPosition.x
-                        val relativeY = position.y - parentPosition.y
-
-                        // Calculate the center of the InfoItem
-                        val centerX = relativeX + itemSize.width / 2f
-                        val centerY = relativeY + itemSize.height / 2f
-
-                        itemSizes[3] = with(density) {
-                            DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                        }
-                        itemPositions[3] =
-                            Offset(centerX - parentCenter.x, centerY - parentCenter.y)
-                    }
-            ) {
-                NBATeamInfoFourthItem()
+            NBATeamInfoFourthItem { index, coordinates ->
+                updateItemPosition(index, coordinates)
             }
 
             Row(
@@ -242,316 +115,222 @@ fun NBATeamInfoView(
                     .padding(top = 12.dp)
                     .fillMaxWidth()
             ) {
-                // last game stats
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .onGloballyPositioned { layoutCoordinates ->
-                            val itemSize = layoutCoordinates.size
-                            val position = layoutCoordinates.positionInWindow()
-
-                            val relativeX = position.x - parentPosition.x
-                            val relativeY = position.y - parentPosition.y
-
-                            // Calculate the center of the InfoItem
-                            val centerX = relativeX + itemSize.width / 2f
-                            val centerY = relativeY + itemSize.height / 2f
-
-                            itemSizes[4] = with(density) {
-                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                            }
-                            itemPositions[4] =
-                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
-                        }
-                ) {
-                    NBATeamInfoFifthItem()
+                NBATeamInfoFifthItem(
+                    containerModifier = Modifier.weight(1f)
+                ) { index, coordinates ->
+                    updateItemPosition(index, coordinates)
                 }
 
-                // next game stats
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .onGloballyPositioned { layoutCoordinates ->
-                            val itemSize = layoutCoordinates.size
-                            val position = layoutCoordinates.positionInWindow()
-
-                            val relativeX = position.x - parentPosition.x
-                            val relativeY = position.y - parentPosition.y
-
-                            // Calculate the center of the InfoItem
-                            val centerX = relativeX + itemSize.width / 2f
-                            val centerY = relativeY + itemSize.height / 2f
-
-                            itemSizes[5] = with(density) {
-                                DpSize(itemSize.width.toDp(), itemSize.height.toDp())
-                            }
-                            itemPositions[5] =
-                                Offset(centerX - parentCenter.x, centerY - parentCenter.y)
-                        }
-                        .widthIn(max = screenWidthDp() / 2)
-                ) {
-                    NBATeamInfoSixthItem()
+                NBATeamInfoSixthItem(
+                    containerModifier = Modifier.weight(1f)
+                ) { index, coordinates ->
+                    updateItemPosition(index, coordinates)
                 }
             }
-        }
+        },
+        displayContent = {
+            NBATeamInfoFirstItem(
+                isAniItem = true,
+                itemSize = itemSizes[0],
+                itemPosition = itemPositions[0],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
 
-        /* ---------------------
-           visible ui
-           - with animation effect
-           --------------------- */
-        val firstPosition = itemPositions[0] ?: Offset.Zero
-        val firstAnimatedPosition by animateOffsetAsState(
-            targetValue = if (aniPositions) firstPosition else Offset.Zero,
-            animationSpec = tween(1000),
-        )
-        val secondPosition = itemPositions[1] ?: Offset.Zero
-        val secondAnimatedPosition by animateOffsetAsState(
-            targetValue = if (aniPositions) secondPosition else Offset.Zero,
-            animationSpec = tween(1000),
-        )
-        val thirdPosition = itemPositions[2] ?: Offset.Zero
-        val thirdAnimatedPosition by animateOffsetAsState(
-            targetValue = if (aniPositions) thirdPosition else Offset.Zero,
-            animationSpec = tween(1000),
-        )
-        val fourthPosition = itemPositions[3] ?: Offset.Zero
-        val fourthAnimatedPosition by animateOffsetAsState(
-            targetValue = if (aniPositions) fourthPosition else Offset.Zero,
-            animationSpec = tween(1000),
-        )
-        val fifthPosition = itemPositions[4] ?: Offset.Zero
-        val fifthAnimatedPosition by animateOffsetAsState(
-            targetValue = if (aniPositions) fifthPosition else Offset.Zero,
-            animationSpec = tween(1000),
-        )
-        val sixthPosition = itemPositions[5] ?: Offset.Zero
-        val sixthAnimatedPosition by animateOffsetAsState(
-            targetValue = if (aniPositions) sixthPosition else Offset.Zero,
-            animationSpec = tween(1000),
-        )
+            NBATeamInfoSecondItem(
+                isAniItem = true,
+                itemSize = itemSizes[1],
+                itemPosition = itemPositions[1],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
 
-        // logo, name
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .size(itemSizes[0] ?: DpSize(width = 130.dp, height = 150.dp))
-                .offset {
-                    IntOffset(
-                        firstAnimatedPosition.x.roundToInt(),
-                        firstAnimatedPosition.y.roundToInt()
-                    )
-                }
-        ) {
-            NBATeamInfoFirstItem(contentsAlpha = contentsAlpha)
-        }
+            NBATeamInfoThirdItem(
+                isAniItem = true,
+                itemSize = itemSizes[2],
+                itemPosition = itemPositions[2],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
 
-        // founded, state, city
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier
-                .size(itemSizes[1] ?: DpSize(width = 130.dp, height = 150.dp))
-                .offset {
-                    IntOffset(
-                        secondAnimatedPosition.x.roundToInt(),
-                        secondAnimatedPosition.y.roundToInt()
-                    )
-                }
-        ) {
-            NBATeamInfoSecondItem(contentsAlpha = contentsAlpha)
-        }
+            NBATeamInfoFourthItem(
+                isAniItem = true,
+                itemSize = itemSizes[3],
+                itemPosition = itemPositions[3],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
 
-        // venue
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier
-                .size(itemSizes[2] ?: DpSize(width = 130.dp, height = 150.dp))
-                .offset {
-                    IntOffset(
-                        thirdAnimatedPosition.x.roundToInt(),
-                        thirdAnimatedPosition.y.roundToInt()
-                    )
-                }
-        ) {
-            NBATeamInfoThirdItem(contentsAlpha = contentsAlpha)
-        }
+            NBATeamInfoFifthItem(
+                isAniItem = true,
+                itemSize = itemSizes[4],
+                itemPosition = itemPositions[4],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
 
-        // league stats
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .size(itemSizes[3] ?: DpSize(width = screenWidthDp(), height = 150.dp))
-                .offset {
-                    IntOffset(
-                        fourthAnimatedPosition.x.roundToInt(),
-                        fourthAnimatedPosition.y.roundToInt()
-                    )
-                }
-                .clickable {
-                    displayModel?.let {
-                        searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
-                    }
-                }
-        ) {
-            NBATeamInfoFourthItem(contentsAlpha = contentsAlpha)
+            NBATeamInfoSixthItem(
+                isAniItem = true,
+                itemSize = itemSizes[5],
+                itemPosition = itemPositions[5],
+                aniPosition = aniPositions,
+                contentsAlpha = contentsAlpha
+            )
         }
-
-        // last game stats
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .size(itemSizes[4] ?: DpSize(width = screenWidthDp() / 2, height = 150.dp))
-                .offset {
-                    IntOffset(
-                        fifthAnimatedPosition.x.roundToInt(),
-                        fifthAnimatedPosition.y.roundToInt()
-                    )
-                }
-                .clickable {
-                    searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
-                }
-        ) {
-            NBATeamInfoFifthItem(contentsAlpha = contentsAlpha)
-        }
-
-        // next game stats
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .size(itemSizes[5] ?: DpSize(width = screenWidthDp() / 2, height = 150.dp))
-                .offset {
-                    IntOffset(
-                        sixthAnimatedPosition.x.roundToInt(),
-                        sixthAnimatedPosition.y.roundToInt()
-                    )
-                }
-                .clickable {
-                    searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
-                }
-        ) {
-            NBATeamInfoSixthItem(contentsAlpha = contentsAlpha)
-        }
-    }
+    )
 }
 
+// logo, team, name
 @Composable
 fun NBATeamInfoFirstItem(
     nbaTeamInfoViewModel: NBATeamInfoViewModel = hiltViewModel(),
-    contentsAlpha: Float = 1f
+    isAniItem: Boolean = false,
+    itemSize: DpSize? = null,
+    itemPosition: Offset? = null,
+    aniPosition: Boolean = true,
+    contentsAlpha: Float = 0f,
+    containerModifier: Modifier = Modifier,
+    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by nbaTeamInfoViewModel.displayModel.collectAsState()
 
     displayModel?.let {
         val team = it.team
 
-        /* ---------------------
-           ui
-           --------------------- */
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+        MovingCapsuleItemContainer(
+            isAniItem = isAniItem,
+            itemSize = itemSize,
+            itemPosition = itemPosition,
+            aniPosition = aniPosition,
+            updateItemPosition = { coordinates ->
+                updateItemPosition?.let { it(0, coordinates) }
+            },
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = containerModifier
         ) {
-            HCapsuleBar()
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                HCapsuleBar()
+            }
+
+            URLImage(
+                url = NBAUtil.teamLogoUrl(team.id),
+                modifier = Modifier.alpha(contentsAlpha),
+                isSvg = true
+            )
+
+            Text(
+                text = nbaTeamInfoViewModel.teamNameDictionary["full_${team.id}"] ?: team.fullName,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.alpha(contentsAlpha)
+            )
+
+            Text(
+                text = team.fullName,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Light,
+                maxLines = 2,
+                modifier = Modifier.alpha(contentsAlpha)
+            )
         }
-
-        URLImage(
-            url = NBAUtil.teamLogoUrl(team.id),
-            modifier = Modifier.alpha(contentsAlpha),
-            isSvg = true
-        )
-
-        Text(
-            text = nbaTeamInfoViewModel.teamNameDictionary["full_${team.id}"] ?: team.fullName,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.alpha(contentsAlpha)
-        )
-
-        Text(
-            text = team.fullName,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Light,
-            maxLines = 2,
-            modifier = Modifier.alpha(contentsAlpha)
-        )
     }
 }
 
+// founded, state, city
 @Composable
 fun NBATeamInfoSecondItem(
     nbaTeamInfoViewModel: NBATeamInfoViewModel = hiltViewModel(),
-    contentsAlpha: Float = 1f
+    isAniItem: Boolean = false,
+    itemSize: DpSize? = null,
+    itemPosition: Offset? = null,
+    aniPosition: Boolean = true,
+    contentsAlpha: Float = 0f,
+    containerModifier: Modifier = Modifier,
+    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by nbaTeamInfoViewModel.displayModel.collectAsState()
 
     displayModel?.let {
         val team = it.team
 
-        /* ---------------------
-           ui
-           --------------------- */
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+        MovingCapsuleItemContainer(
+            isAniItem = isAniItem,
+            itemSize = itemSize,
+            itemPosition = itemPosition,
+            aniPosition = aniPosition,
+            updateItemPosition = { coordinates ->
+                updateItemPosition?.let { it(1, coordinates) }
+            },
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.Start,
+            modifier = containerModifier
         ) {
-            HCapsuleBar()
-        }
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                HCapsuleBar()
+            }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.alpha(contentsAlpha)
-        ) {
-            Text(
-                text = "창단연도: ",
-                fontSize = 15.sp
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.alpha(contentsAlpha)
+            ) {
+                Text(
+                    text = "창단연도: ",
+                    fontSize = 15.sp
+                )
 
-            Text(
-                text = team.yearFounded.toString(),
-                fontWeight = FontWeight.Medium
-            )
-        }
+                Text(
+                    text = team.yearFounded.toString(),
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
-        Column(
-            modifier = Modifier.alpha(contentsAlpha)
-        ) {
-            Text(
-                text = "연고지: ",
-                fontSize = 15.sp
-            )
+            Column(
+                modifier = Modifier.alpha(contentsAlpha)
+            ) {
+                Text(
+                    text = "연고지: ",
+                    fontSize = 15.sp
+                )
 
-            Text(
-                text = team.state,
-                fontWeight = FontWeight.Medium
-            )
-        }
+                Text(
+                    text = team.state,
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
-        Column(
-            modifier = Modifier.alpha(contentsAlpha)
-        ) {
-            Text(
-                text = "컨퍼런스/디비전: ",
-                fontSize = 15.sp
-            )
+            Column(
+                modifier = Modifier.alpha(contentsAlpha)
+            ) {
+                Text(
+                    text = "컨퍼런스/디비전: ",
+                    fontSize = 15.sp
+                )
 
-            Text(
-                text = "${team.teamConference} / ${team.teamDivision}",
-                fontWeight = FontWeight.Medium
-            )
+                Text(
+                    text = "${team.teamConference} / ${team.teamDivision}",
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
 
+// venue
 @Composable
 fun NBATeamInfoThirdItem(
     nbaTeamInfoViewModel: NBATeamInfoViewModel = hiltViewModel(),
-    contentsAlpha: Float = 1f
+    isAniItem: Boolean = false,
+    itemSize: DpSize? = null,
+    itemPosition: Offset? = null,
+    aniPosition: Boolean = true,
+    contentsAlpha: Float = 0f,
+    containerModifier: Modifier = Modifier,
+    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by nbaTeamInfoViewModel.displayModel.collectAsState()
 
@@ -559,67 +338,85 @@ fun NBATeamInfoThirdItem(
         val team = it.team
         val venue = it.venue
 
-        /* ---------------------
-           ui
-           --------------------- */
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+        MovingCapsuleItemContainer(
+            isAniItem = isAniItem,
+            itemSize = itemSize,
+            itemPosition = itemPosition,
+            aniPosition = aniPosition,
+            updateItemPosition = { coordinates ->
+                updateItemPosition?.let { it(2, coordinates) }
+            },
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.Start,
+            modifier = containerModifier
         ) {
-            HCapsuleBar()
-        }
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                HCapsuleBar()
+            }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.alpha(contentsAlpha)
-        ) {
-            Text(
-                text = "홈구장: ",
-                fontSize = 15.sp
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.alpha(contentsAlpha)
+            ) {
+                Text(
+                    text = "홈구장: ",
+                    fontSize = 15.sp
+                )
 
-            Text(
-                text = nbaTeamInfoViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
-                fontWeight = FontWeight.Medium
-            )
-        }
+                Text(
+                    text = nbaTeamInfoViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.alpha(contentsAlpha)
-        ) {
-            Text(
-                text = "좌석수: ",
-                fontSize = 15.sp
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.alpha(contentsAlpha)
+            ) {
+                Text(
+                    text = "좌석수: ",
+                    fontSize = 15.sp
+                )
 
-            Text(
-                text = venue.capacity.toString(),
-                fontWeight = FontWeight.Medium
-            )
-        }
+                Text(
+                    text = venue.capacity.toString(),
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.alpha(contentsAlpha)
-        ) {
-            Text(
-                text = "개장: ",
-                fontSize = 15.sp
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.alpha(contentsAlpha)
+            ) {
+                Text(
+                    text = "개장: ",
+                    fontSize = 15.sp
+                )
 
-            Text(
-                text = venue.opened.toString(),
-                fontWeight = FontWeight.Medium
-            )
+                Text(
+                    text = venue.opened.toString(),
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
 
+// league stats
 @Composable
 fun NBATeamInfoFourthItem(
+    searchViewModel: SearchViewModel = hiltViewModel(),
     nbaTeamInfoViewModel: NBATeamInfoViewModel = hiltViewModel(),
-    contentsAlpha: Float = 1f
+    isAniItem: Boolean = false,
+    itemSize: DpSize? = null,
+    itemPosition: Offset? = null,
+    aniPosition: Boolean = true,
+    contentsAlpha: Float = 0f,
+    containerModifier: Modifier = Modifier,
+    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by nbaTeamInfoViewModel.displayModel.collectAsState()
 
@@ -627,202 +424,255 @@ fun NBATeamInfoFourthItem(
         val team = it.team
         val stats = it.stats
 
-        /* ---------------------
-           ui
-           --------------------- */
-        HCapsuleBar()
-
-        NBATitle(
-            leagueName = "NBA 정규시즌",
-            leagueSeason = stats?.groupValue?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024,
+        MovingCapsuleItemContainer(
+            isAniItem = isAniItem,
+            itemSize = itemSize,
+            itemPosition = itemPosition,
+            aniPosition = aniPosition,
+            updateItemPosition = { coordinates ->
+                updateItemPosition?.let { it(3, coordinates) }
+            },
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
-                .padding(horizontal = 4.dp)
-                .alpha(contentsAlpha)
-        )
+                .padding(top = if (isAniItem) 0.dp else 12.dp),
+            onClick = {
+                searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
+            }
+        ) {
+            HCapsuleBar()
 
-        stats?.let {
-            Row(
+            NBATitle(
+                leagueName = "NBA 정규시즌",
+                leagueSeason = stats?.groupValue?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024,
                 modifier = Modifier
+                    .padding(horizontal = 4.dp)
                     .alpha(contentsAlpha)
-            ) {
-                FBStatDataItem(
-                    category = "서부 컨퍼런스 순위",
-                    data = team.confRank.toString(),
-                    customCategoryFontSize = 13,
-                    modifier = Modifier.weight(1f)
-                )
+            )
 
-                FBStatDataItem(
-                    category = "승",
-                    data = stats.wins.toString(),
-                    modifier = Modifier.weight(1f)
-                )
+            stats?.let {
+                Row(
+                    modifier = Modifier
+                        .alpha(contentsAlpha)
+                ) {
+                    FBStatDataItem(
+                        category = "${NBAUtil.translateEastWest(team.teamConference)} 컨퍼런스 순위",
+                        data = team.confRank.toString(),
+                        customCategoryFontSize = 13,
+                        modifier = Modifier.weight(1f)
+                    )
 
-                FBStatDataItem(
-                    category = "패",
-                    data = stats.losses.toString(),
-                    modifier = Modifier.weight(1f)
-                )
+                    FBStatDataItem(
+                        category = "승",
+                        data = stats.wins.toString(),
+                        modifier = Modifier.weight(1f)
+                    )
 
-                FBStatDataItem(
-                    category = "경기당 득점",
-                    data = stats.ptsPG.toString(),
-                    modifier = Modifier.weight(1f)
-                )
+                    FBStatDataItem(
+                        category = "패",
+                        data = stats.losses.toString(),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    FBStatDataItem(
+                        category = "경기당 득점",
+                        data = stats.ptsPG.toString(),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }
 }
 
+// last game stats
 @Composable
 fun NBATeamInfoFifthItem(
+    searchViewModel: SearchViewModel = hiltViewModel(),
     nbaTeamInfoViewModel: NBATeamInfoViewModel = hiltViewModel(),
-    contentsAlpha: Float = 1f
+    isAniItem: Boolean = false,
+    itemSize: DpSize? = null,
+    itemPosition: Offset? = null,
+    aniPosition: Boolean = true,
+    contentsAlpha: Float = 0f,
+    containerModifier: Modifier = Modifier,
+    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by nbaTeamInfoViewModel.displayModel.collectAsState()
 
     displayModel?.let {
         val lastGame = it.lastGame
 
-        /* ---------------------
-           ui
-           --------------------- */
-        HCapsuleBar()
-
-        Text(
-            text = "최근경기",
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.alpha(contentsAlpha)
-        )
-
-        lastGame?.let {
-            val homeTeam = lastGame.boxScoreTraditional?.homeTeam
-            val awayTeam = lastGame.boxScoreTraditional?.awayTeam
-            val homeTeamScore = lastGame.lineScore.find { it.teamId == homeTeam?.teamId }?.pts ?: 0
-            val awayTeamScore = lastGame.lineScore.find { it.teamId == awayTeam?.teamId }?.pts ?: 0
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = if (homeTeam == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${homeTeam.teamId}"] ?: homeTeam.teamCity,
-                    fontSize = 15.sp,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Text(
-                    text = (homeTeamScore).toString(),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.4f),
-                    color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
-                )
-
-                Text(
-                    text = " vs ",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.3f)
-                )
-
-                Text(
-                    text = (awayTeamScore).toString(),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.4f),
-                    color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
-                )
-
-                Text(
-                    text = if (awayTeam == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${awayTeam.teamId}"] ?: awayTeam.teamCity,
-                    fontSize = 15.sp,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
+        MovingCapsuleItemContainer(
+            isAniItem = isAniItem,
+            itemSize = itemSize,
+            itemPosition = itemPosition,
+            aniPosition = aniPosition,
+            updateItemPosition = { coordinates ->
+                updateItemPosition?.let { it(4, coordinates) }
+            },
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = containerModifier,
+            onClick = {
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
             }
+        ) {
+            HCapsuleBar()
 
             Text(
-                text = CalendarUtil.formatDate(lastGame.gameSummary?.date),
-                fontSize = 15.sp,
+                text = "최근경기",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.alpha(contentsAlpha)
             )
+
+            lastGame?.let {
+                val homeTeam = lastGame.boxScoreTraditional?.homeTeam
+                val awayTeam = lastGame.boxScoreTraditional?.awayTeam
+                val homeTeamScore = lastGame.lineScore.find { it.teamId == homeTeam?.teamId }?.pts ?: 0
+                val awayTeamScore = lastGame.lineScore.find { it.teamId == awayTeam?.teamId }?.pts ?: 0
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .alpha(contentsAlpha)
+                ) {
+                    Text(
+                        text = if (homeTeam == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${homeTeam.teamId}"] ?: homeTeam.teamCity,
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Text(
+                        text = (homeTeamScore).toString(),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.4f),
+                        color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
+                    )
+
+                    Text(
+                        text = " vs ",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.3f)
+                    )
+
+                    Text(
+                        text = (awayTeamScore).toString(),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.4f),
+                        color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
+                    )
+
+                    Text(
+                        text = if (awayTeam == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${awayTeam.teamId}"] ?: awayTeam.teamCity,
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Text(
+                    text = CalendarUtil.formatDate(lastGame.gameSummary?.date),
+                    fontSize = 15.sp,
+                    modifier = Modifier.alpha(contentsAlpha)
+                )
+            }
         }
     }
 }
 
+// next game stats
 @Composable
 fun NBATeamInfoSixthItem(
+    searchViewModel: SearchViewModel = hiltViewModel(),
     nbaTeamInfoViewModel: NBATeamInfoViewModel = hiltViewModel(),
-    contentsAlpha: Float = 1f
+    isAniItem: Boolean = false,
+    itemSize: DpSize? = null,
+    itemPosition: Offset? = null,
+    aniPosition: Boolean = true,
+    contentsAlpha: Float = 0f,
+    containerModifier: Modifier = Modifier,
+    updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by nbaTeamInfoViewModel.displayModel.collectAsState()
 
     displayModel?.let {
         val nextGame = it.nextGame
 
-        /* ---------------------
-           ui
-           --------------------- */
-        HCapsuleBar()
-
-        Text(
-            text = "다음경기",
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.alpha(contentsAlpha)
-        )
-
-        nextGame?.let {
-            val lastMeeting = nextGame.lastMeeting
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = if (lastMeeting?.lastGameHomeTeamId == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${lastMeeting.lastGameHomeTeamId}"] ?: lastMeeting.lastGameHomeTeamCity,
-                    fontSize = 15.sp,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Text(
-                    text = " vs ",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.3f)
-                )
-
-                Text(
-                    text = if (lastMeeting?.lastGameVisitorTeamId == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${lastMeeting.lastGameVisitorTeamId}"] ?: lastMeeting.lastGameVisitorTeamCity,
-                    fontSize = 15.sp,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
+        MovingCapsuleItemContainer(
+            isAniItem = isAniItem,
+            itemSize = itemSize,
+            itemPosition = itemPosition,
+            aniPosition = aniPosition,
+            updateItemPosition = { coordinates ->
+                updateItemPosition?.let { it(5, coordinates) }
+            },
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = containerModifier,
+            onClick = {
+                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
             }
+        ) {
+            HCapsuleBar()
 
             Text(
-                text = CalendarUtil.formatDate(nextGame.gameSummary?.date),
-                fontSize = 15.sp,
+                text = "다음경기",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.alpha(contentsAlpha)
             )
+
+            nextGame?.let {
+                val lastMeeting = nextGame.lastMeeting
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .alpha(contentsAlpha)
+                ) {
+                    Text(
+                        text = if (lastMeeting?.lastGameHomeTeamId == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${lastMeeting.lastGameHomeTeamId}"] ?: lastMeeting.lastGameHomeTeamCity,
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Text(
+                        text = " vs ",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.3f)
+                    )
+
+                    Text(
+                        text = if (lastMeeting?.lastGameVisitorTeamId == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${lastMeeting.lastGameVisitorTeamId}"] ?: lastMeeting.lastGameVisitorTeamCity,
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Text(
+                    text = CalendarUtil.formatDate(nextGame.gameSummary?.date),
+                    fontSize = 15.sp,
+                    modifier = Modifier.alpha(contentsAlpha)
+                )
+            }
         }
     }
 }

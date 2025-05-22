@@ -4,16 +4,13 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.features.search.display.common.container.state.StandingsContainerState
+import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
@@ -56,7 +56,7 @@ fun FBTeamStandingsView(
        viewmodel state
        --------------------- */
     val displayModel by fbTeamStandingsViewModel.displayModel.collectAsState()
-    val selectedIndex by fbTeamStandingsViewModel.selectedIndex.collectAsState()
+    val selectedCategoryIndex by fbTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
     val isKeyword by fbTeamStandingsViewModel.isKeyword.collectAsState()
 
     val league = displayModel?.league
@@ -67,10 +67,10 @@ fun FBTeamStandingsView(
        etc
        --------------------- */
     val selectedCategoryPosition = with(LocalDensity.current) {
-        val position = if (selectedIndex == 9) {
+        val position = if (selectedCategoryIndex == 9) {
             (fbTeamStandingsViewModel.intDataItemWidth * 8) + fbTeamStandingsViewModel.stringDataItemWidth
         } else {
-            fbTeamStandingsViewModel.intDataItemWidth * selectedIndex
+            fbTeamStandingsViewModel.intDataItemWidth * selectedCategoryIndex
         }
 
         position.toPx()
@@ -81,7 +81,7 @@ fun FBTeamStandingsView(
        --------------------- */
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.FBTeamStandings) {
-            fbTeamStandingsViewModel.send(FBTeamStandingsViewModel.Intent.InitData(data))
+            fbTeamStandingsViewModel.send(FBTeamStandingsIntent.InitData(data))
         }
     }
 
@@ -98,70 +98,29 @@ fun FBTeamStandingsView(
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        league?.let {
-            LeagueTitle(
-                url = league.logo,
-                leagueName = league.name,
-                leagueSeason = league.season
-            )
-        }
-
-        // category
-        Row(
-            modifier = Modifier.padding(top = 6.dp)
-        ) {
-            FBTeamStandingsFirstCategoryItem()
-
-            Row(
-                Modifier.horizontalScroll(horizontalScrollState)
-            ) {
-                FBTeamStandingsCategoryList()
+    StandingsViewContainer(
+        state = StandingsContainerState(
+            firstCategoryItemHeight = fbTeamStandingsViewModel.categoryItemHeight
+        ),
+        headerContent = {
+            league?.let {
+                LeagueTitle(
+                    url = league.logo,
+                    leagueName = league.name,
+                    leagueSeason = league.season
+                )
             }
+        },
+        categoryListContent = {
+            FBTeamStandingsCategoryList()
+        },
+        standingsFirstDataContent = {
+            FBTeamStandingsFirstDataList()
+        },
+        standingsDataContent = {
+            FBTeamStandingsDataList()
         }
-
-        // standings data
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-        ) {
-            Row {
-                FBTeamStandingsFirstDataList()
-
-                Row(
-                    Modifier.horizontalScroll(horizontalScrollState)
-                ) {
-                    FBTeamStandingsDataList()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun FBTeamStandingsFirstCategoryItem(
-    fbTeamStandingsViewModel: FBTeamStandingsViewModel = hiltViewModel()
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(fbTeamStandingsViewModel.categoryItemHeight)
-    ) {
-        Text(
-            text = StringConstants.STANDINGS_FIRST_CATEGORY,
-            fontSize = fbTeamStandingsViewModel.categoryFontSize,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(130.dp)
-        )
-
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-    }
+    )
 }
 
 @Composable
@@ -171,7 +130,7 @@ fun FBTeamStandingsCategoryList(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val selectedIndex by fbTeamStandingsViewModel.selectedIndex.collectAsState()
+    val selectedIndex by fbTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
 
     /* ---------------------
        animation
@@ -229,7 +188,7 @@ fun FBTeamStandingsCategoryListItem(
         modifier = Modifier
             .width(fbTeamStandingsViewModel.getItemWidth(index))
             .clickable {
-                fbTeamStandingsViewModel.send(FBTeamStandingsViewModel.Intent.SelectCagetory(index))
+                fbTeamStandingsViewModel.send(FBTeamStandingsIntent.SelectCategory(index))
             }
     )
 }

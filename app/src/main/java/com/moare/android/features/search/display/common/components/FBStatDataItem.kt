@@ -1,4 +1,4 @@
-package com.moare.android.features.search.display.components
+package com.moare.android.features.search.display.common.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
