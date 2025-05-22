@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class NBAGameStatsDisplayModel(
     override val leagueId: Int,
-    override val keywords: List<Keyword> = emptyList(),
+    override val keywords: List<Keyword> = emptyList(), // NOTE: default value is added for usage in SearchViewModel
     override val entityInfo: List<EntityInfo> = emptyList(),
     val game: NBAGame
 ) : DisplayModelBase

@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.features.search.display.football.view.FBLeagueScheduleView
 import com.moare.android.features.search.display.football.view.FBGameStatsView
@@ -57,6 +58,17 @@ import com.moare.android.features.search.display.football.view.FBTeamInfoView
 import com.moare.android.features.search.display.football.view.FBTeamScheduleView
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
+import com.moare.android.features.search.display.kbo.view.KBOPlayerInfoView
+import com.moare.android.features.search.display.kbo.view.KBOPlayerStatsView
+import com.moare.android.features.search.display.kbo.view.KBOTeamInfoView
+import com.moare.android.features.search.display.kbo.view.KBOTeamStandingsView
+import com.moare.android.features.search.display.kbo.view.KBOTeamStatsView
+import com.moare.android.features.search.display.mlb.view.MLBLeagueScheduleView
+import com.moare.android.features.search.display.mlb.view.MLBPlayerInfoView
+import com.moare.android.features.search.display.mlb.view.MLBPlayerStatsView
+import com.moare.android.features.search.display.mlb.view.MLBTeamInfoView
+import com.moare.android.features.search.display.mlb.view.MLBTeamStandingsView
+import com.moare.android.features.search.display.mlb.view.MLBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAGameStatsView
 import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
 import com.moare.android.features.search.display.nba.view.NBALeagueTournamentView
@@ -72,6 +84,7 @@ import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
+import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.rememberKeyboardVisibility
 import kotlinx.coroutines.delay
 
@@ -123,6 +136,26 @@ fun SearchView(
     val nbaLeagueScheduleData by searchViewModel.nbaLeagueScheduleData.collectAsState()
     val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
     val nbaLeagueTournamentData by searchViewModel.nbaLeagueTournamentData.collectAsState()
+
+    // kbo
+    val kboPlayerInfoData by searchViewModel.kboPlayerInfoData.collectAsState()
+    val kboPlayerStatsData by searchViewModel.kboPlayerStatsData.collectAsState()
+    val kboPlayerStandingsData by searchViewModel.kboPlayerStandingsData.collectAsState()
+    val kboTeamInfoData by searchViewModel.kboTeamInfoData.collectAsState()
+    val kboTeamStatsData by searchViewModel.kboTeamStatsData.collectAsState()
+    val kboTeamStandingsData by searchViewModel.kboTeamStandingsData.collectAsState()
+    val kboLeagueScheduleData by searchViewModel.kboLeagueScheduleData.collectAsState()
+    val kboGameStatsData by searchViewModel.kboGameStatsData.collectAsState()
+
+    // mlb
+    val mlbPlayerInfoData by searchViewModel.mlbPlayerInfoData.collectAsState()
+    val mlbPlayerStatsData by searchViewModel.mlbPlayerStatsData.collectAsState()
+    val mlbPlayerStandingsData by searchViewModel.mlbPlayerStandingsData.collectAsState()
+    val mlbTeamInfoData by searchViewModel.mlbTeamInfoData.collectAsState()
+    val mlbTeamStatsData by searchViewModel.mlbTeamStatsData.collectAsState()
+    val mlbTeamStandingsData by searchViewModel.mlbTeamStandingsData.collectAsState()
+    val mlbLeagueScheduleData by searchViewModel.mlbLeagueScheduleData.collectAsState()
+    val mlbGameStatsData by searchViewModel.mlbGameStatsData.collectAsState()
 
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
@@ -339,109 +372,135 @@ fun SearchView(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(top = 20.dp)
                 ) {
-                    // football_player_info
+                    // football
                     fbPlayerInfoData?.let {
                         FBPlayerInfoView(data = it)
                     }
-
-                    // football_player_stats
                     fbPlayerStatsData?.let {
                         FBPlayerStatsView(data = it)
                     }
-
-                    // football_team_info
+                    fbPlayerStandingsData?.let {
+                        FBPlayerStandingsView(data = it)
+                    }
                     fbTeamInfoData?.let {
                         FBTeamInfoView(data = it)
                     }
-
-                    // football_team_stats
                     fbTeamStatsData?.let {
                         FBTeamStatsView(data = it)
                     }
+                    fbTeamStandingsData?.let {
+                        FBTeamStandingsView(data = it)
+                    }
+                    fbTeamScheduleData?.let {
+                        FBTeamScheduleView(data = it)
+                    }
+                    fbLeagueScheduleData?.let {
+                        FBLeagueScheduleView(data = it)
+                    }
+                    fbGameStatsData?.let {
+                        FBGameStatsView(data = it)
+                    }
 
-                    // basketball_player_info
+                    // nba
                     nbaPlayerInfoData?.let {
                         NBAPlayerInfoView(data = it )
                     }
-
-                    // basketball_player_stats
                     nbaPlayerStatsData?.let {
                         NBAPlayerStatsView(data = it)
                     }
-
-                    // basketball_team_info
-                    nbaTeamInfoData?.let {
-                        NBATeamInfoView(data = it)
-                    }
-
-                    // basketball_team_stats
-                    nbaTeamStatsData?.let {
-                        NBATeamStatsView(data = it)
-                    }
-
-                    // football_player_standings
-                    fbPlayerStandingsData?.let {
-                        FBPlayerStandingsView(
-                            data = it
-                        )
-                    }
-
-                    // football_team_standings
-                    fbTeamStandingsData?.let {
-                        FBTeamStandingsView(
-                            data = it
-                        )
-                    }
-
-                    // football_team_schedule
-                    fbTeamScheduleData?.let {
-                        FBTeamScheduleView(
-                            data = it
-                        )
-                    }
-
-                    // football_league_schedule
-                    fbLeagueScheduleData?.let {
-                        FBLeagueScheduleView(
-                            data = it
-                        )
-                    }
-
-                    // football_game_stats
-                    fbGameStatsData?.let {
-                        FBGameStatsView(
-                            data = it
-                        )
-                    }
-
-                    // basketball_player_standings
                     nbaPlayerStandingsData?.let {
                         NBAPlayerStandingsView(data = it)
                     }
-
-                    // basketball_team_standings
+                    nbaTeamInfoData?.let {
+                        NBATeamInfoView(data = it)
+                    }
+                    nbaTeamStatsData?.let {
+                        NBATeamStatsView(data = it)
+                    }
                     nbaTeamStandingsData?.let {
                         NBATeamStandingsView(data = it)
                     }
-
-                    // basketball_team_schedule
                     nbaTeamScheduleData?.let {
                         NBATeamScheduleView(data = it)
                     }
-
-                    // basketball_league_schedule
                     nbaLeagueScheduleData?.let {
                         NBALeagueScheduleView(data = it)
                     }
-
-                    // basketball_game_stats
                     nbaGameStatsData?.let {
                         NBAGameStatsView(data = it)
                     }
-
-                    // basketball_league_tournament
                     nbaLeagueTournamentData?.let {
                         NBALeagueTournamentView(data = it)
+                    }
+
+                    // kbo
+                    kboPlayerInfoData?.let {
+                        KBOPlayerInfoView(data = it)
+                    }
+                    kboPlayerStatsData?.let {
+                        KBOPlayerStatsView(data = it)
+                    }
+                    kboPlayerStandingsData?.let {
+//                        KBOPlayerStandingsView(data = it)
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'KBO 선수 순위'"))
+                        }
+                    }
+                    kboTeamInfoData?.let {
+                        KBOTeamInfoView(data = it)
+                    }
+                    kboTeamStatsData?.let {
+                        KBOTeamStatsView(data = it)
+                    }
+                    kboTeamStandingsData?.let {
+                        KBOTeamStandingsView(data = it)
+                    }
+                    kboLeagueScheduleData?.let {
+//                        KBOLeagueScheduleView(data = it)
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'KBO 경기 일정'"))
+                        }
+                    }
+                    kboGameStatsData?.let {
+//                        KBOGameStatsView(data = it)
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'KBO 경기 상세'"))
+                        }
+                    }
+
+                    // mlb
+                    mlbPlayerInfoData?.let {
+                        MLBPlayerInfoView(data = it)
+                    }
+                    mlbPlayerStatsData?.let {
+                        MLBPlayerStatsView(data = it)
+                    }
+                    mlbPlayerStandingsData?.let {
+//                        MLBPlayerStandingsView(data = it)
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'MLB 선수 순위'"))
+                        }
+                    }
+                    mlbTeamInfoData?.let {
+                        MLBTeamInfoView(data = it)
+                    }
+                    mlbTeamStatsData?.let {
+                        MLBTeamStatsView(data = it)
+                    }
+                    mlbTeamStandingsData?.let {
+                        MLBTeamStandingsView(data = it)
+                    }
+                    mlbLeagueScheduleData?.let {
+//                        MLBLeagueScheduleView(data = it)
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'MLB 경기 일정'"))
+                        }
+                    }
+                    mlbGameStatsData?.let {
+//                        MLBGameStatsView(data = it)
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'MLB 경기 상세'"))
+                        }
                     }
                 }
             }

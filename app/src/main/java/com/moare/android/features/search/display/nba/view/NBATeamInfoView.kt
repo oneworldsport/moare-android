@@ -46,7 +46,7 @@ import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.viewmodel.BaseInfoViewModel
-import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -455,7 +455,7 @@ fun NBATeamInfoFourthItem(
                         .alpha(contentsAlpha)
                 ) {
                     FBStatDataItem(
-                        category = "서부 컨퍼런스 순위",
+                        category = "${NBAUtil.translateEastWest(team.teamConference)} 컨퍼런스 순위",
                         data = team.confRank.toString(),
                         customCategoryFontSize = 13,
                         modifier = Modifier.weight(1f)

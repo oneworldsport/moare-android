@@ -1,0 +1,129 @@
+{
+  "dataType": "football_team_stats",
+  "keywords": [],
+  "entityInfo": [
+    {
+      "category": "football",
+      "entityType": "player",
+      "entityName": "손흥민",
+      "leagueId": 39,
+      "teamId": 47,
+      "playerId": 186
+    }
+  ],
+  "data": {
+    "info": {
+      "statistics": [
+        {
+          "defenseData": {
+            "a": "353",
+            "cs": "11",
+            "cs%": "25.0",
+            "dp": "26",
+            "e": "26",
+            "fpct": "0.980",
+            "g": "34",
+            "pb": "3",
+            "pko": "3",
+            "po": "900",
+            "sb": "33"
+          },
+          "hitterData": {
+            "2b": "70",
+            "3b": "1",
+            "ab": "1145",
+            "avg": "0.248",
+            "bb": "150",
+            "g": "34",
+            "gdp": "26",
+            "h": "284",
+            "hbp": "9",
+            "hr": "29",
+            "ibb": "2",
+            "mh": "33",
+            "obp": "0.338",
+            "ops": "0.725",
+            "pa": "1323",
+            "ph-ba": "0.265",
+            "r": "159",
+            "rbi": "150",
+            "risp": "0.258",
+            "sac": "12",
+            "sf": "7",
+            "slg": "0.387",
+            "so": "260",
+            "tb": "443"
+          },
+          "pitcherData": {
+            "2b": "73",
+            "3b": "5",
+            "avg": "0.272",
+            "bb": "127",
+            "bk": "1",
+            "bsv": "4",
+            "cg": "0",
+            "er": "149",
+            "era": "4.47",
+            "g": "34",
+            "h": "313",
+            "hbp": "21",
+            "hld": "19",
+            "hr": "19",
+            "ibb": "4",
+            "ip": "300",
+            "l": "18",
+            "np": "5105",
+            "qs": "17",
+            "r": "171",
+            "sac": "15",
+            "sf": "14",
+            "sho": "1",
+            "so": "253",
+            "sv": "8",
+            "tbf": "1329",
+            "w": "16",
+            "whip": "1.47",
+            "wp": "12",
+            "wpct": "0.471"
+          },
+          "rankData": {
+            "awayrecord": "7-0-8",
+            "draws": "0",
+            "gb": "6",
+            "gp": "34",
+            "homerecord": "9-0-10",
+            "last10game": "5승0무5패",
+            "losses": "18",
+            "streak": "2승",
+            "winpct": "0.471",
+            "wins": "16"
+          },
+          "runnerData": {
+            "cs": "3",
+            "g": "34",
+            "oob": "9",
+            "pko": "2",
+            "sb": "19",
+            "sb%": "86.4",
+            "sba": "22"
+          }
+        }
+      ],
+      "team": {
+        "city": "광주광역시",
+        "coach": "이범호",
+        "id": 6,
+        "teamCode": "HT",
+        "teamName": "KIA",
+        "yearFounded": 2001
+      },
+      "venue": {
+        "capacity": 20500,
+        "name": "광주-기아 챔피언스 필드",
+        "opened": 2014
+      }
+    },
+    "lastGame": [],
+    "nextGame": []
+  }
+}

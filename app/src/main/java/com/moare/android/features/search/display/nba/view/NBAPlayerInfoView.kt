@@ -47,7 +47,7 @@ import com.moare.android.core.util.toCm
 import com.moare.android.core.util.toKg
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
-import com.moare.android.features.search.display.components.FBStatDataItem
+import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -108,7 +108,9 @@ fun NBAPlayerInfoView(
 
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
             ) {
                 NBAPlayerInfoFourthItem(
                     containerModifier = Modifier.weight(1f)
