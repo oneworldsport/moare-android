@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.features.search.display.football.view.FBLeagueScheduleView
 import com.moare.android.features.search.display.football.view.FBGameStatsView
@@ -83,6 +84,7 @@ import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
+import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.rememberKeyboardVisibility
 import kotlinx.coroutines.delay
 
@@ -438,9 +440,12 @@ fun SearchView(
                     kboPlayerStatsData?.let {
                         KBOPlayerStatsView(data = it)
                     }
-//                    kboPlayerStandingsData?.let {
+                    kboPlayerStandingsData?.let {
 //                        KBOPlayerStandingsView(data = it)
-//                    }
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'KBO 선수 순위'"))
+                        }
+                    }
                     kboTeamInfoData?.let {
                         KBOTeamInfoView(data = it)
                     }
@@ -450,12 +455,18 @@ fun SearchView(
                     kboTeamStandingsData?.let {
                         KBOTeamStandingsView(data = it)
                     }
-//                    kboLeagueScheduleData?.let {
+                    kboLeagueScheduleData?.let {
 //                        KBOLeagueScheduleView(data = it)
-//                    }
-//                    kboGameStatsData?.let {
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'KBO 경기 일정'"))
+                        }
+                    }
+                    kboGameStatsData?.let {
 //                        KBOGameStatsView(data = it)
-//                    }
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'KBO 경기 상세'"))
+                        }
+                    }
 
                     // mlb
                     mlbPlayerInfoData?.let {
@@ -464,9 +475,12 @@ fun SearchView(
                     mlbPlayerStatsData?.let {
                         MLBPlayerStatsView(data = it)
                     }
-//                    mlbPlayerStandingsData?.let {
+                    mlbPlayerStandingsData?.let {
 //                        MLBPlayerStandingsView(data = it)
-//                    }
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'MLB 선수 순위'"))
+                        }
+                    }
                     mlbTeamInfoData?.let {
                         MLBTeamInfoView(data = it)
                     }
@@ -477,11 +491,17 @@ fun SearchView(
                         MLBTeamStandingsView(data = it)
                     }
                     mlbLeagueScheduleData?.let {
-                        MLBLeagueScheduleView(data = it)
+//                        MLBLeagueScheduleView(data = it)
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'MLB 경기 일정'"))
+                        }
                     }
-//                    mlbGameStatsData?.let {
+                    mlbGameStatsData?.let {
 //                        MLBGameStatsView(data = it)
-//                    }
+                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                            Text(StringConstants.viewPreparingAdviseText("'MLB 경기 상세'"))
+                        }
+                    }
                 }
             }
 

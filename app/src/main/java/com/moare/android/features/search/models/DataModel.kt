@@ -313,21 +313,22 @@ data class DataModel(
                     if (leagueId == Constants.Ids.KBO) {
                         val responseModel: KBOPlayerStandingsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
 
-                        if (responseModel.standings.isEmpty()) {
-                            SportDecodableModel.NoResult
-                        } else {
+                        // NOTE: temporary annotation for view preparing advise text
+//                        if (responseModel.standings.isEmpty()) {
+//                            SportDecodableModel.NoResult
+//                        } else {
                             val displayModel = modelConverter.kboPlayerStandingsConverter(responseModel)
                             SportDecodableModel.KBOPlayerStandings(responseModel, displayModel)
-                        }
+//                        }
                     } else if (leagueId == Constants.Ids.MLB) {
                         val responseModel: MLBPlayerStandingsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
 
-                        if (responseModel.standings.isEmpty()) {
-                            SportDecodableModel.NoResult
-                        } else {
+//                        if (responseModel.standings.isEmpty()) {
+//                            SportDecodableModel.NoResult
+//                        } else {
                             val displayModel = modelConverter.mlbPlayerStandingsConverter(responseModel)
                             SportDecodableModel.MLBPlayerStandings(responseModel, displayModel)
-                        }
+//                        }
                     } else {
                         SportDecodableModel.NoResult
                     }

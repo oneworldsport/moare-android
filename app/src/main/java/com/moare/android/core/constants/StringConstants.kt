@@ -118,4 +118,24 @@ object StringConstants {
         val GAME_STATS_COMMON_CATEGORIES = listOf("리바운드", "턴오버", "파울", "득실마진", "출전시간")
         val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_ATTACK_CATEGORIES + GAME_STATS_DEFEND_CATEGORIES + GAME_STATS_COMMON_CATEGORIES
     }
+
+    fun viewPreparingAdviseText(type: String): String {
+        return "${type} 화면은 더 나은 서비스 제공을 위해 현재 개선 작업 중입니다. 이용에 불편을 드려 죄송합니다."
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
