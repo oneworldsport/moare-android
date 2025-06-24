@@ -81,6 +81,40 @@ import com.moare.android.features.search.display.nba.view.NBATeamStandingsView
 import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
+import com.moare.android.features.search.models.SportDisplayType
+import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
 import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
@@ -107,55 +141,13 @@ fun SearchView(
     /* ---------------------
        viewmodel state
        --------------------- */
+    val displayModels by searchViewModel.displayModels.collectAsState()
     val searchDataState by searchViewModel.searchDataState.collectAsState()
     val showResult by searchViewModel.resultVisibleState.collectAsState()
     val searchState by searchViewModel.searchState.collectAsState()
     val barFirstOpened by searchViewModel.barFirstOpened.collectAsState()
     val focusState by searchViewModel.focusState.collectAsState()
     val notice by searchViewModel.noticeData.collectAsState()
-
-    // football
-    val fbPlayerInfoData by searchViewModel.fbPlayerInfoData.collectAsState()
-    val fbPlayerStatsData by searchViewModel.fbPlayerStatsData.collectAsState()
-    val fbPlayerStandingsData by searchViewModel.fbPlayerStandingsData.collectAsState()
-    val fbTeamInfoData by searchViewModel.fbTeamInfoData.collectAsState()
-    val fbTeamStatsData by searchViewModel.fbTeamStatsData.collectAsState()
-    val fbTeamStandingsData by searchViewModel.fbTeamStandingsData.collectAsState()
-    val fbTeamScheduleData by searchViewModel.fbTeamScheduleData.collectAsState()
-    val fbLeagueScheduleData by searchViewModel.fbLeagueScheduleData.collectAsState()
-    val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
-
-    // nba
-    val nbaPlayerInfoData by searchViewModel.nbaPlayerInfoData.collectAsState()
-    val nbaPlayerStatsData by searchViewModel.nbaPlayerStatsData.collectAsState()
-    val nbaPlayerStandingsData by searchViewModel.nbaPlayerStandingsData.collectAsState()
-    val nbaTeamInfoData by searchViewModel.nbaTeamInfoData.collectAsState()
-    val nbaTeamStatsData by searchViewModel.nbaTeamStatsData.collectAsState()
-    val nbaTeamStandingsData by searchViewModel.nbaTeamStandingsData.collectAsState()
-    val nbaTeamScheduleData by searchViewModel.nbaTeamScheduleData.collectAsState()
-    val nbaLeagueScheduleData by searchViewModel.nbaLeagueScheduleData.collectAsState()
-    val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
-    val nbaLeagueTournamentData by searchViewModel.nbaLeagueTournamentData.collectAsState()
-
-    // kbo
-    val kboPlayerInfoData by searchViewModel.kboPlayerInfoData.collectAsState()
-    val kboPlayerStatsData by searchViewModel.kboPlayerStatsData.collectAsState()
-    val kboPlayerStandingsData by searchViewModel.kboPlayerStandingsData.collectAsState()
-    val kboTeamInfoData by searchViewModel.kboTeamInfoData.collectAsState()
-    val kboTeamStatsData by searchViewModel.kboTeamStatsData.collectAsState()
-    val kboTeamStandingsData by searchViewModel.kboTeamStandingsData.collectAsState()
-    val kboLeagueScheduleData by searchViewModel.kboLeagueScheduleData.collectAsState()
-    val kboGameStatsData by searchViewModel.kboGameStatsData.collectAsState()
-
-    // mlb
-    val mlbPlayerInfoData by searchViewModel.mlbPlayerInfoData.collectAsState()
-    val mlbPlayerStatsData by searchViewModel.mlbPlayerStatsData.collectAsState()
-    val mlbPlayerStandingsData by searchViewModel.mlbPlayerStandingsData.collectAsState()
-    val mlbTeamInfoData by searchViewModel.mlbTeamInfoData.collectAsState()
-    val mlbTeamStatsData by searchViewModel.mlbTeamStatsData.collectAsState()
-    val mlbTeamStandingsData by searchViewModel.mlbTeamStandingsData.collectAsState()
-    val mlbLeagueScheduleData by searchViewModel.mlbLeagueScheduleData.collectAsState()
-    val mlbGameStatsData by searchViewModel.mlbGameStatsData.collectAsState()
 
     val query by searchViewModel.query.collectAsState()
     val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
@@ -373,131 +365,128 @@ fun SearchView(
                     modifier = Modifier.padding(top = 20.dp)
                 ) {
                     // football
-                    fbPlayerInfoData?.let {
-                        FBPlayerInfoView(data = it)
+                    displayModels[SportDisplayType.FB_PLAYER_INFO]?.let {
+                        FBPlayerInfoView(data = it as FBPlayerInfoDisplayModel)
                     }
-                    fbPlayerStatsData?.let {
-                        FBPlayerStatsView(data = it)
+                    displayModels[SportDisplayType.FB_PLAYER_STATS]?.let {
+                        FBPlayerStatsView(data = it as FBPlayerStatsDisplayModel)
                     }
-                    fbPlayerStandingsData?.let {
-                        FBPlayerStandingsView(data = it)
+                    displayModels[SportDisplayType.FB_PLAYER_STANDINGS]?.let {
+                        FBPlayerStandingsView(data = it as FBPlayerStandingsDisplayModel)
                     }
-                    fbTeamInfoData?.let {
-                        FBTeamInfoView(data = it)
+                    displayModels[SportDisplayType.FB_TEAM_INFO]?.let {
+                        FBTeamInfoView(data = it as FBTeamInfoDisplayModel)
                     }
-                    fbTeamStatsData?.let {
-                        FBTeamStatsView(data = it)
+                    displayModels[SportDisplayType.FB_TEAM_STATS]?.let {
+                        FBTeamStatsView(data = it as FBTeamStatsDisplayModel)
                     }
-                    fbTeamStandingsData?.let {
-                        FBTeamStandingsView(data = it)
+                    displayModels[SportDisplayType.FB_TEAM_STANDINGS]?.let {
+                        FBTeamStandingsView(data = it as FBTeamStandingsDisplayModel)
                     }
-                    fbTeamScheduleData?.let {
-                        FBTeamScheduleView(data = it)
+                    displayModels[SportDisplayType.FB_TEAM_SCHEDULE]?.let {
+                        FBTeamScheduleView(data = it as FBTeamScheduleDisplayModel)
                     }
-                    fbLeagueScheduleData?.let {
-                        FBLeagueScheduleView(data = it)
+                    displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE]?.let {
+                        FBLeagueScheduleView(data = it as FBLeagueScheduleDisplayModel)
                     }
-                    fbGameStatsData?.let {
-                        FBGameStatsView(data = it)
+                    displayModels[SportDisplayType.FB_GAME_STATS]?.let {
+                        FBGameStatsView(data = it as FBGameStatsDisplayModel)
                     }
-
                     // nba
-                    nbaPlayerInfoData?.let {
-                        NBAPlayerInfoView(data = it )
+                    displayModels[SportDisplayType.NBA_PLAYER_INFO]?.let {
+                        NBAPlayerInfoView(data = it as NBAPlayerInfoDisplayModel)
                     }
-                    nbaPlayerStatsData?.let {
-                        NBAPlayerStatsView(data = it)
+                    displayModels[SportDisplayType.NBA_PLAYER_STATS]?.let {
+                        NBAPlayerStatsView(data = it as NBAPlayerStatsDisplayModel)
                     }
-                    nbaPlayerStandingsData?.let {
-                        NBAPlayerStandingsView(data = it)
+                    displayModels[SportDisplayType.NBA_PLAYER_STANDINGS]?.let {
+                        NBAPlayerStandingsView(data = it as NBAPlayerStandingsDisplayModel)
                     }
-                    nbaTeamInfoData?.let {
-                        NBATeamInfoView(data = it)
+                    displayModels[SportDisplayType.NBA_TEAM_INFO]?.let {
+                        NBATeamInfoView(data = it as NBATeamInfoDisplayModel)
                     }
-                    nbaTeamStatsData?.let {
-                        NBATeamStatsView(data = it)
+                    displayModels[SportDisplayType.NBA_TEAM_STATS]?.let {
+                        NBATeamStatsView(data = it as NBATeamStatsDisplayModel)
                     }
-                    nbaTeamStandingsData?.let {
-                        NBATeamStandingsView(data = it)
+                    displayModels[SportDisplayType.NBA_TEAM_STANDINGS]?.let {
+                        NBATeamStandingsView(data = it as NBATeamStandingsDisplayModel)
                     }
-                    nbaTeamScheduleData?.let {
-                        NBATeamScheduleView(data = it)
+                    displayModels[SportDisplayType.NBA_TEAM_SCHEDULE]?.let {
+                        NBATeamScheduleView(data = it as NBATeamScheduleDisplayModel)
                     }
-                    nbaLeagueScheduleData?.let {
-                        NBALeagueScheduleView(data = it)
+                    displayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE]?.let {
+                        NBALeagueScheduleView(data = it as NBALeagueScheduleDisplayModel)
                     }
-                    nbaGameStatsData?.let {
-                        NBAGameStatsView(data = it)
+                    displayModels[SportDisplayType.NBA_GAME_STATS]?.let {
+                        NBAGameStatsView(data = it as NBAGameStatsDisplayModel)
                     }
-                    nbaLeagueTournamentData?.let {
-                        NBALeagueTournamentView(data = it)
+                    displayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT]?.let {
+                        NBALeagueTournamentView(data = it as NBALeagueScheduleDisplayModel)
                     }
-
                     // kbo
-                    kboPlayerInfoData?.let {
-                        KBOPlayerInfoView(data = it)
+                    displayModels[SportDisplayType.KBO_PLAYER_INFO]?.let {
+                        KBOPlayerInfoView(data = it as KBOPlayerInfoDisplayModel)
                     }
-                    kboPlayerStatsData?.let {
-                        KBOPlayerStatsView(data = it)
+                    displayModels[SportDisplayType.KBO_PLAYER_STATS]?.let {
+                        KBOPlayerStatsView(data = it as KBOPlayerStatsDisplayModel)
                     }
-                    kboPlayerStandingsData?.let {
+                    displayModels[SportDisplayType.KBO_PLAYER_STANDINGS]?.let {
 //                        KBOPlayerStandingsView(data = it)
                         CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
                             Text(StringConstants.viewPreparingAdviseText("'KBO 선수 순위'"))
                         }
                     }
-                    kboTeamInfoData?.let {
-                        KBOTeamInfoView(data = it)
+                    displayModels[SportDisplayType.KBO_TEAM_INFO]?.let {
+                        KBOTeamInfoView(data = it as KBOTeamInfoDisplayModel)
                     }
-                    kboTeamStatsData?.let {
-                        KBOTeamStatsView(data = it)
+                    displayModels[SportDisplayType.KBO_TEAM_STATS]?.let {
+                        KBOTeamStatsView(data = it as KBOTeamStatsDisplayModel)
                     }
-                    kboTeamStandingsData?.let {
-                        KBOTeamStandingsView(data = it)
+                    displayModels[SportDisplayType.KBO_TEAM_STANDINGS]?.let {
+                        KBOTeamStandingsView(data = it as KBOTeamStandingsDisplayModel)
                     }
-                    kboLeagueScheduleData?.let {
-//                        KBOLeagueScheduleView(data = it)
+                    displayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE]?.let {
+//                        KBOLeagueScheduleView(data = it as KBOLeagueScheduleDisplayModel)
                         CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
                             Text(StringConstants.viewPreparingAdviseText("'KBO 경기 일정'"))
                         }
                     }
-                    kboGameStatsData?.let {
-//                        KBOGameStatsView(data = it)
+                    displayModels[SportDisplayType.KBO_GAME_STATS]?.let {
+//                        KBOGameStatsView(data = it as KBOGameStatsDisplayModel)
                         CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
                             Text(StringConstants.viewPreparingAdviseText("'KBO 경기 상세'"))
                         }
                     }
-
                     // mlb
-                    mlbPlayerInfoData?.let {
-                        MLBPlayerInfoView(data = it)
+                    displayModels[SportDisplayType.MLB_PLAYER_INFO]?.let {
+                        MLBPlayerInfoView(data = it as MLBPlayerInfoDisplayModel)
                     }
-                    mlbPlayerStatsData?.let {
-                        MLBPlayerStatsView(data = it)
+                    displayModels[SportDisplayType.MLB_PLAYER_STATS]?.let {
+                        MLBPlayerStatsView(data = it as MLBPlayerStatsDisplayModel)
                     }
-                    mlbPlayerStandingsData?.let {
+                    displayModels[SportDisplayType.MLB_PLAYER_STANDINGS]?.let {
 //                        MLBPlayerStandingsView(data = it)
                         CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
                             Text(StringConstants.viewPreparingAdviseText("'MLB 선수 순위'"))
                         }
                     }
-                    mlbTeamInfoData?.let {
-                        MLBTeamInfoView(data = it)
+                    displayModels[SportDisplayType.MLB_TEAM_INFO]?.let {
+                        MLBTeamInfoView(data = it as MLBTeamInfoDisplayModel)
                     }
-                    mlbTeamStatsData?.let {
-                        MLBTeamStatsView(data = it)
+                    displayModels[SportDisplayType.MLB_TEAM_STATS]?.let {
+                        MLBTeamStatsView(data = it as MLBTeamStatsDisplayModel)
                     }
-                    mlbTeamStandingsData?.let {
-                        MLBTeamStandingsView(data = it)
+                    displayModels[SportDisplayType.MLB_TEAM_STANDINGS]?.let {
+                        MLBTeamStandingsView(data = it as MLBTeamStandingsDisplayModel)
                     }
-                    mlbLeagueScheduleData?.let {
-//                        MLBLeagueScheduleView(data = it)
+                    displayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE]?.let {
+//                        MLBLeagueScheduleView(data = it as MLBLeagueScheduleDisplayModel)
                         CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
                             Text(StringConstants.viewPreparingAdviseText("'MLB 경기 일정'"))
                         }
                     }
-                    mlbGameStatsData?.let {
-//                        MLBGameStatsView(data = it)
+                    displayModels[SportDisplayType.MLB_GAME_STATS]?.let {
+//                        MLBGameStatsView(data = it as MLBGameStatsDisplayModel)
                         CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
                             Text(StringConstants.viewPreparingAdviseText("'MLB 경기 상세'"))
                         }
