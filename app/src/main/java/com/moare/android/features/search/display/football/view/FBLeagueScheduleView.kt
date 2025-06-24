@@ -56,6 +56,8 @@ import com.moare.android.features.search.display.football.viewmodel.FBLeagueSche
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.SportDisplayType
+import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.ui.common.components.CalendarList
@@ -94,7 +96,8 @@ fun FBLeagueScheduleView(
     val isAllResultOpened by fbLeagueScheduleViewModel.isAllResultOpened.collectAsState()
     val displayDataState by fbLeagueScheduleViewModel.displayDataState.collectAsState()
 
-    val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
+    val displayModels by searchViewModel.displayModels.collectAsState()
+    val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
 
     val viewStack by searchViewModel.viewStack.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
@@ -129,10 +132,10 @@ fun FBLeagueScheduleView(
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
-            shouldShowCalendar = fbGameStatsData == null,
-            shouldShowAllResultToggleButton = fbGameStatsData == null,
+            shouldShowCalendar = fbGameStatsModel == null,
+            shouldShowAllResultToggleButton = fbGameStatsModel == null,
             displayDataState = displayDataState,
-            shouldFillBelow = fbGameStatsData == null,
+            shouldFillBelow = fbGameStatsModel == null,
             calendarUiState = CalendarUiState(
                 yearMonthList,
                 days,
@@ -160,7 +163,7 @@ fun FBLeagueScheduleView(
             }
         ),
         titleContent = {
-            fbGameStatsData?.let {
+            fbGameStatsModel?.let {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -194,9 +197,10 @@ fun FBLeagueScheduleList(
     val filteredGames by fbLeagueScheduleViewModel.filteredGames.collectAsState()
     val selectedDayIndex by fbLeagueScheduleViewModel.selectedDayIndex.collectAsState()
 
-    val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
+    val displayModels by searchViewModel.displayModels.collectAsState()
+    val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
 
-    val gameListToDisplay = if (fbGameStatsData == null) filteredGames[selectedDayIndex] ?: emptyList() else listOf(fbGameStatsData!!.game)
+    val gameListToDisplay = if (fbGameStatsModel == null) filteredGames[selectedDayIndex] ?: emptyList() else listOf(fbGameStatsModel.game)
 
     LazyColumn {
         items(gameListToDisplay) { item ->
@@ -228,7 +232,8 @@ fun FBLeagueScheduleListItem(
     val displayModel by fbLeagueScheduleViewModel.displayModel.collectAsState()
     val gameResultOpenedStateList by fbLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
 
-    val fbGameStatsData by searchViewModel.fbGameStatsData.collectAsState()
+    val displayModels by searchViewModel.displayModels.collectAsState()
+    val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
 
     /* ---------------------
        animation
@@ -282,8 +287,8 @@ fun FBLeagueScheduleListItem(
             isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
         }
     }
-    LaunchedEffect(fbGameStatsData) {
-        fbGameStatsData?.let {
+    LaunchedEffect(fbGameStatsModel) {
+        fbGameStatsModel?.let {
             isResultOpened = true
 
             refereeKrName = EnNameTranslationUtils.translateByAWS(it.game.fixture.referee)
@@ -292,7 +297,7 @@ fun FBLeagueScheduleListItem(
 
     ScheduleGameItemContainer(
         state = ScheduleGameItemState(
-            isClickEnabled = fbGameStatsData == null,
+            isClickEnabled = fbGameStatsModel == null,
             homeTeamLogo = data.teams.home.logo,
             homeTeamName = fbLeagueScheduleViewModel.teamNameDictionary["short_${data.teams.home.id}"] ?: data.teams.home.name,
             homeTeamScore = data.goals.home,
@@ -303,18 +308,18 @@ fun FBLeagueScheduleListItem(
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
-            isCapsuleButtonDisabled = fbGameStatsData != null || !StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short),
+            isCapsuleButtonDisabled = fbGameStatsModel != null || !StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short),
             date = CalendarUtil.formatDate(data.fixture.date).split(" ").firstOrNull() ?: "",
             dateTime = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
-            venue = fbLeagueScheduleViewModel.teamNameDictionary["venue_${data.teams.home.id}"] ?: (fbGameStatsData?.game?.fixture?.venue?.name ?: ""),
+            venue = fbLeagueScheduleViewModel.teamNameDictionary["venue_${data.teams.home.id}"] ?: (fbGameStatsModel?.game?.fixture?.venue?.name ?: ""),
             gameType = MatchDescriptionConverter.convert(input = data.league.round),
             referee = refereeKrName,
-            shouldShowOnlyDateTime = fbGameStatsData == null,
-            shouldShowVenue = fbGameStatsData != null,
-            shouldShowGameType = fbGameStatsData == null,
-            shouldShowReferee = fbGameStatsData != null,
-            shouldShowHomeLabel = fbGameStatsData != null,
-            shouldShowAwayLabel = fbGameStatsData != null
+            shouldShowOnlyDateTime = fbGameStatsModel == null,
+            shouldShowVenue = fbGameStatsModel != null,
+            shouldShowGameType = fbGameStatsModel == null,
+            shouldShowReferee = fbGameStatsModel != null,
+            shouldShowHomeLabel = fbGameStatsModel != null,
+            shouldShowAwayLabel = fbGameStatsModel != null
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {

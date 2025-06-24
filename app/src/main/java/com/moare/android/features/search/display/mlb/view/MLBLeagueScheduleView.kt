@@ -55,6 +55,9 @@ import com.moare.android.features.search.display.nba.viewmodel.NBALeagueSchedule
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.SportDisplayType
+import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.mlb.MLBGame
@@ -89,7 +92,8 @@ fun MLBLeagueScheduleView(
 
     val season = displayModel?.games?.firstOrNull()?.game?.season
 
-    val mlbGameStatsData by searchViewModel.mlbGameStatsData.collectAsState()
+    val displayModels by searchViewModel.displayModels.collectAsState()
+    val mlbGameStatsModel = displayModels[SportDisplayType.MLB_GAME_STATS] as? MLBGameStatsDisplayModel
 
     val viewStack by searchViewModel.viewStack.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
@@ -124,10 +128,10 @@ fun MLBLeagueScheduleView(
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
-            shouldShowCalendar = mlbGameStatsData == null,
-            shouldShowAllResultToggleButton = mlbGameStatsData == null,
+            shouldShowCalendar = mlbGameStatsModel == null,
+            shouldShowAllResultToggleButton = mlbGameStatsModel == null,
             displayDataState = displayDataState,
-            shouldFillBelow = mlbGameStatsData == null,
+            shouldFillBelow = mlbGameStatsModel == null,
             calendarUiState = CalendarUiState(
                 yearMonthList,
                 days,
@@ -171,8 +175,6 @@ fun MLBLeagueScheduleList(
     val filteredGames by mlbLeagueScheduleViewModel.filteredGames.collectAsState()
     val selectedDayIndex by mlbLeagueScheduleViewModel.selectedDayIndex.collectAsState()
 
-    val mlbGameStatsData by searchViewModel.mlbGameStatsData.collectAsState()
-
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
 
     LazyColumn {
@@ -203,8 +205,6 @@ fun MLBLeagueScheduleListItem(
     val awayTeamId = data.teams.away.id
     val homeTeamScore = data.linescore.teams.home.runs
     val awayTeamScore = data.linescore.teams.away.runs
-
-//    val mlbGameStatsData by searchViewModel.mlbGameStatsData.collectAsState()
 
     /* ---------------------
        animation

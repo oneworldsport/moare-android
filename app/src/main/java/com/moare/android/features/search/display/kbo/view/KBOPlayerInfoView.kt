@@ -720,8 +720,8 @@ fun KBOPlayerInfoSeventhItem(
             )
 
             lastGame?.let {
-                val homeTeamScore = it.lineScore.home.r.toInt()
-                val awayTeamScore = it.lineScore.away.r.toInt()
+                val homeTeamScore = it.lineScore?.home?.r?.toIntOrNull() ?: 0
+                val awayTeamScore = it.lineScore?.away?.r?.toIntOrNull() ?: 0
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

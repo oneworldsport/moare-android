@@ -415,14 +415,14 @@ class ModelConverter(
         var lastGamePlayerPitcherStats: KBOGamePitcherStats? = null
 
         if (isHome) {
-            lastGamePlayerHitterStats = lastGame?.lineup?.home?.hitters?.find { it.playerName == info.player.name }
+            lastGamePlayerHitterStats = lastGame?.lineup?.home?.hitters?.find { it.id == info.player.id }
             if (lastGamePlayerHitterStats == null) {
-                lastGamePlayerPitcherStats = lastGame?.lineup?.home?.pitchers?.find { it.playerName == info.player.name }
+                lastGamePlayerPitcherStats = lastGame?.lineup?.home?.pitchers?.find { it.id == info.player.id }
             }
         } else {
-            lastGamePlayerHitterStats = lastGame?.lineup?.away?.hitters?.find { it.playerName == info.player.name }
+            lastGamePlayerHitterStats = lastGame?.lineup?.away?.hitters?.find { it.id == info.player.id }
             if (lastGamePlayerHitterStats == null) {
-                lastGamePlayerPitcherStats = lastGame?.lineup?.away?.pitchers?.find { it.playerName == info.player.name }
+                lastGamePlayerPitcherStats = lastGame?.lineup?.away?.pitchers?.find { it.id == info.player.id }
             }
         }
 

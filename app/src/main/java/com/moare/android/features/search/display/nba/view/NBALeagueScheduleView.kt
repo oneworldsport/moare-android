@@ -54,6 +54,9 @@ import com.moare.android.features.search.display.nba.viewmodel.NBALeagueSchedule
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.SportDisplayType
+import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.ui.common.components.CalendarList
@@ -87,8 +90,8 @@ fun NBALeagueScheduleView(
 
     val season = displayModel?.games?.firstOrNull()?.gameSummary?.season
 
-    val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
-
+    val displayModels by searchViewModel.displayModels.collectAsState()
+    val nbaGameStatsModel = displayModels[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel
     val viewStack by searchViewModel.viewStack.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
 
@@ -122,10 +125,10 @@ fun NBALeagueScheduleView(
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
-            shouldShowCalendar = nbaGameStatsData == null,
-            shouldShowAllResultToggleButton = nbaGameStatsData == null,
+            shouldShowCalendar = nbaGameStatsModel == null,
+            shouldShowAllResultToggleButton = nbaGameStatsModel == null,
             displayDataState = displayDataState,
-            shouldFillBelow = nbaGameStatsData == null,
+            shouldFillBelow = nbaGameStatsModel == null,
             calendarUiState = CalendarUiState(
                 yearMonthList,
                 days,
@@ -169,8 +172,6 @@ fun NBALeagueScheduleList(
        --------------------- */
     val filteredGames by nbaLeagueScheduleViewModel.filteredGames.collectAsState()
     val selectedDayIndex by nbaLeagueScheduleViewModel.selectedDayIndex.collectAsState()
-
-    val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
 
 //    val gameListToDisplay = if (nbaGameStatsData == null) filteredGames[selectedDayIndex] ?: emptyList() else listOf(nbaGameStatsData!!.game)
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()

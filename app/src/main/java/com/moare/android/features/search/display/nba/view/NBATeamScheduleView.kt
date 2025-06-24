@@ -40,6 +40,8 @@ import com.moare.android.features.search.display.nba.viewmodel.NBATeamScheduleIn
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.SportDisplayType
+import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.ui.common.components.CapsuleButton
@@ -62,7 +64,8 @@ fun NBATeamScheduleView(
 
     val season = displayModel?.games?.firstOrNull()?.gameSummary?.season
 
-    val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
+    val displayModels by searchViewModel.displayModels.collectAsState()
+    val nbaGameStatsModel = displayModels[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel
     val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
@@ -100,7 +103,7 @@ fun NBATeamScheduleView(
 //            }
 //        }
 
-        if (nbaGameStatsData == null) {
+        if (nbaGameStatsModel == null) {
             /* ---------------------
                all result open button
                - hides when game selected
@@ -145,9 +148,10 @@ fun NBATeamScheduleList(
        --------------------- */
     val games by nbaTeamScheduleViewModel.games.collectAsState()
 
-    val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
+    val displayModels by searchViewModel.displayModels.collectAsState()
+    val nbaGameStatsModel = displayModels[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel
 
-    val gameListToDisplay = if (nbaGameStatsData == null) games else listOf(nbaGameStatsData!!.game)
+    val gameListToDisplay = if (nbaGameStatsModel == null) games else listOf(nbaGameStatsModel.game)
 
     LazyColumn {
         items(gameListToDisplay) { item ->

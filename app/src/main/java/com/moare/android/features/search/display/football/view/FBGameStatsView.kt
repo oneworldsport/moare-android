@@ -57,7 +57,10 @@ import com.moare.android.features.search.display.football.viewmodel.FBGameStatsI
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
 import com.moare.android.features.search.models.models.football.FBPerson
 import com.moare.android.ui.common.components.HCapsuleBar
@@ -90,9 +93,10 @@ fun FBGameStatsView(
     val firstSelectedIndex by fbGameStatsViewModel.firstSelectedIndex.collectAsState()
     val secondSelectedIndex by fbGameStatsViewModel.secondSelectedIndex.collectAsState()
 
-    val fbLeagueScheduleData by searchViewModel.fbLeagueScheduleData.collectAsState()
-    val fbTeamScheduleData by searchViewModel.fbTeamScheduleData.collectAsState()
+    val displayModels by searchViewModel.displayModels.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
+    val fbLeagueScheduleModel = displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] as? FBLeagueScheduleDisplayModel
+    val fbTeamScheduleModel = displayModels[SportDisplayType.FB_TEAM_SCHEDULE] as? FBTeamScheduleDisplayModel
 
     /* ---------------------
        etc
@@ -144,8 +148,8 @@ fun FBGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowTitle = fbLeagueScheduleData == null && fbTeamScheduleData == null,
-            shouldShowGameItem = fbLeagueScheduleData == null && fbTeamScheduleData == null,
+            shouldShowTitle = fbLeagueScheduleModel == null && fbTeamScheduleModel == null,
+            shouldShowGameItem = fbLeagueScheduleModel == null && fbTeamScheduleModel == null,
             shouldShowStats = displayModel?.game?.fixture?.status?.short != "NS",
             shouldShowCoach = true,
             firstCategoryItemHeight = fbGameStatsViewModel.categoryItemHeight * 2

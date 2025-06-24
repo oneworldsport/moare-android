@@ -59,7 +59,11 @@ import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsInten
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.SportDisplayType
+import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
 import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
 import com.moare.android.features.search.models.models.nba.NBALineScore
@@ -92,11 +96,8 @@ fun NBAGameStatsView(
     val displayModel by nbaGameStatsViewModel.displayModel.collectAsState()
     val firstSelectedIndex by nbaGameStatsViewModel.firstSelectedIndex.collectAsState()
     val secondSelectedIndex by nbaGameStatsViewModel.secondSelectedIndex.collectAsState()
-
     val season = displayModel?.game?.gameSummary?.season
 
-    val nbaLeagueScheduleData by searchViewModel.nbaLeagueScheduleData.collectAsState()
-    val nbaTeamScheduleData by searchViewModel.nbaTeamScheduleData.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------

@@ -365,7 +365,7 @@ fun FBTeamStatsItem(
         )
         FBStatDataItem(
             category = "클린시트",
-            data = data.cleanSheet.total.toString(),
+            data = (data.cleanSheet?.total ?: 0).toString(),
             customWidth = 80.dp
         )
         FBStatDataItem(

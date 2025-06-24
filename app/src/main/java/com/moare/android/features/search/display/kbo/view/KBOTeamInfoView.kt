@@ -507,8 +507,8 @@ fun KBOTeamInfoFifthItem(
             )
 
             lastGame?.let {
-                val homeTeamScore = it.lineScore.home.r
-                val awayTeamScore = it.lineScore.away.r
+                val homeTeamScore = it.lineScore?.home?.r?.toIntOrNull() ?: 0
+                val awayTeamScore = it.lineScore?.away?.r?.toIntOrNull() ?: 0
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -525,7 +525,7 @@ fun KBOTeamInfoFifthItem(
                     )
 
                     Text(
-                        text = homeTeamScore,
+                        text = homeTeamScore.toString(),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center,
@@ -542,7 +542,7 @@ fun KBOTeamInfoFifthItem(
                     )
 
                     Text(
-                        text = awayTeamScore,
+                        text = awayTeamScore.toString(),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center,
