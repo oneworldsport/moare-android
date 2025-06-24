@@ -285,8 +285,7 @@ fun KBOPlayerInfoSecondItem(
             // TODO: "소속팀" 라벨 표시 필요
             URLImage(
                 url = KBOUtil.teamLogoUrl(player.teamId),
-                modifier = Modifier.alpha(contentsAlpha),
-                isSvg = true
+                modifier = Modifier.alpha(contentsAlpha)
             )
 
             Text(

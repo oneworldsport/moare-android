@@ -130,6 +130,9 @@ fun ScheduleGameItemContainer(
                     modifier = Modifier.padding(vertical = 2.dp)
                 )
             } else {
+                // TODO
+//                date = CalendarUtil.formatDate(data.fixture.date).split(" ").firstOrNull() ?: "",
+//                dateTime = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
                 Text(
                     text = state.date,
                     fontSize = 12.sp,

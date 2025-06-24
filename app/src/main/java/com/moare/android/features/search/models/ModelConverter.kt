@@ -410,7 +410,7 @@ class ModelConverter(
         val lastGame = response.lastGame
         val isHome = lastGame?.gameInfo?.homeTeamId?.toInt() == info.player.teamId
 
-        var lastGamePlayerHitterStats: KBOGameHitterStats? = null
+        val lastGamePlayerHitterStats: KBOGameHitterStats?
         var lastGamePlayerPitcherStats: KBOGamePitcherStats? = null
 
         if (isHome) {
@@ -419,9 +419,9 @@ class ModelConverter(
                 lastGamePlayerPitcherStats = lastGame?.lineup?.home?.pitchers?.find { it.playerName == info.player.name }
             }
         } else {
-            lastGamePlayerHitterStats = lastGame?.lineup?.home?.hitters?.find { it.playerName == info.player.name }
+            lastGamePlayerHitterStats = lastGame?.lineup?.away?.hitters?.find { it.playerName == info.player.name }
             if (lastGamePlayerHitterStats == null) {
-                lastGamePlayerPitcherStats = lastGame?.lineup?.home?.pitchers?.find { it.playerName == info.player.name }
+                lastGamePlayerPitcherStats = lastGame?.lineup?.away?.pitchers?.find { it.playerName == info.player.name }
             }
         }
 
