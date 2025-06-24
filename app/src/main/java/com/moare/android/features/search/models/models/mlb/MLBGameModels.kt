@@ -20,7 +20,7 @@ data class MLBGame(
 
 @Serializable
 data class MLBGameBoxscore(
-    val info: List<MLBLabelObj>,
+    val info: List<MLBLabelObj>? = null,
     val officials: List<MBLGameBoxscoreOfficial>,
     val teams: MLBGameBoxscoreTeams
 )
@@ -116,7 +116,7 @@ data class MLBGameBoxsocreTeamInfo(
     @SerialName("id") private val _id: Int? = null,
     @SerialName("link") private val _link: String? = null,
     @SerialName("name") private val _name: String? = null,
-    val springLeague: MLBAbbreviationIdObj
+    val springLeague: MLBAbbreviationIdObj? = null
 ) {
     val allStarStatus: String get() = _allStarStatus ?: ""
     val id: Int get() = _id ?: 0
@@ -174,12 +174,12 @@ data class MLBGameLineScore(
     @SerialName("balls") private val _balls: Int? = null,
     @SerialName("currentInning") private val _currentInning: Int? = null,
     @SerialName("currentInningOrdinal") private val _currentInningOrdinal: String? = null,
-    val defense: MLBGameLineScoreDefense,
+    val defense: MLBGameLineScoreDefense? = null,
     @SerialName("inningHalf") private val _inningHalf: String? = null,
     val innings: List<MLBGameLineScoreInning>,
     @SerialName("inningState") private val _inningState: String? = null,
     @SerialName("isTopInning") private val _isTopInning: Boolean? = null,
-    val offense: MLBGameLineScoreDefense,
+    val offense: MLBGameLineScoreDefense? = null,
     @SerialName("outs") private val _outs: Int? = null,
     @SerialName("scheduledInnings") private val _scheduledInnings: Int? = null,
     @SerialName("strikes") private val _strikes: Int? = null,
@@ -310,7 +310,7 @@ data class MLBGameTeamDetail(
     val league: MLBNameObj,
     @SerialName("locationName") private val _locationName: String? = null,
     @SerialName("name") private val _name: String? = null,
-    val record: MLBGameTeamRecord,
+    val record: MLBGameTeamRecord? = null,
     @SerialName("season") private val _season: Int? = null,
     @SerialName("shortName") private val _shortName: String? = null,
     @SerialName("teamCode") private val _teamCode: String? = null,

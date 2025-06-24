@@ -229,11 +229,12 @@ class ModelConverter(
     }
 
     fun fbGameStatsConverter(response: FBGameStatsResponseModel): FBGameStatsDisplayModel {
+        val game = response.game!!
         return FBGameStatsDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.EPL,
+            leagueId = game.league.id,
             keywords = keywords,
             entityInfo = entityInfo,
-            game = response.game!!
+            game = game
         )
     }
 

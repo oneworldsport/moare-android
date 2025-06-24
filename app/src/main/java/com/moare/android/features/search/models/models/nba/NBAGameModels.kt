@@ -12,7 +12,7 @@ data class NBAGame(
     val lastMeeting: NBALastMeeting?,
     val lineScore: List<NBALineScore> = emptyList(),
     val officials: List<NBAOfficial> = emptyList(),
-    val otherStats: List<NBAOtherStats> = emptyList(),
+    val otherStats: List<NBAOtherStats>? = null,
     val seasonSeries: NBASeasonSeries?
 )
 
