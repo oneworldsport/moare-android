@@ -1,13 +1,11 @@
 package com.moare.android.features.search.display.common.viewmodel
 
 import com.moare.android.core.constants.Constants
-import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.DayInfo
 import com.moare.android.features.search.models.ApiFetchState
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
@@ -74,7 +72,7 @@ abstract class BaseScheduleViewModel<I, T>(
         // init data
         _displayModel.value = displayModel
 
-        if (displayModel is DisplayModelBase) {
+        if (displayModel is SportDisplayModel) {
             loadDictionaries(displayModel.leagueId)
         }
     }

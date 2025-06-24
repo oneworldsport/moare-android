@@ -2,7 +2,7 @@ package com.moare.android.features.search.models.displaymodels.kbo
 
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOGame
 import kotlinx.serialization.Serializable
 
@@ -13,4 +13,4 @@ data class KBOLeagueScheduleDisplayModel(
     override val entityInfo: List<EntityInfo>,
     val yearMonthList: List<String>,
     var games: List<KBOGame>
-) : DisplayModelBase
+) : SportDisplayModel

@@ -2,7 +2,7 @@ package com.moare.android.features.search.models.displaymodels.nba
 
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAPlayerInfo
 import com.moare.android.features.search.models.models.nba.NBAPlayerStats
 import kotlinx.serialization.Serializable
@@ -14,4 +14,4 @@ data class NBAPlayerStatsDisplayModel(
     override val entityInfo: List<EntityInfo>,
     val player: NBAPlayerInfo,
     val stats: List<NBAPlayerStats>
-) : DisplayModelBase
+) : SportDisplayModel

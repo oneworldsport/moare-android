@@ -2,7 +2,7 @@ package com.moare.android.features.search.models.displaymodels.kbo
 
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOTeamInfo
 import com.moare.android.features.search.models.models.kbo.KBOTeamStats
 import com.moare.android.features.search.models.models.kbo.KBOTeamVenue
@@ -16,4 +16,4 @@ data class KBOTeamStatsDisplayModel(
     val team: KBOTeamInfo,
     val venue: KBOTeamVenue,
     val stats: List<KBOTeamStats>
-) : DisplayModelBase
+) : SportDisplayModel
