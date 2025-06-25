@@ -39,13 +39,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.FBUtil
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerActions
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerState
+import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
+import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleViewModel
@@ -61,6 +65,7 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDi
 import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.mlb.MLBGame
+import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
@@ -80,7 +85,6 @@ fun MLBLeagueScheduleView(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by mlbLeagueScheduleViewModel.displayModel.collectAsState()
     val yearMonthList by mlbLeagueScheduleViewModel.yearMonthList.collectAsState()
     val days by mlbLeagueScheduleViewModel.days.collectAsState()
     val selectedYearMonthIndex by mlbLeagueScheduleViewModel.selectedYearMonthIndex.collectAsState()
@@ -89,11 +93,6 @@ fun MLBLeagueScheduleView(
     val dayCalendarScrollTrigger by mlbLeagueScheduleViewModel.dayCalendarScrollTrigger.collectAsState()
     val isAllResultOpened by mlbLeagueScheduleViewModel.isAllResultOpened.collectAsState()
     val displayDataState by mlbLeagueScheduleViewModel.displayDataState.collectAsState()
-
-    val season = displayModel?.games?.firstOrNull()?.game?.season
-
-    val displayModels by searchViewModel.displayModels.collectAsState()
-    val mlbGameStatsModel = displayModels[SportDisplayType.MLB_GAME_STATS] as? MLBGameStatsDisplayModel
 
     val viewStack by searchViewModel.viewStack.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
@@ -128,10 +127,7 @@ fun MLBLeagueScheduleView(
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
-            shouldShowCalendar = mlbGameStatsModel == null,
-            shouldShowAllResultToggleButton = mlbGameStatsModel == null,
             displayDataState = displayDataState,
-            shouldFillBelow = mlbGameStatsModel == null,
             calendarUiState = CalendarUiState(
                 yearMonthList,
                 days,
@@ -188,60 +184,37 @@ fun MLBLeagueScheduleList(
 fun MLBLeagueScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
     mlbLeagueScheduleViewModel: MLBLeagueScheduleViewModel = hiltViewModel(),
-    data: MLBGame,
+    data: MLBGameForSchedule,
 ) {
+    val gameId = data.gameId
+    val homeTeamId = data.homeTeamId
+    val awayTeamId = data.awayTeamId
+    val gameStatus = data.gameStatus
+    val teamNameDic = mlbLeagueScheduleViewModel.teamNameDictionary
+
     /* ---------------------
        ui state
        --------------------- */
     var isResultOpened by remember { mutableStateOf(false) }
-    val noRippleInteractionSource = remember { MutableInteractionSource() }
 
     /* ---------------------
        viewmodel state
        --------------------- */
     val gameResultOpenedStateList by mlbLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
 
-    val homeTeamId = data.teams.home.id
-    val awayTeamId = data.teams.away.id
-    val homeTeamScore = data.linescore.teams.home.runs
-    val awayTeamScore = data.linescore.teams.away.runs
-
-    /* ---------------------
-       animation
-       --------------------- */
-    val scoreAlpha by animateFloatAsState(
-        targetValue = if (StringConstants.MLB.GAME_LIVE_LIST.contains(data.status.codedGameState) || (StringConstants.MLB.GAME_FINISHED_LIST.contains(data.status.codedGameState) && isResultOpened)) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = 300,
-            easing = LinearOutSlowInEasing
-        )
-    )
-
     /* ---------------------
        constants
        --------------------- */
-    val gameStatusText = if (isResultOpened) {
-        when (data.status.codedGameState) {
-            "S" -> StringConstants.GAME_NOT_STARTED_STR
-            in StringConstants.MLB.GAME_LIVE_LIST -> "${data.linescore.currentInning}${
-                if (data.linescore.inningState == "Top") {
-                    "초"
-                } else {
-                    "말"
-                }
-            }"
-            in StringConstants.MLB.GAME_FINISHED_LIST -> StringConstants.GAME_FINISHED_STR
-            else -> ""
-        }
-    } else {
-        StringConstants.RESULT_OPEN
+    val gameStatusText = when (gameStatus) {
+        StringConstants.MLB.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
+        StringConstants.MLB.GAME_LIVE -> StringConstants.GAME_LIVE_STR
+        StringConstants.MLB.GAME_POSTPONED -> StringConstants.GAME_POSTPONED_STR
+        in StringConstants.MLB.GAME_FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
+        else -> ""
     }
 
-    val gameStatusColor = if (isResultOpened) {
-        when (data.status.codedGameState) {
-            in StringConstants.MLB.GAME_LIVE_LIST -> MaterialTheme.colors.primary
-            else -> Color.Gray
-        }
+    val gameStatusColor = if (gameStatus == StringConstants.MLB.GAME_LIVE) {
+        MaterialTheme.colors.primary
     } else {
         Color.Gray
     }
@@ -250,135 +223,46 @@ fun MLBLeagueScheduleListItem(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (StringConstants.MLB.GAME_FINISHED_LIST.contains(data.status.codedGameState)) {
-            isResultOpened = gameResultOpenedStateList[data.game.id] ?: false
+        if (StringConstants.MLB.GAME_FINISHED_LIST.contains(gameStatus)) {
+            isResultOpened = gameResultOpenedStateList[gameId] ?: false
+        } else if (gameStatus == StringConstants.MLB.GAME_SCHEDULED || gameStatus == StringConstants.MLB.GAME_POSTPONED) {
+            isResultOpened = false
         } else {
             isResultOpened = true
         }
     }
     LaunchedEffect(gameResultOpenedStateList) {
-        if (StringConstants.MLB.GAME_FINISHED_LIST.contains(data.status.codedGameState)) {
-            isResultOpened = gameResultOpenedStateList[data.game.id] ?: false
+        if (StringConstants.MLB.GAME_FINISHED_LIST.contains(gameStatus)) {
+            isResultOpened = gameResultOpenedStateList[gameId] ?: false
         }
     }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-//            .clickable(enabled = mlbGameStatsData == null) {
-            .clickable {
+    ScheduleGameItem(
+        state = ScheduleGameItemState(
+            homeTeamLogo = MLBUtil.teamLogoUrl(homeTeamId),
+            homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
+            homeTeamScore = data.homeTeamScore,
+            awayTeamLogo = MLBUtil.teamLogoUrl(awayTeamId),
+            awayTeamName = teamNameDic["short_${awayTeamId}"] ?: "",
+            awayTeamScore = data.awayTeamScore,
+            isResultOpened = isResultOpened,
+            gameStatusText = gameStatusText,
+            gameStatusColor = gameStatusColor,
+            isCapsuleButtonDisabled = !StringConstants.MLB.GAME_FINISHED_LIST.contains(gameStatus),
+            date = data.date,
+            venue = teamNameDic["venue_${homeTeamId}"] ?: "",
+            isSvgLogo = true
+        ),
+        actions = ScheduleGameItemActions(
+            onGameItemClick = {
                 searchViewModel.send(SearchViewModel.Intent.SelectMLBGame(data))
 
                 // set selected game's isOpened true
-                mlbLeagueScheduleViewModel.send(MLBLeagueScheduleIntent.UpdateResultOpenedState(data.game.id, true))
+                mlbLeagueScheduleViewModel.send(MLBLeagueScheduleIntent.UpdateResultOpenedState(gameId, true))
+            },
+            onCapsuleButtonClick = {
+                mlbLeagueScheduleViewModel.send(MLBLeagueScheduleIntent.UpdateResultOpenedState(gameId, !isResultOpened))
             }
-            .padding(vertical = 8.dp)
-            .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
-    ) {
-        /* ---------------------
-           home
-           --------------------- */
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .weight(1f)
-//                .clickable(enabled = fbGameStatsData != null) {
-//                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue = TextFieldValue(text = "토트넘")))
-//                    searchViewModel.send(SearchViewModel.Intent.PerformSearch())
-//                }
-        ) {
-            URLImage(
-                url = MLBUtil.teamLogoUrl(homeTeamId),
-                size = URLImageSize.SMALL,
-                isSvg = true
-            )
-
-            Text(
-                text = mlbLeagueScheduleViewModel.teamNameDictionary["short_$homeTeamId"] ?: "",
-                fontSize = 13.sp,
-                maxLines = 2
-            )
-        }
-
-        // Add space to both sides of each score to place the score in the middle
-        Spacer(Modifier.weight(0.3f))
-
-        // score
-        Text(
-            text = homeTeamScore.toString(),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .width(30.dp)
-                .alpha(scoreAlpha),
-            color = if (homeTeamScore >= awayTeamScore) MaterialTheme.colors.primary else Color.Black
         )
-
-        Spacer(Modifier.weight(0.3f))
-
-        /* ---------------------
-           game info
-           --------------------- */
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // game status
-            CapsuleButton(
-                text = gameStatusText,
-                color = gameStatusColor,
-                isDisabled = !StringConstants.MLB.GAME_FINISHED_LIST.contains(data.status.codedGameState)
-            ) {
-                mlbLeagueScheduleViewModel.send(MLBLeagueScheduleIntent.UpdateResultOpenedState(data.game.id, !isResultOpened))
-            }
-
-            // game date
-            Text(
-                text = CalendarUtil.formatDate(data.gameInfo.gameDate, TimeFormatType.AMPM),
-                fontSize = 12.sp,
-                modifier = Modifier.padding(vertical = 2.dp)
-            )
-        }
-
-        /* ---------------------
-           away
-           --------------------- */
-        Spacer(Modifier.weight(0.3f))
-
-        // score
-        Text(
-            text = awayTeamScore.toString(),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .width(30.dp)
-                .alpha(scoreAlpha),
-            color = if (awayTeamScore >= homeTeamScore) MaterialTheme.colors.primary else Color.Black
-        )
-
-        Spacer(Modifier.weight(0.3f))
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .weight(1f)
-        ) {
-            URLImage(
-                url = MLBUtil.teamLogoUrl(awayTeamId),
-                size = URLImageSize.SMALL,
-                isSvg = true
-            )
-
-            Text(
-                text = mlbLeagueScheduleViewModel.teamNameDictionary["short_$awayTeamId"] ?: "",
-                fontSize = 13.sp,
-                maxLines = 2
-            )
-        }
-    }
+    )
 }

@@ -16,6 +16,7 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoD
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
@@ -24,6 +25,7 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoD
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
@@ -404,11 +406,19 @@ data class DataModel(
                         SportDecodableModel.NoResult
                     }
                 }
-//                "baseball_team_schedule" -> {
-//                    val responseModel: KBOGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-//                    val displayModel = modelConverter.kboTeamScheduleConverter(responseModel)
-//                    SportDecodableModel.KBOTeamSchedule(responseModel, displayModel)
-//                }
+                "baseball_team_schedule" -> {
+                    if (leagueId == Constants.Ids.KBO) {
+                        val responseModel: KBOGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                        val displayModel = modelConverter.kboTeamScheduleConverter(responseModel)
+                        SportDecodableModel.KBOTeamSchedule(responseModel, displayModel)
+                    } else if (leagueId == Constants.Ids.MLB) {
+                        val responseModel: MLBGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                        val displayModel = modelConverter.mlbTeamScheduleConverter(responseModel)
+                        SportDecodableModel.MLBTeamSchedule(responseModel, displayModel)
+                    } else {
+                        SportDecodableModel.NoResult
+                    }
+                }
                 "baseball_league_schedule" -> {
                     if (leagueId == Constants.Ids.KBO) {
                         val responseModel: KBOGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
@@ -639,11 +649,11 @@ sealed class SportDecodableModel {
         val displayModel: KBOTeamStandingsDisplayModel
     ) : SportDecodableModel()
 
-//    @Serializable
-//    data class KBOTeamSchedule(
-//        val responseModel: KBOGameScheduleResponseModel,
-//        val displayModel: KBOTeamScheduleDisplayModel
-//    ) : SportDecodableModel()
+    @Serializable
+    data class KBOTeamSchedule(
+        val responseModel: KBOGameScheduleResponseModel,
+        val displayModel: KBOTeamScheduleDisplayModel
+    ) : SportDecodableModel()
 
     @Serializable
     data class KBOLeagueSchedule(
@@ -694,11 +704,11 @@ sealed class SportDecodableModel {
         val displayModel: MLBTeamStandingsDisplayModel
     ) : SportDecodableModel()
 
-//    @Serializable
-//    data class MLBTeamSchedule(
-//        val responseModel: MLBGameScheduleResponseModel,
-//        val displayModel: MLBTeamScheduleDisplayModel
-//    ) : SportDecodableModel()
+    @Serializable
+    data class MLBTeamSchedule(
+        val responseModel: MLBGameScheduleResponseModel,
+        val displayModel: MLBTeamScheduleDisplayModel
+    ) : SportDecodableModel()
 
     @Serializable
     data class MLBLeagueSchedule(

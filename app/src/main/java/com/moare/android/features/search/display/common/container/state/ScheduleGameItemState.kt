@@ -16,7 +16,7 @@ data class ScheduleGameItemState(
     val isCapsuleButtonDisabled: Boolean = false,
     val date: String,
     val venue: String,
-    val gameType: String,
+    val gameType: String? = null,
     val referee: String? = null,
     val shouldShowOnlyDateTime: Boolean = true,
     val shouldShowVenue: Boolean = false,

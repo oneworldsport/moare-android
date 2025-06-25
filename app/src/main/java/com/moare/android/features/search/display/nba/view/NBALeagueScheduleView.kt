@@ -94,7 +94,6 @@ fun NBALeagueScheduleView(
     val displayDataState by nbaLeagueScheduleViewModel.displayDataState.collectAsState()
 
     val displayModels by searchViewModel.displayModels.collectAsState()
-    val nbaGameStatsModel = displayModels[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel
     val viewStack by searchViewModel.viewStack.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
 
@@ -261,7 +260,7 @@ fun NBALeagueScheduleListItem(
             homeTeamLogo = NBAUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
-            awayTeamLogo = FBUtil.teamLogoUrl(awayTeamId),
+            awayTeamLogo = NBAUtil.teamLogoUrl(awayTeamId),
             awayTeamName = teamNameDic["short_${awayTeamId}"] ?: "",
             awayTeamScore = data.awayTeamScore,
             isResultOpened = isResultOpened,
@@ -271,7 +270,6 @@ fun NBALeagueScheduleListItem(
             date = data.date,
             venue = teamNameDic["venue_${homeTeamId}"] ?: "",
             gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
-            shouldShowGameType = true,
             isSvgLogo = true
         ),
         actions = ScheduleGameItemActions(

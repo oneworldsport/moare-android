@@ -19,6 +19,7 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStand
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
@@ -29,6 +30,7 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStand
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
@@ -544,14 +546,14 @@ class ModelConverter(
         )
     }
 
-//    fun kboTeamScheduleConverter(response: KBOGameScheduleResponseModel): KBOTeamScheduleDisplayModel {
-//        return KBOTeamScheduleDisplayModel(
-//            leagueId = leagueId ?: Constants.Ids.KBO,
-//            keywords = keywords,
-//            entityInfo = entityInfo,
-//            games = response.schedule
-//        )
-//    }
+    fun kboTeamScheduleConverter(response: KBOGameScheduleResponseModel): KBOTeamScheduleDisplayModel {
+        return KBOTeamScheduleDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            games = response.schedule
+        )
+    }
 
     fun kboLeagueScheduleConverter(response: KBOGameScheduleResponseModel): KBOLeagueScheduleDisplayModel {
         val yearMonthList = response.scheduledMonths.map {
@@ -716,14 +718,14 @@ class ModelConverter(
         )
     }
 
-//    fun mlbTeamScheduleConverter(response: MLBGameScheduleResponseModel): MLBTeamScheduleDisplayModel {
-//        return MLBTeamScheduleDisplayModel(
-//            leagueId = leagueId ?: Constants.Ids.MLB,
-//            keywords = keywords,
-//            entityInfo = entityInfo,
-//            games = response.schedule
-//        )
-//    }
+    fun mlbTeamScheduleConverter(response: MLBGameScheduleResponseModel): MLBTeamScheduleDisplayModel {
+        return MLBTeamScheduleDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.MLB,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            games = response.schedule
+        )
+    }
 
     fun mlbLeagueScheduleConverter(response: MLBGameScheduleResponseModel): MLBLeagueScheduleDisplayModel {
         val yearMonthList = response.scheduledMonths.map {

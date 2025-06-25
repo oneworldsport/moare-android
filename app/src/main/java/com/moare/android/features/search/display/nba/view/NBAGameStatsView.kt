@@ -125,12 +125,6 @@ fun NBAGameStatsView(
         }
     }
 
-    LaunchedEffect(Unit) {
-        if (displayModel?.game?.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE) {
-            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
-        }
-    }
-
     // scroll to category that matches with the keyword,
     // and when first category list's item is selected by click
     LaunchedEffect(firstSelectedIndex) {

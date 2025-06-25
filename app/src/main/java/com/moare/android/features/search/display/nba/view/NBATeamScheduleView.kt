@@ -70,11 +70,8 @@ fun NBATeamScheduleView(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by nbaTeamScheduleViewModel.displayModel.collectAsState()
     val isAllResultOpened by nbaTeamScheduleViewModel.isAllResultOpened.collectAsState()
 
-    val displayModels by searchViewModel.displayModels.collectAsState()
-    val nbaGameStatsModel = displayModels[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel
     val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
@@ -113,9 +110,6 @@ fun NBATeamScheduleList(
        viewmodel state
        --------------------- */
     val games by nbaTeamScheduleViewModel.games.collectAsState()
-
-    val displayModels by searchViewModel.displayModels.collectAsState()
-    val nbaGameStatsModel = displayModels[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel
 
     LazyColumn {
         items(games) { item ->
@@ -202,7 +196,7 @@ fun NBATeamScheduleListItem(
             homeTeamLogo = NBAUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
-            awayTeamLogo = FBUtil.teamLogoUrl(awayTeamId),
+            awayTeamLogo = NBAUtil.teamLogoUrl(awayTeamId),
             awayTeamName = teamNameDic["short_${awayTeamId}"] ?: "",
             awayTeamScore = data.awayTeamScore,
             isResultOpened = isResultOpened,
@@ -213,7 +207,6 @@ fun NBATeamScheduleListItem(
             venue = teamNameDic["venue_${homeTeamId}"] ?: "",
             gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
             shouldShowOnlyDateTime = false,
-            shouldShowGameType = true,
             isSvgLogo = true
         ),
         actions = ScheduleGameItemActions(

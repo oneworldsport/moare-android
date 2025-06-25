@@ -56,6 +56,7 @@ import com.moare.android.features.search.display.common.container.view.GameStats
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
@@ -123,15 +124,6 @@ fun FBGameStatsView(
         }
     }
 
-    LaunchedEffect(Unit) {
-        displayModel?.let {
-            if (it.game.fixture.status.short != Constants.FBGameStatus.NOT_STARTED &&
-                it.game.fixture.status.short != Constants.FBGameStatus.FINISHED) {
-                searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
-            }
-        }
-    }
-
     // scroll to category that matches with the keyword,
     // and when first category list's item is selected by click
     LaunchedEffect(firstSelectedIndex) {
@@ -174,7 +166,7 @@ fun FBGameStatsView(
         },
         gameContent = {
             displayModel?.game?.let { game ->
-                FBLeagueScheduleListItem(data = game)
+                FBLeagueScheduleListItem(data = ModelConverter().fbGameToGameScheduleConverter(game))
             }
         },
         teamButtonContent = {
