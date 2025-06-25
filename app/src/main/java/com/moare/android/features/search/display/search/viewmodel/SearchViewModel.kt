@@ -370,33 +370,19 @@ class SearchViewModel @Inject constructor(
         _autoCompleteListVisibleState.emit(!autoCompleteListVisibleState.value)
     }
 
-    private suspend fun updateTextField(newValue: TextFieldValue, updateAutoCompleteList: Boolean = true) {
-        _query.emit(newValue)
+    private fun updateTextField(newValue: TextFieldValue, updateAutoCompleteList: Boolean = true) {
+        _query.value = newValue
 
         // auto complete
         if (updateAutoCompleteList) {
             if (newValue.text.isBlank()) {
-                _autoCompleteList.emit(emptyList())
-                _autoCompleteListVisibleState.emit(false)
+                _autoCompleteList.value = emptyList()
+                _autoCompleteListVisibleState.value = false
             } else {
-//                val result = mutableSetOf<String>()
-//                result.addAll(trie.search(newValue.text))
-//                result.addAll(trie.search(getChosung(newValue.text)))
-//                _autoCompleteList.emit(result.toList())
+                val result = trie.search(newValue.text)
 
-                val result = mutableListOf<String>()
-                result.addAll(trie.search(getChosung(newValue.text)))
-
-                val additionalResult = trie.search(newValue.text)
-
-                for (word in additionalResult) {
-                    if (!result.contains(word)) {
-                        result.add(word)
-                    }
-                }
-
-                _autoCompleteList.emit(result)
-                _autoCompleteListVisibleState.emit(true)
+                _autoCompleteList.value = result
+                _autoCompleteListVisibleState.value = true
             }
         }
     }
