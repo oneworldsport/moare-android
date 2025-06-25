@@ -783,6 +783,44 @@ class SearchViewModel @Inject constructor(
                 )
             }
 
+            is SportDecodableModel.KBOPlayerInfo,
+            is SportDecodableModel.KBOTeamInfo-> {
+                val lastGame: KBOGame?
+                val nextGame: KBOGame?
+                if (lastView is SportDecodableModel.KBOPlayerInfo) {
+                    lastGame = lastView.responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                } else {
+                    lastGame = (lastView as SportDecodableModel.KBOTeamInfo).responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                }
+
+                val responseModel = if (gameType == "previous") KBOGameStatsResponseModel(lastGame) else KBOGameStatsResponseModel(nextGame)
+                dataModel = SportDecodableModel.KBOGameStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.kboGameStatsConverter(responseModel)
+                )
+            }
+
+            is SportDecodableModel.MLBPlayerInfo,
+            is SportDecodableModel.MLBTeamInfo-> {
+                val lastGame: MLBGame?
+                val nextGame: MLBGame?
+                if (lastView is SportDecodableModel.MLBPlayerInfo) {
+                    lastGame = lastView.responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                } else {
+                    lastGame = (lastView as SportDecodableModel.MLBTeamInfo).responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                }
+
+                val responseModel = if (gameType == "previous") MLBGameStatsResponseModel(lastGame) else MLBGameStatsResponseModel(nextGame)
+                dataModel = SportDecodableModel.MLBGameStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.mlbGameStatsConverter(responseModel)
+                )
+            }
+
              else -> return // Make it do nothing
         }
 

@@ -423,7 +423,7 @@ class ModelConverter(
         val stats = info.statistics.find { it.seasonType == "Regular Season" }
 
         val lastGame = response.lastGame
-        val isHome = lastGame?.gameInfo?.homeTeamId?.toInt() == info.player.teamId
+        val isHome = lastGame?.gameInfo?.homeTeamId == info.player.teamId
 
         val lastGamePlayerHitterStats: KBOGameHitterStats?
         var lastGamePlayerPitcherStats: KBOGamePitcherStats? = null

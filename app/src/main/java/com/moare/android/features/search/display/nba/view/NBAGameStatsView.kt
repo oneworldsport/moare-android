@@ -990,9 +990,6 @@ fun NBAGameStatsFirstDataListItem(
     nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel(),
     data: NBABoxScoreTeamPlayer
 ) {
-    val playerKrName = nbaGameStatsViewModel.playerNameDictionary[(data.firstName + " " + data.familyName).lowercase()]
-        ?: (data.firstName + " " + data.familyName)
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -1017,7 +1014,7 @@ fun NBAGameStatsFirstDataListItem(
         )
 
         Text(
-            text = playerKrName,
+            text = nbaGameStatsViewModel.playerNameDictionary[data.personId.toString()] ?: data.nameI,
             fontSize = 12.sp,
             maxLines = 2,
             modifier = Modifier.width(60.dp)

@@ -27,7 +27,7 @@ sealed class KBOLeagueScheduleIntent {
     data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int, val updateViewStack: (SportDecodableModel.KBOLeagueSchedule) -> Unit) : KBOLeagueScheduleIntent()
     data class SelectDay(val day: DayInfo, val selectedIndex: Int) : KBOLeagueScheduleIntent()
     data object ToggleAllResult : KBOLeagueScheduleIntent()
-    data class UpdateResultOpenedState(val itemKey: String, val isOpened: Boolean) : KBOLeagueScheduleIntent()
+    data class UpdateResultOpenedState(val itemKey: String, val isOpened: Boolean) : KBOLeagueScheduleIntent() // NOTE: 더블헤더가 있는 날에 취소된 경기가 있으면 gameId가 같은 경우가 있어 gameId 대신에 itemKey를 사용
     data class UpdateGamesData(
         val kboLeagueScheduleData: SportDecodableModel.KBOLeagueSchedule,
         val kboGameStatsData: SportDecodableModel.KBOGameStats,
