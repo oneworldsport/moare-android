@@ -39,13 +39,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.FBUtil
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
+import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerActions
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerState
+import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
+import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
 import com.moare.android.features.search.display.football.view.FBLeagueScheduleList
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleIntent
@@ -59,6 +63,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBGameSta
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
+import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.common.components.CapsuleButton
@@ -87,8 +92,6 @@ fun NBALeagueScheduleView(
     val dayCalendarScrollTrigger by nbaLeagueScheduleViewModel.dayCalendarScrollTrigger.collectAsState()
     val isAllResultOpened by nbaLeagueScheduleViewModel.isAllResultOpened.collectAsState()
     val displayDataState by nbaLeagueScheduleViewModel.displayDataState.collectAsState()
-
-    val season = displayModel?.games?.firstOrNull()?.gameSummary?.season
 
     val displayModels by searchViewModel.displayModels.collectAsState()
     val nbaGameStatsModel = displayModels[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel
@@ -125,10 +128,7 @@ fun NBALeagueScheduleView(
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
-            shouldShowCalendar = nbaGameStatsModel == null,
-            shouldShowAllResultToggleButton = nbaGameStatsModel == null,
             displayDataState = displayDataState,
-            shouldFillBelow = nbaGameStatsModel == null,
             calendarUiState = CalendarUiState(
                 yearMonthList,
                 days,
@@ -173,7 +173,6 @@ fun NBALeagueScheduleList(
     val filteredGames by nbaLeagueScheduleViewModel.filteredGames.collectAsState()
     val selectedDayIndex by nbaLeagueScheduleViewModel.selectedDayIndex.collectAsState()
 
-//    val gameListToDisplay = if (nbaGameStatsData == null) filteredGames[selectedDayIndex] ?: emptyList() else listOf(nbaGameStatsData!!.game)
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
 
     LazyColumn {
@@ -187,8 +186,14 @@ fun NBALeagueScheduleList(
 fun NBALeagueScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
     nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel(),
-    data: NBAGame,
+    data: NBAGameForSchedule,
 ) {
+    val gameId = data.gameId
+    val homeTeamId = data.homeTeamId
+    val awayTeamId = data.awayTeamId
+    val gameStatus = data.gameStatus.toIntOrNull() ?: 0
+    val teamNameDic = nbaLeagueScheduleViewModel.teamNameDictionary
+
     /* ---------------------
        ui state
        --------------------- */
@@ -200,60 +205,35 @@ fun NBALeagueScheduleListItem(
        --------------------- */
     val gameResultOpenedStateList by nbaLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
 
-    val homeTeamId = data.gameSummary?.homeTeamId
-    val awayTeamId = data.gameSummary?.visitorTeamId
-    val homeTeamScore = data.lineScore.find { it.teamId == homeTeamId }?.pts ?: 0
-    val awayTeamScore = data.lineScore.find { it.teamId == awayTeamId }?.pts ?: 0
-
-//    val nbaGameStatsData by searchViewModel.nbaGameStatsData.collectAsState()
-
-    /* ---------------------
-       animation
-       --------------------- */
-    val scoreAlpha by animateFloatAsState(
-        targetValue = if (data.gameSummary?.gameStatusId == 2 || (data.gameSummary?.gameStatusId == 3 && isResultOpened)) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = 300,
-            easing = LinearOutSlowInEasing
-        )
-    )
-
     /* ---------------------
        constants
        --------------------- */
-    val gameStatusText = if (isResultOpened) {
-        when (data.gameSummary?.gameStatusId) {
-            1 -> StringConstants.GAME_NOT_STARTED_STR
-            2 -> if (data.lineScore.firstOrNull()?.ptsOt3 != null) {
-                StringConstants.NBA.GAME_OT_3
-            } else if (data.lineScore.firstOrNull()?.ptsOt2 != null) {
-                StringConstants.NBA.GAME_OT_2
-            } else if (data.lineScore.firstOrNull()?.ptsOt1 != null) {
-                StringConstants.NBA.GAME_OT_1
-            } else if (data.lineScore.firstOrNull()?.ptsQtr4 != null) {
-                StringConstants.NBA.GAME_QTR_4
-            } else if (data.lineScore.firstOrNull()?.ptsQtr3 != null) {
-                StringConstants.NBA.GAME_QTR_3
-            } else if (data.lineScore.firstOrNull()?.ptsQtr2 != null) {
-                StringConstants.NBA.GAME_QTR_2
-            } else if (data.lineScore.firstOrNull()?.ptsQtr1 != null) {
-                StringConstants.NBA.GAME_QTR_1
-            } else {
-                ""
-            }
-            3 -> StringConstants.GAME_FINISHED_STR
-            else -> ""
-        }
-    } else {
-        StringConstants.RESULT_OPEN
+    val gameStatusText = when (gameStatus) {
+        1 -> StringConstants.GAME_NOT_STARTED_STR
+        2 -> StringConstants.GAME_LIVE_STR
+//            if (data.lineScore.firstOrNull()?.ptsOt3 != null) {
+//            StringConstants.NBA.GAME_OT_3
+//        } else if (data.lineScore.firstOrNull()?.ptsOt2 != null) {
+//            StringConstants.NBA.GAME_OT_2
+//        } else if (data.lineScore.firstOrNull()?.ptsOt1 != null) {
+//            StringConstants.NBA.GAME_OT_1
+//        } else if (data.lineScore.firstOrNull()?.ptsQtr4 != null) {
+//            StringConstants.NBA.GAME_QTR_4
+//        } else if (data.lineScore.firstOrNull()?.ptsQtr3 != null) {
+//            StringConstants.NBA.GAME_QTR_3
+//        } else if (data.lineScore.firstOrNull()?.ptsQtr2 != null) {
+//            StringConstants.NBA.GAME_QTR_2
+//        } else if (data.lineScore.firstOrNull()?.ptsQtr1 != null) {
+//            StringConstants.NBA.GAME_QTR_1
+//        } else {
+//            ""
+//        }
+        3 -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
+        else -> ""
     }
 
-    val gameStatusColor = if (isResultOpened) {
-        if (data.gameSummary?.gameStatusId == 2) {
-            MaterialTheme.colors.primary
-        } else {
-            Color.Gray
-        }
+    val gameStatusColor = if (gameStatus == 2) {
+        MaterialTheme.colors.primary
     } else {
         Color.Gray
     }
@@ -262,202 +242,86 @@ fun NBALeagueScheduleListItem(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (data.gameSummary?.gameStatusId == 3) {
-            isResultOpened = gameResultOpenedStateList[data.gameSummary.gameCode] ?: false
+        if (gameStatus == 3) {
+            isResultOpened = gameResultOpenedStateList[gameId] ?: false
+        } else if (gameStatus == 1) {
+            isResultOpened = false
         } else {
             isResultOpened = true
         }
     }
     LaunchedEffect(gameResultOpenedStateList) {
-        if (data.gameSummary?.gameStatusId == 3) {
-            isResultOpened = gameResultOpenedStateList[data.gameSummary.gameCode] ?: false
+        if (gameStatus == 3) {
+            isResultOpened = gameResultOpenedStateList[gameId] ?: false
         }
     }
-//    LaunchedEffect(nbaGameStatsData) {
-//        nbaGameStatsData?.let {
-//            isResultOpened = true
-//        }
-//    }
 
-    /* ---------------------
-       ui
-       --------------------- */
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-//            .clickable(enabled = nbaGameStatsData == null) {
-            .clickable {
+    ScheduleGameItem(
+        state = ScheduleGameItemState(
+            homeTeamLogo = NBAUtil.teamLogoUrl(homeTeamId),
+            homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
+            homeTeamScore = data.homeTeamScore,
+            awayTeamLogo = FBUtil.teamLogoUrl(awayTeamId),
+            awayTeamName = teamNameDic["short_${awayTeamId}"] ?: "",
+            awayTeamScore = data.awayTeamScore,
+            isResultOpened = isResultOpened,
+            gameStatusText = gameStatusText,
+            gameStatusColor = gameStatusColor,
+            isCapsuleButtonDisabled = gameStatus != 3,
+            date = data.date,
+            venue = teamNameDic["venue_${homeTeamId}"] ?: "",
+            gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
+            shouldShowGameType = true,
+            isSvgLogo = true
+        ),
+        actions = ScheduleGameItemActions(
+            onGameItemClick = {
                 searchViewModel.send(SearchViewModel.Intent.SelectNBAGame(data))
 
                 // set selected game's isOpened true
-                data.gameSummary?.let {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateResultOpenedState(it.gameCode, true))
-                }
+                nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateResultOpenedState(gameId, true))
+            },
+            onCapsuleButtonClick = {
+                nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateResultOpenedState(gameId, !isResultOpened))
             }
-            .padding(vertical = 8.dp)
-            .padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
-    ) {
-        /* ---------------------
-           home
-           --------------------- */
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .weight(1f)
-//                .clickable(enabled = fbGameStatsData != null) {
-//                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue = TextFieldValue(text = "토트넘")))
-//                    searchViewModel.send(SearchViewModel.Intent.PerformSearch())
+        )
+    )
+
+    // playoffs info
+//            if (data.gameSummary != null && data.gameSummary.seriesText.isNotEmpty()) {
+//                val gameSummary = data.gameSummary
+//                Text(
+//                    text = NBAUtil.gameType(gameSummary, true),
+//                    fontSize = 11.sp
+//                )
+//
+//                if (data.seasonSeries != null && gameSummary.seriesGameNumber.isNotEmpty()) {
+//                    val seasonSeries = data.seasonSeries
+//                    CenterRow {
+//                        Text(
+//                            text = "시리즈 스코어: ",
+//                            fontSize = 11.sp
+//                        )
+//
+//                        Text(
+//                            text = "${seasonSeries.homeTeamWins}",
+//                            fontSize = 11.sp,
+//                            color = if (seasonSeries.homeTeamWins >= seasonSeries.homeTeamLosses) Moare else Color.Black
+//                        )
+//
+//                        Text(
+//                            text = " - ",
+//                            fontSize = 11.sp
+//                        )
+//
+//                        Text(
+//                            text = "${seasonSeries.homeTeamLosses}",
+//                            fontSize = 11.sp,
+//                            color = if (seasonSeries.homeTeamLosses >= seasonSeries.homeTeamWins) Moare else Color.Black
+//                        )
+//                    }
 //                }
-        ) {
-            URLImage(
-                url = NBAUtil.teamLogoUrl(homeTeamId),
-                size = URLImageSize.SMALL,
-                isSvg = true
-            )
-
-            Text(
-                text = nbaLeagueScheduleViewModel.teamNameDictionary["short_$homeTeamId"] ?: "",
-                fontSize = 13.sp,
-                maxLines = 2
-            )
-
-//            nbaGameStatsData?.let {
-//                RoundedBorderText(
-//                    text = "홈",
-//                    fontSize = 11.sp,
-//                    radius = 4.dp,
-//                    textColor = Moare,
-//                    borderColor = Moare
-//                )
 //            }
-        }
-
-        // Add space to both sides of each score to place the score in the middle
-        Spacer(Modifier.weight(0.3f))
-
-        // score
-        Text(
-            text = homeTeamScore.toString(),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .width(30.dp)
-                .alpha(scoreAlpha),
-            color = if (homeTeamScore >= awayTeamScore) MaterialTheme.colors.primary else Color.Black
-        )
-
-        Spacer(Modifier.weight(0.3f))
-
-        /* ---------------------
-           game info
-           --------------------- */
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // game status
-            CapsuleButton(
-                text = gameStatusText,
-                color = gameStatusColor,
-                isDisabled = data.gameSummary?.gameStatusId != 3
-            ) {
-                data.gameSummary?.let {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateResultOpenedState(it.gameCode, !isResultOpened))
-                }
-            }
-
-            // game date
-            Text(
-                text = CalendarUtil.formatDate(data.gameSummary?.date, TimeFormatType.AMPM),
-                fontSize = 12.sp,
-                modifier = Modifier.padding(vertical = 2.dp)
-            )
-
-            // playoffs info
-            if (data.gameSummary != null && data.gameSummary.seriesText.isNotEmpty()) {
-                val gameSummary = data.gameSummary
-                Text(
-                    text = NBAUtil.gameType(gameSummary, true),
-                    fontSize = 11.sp
-                )
-
-                if (data.seasonSeries != null && gameSummary.seriesGameNumber.isNotEmpty()) {
-                    val seasonSeries = data.seasonSeries
-                    CenterRow {
-                        Text(
-                            text = "시리즈 스코어: ",
-                            fontSize = 11.sp
-                        )
-
-                        Text(
-                            text = "${seasonSeries.homeTeamWins}",
-                            fontSize = 11.sp,
-                            color = if (seasonSeries.homeTeamWins >= seasonSeries.homeTeamLosses) Moare else Color.Black
-                        )
-
-                        Text(
-                            text = " - ",
-                            fontSize = 11.sp
-                        )
-
-                        Text(
-                            text = "${seasonSeries.homeTeamLosses}",
-                            fontSize = 11.sp,
-                            color = if (seasonSeries.homeTeamLosses >= seasonSeries.homeTeamWins) Moare else Color.Black
-                        )
-                    }
-                }
-            }
-        }
-
-        /* ---------------------
-           away
-           --------------------- */
-        Spacer(Modifier.weight(0.3f))
-
-        // score
-        Text(
-            text = awayTeamScore.toString(),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .width(30.dp)
-                .alpha(scoreAlpha),
-            color = if (awayTeamScore >= homeTeamScore) MaterialTheme.colors.primary else Color.Black
-        )
-
-        Spacer(Modifier.weight(0.3f))
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .weight(1f)
-        ) {
-            URLImage(
-                url = NBAUtil.teamLogoUrl(awayTeamId),
-                size = URLImageSize.SMALL,
-                isSvg = true
-            )
-
-            Text(
-                text = nbaLeagueScheduleViewModel.teamNameDictionary["short_$awayTeamId"] ?: "",
-                fontSize = 13.sp,
-                maxLines = 2
-            )
-
-//            nbaGameStatsData?.let {
-//                RoundedBorderText(
-//                    text = "원정",
-//                    fontSize = 11.sp,
-//                    radius = 4.dp,
-//                    textColor = Color.Gray,
-//                    borderColor = Color.Gray
-//                )
-//            }
-        }
-    }
 }
 
 

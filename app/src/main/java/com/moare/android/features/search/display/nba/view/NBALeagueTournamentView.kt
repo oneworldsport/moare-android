@@ -53,6 +53,7 @@ import com.moare.android.features.search.display.nba.viewmodel.NBALeagueTourname
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATournamentDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
@@ -64,7 +65,7 @@ import com.moare.android.ui.util.CenterRow
 fun NBALeagueTournamentView(
     searchViewModel: SearchViewModel = hiltViewModel(),
     nbaLeagueTournamentViewModel: NBALeagueTournamentViewModel = hiltViewModel(),
-    data: NBALeagueScheduleDisplayModel
+    data: NBATournamentDisplayModel
 ) {
     /* ---------------------
        viewmodel state

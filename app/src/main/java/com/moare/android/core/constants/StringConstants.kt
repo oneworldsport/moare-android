@@ -16,6 +16,7 @@ object StringConstants {
     const val RESULT_HIDE = "결과 숨기기"
     const val GAME_NOT_STARTED_STR = "경기 전"
     const val GAME_FINISHED_STR = "경기 종료"
+    const val GAME_LIVE_STR = "경기중"
 
     const val STANDINGS_FIRST_CATEGORY = "순위"
     val STATS_FIRST_CATEGORIES = listOf("공격 지표", "수비 지표", "공통 지표")

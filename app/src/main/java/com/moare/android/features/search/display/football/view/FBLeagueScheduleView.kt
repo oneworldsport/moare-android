@@ -1,22 +1,10 @@
 package com.moare.android.features.search.display.football.view
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
@@ -29,21 +17,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.EnNameTranslationUtils
+import com.moare.android.core.util.FBUtil
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.TimeFormatType
-import com.moare.android.features.search.display.common.container.component.ScheduleGameItemContainer
+import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerActions
@@ -54,21 +36,13 @@ import com.moare.android.features.search.display.common.container.view.ScheduleV
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleIntent
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.ApiFetchState
+import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.models.football.FBGame
-import com.moare.android.ui.common.components.CalendarList
-import com.moare.android.ui.common.components.CalendarType
-import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.ui.common.components.LeagueTitle
-import com.moare.android.ui.common.components.ProgressIndicator
-import com.moare.android.ui.common.components.RoundedBorderText
-import com.moare.android.ui.common.components.URLImage
-import com.moare.android.ui.common.components.URLImageSize
-import com.moare.android.ui.theme.Moare
 
 @Composable
 fun FBLeagueScheduleView(
@@ -200,7 +174,7 @@ fun FBLeagueScheduleList(
     val displayModels by searchViewModel.displayModels.collectAsState()
     val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
 
-    val gameListToDisplay = if (fbGameStatsModel == null) filteredGames[selectedDayIndex] ?: emptyList() else listOf(fbGameStatsModel.game)
+    val gameListToDisplay = if (fbGameStatsModel == null) filteredGames[selectedDayIndex] ?: emptyList() else listOf(ModelConverter().fbGameToGameScheduleConverter(fbGameStatsModel.game))
 
     LazyColumn {
         items(gameListToDisplay) { item ->
@@ -216,15 +190,18 @@ fun FBLeagueScheduleList(
 fun FBLeagueScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
     fbLeagueScheduleViewModel: FBLeagueScheduleViewModel = hiltViewModel(),
-    data: FBGame,
+    data: FBGameForSchedule,
 ) {
+    val gameId = data.gameId
+    val homeTeamId = data.homeTeamId
+    val awayTeamId = data.awayTeamId
+    val gameStatus = data.gameStatus
+    val teamNameDic = fbLeagueScheduleViewModel.teamNameDictionary
+
     /* ---------------------
        ui state
        --------------------- */
-//    var isResultOpened by remember(data.fixture.id) { mutableStateOf(false) }
     var isResultOpened by remember { mutableStateOf(false) }
-    val noRippleInteractionSource = remember { MutableInteractionSource() }
-    var refereeKrName by remember { mutableStateOf("") }
 
     /* ---------------------
        viewmodel state
@@ -236,84 +213,62 @@ fun FBLeagueScheduleListItem(
     val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
 
     /* ---------------------
-       animation
-       --------------------- */
-    val scoreAlpha by animateFloatAsState(
-        targetValue = if (StringConstants.Football.GAME_LIVE_LIST.contains(data.fixture.status.short) ||
-            (StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short) && isResultOpened)) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = 300,
-            easing = LinearOutSlowInEasing
-        )
-    )
-
-    /* ---------------------
        constants
        --------------------- */
-    val gameStatusText = if (isResultOpened) {
-        when (data.fixture.status.short) {
-            StringConstants.Football.GAME_NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
-            StringConstants.Football.GAME_FIRST_HALF -> StringConstants.Football.GAME_FIRST_HALF_STR
-            StringConstants.Football.GAME_HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
-            StringConstants.Football.GAME_SECOND_HALF -> StringConstants.Football.GAME_SECOND_HALF_STR
-            in StringConstants.Football.GAME_FINISHED_LIST -> StringConstants.GAME_FINISHED_STR
-            else -> ""
-        }
-    } else {
-        StringConstants.RESULT_OPEN
+    val gameStatusText = when (gameStatus) {
+        StringConstants.Football.GAME_NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
+        StringConstants.Football.GAME_FIRST_HALF -> StringConstants.Football.GAME_FIRST_HALF_STR
+        StringConstants.Football.GAME_HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
+        StringConstants.Football.GAME_SECOND_HALF -> StringConstants.Football.GAME_SECOND_HALF_STR
+        in StringConstants.Football.GAME_FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
+        else -> ""
     }
 
-    val gameStatusColor = if (isResultOpened) {
-        when (data.fixture.status.short) {
-            in StringConstants.Football.GAME_LIVE_LIST -> MaterialTheme.colors.primary
-            else -> Color.Gray
-        }
-    } else {
-        Color.Gray
+    val gameStatusColor = when (gameStatus) {
+        in StringConstants.Football.GAME_LIVE_LIST -> MaterialTheme.colors.primary
+        else -> Color.Gray
     }
 
     /* ---------------------
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short)) {
-            isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
+        if (StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus)) {
+            isResultOpened = gameResultOpenedStateList[gameId] ?: false
+        } else if (gameStatus == StringConstants.Football.GAME_NOT_STARTED) {
+            isResultOpened = false
         } else {
             isResultOpened = true
         }
     }
     LaunchedEffect(gameResultOpenedStateList) {
-        if (StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short)) {
-            isResultOpened = gameResultOpenedStateList[data.fixture.id] ?: false
+        if (StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus)) {
+            isResultOpened = gameResultOpenedStateList[gameId] ?: false
         }
     }
     LaunchedEffect(fbGameStatsModel) {
         fbGameStatsModel?.let {
             isResultOpened = true
-
-            refereeKrName = EnNameTranslationUtils.translateByAWS(it.game.fixture.referee)
         }
     }
 
-    ScheduleGameItemContainer(
+    ScheduleGameItem(
         state = ScheduleGameItemState(
             isClickEnabled = fbGameStatsModel == null,
-            homeTeamLogo = data.teams.home.logo,
-            homeTeamName = fbLeagueScheduleViewModel.teamNameDictionary["short_${data.teams.home.id}"] ?: data.teams.home.name,
-            homeTeamScore = data.goals.home,
-            awayTeamLogo = data.teams.away.logo,
-            awayTeamName = fbLeagueScheduleViewModel.teamNameDictionary["short_${data.teams.away.id}"] ?: data.teams.away.name,
-            awayTeamScore = data.goals.away,
-            scoreAlpha = scoreAlpha,
+            homeTeamLogo = FBUtil.teamLogoUrl(homeTeamId),
+            homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
+            homeTeamScore = data.homeTeamScore,
+            awayTeamLogo = FBUtil.teamLogoUrl(awayTeamId),
+            awayTeamName = teamNameDic["short_${awayTeamId}"] ?: "",
+            awayTeamScore = data.awayTeamScore,
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
-            isCapsuleButtonDisabled = fbGameStatsModel != null || !StringConstants.Football.GAME_FINISHED_LIST.contains(data.fixture.status.short),
-            date = CalendarUtil.formatDate(data.fixture.date).split(" ").firstOrNull() ?: "",
-            dateTime = CalendarUtil.formatDate(data.fixture.date, TimeFormatType.AMPM),
-            venue = fbLeagueScheduleViewModel.teamNameDictionary["venue_${data.teams.home.id}"] ?: (fbGameStatsModel?.game?.fixture?.venue?.name ?: ""),
-            gameType = MatchDescriptionConverter.convert(input = data.league.round),
-            referee = refereeKrName,
+            isCapsuleButtonDisabled = fbGameStatsModel != null || !StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus),
+            date = data.date,
+            venue = teamNameDic["venue_${homeTeamId}"] ?: (fbGameStatsModel?.game?.fixture?.venue?.name ?: ""),
+            gameType = MatchDescriptionConverter.convert(input = data.gameInfo?.round ?: ""),
+            referee = fbGameStatsModel?.game?.fixture?.referee,
             shouldShowOnlyDateTime = fbGameStatsModel == null,
             shouldShowVenue = fbGameStatsModel != null,
             shouldShowGameType = fbGameStatsModel == null,
@@ -328,10 +283,10 @@ fun FBLeagueScheduleListItem(
                 }
 
                 // set selected game's isOpened true
-                fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.UpdateResultOpenedState(data.fixture.id, true))
+                fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.UpdateResultOpenedState(gameId, true))
             },
             onCapsuleButtonClick = {
-                fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.UpdateResultOpenedState(data.fixture.id, !isResultOpened))
+                fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.UpdateResultOpenedState(gameId, !isResultOpened))
             }
         )
     )

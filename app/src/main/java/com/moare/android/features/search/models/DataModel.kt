@@ -35,6 +35,7 @@ import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStats
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATournamentDisplayModel
 import com.moare.android.features.search.models.responsemodels.football.FBGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
@@ -53,6 +54,7 @@ import com.moare.android.features.search.models.responsemodels.mlb.MLBPlayerInfo
 import com.moare.android.features.search.models.responsemodels.mlb.MLBPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameListResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
@@ -257,7 +259,7 @@ data class DataModel(
                     }
                 }
                 "basketball_league_tournament" -> {
-                    val responseModel: NBAGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                    val responseModel: NBAGameListResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
                     val displayModel = modelConverter.nbaLeagueTournamentConverter(responseModel)
                     SportDecodableModel.NBALeagueTournament(responseModel, displayModel)
                 }
@@ -596,8 +598,8 @@ sealed class SportDecodableModel {
 
     @Serializable
     data class NBALeagueTournament(
-        val responseModel: NBAGameScheduleResponseModel,
-        val displayModel: NBALeagueScheduleDisplayModel
+        val responseModel: NBAGameListResponseModel,
+        val displayModel: NBATournamentDisplayModel
     ) : SportDecodableModel()
 
     // kbo

@@ -10,14 +10,11 @@ data class ScheduleGameItemState(
     val awayTeamLogo: String?,
     val awayTeamName: String,
     val awayTeamScore: Int,
-    val scoreAlpha: Float = 0f,
-//    val leagueId: Int,
     val isResultOpened: Boolean = false,
     val gameStatusText: String,
     val gameStatusColor: Color,
     val isCapsuleButtonDisabled: Boolean = false,
     val date: String,
-    val dateTime: String,
     val venue: String,
     val gameType: String,
     val referee: String? = null,
@@ -26,7 +23,8 @@ data class ScheduleGameItemState(
     val shouldShowGameType: Boolean = true,
     val shouldShowReferee: Boolean = false,
     val shouldShowHomeLabel: Boolean = false,
-    val shouldShowAwayLabel: Boolean = false
+    val shouldShowAwayLabel: Boolean = false,
+    val isSvgLogo: Boolean = false
 )
 
 data class ScheduleGameItemActions(

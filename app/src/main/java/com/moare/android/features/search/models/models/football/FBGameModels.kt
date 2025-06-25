@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.models.football
 
+import com.moare.android.features.search.models.models.common.GameForSchedule
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
@@ -221,4 +222,34 @@ data class FBGamePlayerStatsGames(
     val substitute: Boolean
         get() = _substitute ?: false
 }
+
+@Serializable
+data class FBGameInfoForSchedule(
+    @SerialName("round") private val _round: String? = null,
+    @SerialName("elapsed") private val _elapsed: Int? = null
+) {
+    val round: String get() = _round ?: ""
+    val elapsed: Int get() = _elapsed ?: 0
+}
+
+typealias FBGameForSchedule = GameForSchedule<FBGameInfoForSchedule>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

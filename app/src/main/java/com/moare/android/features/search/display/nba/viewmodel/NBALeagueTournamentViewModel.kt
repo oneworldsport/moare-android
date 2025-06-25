@@ -6,6 +6,7 @@ import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATournamentDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class NBALeagueTournamentViewModel @Inject constructor(
     private val nameProvider: TranslatedNameProvider
-) : MVIViewModel<NBALeagueTournamentViewModel.Intent, NBALeagueScheduleDisplayModel>() {
+) : MVIViewModel<NBALeagueTournamentViewModel.Intent, NBATournamentDisplayModel>() {
     /* ---------------------
        constants
        --------------------- */
@@ -29,8 +30,8 @@ class NBALeagueTournamentViewModel @Inject constructor(
     /* ---------------------
        data state
        --------------------- */
-    private val _displayModel = MutableStateFlow<NBALeagueScheduleDisplayModel?>(null)
-    val displayModel: StateFlow<NBALeagueScheduleDisplayModel?> = _displayModel
+    private val _displayModel = MutableStateFlow<NBATournamentDisplayModel?>(null)
+    val displayModel: StateFlow<NBATournamentDisplayModel?> = _displayModel
 
     private val _westFirstRoundFirstGameList = MutableStateFlow<List<NBAGame>?>(null)
     val westFirstRoundFirstGameList: StateFlow<List<NBAGame>?> = _westFirstRoundFirstGameList
@@ -150,7 +151,7 @@ class NBALeagueTournamentViewModel @Inject constructor(
        intent
        --------------------- */
     sealed class Intent {
-        data class InitData(val displayModel: NBALeagueScheduleDisplayModel) : Intent()
+        data class InitData(val displayModel: NBATournamentDisplayModel) : Intent()
     }
 
     override fun send(intent: Intent) {
@@ -162,7 +163,7 @@ class NBALeagueTournamentViewModel @Inject constructor(
     /* ---------------------
        init
        --------------------- */
-    override fun initData(displayModel: NBALeagueScheduleDisplayModel) {
+    override fun initData(displayModel: NBATournamentDisplayModel) {
         // init data
         _displayModel.value = displayModel
 

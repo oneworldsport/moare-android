@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.models.kbo
 
+import com.moare.android.features.search.models.models.common.GameForSchedule
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -173,3 +174,4 @@ data class KBOGamePitcherStats(
     val era: String get() = _era ?: "0.0" // 평균자책점
 }
 
+typealias KBOGameForSchedule = GameForSchedule<String>

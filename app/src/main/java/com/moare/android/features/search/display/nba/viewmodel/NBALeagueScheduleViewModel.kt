@@ -10,10 +10,12 @@ import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.viewmodel.BaseScheduleViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
+import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
+import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +29,7 @@ sealed class NBALeagueScheduleIntent {
     data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int, val updateViewStack: (SportDecodableModel.NBALeagueSchedule) -> Unit) : NBALeagueScheduleIntent()
     data class SelectDay(val day: DayInfo, val selectedIndex: Int) : NBALeagueScheduleIntent()
     data object ToggleAllResult : NBALeagueScheduleIntent()
-    data class UpdateResultOpenedState(val gameCode: String, val isOpened: Boolean) : NBALeagueScheduleIntent()
+    data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : NBALeagueScheduleIntent()
     data class UpdateGamesData(
         val nbaLeagueScheduleData: SportDecodableModel.NBALeagueSchedule,
         val nbaGameStatsData: SportDecodableModel.NBAGameStats,
@@ -43,8 +45,8 @@ class NBALeagueScheduleViewModel @Inject constructor(
     /* ---------------------
        data state
        --------------------- */
-    private val _filteredGames = MutableStateFlow<Map<Int, List<NBAGame>>>(emptyMap())
-    val filteredGames: StateFlow<Map<Int, List<NBAGame>>> = _filteredGames
+    private val _filteredGames = MutableStateFlow<Map<Int, List<NBAGameForSchedule>>>(emptyMap())
+    val filteredGames: StateFlow<Map<Int, List<NBAGameForSchedule>>> = _filteredGames
 
     /* ---------------------
        ui state
@@ -58,7 +60,7 @@ class NBALeagueScheduleViewModel @Inject constructor(
             is NBALeagueScheduleIntent.SelectYearMonth -> selectYearMonth(intent.yearMonth, intent.selectedIndex, intent.updateViewStack)
             is NBALeagueScheduleIntent.SelectDay -> selectDay(intent.day, intent.selectedIndex)
             is NBALeagueScheduleIntent.ToggleAllResult -> toggleAllResult()
-            is NBALeagueScheduleIntent.UpdateResultOpenedState -> updateResultOpenedState(intent.gameCode, intent.isOpened)
+            is NBALeagueScheduleIntent.UpdateResultOpenedState -> updateResultOpenedState(intent.gameId, intent.isOpened)
             is NBALeagueScheduleIntent.UpdateGamesData -> updateGamesData(intent.nbaLeagueScheduleData, intent.nbaGameStatsData, intent.updateViewStack)
         }
     }
@@ -77,7 +79,7 @@ class NBALeagueScheduleViewModel @Inject constructor(
         _yearMonthList.value = displayModel.yearMonthList
 
         // select default yearMonth
-        displayModel.games.firstOrNull()?.gameSummary?.date?.let {
+        displayModel.games.firstOrNull()?.date?.let {
             val defaultYearMonth = CalendarUtil.formatDate(it, TimeFormatType.YEAR_MONTH)
             val defaultYearMonthIndex = yearMonthList.value.withIndex().first { (_, value) -> value == defaultYearMonth }
             _selectedYearMonth.value = defaultYearMonth
@@ -120,14 +122,10 @@ class NBALeagueScheduleViewModel @Inject constructor(
                 var newDay = day
 
                 val games = displayModel.value?.games?.filter { game ->
-                    if (game.gameSummary != null) {
-                        CalendarUtil.isSameDate(game.gameSummary.date, selectedYearMonth.value, day.day)
-                    } else {
-                        false
-                    }
+                    CalendarUtil.isSameDate(game.date, selectedYearMonth.value, day.day)
                 }
 
-                isResultOpenedStateList.putAll((games ?: emptyList()).associate { (it.gameSummary?.gameCode ?: "") to isAllResultOpened.value })
+                isResultOpenedStateList.putAll((games ?: emptyList()).associate { (it.gameId) to isAllResultOpened.value })
 
                 newFilteredGames[index] = games ?: emptyList()
 
@@ -210,9 +208,9 @@ class NBALeagueScheduleViewModel @Inject constructor(
         }
     }
 
-    private fun updateResultOpenedState(gameCode: String, isOpened: Boolean) {
+    private fun updateResultOpenedState(gameId: String, isOpened: Boolean) {
         val newMap = gameResultOpenedStateList.value.toMutableMap()
-        newMap[gameCode] = isOpened
+        newMap[gameId] = isOpened
         _gameResultOpenedStateList.value = newMap
     }
 
@@ -221,8 +219,9 @@ class NBALeagueScheduleViewModel @Inject constructor(
         nbaGameStatsData: SportDecodableModel.NBAGameStats,
         updateViewStack: (SportDecodableModel.NBALeagueSchedule) -> Unit
     ) {
+        val game = nbaGameStatsData.displayModel.game
         val newGames = nbaLeagueScheduleData.displayModel.games.map {
-            if (it.gameSummary?.gameCode == nbaGameStatsData.displayModel.game.gameSummary?.gameCode) nbaGameStatsData.displayModel.game else it
+            if (it.gameId == game.gameSummary?.gameCode) ModelConverter().nbaGameToGameScheduleConverter(game) else it
         }
 
         var newData = nbaLeagueScheduleData
@@ -231,11 +230,7 @@ class NBALeagueScheduleViewModel @Inject constructor(
 
         val newFilteredGames = filteredGames.value.toMutableMap()
         newFilteredGames[selectedDayIndex.value] = newData.displayModel.games.filter { game ->
-            if (game.gameSummary != null) {
-                CalendarUtil.isSameDate(game.gameSummary.date, selectedYearMonth.value, selectedDayIndex.value + 1)
-            } else {
-                false
-            }
+            CalendarUtil.isSameDate(game.date, selectedYearMonth.value, selectedDayIndex.value + 1)
         }
 
         _filteredGames.value = newFilteredGames

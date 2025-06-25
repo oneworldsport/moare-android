@@ -43,9 +43,20 @@ import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDis
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATournamentDisplayModel
+import com.moare.android.features.search.models.models.football.FBGame
+import com.moare.android.features.search.models.models.football.FBGameForSchedule
+import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
 import com.moare.android.features.search.models.models.football.FBLeague
+import com.moare.android.features.search.models.models.kbo.KBOGame
+import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
 import com.moare.android.features.search.models.models.kbo.KBOGamePitcherStats
+import com.moare.android.features.search.models.models.mlb.MLBGame
+import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
+import com.moare.android.features.search.models.models.mlb.MLBGameInfoForSchedule
+import com.moare.android.features.search.models.models.nba.NBAGame
+import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
@@ -64,6 +75,7 @@ import com.moare.android.features.search.models.responsemodels.mlb.MLBPlayerInfo
 import com.moare.android.features.search.models.responsemodels.mlb.MLBPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameListResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
@@ -390,8 +402,8 @@ class ModelConverter(
         )
     }
 
-    fun nbaLeagueTournamentConverter(response: NBAGameScheduleResponseModel): NBALeagueScheduleDisplayModel {
-        return NBALeagueScheduleDisplayModel(
+    fun nbaLeagueTournamentConverter(response: NBAGameListResponseModel): NBATournamentDisplayModel {
+        return NBATournamentDisplayModel(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
@@ -736,4 +748,123 @@ class ModelConverter(
             game = response.game!!
         )
     }
+
+    // Not used in DataModel
+    fun fbGameToGameScheduleConverter(game: FBGame): FBGameForSchedule {
+        val date = game.fixture.date.split("+").firstOrNull()
+        val homeTeamId = game.teams.home.id
+        val awayTeamId = game.teams.away.id
+        val homeTeamScore = game.goals.home
+        val awayTeamScore = game.goals.away
+        val gameInfo = FBGameInfoForSchedule(_round = game.league.round, _elapsed = game.fixture.status.elapsed)
+
+        return FBGameForSchedule(
+            _itemKey = if (date != null) "${date}#${game.fixture.id}" else "",
+            _homeTeamId = homeTeamId,
+            _awayTeamId = awayTeamId,
+            _homeTeamScore = homeTeamScore,
+            _awayTeamScore = awayTeamScore,
+            _gameStatus = game.fixture.status.short,
+            gameInfo = gameInfo
+        )
+    }
+
+    fun nbaGameListToGameScheduleListConverter(gameList: List<NBAGame>): List<NBAGameForSchedule> {
+        return gameList.mapNotNull {
+            nbaGameToGameScheduleConverter(game = it)
+        }
+    }
+
+    fun nbaGameToGameScheduleConverter(game: NBAGame): NBAGameForSchedule {
+        val gameSummary = game.gameSummary
+        val date = gameSummary?.date?.split("+")?.firstOrNull()
+        val homeTeamId = gameSummary?.homeTeamId
+        val awayTeamId = gameSummary?.visitorTeamId
+        val homeTeamScore = game.lineScore.firstOrNull { it.teamId == homeTeamId }?.pts ?: 0
+        val awayTeamScore = game.lineScore.firstOrNull { it.teamId == awayTeamId }?.pts ?: 0
+
+        return NBAGameForSchedule(
+            _itemKey = if (date != null) "${date}#${gameSummary.gameCode}" else "",
+            _homeTeamId = homeTeamId,
+            _awayTeamId = awayTeamId,
+            _homeTeamScore = homeTeamScore,
+            _awayTeamScore = awayTeamScore,
+            _gameStatus = gameSummary?.gameStatusId?.toString(),
+            gameInfo = gameSummary
+        )
+    }
+
+    fun mlbGameToGameScheduleConverter(game: MLBGame): MLBGameForSchedule {
+        val date = game.gameInfo.gameDate.split("+").firstOrNull()
+        val homeTeamId = game.teams.home.id
+        val awayTeamId = game.teams.away.id
+        val homeTeamScore = game.linescore.teams.home.runs
+        val awayTeamScore = game.linescore.teams.away.runs
+        val gameInfo = MLBGameInfoForSchedule(_currentInning = game.linescore.currentInning)
+
+        return MLBGameForSchedule(
+            _itemKey = if (date != null) "${date}#${game.game.id}" else "",
+            _homeTeamId = homeTeamId,
+            _awayTeamId = awayTeamId,
+            _homeTeamScore = homeTeamScore,
+            _awayTeamScore = awayTeamScore,
+            _gameStatus = game.status.statusCode,
+            gameInfo = gameInfo
+        )
+    }
+
+    fun kboGameToGameScheduleConverter(game: KBOGame): KBOGameForSchedule {
+        val date = game.gameInfo?.date?.split("+")?.firstOrNull()
+        val homeTeamId = game.gameInfo?.homeTeamId ?: 0
+        val awayTeamId = game.gameInfo?.awayTeamId ?: 0
+        val homeTeamScore = game.lineScore?.home?.r ?: "0"
+        val awayTeamScore = game.lineScore?.away?.r ?: "0"
+
+        return KBOGameForSchedule(
+            _itemKey = if (date != null) "${date}#${game.gameInfo.gameId}" else "",
+            _homeTeamId = homeTeamId,
+            _awayTeamId = awayTeamId,
+            _homeTeamScore = homeTeamScore.toIntOrNull(),
+            _awayTeamScore = awayTeamScore.toIntOrNull(),
+            _gameStatus = game.gameInfo?.gameStatus,
+            gameInfo = null
+        )
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
