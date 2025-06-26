@@ -2,7 +2,7 @@ package com.moare.android.features.search.models.displaymodels.kbo
 
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOPlayerInfo
 import com.moare.android.features.search.models.models.kbo.KBOPlayerStats
 import kotlinx.serialization.Serializable
@@ -14,4 +14,4 @@ data class KBOPlayerStatsDisplayModel(
     override val entityInfo: List<EntityInfo>,
     val player: KBOPlayerInfo,
     val stats: List<KBOPlayerStats>
-) : DisplayModelBase
+) : SportDisplayModel

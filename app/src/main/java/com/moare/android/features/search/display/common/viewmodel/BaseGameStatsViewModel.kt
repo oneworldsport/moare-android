@@ -1,11 +1,10 @@
 package com.moare.android.features.search.display.common.viewmodel
 
 import com.moare.android.core.constants.Constants
-import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.ApiFetchState
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -24,11 +23,11 @@ abstract class BaseGameStatsViewModel<I, T>(
     /* ---------------------
        ui state
        --------------------- */
-    protected var _firstSelectedIndex = MutableStateFlow(0)
-    val firstSelectedIndex: StateFlow<Int> = _firstSelectedIndex
+    protected var _firstCategorySelectedIndex = MutableStateFlow(0)
+    val firstCategorySelectedIndex: StateFlow<Int> = _firstCategorySelectedIndex
 
-    protected var _secondSelectedIndex = MutableStateFlow(0)
-    val secondSelectedIndex: StateFlow<Int> = _secondSelectedIndex
+    protected var _secondCategorySelectedIndex = MutableStateFlow(0)
+    val secondCategorySelectedIndex: StateFlow<Int> = _secondCategorySelectedIndex
 
     protected var _selectedTeamIndex = MutableStateFlow(0)
     val selectedTeamIndex: StateFlow<Int> = _selectedTeamIndex
@@ -44,8 +43,8 @@ abstract class BaseGameStatsViewModel<I, T>(
         // init with default value
         _displayDataState.value = ApiFetchState.Idle
 
-        _firstSelectedIndex.value = 0
-        _secondSelectedIndex.value = 0
+        _firstCategorySelectedIndex.value = 0
+        _secondCategorySelectedIndex.value = 0
         _selectedTeamIndex.value = 0
 
         shouldScrollCategory = false
@@ -53,7 +52,7 @@ abstract class BaseGameStatsViewModel<I, T>(
         // init data
         _displayModel.value = displayModel
 
-        if (displayModel is DisplayModelBase) {
+        if (displayModel is SportDisplayModel) {
             loadDictionaries(displayModel.leagueId)
         }
     }
@@ -76,9 +75,20 @@ abstract class BaseGameStatsViewModel<I, T>(
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_PLAYER_DIC)
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
             }
+            Constants.Ids.SERIEA -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_TEAM_DIC)
+            }
             Constants.Ids.NBA -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_PLAYER_DIC)
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
+            }
+            Constants.Ids.KBO -> {
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.KBO_TEAM_DIC)
+            }
+            Constants.Ids.MLB -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.MLB_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.MLB_TEAM_DIC)
             }
             else -> {}
         }
@@ -90,7 +100,7 @@ abstract class BaseGameStatsViewModel<I, T>(
 
     open fun selectSecondCategory(index: Int) {
         shouldScrollCategory = false
-        _secondSelectedIndex.value = index
+        _secondCategorySelectedIndex.value = index
     }
 
     open fun selectTeam(index: Int) {

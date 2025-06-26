@@ -326,7 +326,7 @@ fun MLBPlayerStatsItem(
             )
             FBStatDataItem(
                 category = "타율",
-                data = it.avg.toString(),
+                data = it.avg,
                 customCategoryFontSize = 11,
                 customCategoryHeight = 30.dp,
                 modifier = Modifier.weight(1f)

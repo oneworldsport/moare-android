@@ -260,7 +260,7 @@ fun NBAPlayerInfoFirstItem(
             )
 
             Text(
-                text = nbaPlayerInfoViewModel.playerNameDictionary[player.displayFirstLast.lowercase()] ?: player.displayFirstLast,
+                text = nbaPlayerInfoViewModel.playerNameDictionary[player.personId.toString()] ?: player.displayFirstLast,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.alpha(contentsAlpha)
             )

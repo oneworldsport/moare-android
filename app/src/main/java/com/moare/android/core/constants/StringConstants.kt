@@ -16,6 +16,9 @@ object StringConstants {
     const val RESULT_HIDE = "결과 숨기기"
     const val GAME_NOT_STARTED_STR = "경기 전"
     const val GAME_FINISHED_STR = "경기 종료"
+    const val GAME_LIVE_STR = "경기중"
+    const val GAME_POSTPONED_STR = "경기 연기"
+    const val GAME_CANCELED_STR = "경기 취소"
 
     const val STANDINGS_FIRST_CATEGORY = "순위"
     val STATS_FIRST_CATEGORIES = listOf("공격 지표", "수비 지표", "공통 지표")
@@ -82,9 +85,11 @@ object StringConstants {
         val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_ATTACK_CATEGORIES + GAME_STATS_DEFEND_CATEGORIES + GAME_STATS_COMMON_CATEGORIES
     }
 
-    object MLB {
-        val GAME_LIVE_LIST = listOf("I")
-        val GAME_FINISHED_LIST = listOf("F")
+    object KBO {
+        const val GAME_SCHEDULED = 1
+        const val GAME_LIVE = 2
+        const val GAME_FINAL = 3
+        const val GAME_CANCELED = 4
 
         val DIVISION_CATEGORY = listOf("내셔널 서부", "내셔널 동부", "내셔널 중부", "아메리칸 서부", "아메리칸 동부", "아메리칸 중부")
 
@@ -96,27 +101,34 @@ object StringConstants {
         val PLAYER_STANDINGS_FIELDING_CATEGORIES = listOf("")
         val PLAYER_STANDINGS_SECOND_CATEGORIES = PLAYER_STANDINGS_HITTING_CATEGORIES + PLAYER_STANDINGS_PITCHING_CATEGORIES + PLAYER_STANDINGS_RUNNING_CATEGORIES
 
-        val GAME_STATS_ATTACK_CATEGORIES = listOf("득점", "도움", "공격리바운드", "야투 시도", "야투 성공", "야투 성공률", "3점 시도", "3점 성공", "3점 성공률", "자유투 시도", "자유투 성공", "자유투 성공률")
-        val GAME_STATS_DEFEND_CATEGORIES = listOf("수비리바운드", "블록", "스틸")
-        val GAME_STATS_COMMON_CATEGORIES = listOf("리바운드", "턴오버", "파울", "득실마진", "출전시간")
-        val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_ATTACK_CATEGORIES + GAME_STATS_DEFEND_CATEGORIES + GAME_STATS_COMMON_CATEGORIES
+        val GAME_STATS_HITTING_CATEGORIES = listOf("타수", "안타", "홈런", "타점", "득점", "도루", "볼넷", "삼진")
+        val GAME_STATS_PITCHING_CATEGORIES = listOf("이닝", "실점", "자책", "볼넷", "삼진", "피안타")
+        val GAME_STATS_RUNNING_CATEGORIES = listOf("")
+        val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_HITTING_CATEGORIES + GAME_STATS_PITCHING_CATEGORIES + GAME_STATS_RUNNING_CATEGORIES
     }
 
-    object KBO {
+    object MLB {
+        const val GAME_SCHEDULED = "Scheduled"
+        const val GAME_LIVE = "In Progress"
+        const val GAME_POSTPONED = "Postponed"
+        const val GAME_RAIN = "Completed Early: Rain"
+        const val GAME_FINAL = "Final"
+        val GAME_FINISHED_LIST = listOf(GAME_RAIN, GAME_FINAL)
+
         val DIVISION_CATEGORY = listOf("내셔널 서부", "내셔널 동부", "내셔널 중부", "아메리칸 서부", "아메리칸 동부", "아메리칸 중부")
 
         val TEAM_STANDINGS_CATEGORIES = listOf("승률", "게임차", "승", "패", "경기수", "연속", "타율", "안타", "홈런", "장타율", "득점", "평균자책", "피안타율", "피안타", "피홈런", "실점", "도루성공률")
 
         val PLAYER_STANDINGS_HITTING_CATEGORIES = listOf("경기당 득점", "경기당 도움", "경기당 공격리바운드", "경기당 야투 시도", "경기당 야투 성공", "야투 성공률", "경기당 3점 시도", "경기당 3점 성공", "3점 성공률", "경기당 자유투 시도", "경기당 자유투 성공", "자유투 성공률")
         val PLAYER_STANDINGS_PITCHING_CATEGORIES = listOf("경기당 수비리바운드", "경기당 블록", "경기당 스틸")
-        val PLAYER_STANDINGS_RUNNING_CATEGORIES = listOf("경기당 리바운드", "경기당 턴오버", "경기당 파울", "경기당 파울 유도", "경기당 피블록", "경기당 득실마진", "경기수", "경기당 출전시간", "출전 경기 승", "출전 경기 패", "출전 경기 승률", "트리플더블", "더블더블")
+        val PLAYER_STANDINGS_RUNNING_CATEGORIES = listOf("")
         val PLAYER_STANDINGS_FIELDING_CATEGORIES = listOf("")
         val PLAYER_STANDINGS_SECOND_CATEGORIES = PLAYER_STANDINGS_HITTING_CATEGORIES + PLAYER_STANDINGS_PITCHING_CATEGORIES + PLAYER_STANDINGS_RUNNING_CATEGORIES
 
-        val GAME_STATS_ATTACK_CATEGORIES = listOf("득점", "도움", "공격리바운드", "야투 시도", "야투 성공", "야투 성공률", "3점 시도", "3점 성공", "3점 성공률", "자유투 시도", "자유투 성공", "자유투 성공률")
-        val GAME_STATS_DEFEND_CATEGORIES = listOf("수비리바운드", "블록", "스틸")
-        val GAME_STATS_COMMON_CATEGORIES = listOf("리바운드", "턴오버", "파울", "득실마진", "출전시간")
-        val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_ATTACK_CATEGORIES + GAME_STATS_DEFEND_CATEGORIES + GAME_STATS_COMMON_CATEGORIES
+        val GAME_STATS_HITTING_CATEGORIES = listOf("타수", "안타", "홈런", "타점", "득점", "도루", "볼넷", "삼진", "타율")
+        val GAME_STATS_PITCHING_CATEGORIES = listOf("이닝", "실점", "자책", "볼넷", "삼진", "피안타", "평균자책")
+        val GAME_STATS_RUNNING_CATEGORIES = listOf("")
+        val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_HITTING_CATEGORIES + GAME_STATS_PITCHING_CATEGORIES + GAME_STATS_RUNNING_CATEGORIES
     }
 
     fun viewPreparingAdviseText(type: String): String {

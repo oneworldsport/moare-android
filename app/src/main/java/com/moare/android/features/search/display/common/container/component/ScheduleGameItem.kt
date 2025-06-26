@@ -1,5 +1,8 @@
 package com.moare.android.features.search.display.common.container.component
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -22,13 +26,9 @@ import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.TimeFormatType
-import com.moare.android.features.search.display.common.container.state.ScheduleContainerActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
-import com.moare.android.features.search.display.football.viewmodel.FBTeamScheduleIntent
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
@@ -36,12 +36,20 @@ import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.theme.Moare
 
 @Composable
-fun ScheduleGameItemContainer(
+fun ScheduleGameItem(
     state: ScheduleGameItemState,
     actions: ScheduleGameItemActions
 ) {
     val homeTeamScore = state.homeTeamScore
     val awayTeamScore = state.awayTeamScore
+
+    val scoreAlpha by animateFloatAsState(
+        targetValue = if (state.isResultOpened) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = LinearOutSlowInEasing
+        )
+    )
 
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -70,7 +78,8 @@ fun ScheduleGameItemContainer(
         ) {
             URLImage(
                 url = state.homeTeamLogo,
-                size = URLImageSize.SMALL
+                size = URLImageSize.SMALL,
+                isSvg = state.isSvgLogo
             )
 
             Text(
@@ -99,7 +108,7 @@ fun ScheduleGameItemContainer(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .width(20.dp)
-                .alpha(state.scoreAlpha),
+                .alpha(scoreAlpha),
             color = if (homeTeamScore >= awayTeamScore) MaterialTheme.colors.primary else Color.Black
         )
 
@@ -125,19 +134,19 @@ fun ScheduleGameItemContainer(
             // game date
             if (state.shouldShowOnlyDateTime) {
                 Text(
-                    text = state.dateTime,
+                    text = CalendarUtil.formatDate(date = state.date, formatType = TimeFormatType.AMPM),
                     fontSize = 12.sp,
                     modifier = Modifier.padding(vertical = 2.dp)
                 )
             } else {
                 Text(
-                    text = state.date,
+                    text = CalendarUtil.formatDate(date = state.date).split(" ").firstOrNull() ?: "",
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 2.dp)
                 )
 
                 Text(
-                    text = state.dateTime,
+                    text = CalendarUtil.formatDate(date = state.date, formatType = TimeFormatType.AMPM),
                     fontSize = 12.sp,
                     modifier = Modifier.padding(bottom = 2.dp)
                 )
@@ -156,12 +165,12 @@ fun ScheduleGameItemContainer(
 
             // game type
             if (state.shouldShowGameType) {
-                Text(
-                    text = state.gameType,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Light,
-                    maxLines = 1,
-                )
+//                Text(
+//                    text = state.gameType,
+//                    fontSize = 12.sp,
+//                    fontWeight = FontWeight.Light,
+//                    maxLines = 1,
+//                )
             }
 
             // referee
@@ -186,7 +195,7 @@ fun ScheduleGameItemContainer(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .width(20.dp)
-                .alpha(state.scoreAlpha),
+                .alpha(scoreAlpha),
             color = if (awayTeamScore >= homeTeamScore) MaterialTheme.colors.primary else Color.Black
         )
 
@@ -200,7 +209,8 @@ fun ScheduleGameItemContainer(
         ) {
             URLImage(
                 url = state.awayTeamLogo,
-                size = URLImageSize.SMALL
+                size = URLImageSize.SMALL,
+                isSvg = state.isSvgLogo
             )
 
             Text(

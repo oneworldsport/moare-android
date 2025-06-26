@@ -155,7 +155,7 @@ fun NBAPlayerStatsPlayerInfoItem(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Text(
-                        text = nbaPlayerStatsViewModel.playerNameDictionary[player.displayFirstLast.lowercase()] ?: player.displayFirstLast,
+                        text = nbaPlayerStatsViewModel.playerNameDictionary[player.personId.toString()] ?: player.displayFirstLast,
                         fontWeight = FontWeight.Medium
                     )
 
