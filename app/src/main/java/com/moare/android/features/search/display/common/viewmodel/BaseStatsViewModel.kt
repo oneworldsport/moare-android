@@ -3,7 +3,7 @@ package com.moare.android.features.search.display.common.viewmodel
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -19,7 +19,7 @@ abstract class BaseStatsViewModel<I, T>(
     override fun initData(displayModel: T) {
         _displayModel.value = displayModel
 
-        if (displayModel is DisplayModelBase) {
+        if (displayModel is SportDisplayModel) {
             loadDictionaries(displayModel.leagueId)
         }
     }
@@ -42,9 +42,20 @@ abstract class BaseStatsViewModel<I, T>(
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_PLAYER_DIC)
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
             }
+            Constants.Ids.SERIEA -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_TEAM_DIC)
+            }
             Constants.Ids.NBA -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_PLAYER_DIC)
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
+            }
+            Constants.Ids.KBO -> {
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.KBO_TEAM_DIC)
+            }
+            Constants.Ids.MLB -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.MLB_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.MLB_TEAM_DIC)
             }
             else -> {}
         }

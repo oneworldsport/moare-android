@@ -90,13 +90,10 @@ fun NBAGameStatsView(
        viewmodel state
        --------------------- */
     val displayModel by nbaGameStatsViewModel.displayModel.collectAsState()
-    val firstSelectedIndex by nbaGameStatsViewModel.firstSelectedIndex.collectAsState()
-    val secondSelectedIndex by nbaGameStatsViewModel.secondSelectedIndex.collectAsState()
-
+    val firstSelectedIndex by nbaGameStatsViewModel.firstCategorySelectedIndex.collectAsState()
+    val secondSelectedIndex by nbaGameStatsViewModel.secondCategorySelectedIndex.collectAsState()
     val season = displayModel?.game?.gameSummary?.season
 
-    val nbaLeagueScheduleData by searchViewModel.nbaLeagueScheduleData.collectAsState()
-    val nbaTeamScheduleData by searchViewModel.nbaTeamScheduleData.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
@@ -121,12 +118,6 @@ fun NBAGameStatsView(
     LaunchedEffect(data) {
         if (poppedView == null || poppedView is SportDecodableModel.NBAGameStats) {
             nbaGameStatsViewModel.send(NBAGameStatsIntent.InitData(data))
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        if (displayModel?.game?.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE) {
-            searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
         }
     }
 
@@ -793,7 +784,7 @@ fun NBAGameStatsFirstCategoryList(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val selectedIndex by nbaGameStatsViewModel.firstSelectedIndex.collectAsState()
+    val selectedIndex by nbaGameStatsViewModel.firstCategorySelectedIndex.collectAsState()
 
     val itemWidth = nbaGameStatsViewModel.itemWidth
     val barWidth = nbaGameStatsViewModel.barWidth
@@ -892,7 +883,7 @@ fun NBAGameStatsSecondCategoryList(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val selectedIndex by nbaGameStatsViewModel.secondSelectedIndex.collectAsState()
+    val selectedIndex by nbaGameStatsViewModel.secondCategorySelectedIndex.collectAsState()
 
     /* ---------------------
        animation
@@ -995,9 +986,6 @@ fun NBAGameStatsFirstDataListItem(
     nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel(),
     data: NBABoxScoreTeamPlayer
 ) {
-    val playerKrName = nbaGameStatsViewModel.playerNameDictionary[(data.firstName + " " + data.familyName).lowercase()]
-        ?: (data.firstName + " " + data.familyName)
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -1022,7 +1010,7 @@ fun NBAGameStatsFirstDataListItem(
         )
 
         Text(
-            text = playerKrName,
+            text = nbaGameStatsViewModel.playerNameDictionary[data.personId.toString()] ?: data.nameI,
             fontSize = 12.sp,
             maxLines = 2,
             modifier = Modifier.width(60.dp)

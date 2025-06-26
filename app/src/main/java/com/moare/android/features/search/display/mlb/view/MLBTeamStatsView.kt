@@ -354,7 +354,7 @@ fun MLBTeamStatsItem(
                 )
                 FBStatDataItem(
                     category = "게임차",
-                    data = record.gamesBack.toString(),
+                    data = record.gamesBack,
                     customCategoryFontSize = 11,
                     customCategoryHeight = 30.dp,
                     modifier = Modifier.weight(1f)
@@ -400,7 +400,7 @@ fun MLBTeamStatsItem(
                     modifier = Modifier.weight(1f)
                 )
                 FBStatDataItem(
-                    category = "장탸율",
+                    category = "장타율",
                     data = hitting.slg,
                     customCategoryFontSize = 11,
                     customCategoryHeight = 30.dp,

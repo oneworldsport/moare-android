@@ -2,7 +2,7 @@ package com.moare.android.features.search.models.displaymodels.football
 
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
 import com.moare.android.features.search.models.models.football.FBPlayerInfo
@@ -19,4 +19,4 @@ data class FBPlayerInfoDisplayModel(
     val lastGame: FBGame?,
     val lastGamePlayerStats: FBGamePlayerStatsDetail?,
     val nextGame: FBGame?
-) : DisplayModelBase
+) : SportDisplayModel

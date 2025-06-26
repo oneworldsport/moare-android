@@ -4,16 +4,13 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -22,9 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -56,8 +50,12 @@ import com.moare.android.features.search.display.common.container.view.GameStats
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
 import com.moare.android.features.search.models.models.football.FBPerson
 import com.moare.android.ui.common.components.HCapsuleBar
@@ -87,12 +85,13 @@ fun FBGameStatsView(
        --------------------- */
     val displayModel by fbGameStatsViewModel.displayModel.collectAsState()
     val coach by fbGameStatsViewModel.coach.collectAsState()
-    val firstSelectedIndex by fbGameStatsViewModel.firstSelectedIndex.collectAsState()
-    val secondSelectedIndex by fbGameStatsViewModel.secondSelectedIndex.collectAsState()
+    val firstSelectedIndex by fbGameStatsViewModel.firstCategorySelectedIndex.collectAsState()
+    val secondSelectedIndex by fbGameStatsViewModel.secondCategorySelectedIndex.collectAsState()
 
-    val fbLeagueScheduleData by searchViewModel.fbLeagueScheduleData.collectAsState()
-    val fbTeamScheduleData by searchViewModel.fbTeamScheduleData.collectAsState()
+    val displayModels by searchViewModel.displayModels.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
+    val fbLeagueScheduleModel = displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] as? FBLeagueScheduleDisplayModel
+    val fbTeamScheduleModel = displayModels[SportDisplayType.FB_TEAM_SCHEDULE] as? FBTeamScheduleDisplayModel
 
     /* ---------------------
        etc
@@ -119,15 +118,6 @@ fun FBGameStatsView(
         }
     }
 
-    LaunchedEffect(Unit) {
-        displayModel?.let {
-            if (it.game.fixture.status.short != Constants.FBGameStatus.NOT_STARTED &&
-                it.game.fixture.status.short != Constants.FBGameStatus.FINISHED) {
-                searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "football"))
-            }
-        }
-    }
-
     // scroll to category that matches with the keyword,
     // and when first category list's item is selected by click
     LaunchedEffect(firstSelectedIndex) {
@@ -144,8 +134,8 @@ fun FBGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowTitle = fbLeagueScheduleData == null && fbTeamScheduleData == null,
-            shouldShowGameItem = fbLeagueScheduleData == null && fbTeamScheduleData == null,
+            shouldShowTitle = fbLeagueScheduleModel == null && fbTeamScheduleModel == null,
+            shouldShowGameItem = fbLeagueScheduleModel == null && fbTeamScheduleModel == null,
             shouldShowStats = displayModel?.game?.fixture?.status?.short != "NS",
             shouldShowCoach = true,
             firstCategoryItemHeight = fbGameStatsViewModel.categoryItemHeight * 2
@@ -170,7 +160,7 @@ fun FBGameStatsView(
         },
         gameContent = {
             displayModel?.game?.let { game ->
-                FBLeagueScheduleListItem(data = game)
+                FBLeagueScheduleListItem(data = ModelConverter().fbGameToGameScheduleConverter(game))
             }
         },
         teamButtonContent = {
@@ -334,7 +324,7 @@ fun FBGameStatsFirstCategoryList(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val selectedIndex by fbGameStatsViewModel.firstSelectedIndex.collectAsState()
+    val selectedIndex by fbGameStatsViewModel.firstCategorySelectedIndex.collectAsState()
 
     val itemWidth = fbGameStatsViewModel.itemWidth
     val barWidth = fbGameStatsViewModel.barWidth
@@ -434,7 +424,7 @@ fun FBGameStatsSecondCategoryList(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val selectedIndex by fbGameStatsViewModel.secondSelectedIndex.collectAsState()
+    val selectedIndex by fbGameStatsViewModel.secondCategorySelectedIndex.collectAsState()
 
     /* ---------------------
        animation

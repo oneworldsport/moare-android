@@ -2,7 +2,7 @@ package com.moare.android.features.search.models.displaymodels.football
 
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import com.moare.android.features.search.models.models.football.FBTeamInfo
 import com.moare.android.features.search.models.models.football.FBVenue
 import com.moare.android.features.search.models.models.football.FBTeamStats
@@ -16,4 +16,4 @@ data class FBTeamStatsDisplayModel(
     val team: FBTeamInfo,
     val venue: FBVenue,
     val stats: List<FBTeamStats>
-) : DisplayModelBase
+) : SportDisplayModel

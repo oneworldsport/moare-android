@@ -449,7 +449,7 @@ fun NBAPlayerStandingsFirstDataListItem(
         ) {
             Column {
                 Text(
-                    text = nbaPlayerStandingsViewModel.playerNameDictionary[data.player.displayFirstLast.lowercase()] ?: data.player.displayFirstLast,
+                    text = nbaPlayerStandingsViewModel.playerNameDictionary[data.player.personId.toString()] ?: data.player.displayFirstLast,
                     fontSize = 12.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

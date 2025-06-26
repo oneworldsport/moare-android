@@ -10,8 +10,14 @@ object Constants {
         const val BUNDESLIGA_TEAM_DIC = "bundesliga_team"
         const val LIGUE1_PLAYER_DIC = "ligue1_player"
         const val LIGUE1_TEAM_DIC = "ligue1_team"
+        const val SERIEA_PLAYER_DIC = "seriea_player"
+        const val SERIEA_TEAM_DIC = "seriea_team"
         const val NBA_PLAYER_DIC = "nba_player"
         const val NBA_TEAM_DIC = "nba_team"
+        const val KBO_PLAYER_DIC = "kbo_player"
+        const val KBO_TEAM_DIC = "kbo_team"
+        const val MLB_PLAYER_DIC = "mlb_player"
+        const val MLB_TEAM_DIC = "mlb_team"
     }
 
     object Ids {
@@ -20,6 +26,7 @@ object Constants {
         const val LALIGA = 140
         const val BUNDESLIGA = 78
         const val LIGUE1 = 61
+        const val SERIEA = 135
         const val NBA = 90001
         const val KBO = 90101
         const val MLB = 90102

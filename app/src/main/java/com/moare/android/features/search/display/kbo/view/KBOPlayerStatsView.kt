@@ -699,7 +699,7 @@ fun KBOPlayerStatsItem(
             modifier = Modifier.alpha(contentsAlpha)
         ) {
             FBStatDataItem(
-                category = "이닝당 출루혀용률",
+                category = "이닝당 출루허용률",
                 data = it.whip,
                 customCategoryFontSize = 11,
                 customCategoryHeight = 30.dp,

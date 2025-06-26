@@ -18,6 +18,7 @@ import com.moare.android.ui.common.components.VCapsuleBar
 
 @Composable
 fun StandingsFirstCategoryItem(
+    text: String = StringConstants.STANDINGS_FIRST_CATEGORY,
     height: Dp = 44.dp
 ) {
     Row(

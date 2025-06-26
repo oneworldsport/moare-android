@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.Trie
 import com.moare.android.core.util.getChosung
@@ -15,44 +16,25 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.NoticeModel
+import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.TrendingKeywords
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
+import com.moare.android.features.search.models.models.football.FBGameFixture
+import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.models.kbo.KBOGame
+import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.models.models.mlb.MLBGame
+import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
 import com.moare.android.features.search.models.models.nba.NBAGame
+import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
@@ -90,118 +72,14 @@ class SearchViewModel @Inject constructor(
     private val _searchDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
     val searchDataState: StateFlow<ApiFetchState> = _searchDataState
 
-    // football
-    private val _fbPlayerInfoData = MutableStateFlow<FBPlayerInfoDisplayModel?>(null)
-    val fbPlayerInfoData: StateFlow<FBPlayerInfoDisplayModel?> = _fbPlayerInfoData
+    val initialMap = SportDisplayType.values().associateWith { null }
+    private val _displayModels = MutableStateFlow<Map<SportDisplayType, SportDisplayModel?>>(initialMap)
+    val displayModels: StateFlow<Map<SportDisplayType, SportDisplayModel?>> = _displayModels
 
-    private val _fbPlayerStatsData = MutableStateFlow<FBPlayerStatsDisplayModel?>(null)
-    val fbPlayerStatsData: StateFlow<FBPlayerStatsDisplayModel?> = _fbPlayerStatsData
-
-    private val _fbPlayerStandingsData = MutableStateFlow<FBPlayerStandingsDisplayModel?>(null)
-    val fbPlayerStandingsData: StateFlow<FBPlayerStandingsDisplayModel?> = _fbPlayerStandingsData
-
-    private val _fbTeamInfoData = MutableStateFlow<FBTeamInfoDisplayModel?>(null)
-    val fbTeamInfoData: StateFlow<FBTeamInfoDisplayModel?> = _fbTeamInfoData
-
-    private val _fbTeamStatsData = MutableStateFlow<FBTeamStatsDisplayModel?>(null)
-    val fbTeamStatsData: StateFlow<FBTeamStatsDisplayModel?> = _fbTeamStatsData
-
-    private val _fbTeamStandingsData = MutableStateFlow<FBTeamStandingsDisplayModel?>(null)
-    val fbTeamStandingsData: StateFlow<FBTeamStandingsDisplayModel?> = _fbTeamStandingsData
-
-    private val _fbTeamScheduleData = MutableStateFlow<FBTeamScheduleDisplayModel?>(null)
-    val fbTeamScheduleData: StateFlow<FBTeamScheduleDisplayModel?> = _fbTeamScheduleData
-
-    private val _fbLeagueScheduleData = MutableStateFlow<FBLeagueScheduleDisplayModel?>(null)
-    val fbLeagueScheduleData: StateFlow<FBLeagueScheduleDisplayModel?> = _fbLeagueScheduleData
     private var initialFBLeagueScheduleData: FBLeagueScheduleDisplayModel? = null // NOTE: Used when go back from FBGameStatsView and reopen FBLeagueScheduleView. Has to think about structure.
-
-    private val _fbGameStatsData = MutableStateFlow<FBGameStatsDisplayModel?>(null)
-    val fbGameStatsData: StateFlow<FBGameStatsDisplayModel?> = _fbGameStatsData
-
-    // nba
-    private val _nbaPlayerInfoData = MutableStateFlow<NBAPlayerInfoDisplayModel?>(null)
-    val nbaPlayerInfoData: StateFlow<NBAPlayerInfoDisplayModel?> = _nbaPlayerInfoData
-
-    private val _nbaPlayerStatsData = MutableStateFlow<NBAPlayerStatsDisplayModel?>(null)
-    val nbaPlayerStatsData: StateFlow<NBAPlayerStatsDisplayModel?> = _nbaPlayerStatsData
-
-    private val _nbaPlayerStandingsData = MutableStateFlow<NBAPlayerStandingsDisplayModel?>(null)
-    val nbaPlayerStandingsData: StateFlow<NBAPlayerStandingsDisplayModel?> = _nbaPlayerStandingsData
-
-    private val _nbaTeamInfoData = MutableStateFlow<NBATeamInfoDisplayModel?>(null)
-    val nbaTeamInfoData: StateFlow<NBATeamInfoDisplayModel?> = _nbaTeamInfoData
-
-    private val _nbaTeamStatsData = MutableStateFlow<NBATeamStatsDisplayModel?>(null)
-    val nbaTeamStatsData: StateFlow<NBATeamStatsDisplayModel?> = _nbaTeamStatsData
-
-    private val _nbaTeamStandingsData = MutableStateFlow<NBATeamStandingsDisplayModel?>(null)
-    val nbaTeamStandingsData: StateFlow<NBATeamStandingsDisplayModel?> = _nbaTeamStandingsData
-
-    private val _nbaTeamScheduleData = MutableStateFlow<NBATeamScheduleDisplayModel?>(null)
-    val nbaTeamScheduleData: StateFlow<NBATeamScheduleDisplayModel?> = _nbaTeamScheduleData
-
-    private val _nbaLeagueScheduleData = MutableStateFlow<NBALeagueScheduleDisplayModel?>(null)
-    val nbaLeagueScheduleData: StateFlow<NBALeagueScheduleDisplayModel?> = _nbaLeagueScheduleData
     private var initialNBALeagueScheduleData: NBALeagueScheduleDisplayModel? = null
-
-    private val _nbaGameStatsData = MutableStateFlow<NBAGameStatsDisplayModel?>(null)
-    val nbaGameStatsData: StateFlow<NBAGameStatsDisplayModel?> = _nbaGameStatsData
-
-    private val _nbaLeagueTournamentData = MutableStateFlow<NBALeagueScheduleDisplayModel?>(null)
-    val nbaLeagueTournamentData: StateFlow<NBALeagueScheduleDisplayModel?> = _nbaLeagueTournamentData
-
-    // kbo
-    private val _kboPlayerInfoData = MutableStateFlow<KBOPlayerInfoDisplayModel?>(null)
-    val kboPlayerInfoData: StateFlow<KBOPlayerInfoDisplayModel?> = _kboPlayerInfoData
-
-    private val _kboPlayerStatsData = MutableStateFlow<KBOPlayerStatsDisplayModel?>(null)
-    val kboPlayerStatsData: StateFlow<KBOPlayerStatsDisplayModel?> = _kboPlayerStatsData
-
-    private val _kboPlayerStandingsData = MutableStateFlow<KBOPlayerStandingsDisplayModel?>(null)
-    val kboPlayerStandingsData: StateFlow<KBOPlayerStandingsDisplayModel?> = _kboPlayerStandingsData
-
-    private val _kboTeamInfoData = MutableStateFlow<KBOTeamInfoDisplayModel?>(null)
-    val kboTeamInfoData: StateFlow<KBOTeamInfoDisplayModel?> = _kboTeamInfoData
-
-    private val _kboTeamStatsData = MutableStateFlow<KBOTeamStatsDisplayModel?>(null)
-    val kboTeamStatsData: StateFlow<KBOTeamStatsDisplayModel?> = _kboTeamStatsData
-
-    private val _kboTeamStandingsData = MutableStateFlow<KBOTeamStandingsDisplayModel?>(null)
-    val kboTeamStandingsData: StateFlow<KBOTeamStandingsDisplayModel?> = _kboTeamStandingsData
-
-    private val _kboLeagueScheduleData = MutableStateFlow<KBOLeagueScheduleDisplayModel?>(null)
-    val kboLeagueScheduleData: StateFlow<KBOLeagueScheduleDisplayModel?> = _kboLeagueScheduleData
     private var initialKBOLeagueScheduleData: KBOLeagueScheduleDisplayModel? = null
-
-    private val _kboGameStatsData = MutableStateFlow<KBOGameStatsDisplayModel?>(null)
-    val kboGameStatsData: StateFlow<KBOGameStatsDisplayModel?> = _kboGameStatsData
-
-    // mlb
-    private val _mlbPlayerInfoData = MutableStateFlow<MLBPlayerInfoDisplayModel?>(null)
-    val mlbPlayerInfoData: StateFlow<MLBPlayerInfoDisplayModel?> = _mlbPlayerInfoData
-
-    private val _mlbPlayerStatsData = MutableStateFlow<MLBPlayerStatsDisplayModel?>(null)
-    val mlbPlayerStatsData: StateFlow<MLBPlayerStatsDisplayModel?> = _mlbPlayerStatsData
-
-    private val _mlbPlayerStandingsData = MutableStateFlow<MLBPlayerStandingsDisplayModel?>(null)
-    val mlbPlayerStandingsData: StateFlow<MLBPlayerStandingsDisplayModel?> = _mlbPlayerStandingsData
-
-    private val _mlbTeamInfoData = MutableStateFlow<MLBTeamInfoDisplayModel?>(null)
-    val mlbTeamInfoData: StateFlow<MLBTeamInfoDisplayModel?> = _mlbTeamInfoData
-
-    private val _mlbTeamStatsData = MutableStateFlow<MLBTeamStatsDisplayModel?>(null)
-    val mlbTeamStatsData: StateFlow<MLBTeamStatsDisplayModel?> = _mlbTeamStatsData
-
-    private val _mlbTeamStandingsData = MutableStateFlow<MLBTeamStandingsDisplayModel?>(null)
-    val mlbTeamStandingsData: StateFlow<MLBTeamStandingsDisplayModel?> = _mlbTeamStandingsData
-
-    private val _mlbLeagueScheduleData = MutableStateFlow<MLBLeagueScheduleDisplayModel?>(null)
-    val mlbLeagueScheduleData: StateFlow<MLBLeagueScheduleDisplayModel?> = _mlbLeagueScheduleData
     private var initialMLBLeagueScheduleData: MLBLeagueScheduleDisplayModel? = null
-
-    private val _mlbGameStatsData = MutableStateFlow<MLBGameStatsDisplayModel?>(null)
-    val mlbGameStatsData: StateFlow<MLBGameStatsDisplayModel?> = _mlbGameStatsData
 
     // auto complete
     private val _autoCompleteList = MutableStateFlow<List<String>>(emptyList())
@@ -290,10 +168,10 @@ class SearchViewModel @Inject constructor(
         data object ToggleSearchBar : Intent()
         data object ToggleAutoCompleteListVisibleState : Intent()
 
-        data class SelectFBGame(val game: FBGame, val leagueId: Int) : Intent()
-        data class SelectNBAGame(val game: NBAGame) : Intent()
-        data class SelectKBOGame(val game: KBOGame) : Intent()
-        data class SelectMLBGame(val game: MLBGame) : Intent()
+        data class SelectFBGame(val game: FBGameForSchedule, val leagueId: Int) : Intent()
+        data class SelectNBAGame(val game: NBAGameForSchedule) : Intent()
+        data class SelectKBOGame(val game: KBOGameForSchedule) : Intent()
+        data class SelectMLBGame(val game: MLBGameForSchedule) : Intent()
 
         data class GoBack(val activity: Activity?) : Intent()
 
@@ -398,166 +276,69 @@ class SearchViewModel @Inject constructor(
             _searchDataState.emit(ApiFetchState.Success)
 
             // TODO: updateMainDisplayModel로 정리해야함
-            _fbPlayerInfoData.emit(null)
-            _fbPlayerStatsData.emit(null)
-            _fbPlayerStandingsData.emit(null)
-            _fbTeamInfoData.emit(null)
-            _fbTeamStatsData.emit(null)
-            _fbTeamStandingsData.emit(null)
-            _fbTeamScheduleData.emit(null)
-            _fbLeagueScheduleData.emit(null)
-            _fbGameStatsData.emit(null)
+            _displayModels.value = initialMap
 
-            _nbaPlayerInfoData.emit(null)
-            _nbaPlayerStatsData.emit(null)
-            _nbaPlayerStandingsData.emit(null)
-            _nbaTeamInfoData.emit(null)
-            _nbaTeamStatsData.emit(null)
-            _nbaTeamStandingsData.emit(null)
-            _nbaTeamScheduleData.emit(null)
-            _nbaLeagueScheduleData.emit(null)
-            _nbaGameStatsData.emit(null)
-            _nbaLeagueTournamentData.emit(null)
-
-            _kboPlayerInfoData.emit(null)
-            _kboPlayerStatsData.emit(null)
-            _kboPlayerStandingsData.emit(null)
-            _kboTeamInfoData.emit(null)
-            _kboTeamStatsData.emit(null)
-            _kboTeamStandingsData.emit(null)
-            _kboLeagueScheduleData.emit(null)
-            _kboGameStatsData.emit(null)
-
-            _mlbPlayerInfoData.emit(null)
-            _mlbPlayerStatsData.emit(null)
-            _mlbPlayerStandingsData.emit(null)
-            _mlbTeamInfoData.emit(null)
-            _mlbTeamStatsData.emit(null)
-            _mlbTeamStandingsData.emit(null)
-            _mlbLeagueScheduleData.emit(null)
-            _mlbGameStatsData.emit(null)
-
+            val newDisplayModels = displayModels.value.toMutableMap()
             when (val data = data?.data) {
-                is SportDecodableModel.FBPlayerInfo -> {
-                    _fbPlayerInfoData.emit(data.displayModel)
-                }
-                is SportDecodableModel.FBPlayerStats -> {
-                    _fbPlayerStatsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.FBPlayerStandings -> {
-                    _fbPlayerStandingsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.FBTeamInfo -> {
-                    _fbTeamInfoData.emit(data.displayModel)
-                }
-                is SportDecodableModel.FBTeamStats -> {
-                    _fbTeamStatsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.FBTeamStandings -> {
-                    _fbTeamStandingsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.FBTeamSchedule -> {
-                    _fbTeamScheduleData.emit(data.displayModel)
-                }
+                // football
+                is SportDecodableModel.FBPlayerInfo -> { newDisplayModels[SportDisplayType.FB_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.FBPlayerStats -> { newDisplayModels[SportDisplayType.FB_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.FBPlayerStandings -> { newDisplayModels[SportDisplayType.FB_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.FBLeagueSchedule -> {
-                    _fbLeagueScheduleData.emit(data.displayModel)
+                    newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = data.displayModel
                     initialFBLeagueScheduleData = data.displayModel
                 }
-                is SportDecodableModel.FBGameStats -> {
-                    _fbGameStatsData.emit(data.displayModel)
-                }
-
-                is SportDecodableModel.NBAPlayerInfo -> {
-                    _nbaPlayerInfoData.emit(data.displayModel)
-                }
-                is SportDecodableModel.NBAPlayerStats -> {
-                    _nbaPlayerStatsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.NBAPlayerStandings -> {
-                    _nbaPlayerStandingsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.NBATeamInfo -> {
-                    _nbaTeamInfoData.emit(data.displayModel)
-                }
-                is SportDecodableModel.NBATeamStats -> {
-                    _nbaTeamStatsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.NBATeamStandings -> {
-                    _nbaTeamStandingsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.NBATeamSchedule -> {
-                    _nbaTeamScheduleData.emit(data.displayModel)
-                }
+                is SportDecodableModel.FBGameStats -> { newDisplayModels[SportDisplayType.FB_GAME_STATS] = data.displayModel }
+                // nba
+                is SportDecodableModel.NBAPlayerInfo -> { newDisplayModels[SportDisplayType.NBA_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.NBAPlayerStats -> { newDisplayModels[SportDisplayType.NBA_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.NBAPlayerStandings -> { newDisplayModels[SportDisplayType.NBA_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.NBALeagueSchedule -> {
-                    _nbaLeagueScheduleData.emit(data.displayModel)
+                    newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel
                     initialNBALeagueScheduleData = data.displayModel
                 }
-                is SportDecodableModel.NBAGameStats -> {
-                    _nbaGameStatsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.NBALeagueTournament -> {
-                    _nbaLeagueTournamentData.emit(data.displayModel)
-                }
-
-                is SportDecodableModel.KBOPlayerInfo -> {
-                    _kboPlayerInfoData.emit(data.displayModel)
-                }
-                is SportDecodableModel.KBOPlayerStats -> {
-                    _kboPlayerStatsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.KBOPlayerStandings -> {
-                    _kboPlayerStandingsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.KBOTeamInfo -> {
-                    _kboTeamInfoData.emit(data.displayModel)
-                }
-                is SportDecodableModel.KBOTeamStats -> {
-                    _kboTeamStatsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.KBOTeamStandings -> {
-                    _kboTeamStandingsData.emit(data.displayModel)
-                }
-//                is SportDecodableModel.KBOTeamSchedule -> {
-//                    _nbaTeamScheduleData.emit(data.displayModel)
-//                }
+                is SportDecodableModel.NBAGameStats -> { newDisplayModels[SportDisplayType.NBA_GAME_STATS] = data.displayModel }
+                is SportDecodableModel.NBALeagueTournament -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT] = data.displayModel }
+                // kbo
+                is SportDecodableModel.KBOPlayerInfo -> { newDisplayModels[SportDisplayType.KBO_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.KBOPlayerStats -> { newDisplayModels[SportDisplayType.KBO_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.KBOPlayerStandings -> { newDisplayModels[SportDisplayType.KBO_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.KBOTeamInfo -> { newDisplayModels[SportDisplayType.KBO_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.KBOTeamStats -> { newDisplayModels[SportDisplayType.KBO_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.KBOTeamStandings -> { newDisplayModels[SportDisplayType.KBO_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.KBOTeamSchedule -> { newDisplayModels[SportDisplayType.KBO_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.KBOLeagueSchedule -> {
-                    _kboLeagueScheduleData.emit(data.displayModel)
+                    newDisplayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE] = data.displayModel
                     initialKBOLeagueScheduleData = data.displayModel
                 }
-                is SportDecodableModel.KBOGameStats -> {
-                    _kboGameStatsData.emit(data.displayModel)
-                }
-
-                is SportDecodableModel.MLBPlayerInfo -> {
-                    _mlbPlayerInfoData.emit(data.displayModel)
-                }
-                is SportDecodableModel.MLBPlayerStats -> {
-                    _mlbPlayerStatsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.MLBPlayerStandings -> {
-                    _mlbPlayerStandingsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.MLBTeamInfo -> {
-                    _mlbTeamInfoData.emit(data.displayModel)
-                }
-                is SportDecodableModel.MLBTeamStats -> {
-                    _mlbTeamStatsData.emit(data.displayModel)
-                }
-                is SportDecodableModel.MLBTeamStandings -> {
-                    _mlbTeamStandingsData.emit(data.displayModel)
-                }
+                is SportDecodableModel.KBOGameStats -> { newDisplayModels[SportDisplayType.KBO_GAME_STATS] = data.displayModel }
+                // mlb
+                is SportDecodableModel.MLBPlayerInfo -> { newDisplayModels[SportDisplayType.MLB_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.MLBPlayerStats -> { newDisplayModels[SportDisplayType.MLB_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.MLBPlayerStandings -> { newDisplayModels[SportDisplayType.MLB_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.MLBTeamInfo -> { newDisplayModels[SportDisplayType.MLB_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.MLBTeamStats -> { newDisplayModels[SportDisplayType.MLB_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.MLBTeamStandings -> { newDisplayModels[SportDisplayType.MLB_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.MLBTeamSchedule -> { newDisplayModels[SportDisplayType.MLB_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.MLBLeagueSchedule -> {
-                    _mlbLeagueScheduleData.emit(data.displayModel)
+                    newDisplayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE] = data.displayModel
                     initialMLBLeagueScheduleData = data.displayModel
                 }
-                is SportDecodableModel.MLBGameStats -> {
-                    _mlbGameStatsData.emit(data.displayModel)
-                }
+                is SportDecodableModel.MLBGameStats -> { newDisplayModels[SportDisplayType.MLB_GAME_STATS] = data.displayModel }
 
                 else -> {
                     throw IllegalArgumentException("Unknown data type")
                 }
             }
+            _displayModels.value = newDisplayModels
 
             // add viewStack
             val stack = viewStack.value.toMutableList()
@@ -588,33 +369,19 @@ class SearchViewModel @Inject constructor(
         _autoCompleteListVisibleState.emit(!autoCompleteListVisibleState.value)
     }
 
-    private suspend fun updateTextField(newValue: TextFieldValue, updateAutoCompleteList: Boolean = true) {
-        _query.emit(newValue)
+    private fun updateTextField(newValue: TextFieldValue, updateAutoCompleteList: Boolean = true) {
+        _query.value = newValue
 
         // auto complete
         if (updateAutoCompleteList) {
             if (newValue.text.isBlank()) {
-                _autoCompleteList.emit(emptyList())
-                _autoCompleteListVisibleState.emit(false)
+                _autoCompleteList.value = emptyList()
+                _autoCompleteListVisibleState.value = false
             } else {
-//                val result = mutableSetOf<String>()
-//                result.addAll(trie.search(newValue.text))
-//                result.addAll(trie.search(getChosung(newValue.text)))
-//                _autoCompleteList.emit(result.toList())
+                val result = trie.search(newValue.text)
 
-                val result = mutableListOf<String>()
-                result.addAll(trie.search(getChosung(newValue.text)))
-
-                val additionalResult = trie.search(newValue.text)
-
-                for (word in additionalResult) {
-                    if (!result.contains(word)) {
-                        result.add(word)
-                    }
-                }
-
-                _autoCompleteList.emit(result)
-                _autoCompleteListVisibleState.emit(true)
+                _autoCompleteList.value = result
+                _autoCompleteListVisibleState.value = true
             }
         }
     }
@@ -643,65 +410,57 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun selectFBGame(game: FBGame, leagueId: Int) {
-        val displayModel = FBGameStatsDisplayModel(game = game, leagueId = leagueId)
-        val dataModel = SportDecodableModel.FBGameStats(
-            responseModel = FBGameStatsResponseModel(game = game),
-            displayModel = displayModel
+    private suspend fun selectFBGame(game: FBGameForSchedule, leagueId: Int) {
+        val result = searchClient.fetchById(
+            category = "football",
+            date = game.date,
+            dataType = "football_game_stats",
+            leagueId = leagueId,
+            id = game.gameId
         )
 
         // add stack before emiting _fbGameStatsData to ensure the last stack(SportDecodableModel.FBGameStats in this case) can be up to date after refreshing game data when opening FBGameStatsView
-        val stack = viewStack.value.toMutableList()
-        stack.add(dataModel)
-        _viewStack.emit(stack)
-        _poppedView.emit(null)
-
-        _fbGameStatsData.emit(displayModel)
+        addViewStack(result.data)
+        updateMainDisplayModel(result.data, false)
     }
 
-    private suspend fun selectNBAGame(game: NBAGame) {
-        val displayModel = NBAGameStatsDisplayModel(leagueId = 90001, game = game)
-        val dataModel = SportDecodableModel.NBAGameStats(
-            responseModel = NBAGameStatsResponseModel(game = game),
-            displayModel = displayModel
+    private suspend fun selectNBAGame(game: NBAGameForSchedule) {
+        val result = searchClient.fetchById(
+            category = "basketball",
+            date = game.date,
+            dataType = "basketball_game_stats",
+            leagueId = Constants.Ids.NBA,
+            id = game.gameId
         )
 
-        val stack = viewStack.value.toMutableList()
-        stack.add(dataModel)
-        _viewStack.emit(stack)
-        _poppedView.emit(null)
-
-        _nbaGameStatsData.emit(displayModel)
+        addViewStack(result.data)
+        updateMainDisplayModel(result.data)
     }
 
-    private suspend fun selectKBOGame(game: KBOGame) {
-        val displayModel = KBOGameStatsDisplayModel(leagueId = 90101, game = game)
-        val dataModel = SportDecodableModel.KBOGameStats(
-            responseModel = KBOGameStatsResponseModel(game = game),
-            displayModel = displayModel
+    private suspend fun selectKBOGame(game: KBOGameForSchedule) {
+        val result = searchClient.fetchById(
+            category = "baseball",
+            date = game.date,
+            dataType = "baseball_game_stats",
+            leagueId = Constants.Ids.KBO,
+            id = game.gameId
         )
 
-        val stack = viewStack.value.toMutableList()
-        stack.add(dataModel)
-        _viewStack.emit(stack)
-        _poppedView.emit(null)
-
-        _kboGameStatsData.emit(displayModel)
+        addViewStack(result.data)
+        updateMainDisplayModel(result.data)
     }
 
-    private suspend fun selectMLBGame(game: MLBGame) {
-        val displayModel = MLBGameStatsDisplayModel(leagueId = 90102, game = game)
-        val dataModel = SportDecodableModel.MLBGameStats(
-            responseModel = MLBGameStatsResponseModel(game = game),
-            displayModel = displayModel
+    private suspend fun selectMLBGame(game: MLBGameForSchedule) {
+        val result = searchClient.fetchById(
+            category = "baseball",
+            date = game.date,
+            dataType = "baseball_game_stats",
+            leagueId = Constants.Ids.MLB,
+            id = game.gameId
         )
 
-        val stack = viewStack.value.toMutableList()
-        stack.add(dataModel)
-        _viewStack.emit(stack)
-        _poppedView.emit(null)
-
-        _mlbGameStatsData.emit(displayModel)
+        addViewStack(result.data)
+        updateMainDisplayModel(result.data)
     }
 
     private suspend fun goBack(activity: Activity?) {
@@ -735,176 +494,79 @@ class SearchViewModel @Inject constructor(
                     delay(1000)
 
                     // TODO: updateMainDisplayModel로 정리해야함
-                    _fbPlayerInfoData.emit(null)
-                    _fbPlayerStatsData.emit(null)
-                    _fbPlayerStandingsData.emit(null)
-                    _fbTeamInfoData.emit(null)
-                    _fbTeamStandingsData.emit(null)
-                    _fbTeamScheduleData.emit(null)
-                    _fbLeagueScheduleData.emit(null)
-                    _fbGameStatsData.emit(null)
-                    _fbTeamStatsData.emit(null)
+                    _displayModels.value = initialMap
 
-                    _nbaPlayerInfoData.emit(null)
-                    _nbaPlayerStatsData.emit(null)
-                    _nbaPlayerStandingsData.emit(null)
-                    _nbaTeamInfoData.emit(null)
-                    _nbaTeamStatsData.emit(null)
-                    _nbaTeamStandingsData.emit(null)
-                    _nbaTeamScheduleData.emit(null)
-                    _nbaLeagueScheduleData.emit(null)
-                    _nbaGameStatsData.emit(null)
-                    _nbaLeagueTournamentData.emit(null)
-
-                    _kboPlayerInfoData.emit(null)
-                    _kboPlayerStatsData.emit(null)
-                    _kboPlayerStandingsData.emit(null)
-                    _kboTeamInfoData.emit(null)
-                    _kboTeamStatsData.emit(null)
-                    _kboTeamStandingsData.emit(null)
-                    _kboLeagueScheduleData.emit(null)
-                    _kboGameStatsData.emit(null)
-
-                    _mlbPlayerInfoData.emit(null)
-                    _mlbPlayerStatsData.emit(null)
-                    _mlbPlayerStandingsData.emit(null)
-                    _mlbTeamInfoData.emit(null)
-                    _mlbTeamStatsData.emit(null)
-                    _mlbTeamStandingsData.emit(null)
-                    _mlbLeagueScheduleData.emit(null)
-                    _mlbGameStatsData.emit(null)
-
+                    val newDisplayModels = displayModels.value.toMutableMap()
                     when (viewToShow) {
-                        is SportDecodableModel.FBPlayerInfo -> {
-                            _fbPlayerInfoData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.FBPlayerStats -> {
-                            _fbPlayerStatsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.FBPlayerStandings -> {
-                            _fbPlayerStandingsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.FBTeamInfo -> {
-                            _fbTeamInfoData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.FBTeamStats -> {
-                            _fbTeamStatsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.FBTeamStandings -> {
-                            _fbTeamStandingsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.FBTeamSchedule -> {
-                            _fbTeamScheduleData.emit(viewToShow.displayModel)
-                        }
+                        // football
+                        is SportDecodableModel.FBPlayerInfo -> { newDisplayModels[SportDisplayType.FB_PLAYER_INFO] = viewToShow.displayModel }
+                        is SportDecodableModel.FBPlayerStats -> { newDisplayModels[SportDisplayType.FB_PLAYER_STATS] = viewToShow.displayModel }
+                        is SportDecodableModel.FBPlayerStandings -> { newDisplayModels[SportDisplayType.FB_PLAYER_STANDINGS] = viewToShow.displayModel }
+                        is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = viewToShow.displayModel }
+                        is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = viewToShow.displayModel }
+                        is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = viewToShow.displayModel }
+                        is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.FBLeagueSchedule -> {
                             if (lastView is SportDecodableModel.FBGameStats) {
-                                _fbLeagueScheduleData.emit(initialFBLeagueScheduleData)
+                                newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = initialFBLeagueScheduleData
                             } else {
-                                _fbLeagueScheduleData.emit(viewToShow.displayModel)
+                                newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = viewToShow.displayModel
                             }
                         }
-                        is SportDecodableModel.FBGameStats -> {
-                            _fbGameStatsData.emit(viewToShow.displayModel)
-                        }
-
-                        is SportDecodableModel.NBAPlayerInfo -> {
-                            _nbaPlayerInfoData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.NBAPlayerStats -> {
-                            _nbaPlayerStatsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.NBAPlayerStandings -> {
-                            _nbaPlayerStandingsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.NBATeamInfo -> {
-                            _nbaTeamInfoData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.NBATeamStats -> {
-                            _nbaTeamStatsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.NBATeamStandings -> {
-                            _nbaTeamStandingsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.NBATeamSchedule -> {
-                            _nbaTeamScheduleData.emit(viewToShow.displayModel)
-                        }
+                        is SportDecodableModel.FBGameStats -> { newDisplayModels[SportDisplayType.FB_GAME_STATS] = viewToShow.displayModel }
+                        // nba
+                        is SportDecodableModel.NBAPlayerInfo -> { newDisplayModels[SportDisplayType.NBA_PLAYER_INFO] = viewToShow.displayModel }
+                        is SportDecodableModel.NBAPlayerStats -> { newDisplayModels[SportDisplayType.NBA_PLAYER_STATS] = viewToShow.displayModel }
+                        is SportDecodableModel.NBAPlayerStandings -> { newDisplayModels[SportDisplayType.NBA_PLAYER_STANDINGS] = viewToShow.displayModel }
+                        is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = viewToShow.displayModel }
+                        is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = viewToShow.displayModel }
+                        is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = viewToShow.displayModel }
+                        is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.NBALeagueSchedule -> {
                             if (lastView is SportDecodableModel.NBAGameStats) {
-                                _nbaLeagueScheduleData.emit(initialNBALeagueScheduleData)
+                                newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = initialNBALeagueScheduleData
                             } else {
-                                _nbaLeagueScheduleData.emit(viewToShow.displayModel)
+                                newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = viewToShow.displayModel
                             }
                         }
-                        is SportDecodableModel.NBAGameStats -> {
-                            _nbaGameStatsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.NBALeagueTournament -> {
-                            _nbaLeagueTournamentData.emit(viewToShow.displayModel)
-                        }
-
-                        is SportDecodableModel.KBOPlayerInfo -> {
-                            _kboPlayerInfoData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.KBOPlayerStats -> {
-                            _kboPlayerStatsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.KBOPlayerStandings -> {
-                            _kboPlayerStandingsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.KBOTeamInfo -> {
-                            _kboTeamInfoData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.KBOTeamStats -> {
-                            _kboTeamStatsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.KBOTeamStandings -> {
-                            _kboTeamStandingsData.emit(viewToShow.displayModel)
-                        }
-//                is SportDecodableModel.KBOTeamSchedule -> {
-//                    _nbaTeamScheduleData.emit(viewToShow.displayModel)
-//                }
+                        is SportDecodableModel.NBAGameStats -> { newDisplayModels[SportDisplayType.NBA_GAME_STATS] = viewToShow.displayModel }
+                        is SportDecodableModel.NBALeagueTournament -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT] = viewToShow.displayModel }
+                        // kbo
+                        is SportDecodableModel.KBOPlayerInfo -> { newDisplayModels[SportDisplayType.KBO_PLAYER_INFO] = viewToShow.displayModel }
+                        is SportDecodableModel.KBOPlayerStats -> { newDisplayModels[SportDisplayType.KBO_PLAYER_STATS] = viewToShow.displayModel }
+                        is SportDecodableModel.KBOPlayerStandings -> { newDisplayModels[SportDisplayType.KBO_PLAYER_STANDINGS] = viewToShow.displayModel }
+                        is SportDecodableModel.KBOTeamInfo -> { newDisplayModels[SportDisplayType.KBO_TEAM_INFO] = viewToShow.displayModel }
+                        is SportDecodableModel.KBOTeamStats -> { newDisplayModels[SportDisplayType.KBO_TEAM_STATS] = viewToShow.displayModel }
+                        is SportDecodableModel.KBOTeamStandings -> { newDisplayModels[SportDisplayType.KBO_TEAM_STANDINGS] = viewToShow.displayModel }
+                        is SportDecodableModel.KBOTeamSchedule -> { newDisplayModels[SportDisplayType.KBO_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.KBOLeagueSchedule -> {
                             if (lastView is SportDecodableModel.KBOGameStats) {
-                                _kboLeagueScheduleData.emit(initialKBOLeagueScheduleData)
+                                newDisplayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE] = initialKBOLeagueScheduleData
                             } else {
-                                _kboLeagueScheduleData.emit(viewToShow.displayModel)
+                                newDisplayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE] = viewToShow.displayModel
                             }
                         }
-                        is SportDecodableModel.KBOGameStats -> {
-                            _kboGameStatsData.emit(viewToShow.displayModel)
-                        }
-
-                        is SportDecodableModel.MLBPlayerInfo -> {
-                            _mlbPlayerInfoData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.MLBPlayerStats -> {
-                            _mlbPlayerStatsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.MLBPlayerStandings -> {
-                            _mlbPlayerStandingsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.MLBTeamInfo -> {
-                            _mlbTeamInfoData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.MLBTeamStats -> {
-                            _mlbTeamStatsData.emit(viewToShow.displayModel)
-                        }
-                        is SportDecodableModel.MLBTeamStandings -> {
-                            _mlbTeamStandingsData.emit(viewToShow.displayModel)
-                        }
+                        is SportDecodableModel.KBOGameStats -> { newDisplayModels[SportDisplayType.KBO_GAME_STATS] = viewToShow.displayModel }
+                        // mlb
+                        is SportDecodableModel.MLBPlayerInfo -> { newDisplayModels[SportDisplayType.MLB_PLAYER_INFO] = viewToShow.displayModel }
+                        is SportDecodableModel.MLBPlayerStats -> { newDisplayModels[SportDisplayType.MLB_PLAYER_STATS] = viewToShow.displayModel }
+                        is SportDecodableModel.MLBPlayerStandings -> { newDisplayModels[SportDisplayType.MLB_PLAYER_STANDINGS] = viewToShow.displayModel }
+                        is SportDecodableModel.MLBTeamInfo -> { newDisplayModels[SportDisplayType.MLB_TEAM_INFO] = viewToShow.displayModel }
+                        is SportDecodableModel.MLBTeamStats -> { newDisplayModels[SportDisplayType.MLB_TEAM_STATS] = viewToShow.displayModel }
+                        is SportDecodableModel.MLBTeamStandings -> { newDisplayModels[SportDisplayType.MLB_TEAM_STANDINGS] = viewToShow.displayModel }
+                        is SportDecodableModel.MLBTeamSchedule -> { newDisplayModels[SportDisplayType.MLB_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.MLBLeagueSchedule -> {
                             if (lastView is SportDecodableModel.MLBGameStats) {
-                                _mlbLeagueScheduleData.emit(initialMLBLeagueScheduleData)
+                                newDisplayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE] = initialMLBLeagueScheduleData
                             } else {
-                                _mlbLeagueScheduleData.emit(viewToShow.displayModel)
+                                newDisplayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE] = viewToShow.displayModel
                             }
                         }
-                        is SportDecodableModel.MLBGameStats -> {
-                            _mlbGameStatsData.emit(viewToShow.displayModel)
-                        }
+                        is SportDecodableModel.MLBGameStats -> { newDisplayModels[SportDisplayType.MLB_GAME_STATS] = viewToShow.displayModel }
 
                         else -> {}
                     }
+                    _displayModels.value = newDisplayModels
 
                     _resultVisibleState.emit(true)
                 }
@@ -1119,6 +781,44 @@ class SearchViewModel @Inject constructor(
                 )
             }
 
+            is SportDecodableModel.KBOPlayerInfo,
+            is SportDecodableModel.KBOTeamInfo-> {
+                val lastGame: KBOGame?
+                val nextGame: KBOGame?
+                if (lastView is SportDecodableModel.KBOPlayerInfo) {
+                    lastGame = lastView.responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                } else {
+                    lastGame = (lastView as SportDecodableModel.KBOTeamInfo).responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                }
+
+                val responseModel = if (gameType == "previous") KBOGameStatsResponseModel(lastGame) else KBOGameStatsResponseModel(nextGame)
+                dataModel = SportDecodableModel.KBOGameStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.kboGameStatsConverter(responseModel)
+                )
+            }
+
+            is SportDecodableModel.MLBPlayerInfo,
+            is SportDecodableModel.MLBTeamInfo-> {
+                val lastGame: MLBGame?
+                val nextGame: MLBGame?
+                if (lastView is SportDecodableModel.MLBPlayerInfo) {
+                    lastGame = lastView.responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                } else {
+                    lastGame = (lastView as SportDecodableModel.MLBTeamInfo).responseModel.lastGame
+                    nextGame = lastView.responseModel.nextGame
+                }
+
+                val responseModel = if (gameType == "previous") MLBGameStatsResponseModel(lastGame) else MLBGameStatsResponseModel(nextGame)
+                dataModel = SportDecodableModel.MLBGameStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.mlbGameStatsConverter(responseModel)
+                )
+            }
+
              else -> return // Make it do nothing
         }
 
@@ -1139,7 +839,7 @@ class SearchViewModel @Inject constructor(
         try {
             when (val lastView = viewStack.value.lastOrNull()) {
                 is SportDecodableModel.FBGameStats -> {
-                    val game = fbGameStatsData.value?.game
+                    val game = (displayModels.value[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel)?.game
                     game?.let {
                         // TODO: Has to add loading
                         val result = searchClient.fetchById(
@@ -1161,8 +861,9 @@ class SearchViewModel @Inject constructor(
                 }
 
                 is SportDecodableModel.NBAGameStats -> {
-                    val gameSummary = nbaGameStatsData.value?.game?.gameSummary
-                    val boxScoreTraditional = nbaGameStatsData.value?.game?.boxScoreTraditional
+                    val game = (displayModels.value[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel)?.game
+                    val gameSummary = game?.gameSummary
+                    val boxScoreTraditional = game?.boxScoreTraditional
                     gameSummary?.let { gameSummary ->
                         boxScoreTraditional?.let { boxScoreTraditional->
                             // TODO: Has to add loading
@@ -1198,7 +899,7 @@ class SearchViewModel @Inject constructor(
 
         when (val lastView = viewStack.value.lastOrNull()) {
             is SportDecodableModel.NBALeagueTournament-> {
-                val responseModel = NBAGameScheduleResponseModel(scheduledMonths = emptyList(), schedule = gameList)
+                val responseModel = NBAGameScheduleResponseModel(scheduledMonths = emptyList(), schedule = modelConverter.nbaGameListToGameScheduleListConverter(gameList))
                 dataModel = SportDecodableModel.NBATeamSchedule(
                     responseModel = responseModel,
                     displayModel = modelConverter.nbaTeamScheduleConverter(responseModel)
@@ -1227,163 +928,65 @@ class SearchViewModel @Inject constructor(
         _viewStack.emit(stack)
     }
 
-    private suspend fun updateMainDisplayModel(data: SportDecodableModel, shouldReset: Boolean = true) {
+    private fun updateMainDisplayModel(data: SportDecodableModel, shouldReset: Boolean = true) {
         if (shouldReset) {
-            _fbPlayerInfoData.emit(null)
-            _fbPlayerStatsData.emit(null)
-            _fbPlayerStandingsData.emit(null)
-            _fbTeamInfoData.emit(null)
-            _fbTeamStatsData.emit(null)
-            _fbTeamStandingsData.emit(null)
-            _fbTeamScheduleData.emit(null)
-            _fbLeagueScheduleData.emit(null)
-            _fbGameStatsData.emit(null)
-
-            _nbaPlayerInfoData.emit(null)
-            _nbaPlayerStatsData.emit(null)
-            _nbaPlayerStandingsData.emit(null)
-            _nbaTeamInfoData.emit(null)
-            _nbaTeamStatsData.emit(null)
-            _nbaTeamStandingsData.emit(null)
-            _nbaTeamScheduleData.emit(null)
-            _nbaLeagueScheduleData.emit(null)
-            _nbaGameStatsData.emit(null)
-            _nbaLeagueTournamentData.emit(null)
-
-            _kboPlayerInfoData.emit(null)
-            _kboPlayerStatsData.emit(null)
-            _kboPlayerStandingsData.emit(null)
-            _kboTeamInfoData.emit(null)
-            _kboTeamStatsData.emit(null)
-            _kboTeamStandingsData.emit(null)
-            _kboLeagueScheduleData.emit(null)
-            _kboGameStatsData.emit(null)
-
-            _mlbPlayerInfoData.emit(null)
-            _mlbPlayerStatsData.emit(null)
-            _mlbPlayerStandingsData.emit(null)
-            _mlbTeamInfoData.emit(null)
-            _mlbTeamStatsData.emit(null)
-            _mlbTeamStandingsData.emit(null)
-            _mlbLeagueScheduleData.emit(null)
-            _mlbGameStatsData.emit(null)
+            _displayModels.value = initialMap
         }
 
+        val newDisplayModels = displayModels.value.toMutableMap()
         when (data) {
-            is SportDecodableModel.FBPlayerInfo -> {
-                _fbPlayerInfoData.emit(data.displayModel)
-            }
-            is SportDecodableModel.FBPlayerStats -> {
-                _fbPlayerStatsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.FBPlayerStandings -> {
-                _fbPlayerStandingsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.FBTeamInfo -> {
-                _fbTeamInfoData.emit(data.displayModel)
-            }
-            is SportDecodableModel.FBTeamStats -> {
-                _fbTeamStatsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.FBTeamStandings -> {
-                _fbTeamStandingsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.FBTeamSchedule -> {
-                _fbTeamScheduleData.emit(data.displayModel)
-            }
-            is SportDecodableModel.FBLeagueSchedule -> {
-                _fbLeagueScheduleData.emit(data.displayModel)
-            }
-            is SportDecodableModel.FBGameStats -> {
-                _fbGameStatsData.emit(data.displayModel)
-            }
-
-            is SportDecodableModel.NBAPlayerInfo -> {
-                _nbaPlayerInfoData.emit(data.displayModel)
-            }
-            is SportDecodableModel.NBAPlayerStats -> {
-                _nbaPlayerStatsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.NBAPlayerStandings -> {
-                _nbaPlayerStandingsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.NBATeamInfo -> {
-                _nbaTeamInfoData.emit(data.displayModel)
-            }
-            is SportDecodableModel.NBATeamStats -> {
-                _nbaTeamStatsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.NBATeamStandings -> {
-                _nbaTeamStandingsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.NBATeamSchedule -> {
-                _nbaTeamScheduleData.emit(data.displayModel)
-            }
-            is SportDecodableModel.NBALeagueSchedule -> {
-                _nbaLeagueScheduleData.emit(data.displayModel)
-            }
-            is SportDecodableModel.NBAGameStats -> {
-                _nbaGameStatsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.NBALeagueTournament -> {
-                _nbaLeagueTournamentData.emit(data.displayModel)
-            }
-
-            is SportDecodableModel.KBOPlayerInfo -> {
-                _kboPlayerInfoData.emit(data.displayModel)
-            }
-            is SportDecodableModel.KBOPlayerStats -> {
-                _kboPlayerStatsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.KBOPlayerStandings -> {
-                _kboPlayerStandingsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.KBOTeamInfo -> {
-                _kboTeamInfoData.emit(data.displayModel)
-            }
-            is SportDecodableModel.KBOTeamStats -> {
-                _kboTeamStatsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.KBOTeamStandings -> {
-                _kboTeamStandingsData.emit(data.displayModel)
-            }
-//                is SportDecodableModel.KBOTeamSchedule -> {
-//                    _nbaTeamScheduleData.emit(data.displayModel)
-//                }
-            is SportDecodableModel.KBOLeagueSchedule -> {
-                _kboLeagueScheduleData.emit(data.displayModel)
-            }
-            is SportDecodableModel.KBOGameStats -> {
-                _kboGameStatsData.emit(data.displayModel)
-            }
-
-            is SportDecodableModel.MLBPlayerInfo -> {
-                _mlbPlayerInfoData.emit(data.displayModel)
-            }
-            is SportDecodableModel.MLBPlayerStats -> {
-                _mlbPlayerStatsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.MLBPlayerStandings -> {
-                _mlbPlayerStandingsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.MLBTeamInfo -> {
-                _mlbTeamInfoData.emit(data.displayModel)
-            }
-            is SportDecodableModel.MLBTeamStats -> {
-                _mlbTeamStatsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.MLBTeamStandings -> {
-                _mlbTeamStandingsData.emit(data.displayModel)
-            }
-            is SportDecodableModel.MLBLeagueSchedule -> {
-                _mlbLeagueScheduleData.emit(data.displayModel)
-            }
-            is SportDecodableModel.MLBGameStats -> {
-                _mlbGameStatsData.emit(data.displayModel)
-            }
+            // football
+            is SportDecodableModel.FBPlayerInfo -> { newDisplayModels[SportDisplayType.FB_PLAYER_INFO] = data.displayModel }
+            is SportDecodableModel.FBPlayerStats -> { newDisplayModels[SportDisplayType.FB_PLAYER_STATS] = data.displayModel }
+            is SportDecodableModel.FBPlayerStandings -> { newDisplayModels[SportDisplayType.FB_PLAYER_STANDINGS] = data.displayModel }
+            is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = data.displayModel }
+            is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = data.displayModel }
+            is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = data.displayModel }
+            is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = data.displayModel }
+            is SportDecodableModel.FBLeagueSchedule -> { newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = data.displayModel }
+            is SportDecodableModel.FBGameStats -> { newDisplayModels[SportDisplayType.FB_GAME_STATS] = data.displayModel }
+            // nba
+            is SportDecodableModel.NBAPlayerInfo -> { newDisplayModels[SportDisplayType.NBA_PLAYER_INFO] = data.displayModel }
+            is SportDecodableModel.NBAPlayerStats -> { newDisplayModels[SportDisplayType.NBA_PLAYER_STATS] = data.displayModel }
+            is SportDecodableModel.NBAPlayerStandings -> { newDisplayModels[SportDisplayType.NBA_PLAYER_STANDINGS] = data.displayModel }
+            is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
+            is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
+            is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
+            is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
+            is SportDecodableModel.NBALeagueSchedule -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel }
+            is SportDecodableModel.NBAGameStats -> { newDisplayModels[SportDisplayType.NBA_GAME_STATS] = data.displayModel }
+            is SportDecodableModel.NBALeagueTournament -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT] = data.displayModel }
+            // kbo
+            is SportDecodableModel.KBOPlayerInfo -> { newDisplayModels[SportDisplayType.KBO_PLAYER_INFO] = data.displayModel }
+            is SportDecodableModel.KBOPlayerStats -> { newDisplayModels[SportDisplayType.KBO_PLAYER_STATS] = data.displayModel }
+            is SportDecodableModel.KBOPlayerStandings -> { newDisplayModels[SportDisplayType.KBO_PLAYER_STANDINGS] = data.displayModel }
+            is SportDecodableModel.KBOTeamInfo -> { newDisplayModels[SportDisplayType.KBO_TEAM_INFO] = data.displayModel }
+            is SportDecodableModel.KBOTeamStats -> { newDisplayModels[SportDisplayType.KBO_TEAM_STATS] = data.displayModel }
+            is SportDecodableModel.KBOTeamStandings -> { newDisplayModels[SportDisplayType.KBO_TEAM_STANDINGS] = data.displayModel }
+            is SportDecodableModel.KBOTeamSchedule -> { newDisplayModels[SportDisplayType.KBO_TEAM_SCHEDULE] = data.displayModel }
+            is SportDecodableModel.KBOLeagueSchedule -> { newDisplayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE] = data.displayModel }
+            is SportDecodableModel.KBOGameStats -> { newDisplayModels[SportDisplayType.KBO_GAME_STATS] = data.displayModel }
+            // mlb
+            is SportDecodableModel.MLBPlayerInfo -> { newDisplayModels[SportDisplayType.MLB_PLAYER_INFO] = data.displayModel }
+            is SportDecodableModel.MLBPlayerStats -> { newDisplayModels[SportDisplayType.MLB_PLAYER_STATS] = data.displayModel }
+            is SportDecodableModel.MLBPlayerStandings -> { newDisplayModels[SportDisplayType.MLB_PLAYER_STANDINGS] = data.displayModel }
+            is SportDecodableModel.MLBTeamInfo -> { newDisplayModels[SportDisplayType.MLB_TEAM_INFO] = data.displayModel }
+            is SportDecodableModel.MLBTeamStats -> { newDisplayModels[SportDisplayType.MLB_TEAM_STATS] = data.displayModel }
+            is SportDecodableModel.MLBTeamStandings -> { newDisplayModels[SportDisplayType.MLB_TEAM_STANDINGS] = data.displayModel }
+            is SportDecodableModel.MLBTeamSchedule -> { newDisplayModels[SportDisplayType.MLB_TEAM_SCHEDULE] = data.displayModel }
+            is SportDecodableModel.MLBLeagueSchedule -> { newDisplayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE] = data.displayModel }
+            is SportDecodableModel.MLBGameStats -> { newDisplayModels[SportDisplayType.MLB_GAME_STATS] = data.displayModel }
 
             else -> {}
         }
+        _displayModels.value = newDisplayModels
+    }
+
+    private fun addViewStack(data: SportDecodableModel) {
+        val stack = viewStack.value.toMutableList()
+        stack.add(data)
+        _viewStack.value = stack
+        _poppedView.value = null
     }
 }
 

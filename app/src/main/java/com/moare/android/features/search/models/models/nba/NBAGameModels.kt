@@ -1,19 +1,20 @@
 package com.moare.android.features.search.models.models.nba
 
+import com.moare.android.features.search.models.models.common.GameForSchedule
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class NBAGame(
-    val boxScoreTraditional: NBABoxScoreTraditional?,
-    val gameInfo: NBAGameInfo?,
-    val gameSummary: NBAGameSummary?,
+    val boxScoreTraditional: NBABoxScoreTraditional? = null,
+    val gameInfo: NBAGameInfo? = null,
+    val gameSummary: NBAGameSummary? = null,
     val inativePlayers: List<NBAPlayerForInactive> = emptyList(),
-    val lastMeeting: NBALastMeeting?,
+    val lastMeeting: NBALastMeeting? = null,
     val lineScore: List<NBALineScore> = emptyList(),
     val officials: List<NBAOfficial> = emptyList(),
-    val otherStats: List<NBAOtherStats> = emptyList(),
-    val seasonSeries: NBASeasonSeries?
+    val otherStats: List<NBAOtherStats>? = null,
+    val seasonSeries: NBASeasonSeries? = null
 )
 
 @Serializable
@@ -322,3 +323,18 @@ data class NBASeasonSeries(
     val seriesLeader: String get() = _seriesLeader ?: ""
     val visitorTeamId: Int get() = _visitorTeamId ?: 0
 }
+
+typealias NBAGameForSchedule = GameForSchedule<NBAGameSummary>
+
+
+
+
+
+
+
+
+
+
+
+
+

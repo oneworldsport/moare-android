@@ -4,7 +4,7 @@ import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -39,7 +39,7 @@ abstract class BaseTeamStandingsViewModel<I, T>(
         // init data
         _displayModel.value = displayModel
 
-        if (displayModel is DisplayModelBase) {
+        if (displayModel is SportDisplayModel) {
             loadDictionaries(displayModel.leagueId)
 
             val keywords = displayModel.keywords
@@ -71,8 +71,17 @@ abstract class BaseTeamStandingsViewModel<I, T>(
             Constants.Ids.LIGUE1 -> {
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
             }
+            Constants.Ids.SERIEA -> {
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_TEAM_DIC)
+            }
             Constants.Ids.NBA -> {
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
+            }
+            Constants.Ids.KBO -> {
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.KBO_TEAM_DIC)
+            }
+            Constants.Ids.MLB -> {
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.MLB_TEAM_DIC)
             }
             else -> {}
         }

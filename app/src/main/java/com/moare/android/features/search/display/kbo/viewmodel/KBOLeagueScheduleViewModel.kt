@@ -9,9 +9,11 @@ import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.viewmodel.BaseScheduleViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
+import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOGame
+import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +27,7 @@ sealed class KBOLeagueScheduleIntent {
     data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int, val updateViewStack: (SportDecodableModel.KBOLeagueSchedule) -> Unit) : KBOLeagueScheduleIntent()
     data class SelectDay(val day: DayInfo, val selectedIndex: Int) : KBOLeagueScheduleIntent()
     data object ToggleAllResult : KBOLeagueScheduleIntent()
-    data class UpdateResultOpenedState(val gameCode: String, val isOpened: Boolean) : KBOLeagueScheduleIntent()
+    data class UpdateResultOpenedState(val itemKey: String, val isOpened: Boolean) : KBOLeagueScheduleIntent() // NOTE: 더블헤더가 있는 날에 취소된 경기가 있으면 gameId가 같은 경우가 있어 gameId 대신에 itemKey를 사용
     data class UpdateGamesData(
         val kboLeagueScheduleData: SportDecodableModel.KBOLeagueSchedule,
         val kboGameStatsData: SportDecodableModel.KBOGameStats,
@@ -41,8 +43,8 @@ class KBOLeagueScheduleViewModel @Inject constructor(
     /* ---------------------
        data state
        --------------------- */
-    private val _filteredGames = MutableStateFlow<Map<Int, List<KBOGame>>>(emptyMap())
-    val filteredGames: StateFlow<Map<Int, List<KBOGame>>> = _filteredGames
+    private val _filteredGames = MutableStateFlow<Map<Int, List<KBOGameForSchedule>>>(emptyMap())
+    val filteredGames: StateFlow<Map<Int, List<KBOGameForSchedule>>> = _filteredGames
 
     /* ---------------------
        ui state
@@ -56,7 +58,7 @@ class KBOLeagueScheduleViewModel @Inject constructor(
             is KBOLeagueScheduleIntent.SelectYearMonth -> selectYearMonth(intent.yearMonth, intent.selectedIndex, intent.updateViewStack)
             is KBOLeagueScheduleIntent.SelectDay -> selectDay(intent.day, intent.selectedIndex)
             is KBOLeagueScheduleIntent.ToggleAllResult -> toggleAllResult()
-            is KBOLeagueScheduleIntent.UpdateResultOpenedState -> updateResultOpenedState(intent.gameCode, intent.isOpened)
+            is KBOLeagueScheduleIntent.UpdateResultOpenedState -> updateResultOpenedState(intent.itemKey, intent.isOpened)
             is KBOLeagueScheduleIntent.UpdateGamesData -> updateGamesData(intent.kboLeagueScheduleData, intent.kboGameStatsData, intent.updateViewStack)
         }
     }
@@ -75,7 +77,7 @@ class KBOLeagueScheduleViewModel @Inject constructor(
         _yearMonthList.value = displayModel.yearMonthList
 
         // select default yearMonth
-        displayModel.games.firstOrNull()?.gameInfo?.date?.let {
+        displayModel.games.firstOrNull()?.date?.let {
             val defaultYearMonth = CalendarUtil.formatDate(it, TimeFormatType.YEAR_MONTH)
             val defaultYearMonthIndex = yearMonthList.value.withIndex().first { (_, value) -> value == defaultYearMonth }
             _selectedYearMonth.value = defaultYearMonth
@@ -118,14 +120,10 @@ class KBOLeagueScheduleViewModel @Inject constructor(
                 var newDay = day
 
                 val games = displayModel.value?.games?.filter { game ->
-                    if (game.gameInfo?.date != null) {
-                        CalendarUtil.isSameDate(game.gameInfo.date, selectedYearMonth.value, day.day)
-                    } else {
-                        false
-                    }
+                    CalendarUtil.isSameDate(game.date, selectedYearMonth.value, day.day)
                 }
 
-                isResultOpenedStateList.putAll((games ?: emptyList()).associate { (it.gameInfo?.gameId ?: "") to isAllResultOpened.value })
+                isResultOpenedStateList.putAll((games ?: emptyList()).associate { (it.itemKey) to isAllResultOpened.value })
 
                 newFilteredGames[index] = games ?: emptyList()
 
@@ -208,9 +206,9 @@ class KBOLeagueScheduleViewModel @Inject constructor(
         }
     }
 
-    private fun updateResultOpenedState(gameCode: String, isOpened: Boolean) {
+    private fun updateResultOpenedState(itemKey: String, isOpened: Boolean) {
         val newMap = gameResultOpenedStateList.value.toMutableMap()
-        newMap[gameCode] = isOpened
+        newMap[itemKey] = isOpened
         _gameResultOpenedStateList.value = newMap
     }
 
@@ -219,8 +217,10 @@ class KBOLeagueScheduleViewModel @Inject constructor(
         kboGameStatsData: SportDecodableModel.KBOGameStats,
         updateViewStack: (SportDecodableModel.KBOLeagueSchedule) -> Unit
     ) {
+        val game = kboGameStatsData.displayModel.game
+        val itemKey = "${game.gameInfo?.date?.split("+")?.firstOrNull() ?: ""}#${game.gameInfo?.gameId ?: ""}"
         val newGames = kboLeagueScheduleData.displayModel.games.map {
-            if (it.gameInfo?.gameId == kboGameStatsData.displayModel.game.gameInfo?.gameId) kboGameStatsData.displayModel.game else it
+            if (it.itemKey == itemKey) ModelConverter().kboGameToGameScheduleConverter(game) else it
         }
 
         var newData = kboLeagueScheduleData
@@ -229,11 +229,7 @@ class KBOLeagueScheduleViewModel @Inject constructor(
 
         val newFilteredGames = filteredGames.value.toMutableMap()
         newFilteredGames[selectedDayIndex.value] = newData.displayModel.games.filter { game ->
-            if (game.gameInfo?.gameId != null) {
-                CalendarUtil.isSameDate(game.gameInfo.gameId, selectedYearMonth.value, selectedDayIndex.value + 1)
-            } else {
-                false
-            }
+            CalendarUtil.isSameDate(game.date, selectedYearMonth.value, selectedDayIndex.value + 1)
         }
 
         _filteredGames.value = newFilteredGames

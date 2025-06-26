@@ -2,7 +2,7 @@ package com.moare.android.features.search.models.displaymodels.nba
 
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
-import com.moare.android.features.search.models.displaymodels.DisplayModelBase
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.models.nba.NBATeamInfo
 import com.moare.android.features.search.models.models.nba.NBATeamStats
@@ -19,4 +19,4 @@ data class NBATeamInfoDisplayModel(
     val stats: NBATeamStats?,
     val lastGame: NBAGame?,
     val nextGame: NBAGame?
-) : DisplayModelBase
+) : SportDisplayModel

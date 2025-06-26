@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.amazonaws.auth.CognitoCachingCredentialsProvider
 import com.amazonaws.auth.CognitoCredentialsProvider
 import com.amazonaws.regions.Regions
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.util.AWSUtils
 import com.moare.android.core.util.EnNameTranslationUtils
 import dagger.hilt.android.HiltAndroidApp
@@ -38,79 +39,96 @@ class MyApplication : Application() {
                 eTagKey = stringPreferencesKey("mainNoticeETag")
             )
 
-            // epl dictionary
+            // dictionary
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,
-                category = "epl_player",
+                category = Constants.Keys.EPL_PLAYER_DIC,
                 s3Key = "name_dictionary/epl_player_name_dictionary.json",
                 eTagKey = stringPreferencesKey("eplPlayerNameDictionaryETag")
             )
-
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,
-                category = "epl_team",
+                category = Constants.Keys.EPL_TEAM_DIC,
                 s3Key = "name_dictionary/epl_team_name_dictionary.json",
                 eTagKey = stringPreferencesKey("eplTeamNameDictionaryETag")
             )
-
-            // nba dictionary
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,
-                category = "nba_player",
+                category = Constants.Keys.NBA_PLAYER_DIC,
                 s3Key = "name_dictionary/nba_player_name_dictionary.json",
                 eTagKey = stringPreferencesKey("nbaPlayerNameDictionaryETag")
             )
-
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,
-                category = "nba_team",
+                category = Constants.Keys.NBA_TEAM_DIC,
                 s3Key = "name_dictionary/nba_team_name_dictionary.json",
                 eTagKey = stringPreferencesKey("nbaTeamNameDictionaryETag")
             )
-
-            // laliga dictionary
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,
-                category = "laliga_player",
+                category = Constants.Keys.KBO_TEAM_DIC,
+                s3Key = "name_dictionary/kbo_team_name_dictionary.json",
+                eTagKey = stringPreferencesKey("kboTeamNameDictionaryETag")
+            )
+            AWSUtils.checkNameDictionary(
+                context = this@MyApplication,
+                category = Constants.Keys.MLB_PLAYER_DIC,
+                s3Key = "name_dictionary/mlb_player_name_dictionary.json",
+                eTagKey = stringPreferencesKey("mlbPlayerNameDictionaryETag")
+            )
+            AWSUtils.checkNameDictionary(
+                context = this@MyApplication,
+                category = Constants.Keys.MLB_TEAM_DIC,
+                s3Key = "name_dictionary/mlb_team_name_dictionary.json",
+                eTagKey = stringPreferencesKey("mlbTeamNameDictionaryETag")
+            )
+            AWSUtils.checkNameDictionary(
+                context = this@MyApplication,
+                category = Constants.Keys.LALIGA_PLAYER_DIC,
                 s3Key = "name_dictionary/laliga_player_name_dictionary.json",
                 eTagKey = stringPreferencesKey("laligaPlayerNameDictionaryETag")
             )
-
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,
-                category = "epl_team",
-                s3Key = "name_dictionary/epl_team_name_dictionary.json",
-                eTagKey = stringPreferencesKey("eplTeamNameDictionaryETag")
+                category = Constants.Keys.LALIGA_TEAM_DIC,
+                s3Key = "name_dictionary/laliga_team_name_dictionary.json",
+                eTagKey = stringPreferencesKey("laligaTeamNameDictionaryETag")
             )
-
-            // bundesliga dictionary
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,
-                category = "bundesliga_player",
+                category = Constants.Keys.BUNDESLIGA_PLAYER_DIC,
                 s3Key = "name_dictionary/bundesliga_player_name_dictionary.json",
                 eTagKey = stringPreferencesKey("bundesligaPlayerNameDictionaryETag")
             )
-
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,
-                category = "bundesliga_team",
+                category = Constants.Keys.BUNDESLIGA_TEAM_DIC,
                 s3Key = "name_dictionary/bundesliga_team_name_dictionary.json",
                 eTagKey = stringPreferencesKey("bundesligaTeamNameDictionaryETag")
             )
-
-            // ligue1 dictionary
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,
-                category = "ligue1_player",
+                category = Constants.Keys.LIGUE1_PLAYER_DIC,
                 s3Key = "name_dictionary/ligue1_player_name_dictionary.json",
                 eTagKey = stringPreferencesKey("ligue1PlayerNameDictionaryETag")
             )
-
             AWSUtils.checkNameDictionary(
                 context = this@MyApplication,
-                category = "ligue1_team",
+                category = Constants.Keys.LIGUE1_TEAM_DIC,
                 s3Key = "name_dictionary/ligue1_team_name_dictionary.json",
                 eTagKey = stringPreferencesKey("ligue1TeamNameDictionaryETag")
+            )
+            AWSUtils.checkNameDictionary(
+                context = this@MyApplication,
+                category = Constants.Keys.SERIEA_PLAYER_DIC,
+                s3Key = "name_dictionary/seriea_player_name_dictionary.json",
+                eTagKey = stringPreferencesKey("serieaPlayerNameDictionaryETag")
+            )
+            AWSUtils.checkNameDictionary(
+                context = this@MyApplication,
+                category = Constants.Keys.SERIEA_TEAM_DIC,
+                s3Key = "name_dictionary/seriea_team_name_dictionary.json",
+                eTagKey = stringPreferencesKey("serieaTeamNameDictionaryETag")
             )
         }
 

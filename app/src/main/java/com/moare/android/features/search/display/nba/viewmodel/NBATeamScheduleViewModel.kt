@@ -8,6 +8,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamSch
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.nba.NBAGame
+import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,7 @@ import javax.inject.Inject
 sealed class NBATeamScheduleIntent {
     data class InitData(val displayModel: NBATeamScheduleDisplayModel) : NBATeamScheduleIntent()
     data object ToggleAllResult : NBATeamScheduleIntent()
-    data class UpdateResultOpenedState(val gameCode: String, val isOpened: Boolean) : NBATeamScheduleIntent()
+    data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : NBATeamScheduleIntent()
 }
 
 @HiltViewModel
@@ -27,8 +28,8 @@ class NBATeamScheduleViewModel @Inject constructor(
     /* ---------------------
        data state
        --------------------- */
-    private val _games = MutableStateFlow<List<NBAGame>>(emptyList())
-    val games: StateFlow<List<NBAGame>> = _games
+    private val _games = MutableStateFlow<List<NBAGameForSchedule>>(emptyList())
+    val games: StateFlow<List<NBAGameForSchedule>> = _games
 
     /* ---------------------
        ui state
@@ -40,7 +41,7 @@ class NBATeamScheduleViewModel @Inject constructor(
         when (intent) {
             is NBATeamScheduleIntent.InitData -> initData(intent.displayModel)
             is NBATeamScheduleIntent.ToggleAllResult -> toggleAllResult()
-            is NBATeamScheduleIntent.UpdateResultOpenedState -> updateResultOpenedState(intent.gameCode, intent.isOpened)
+            is NBATeamScheduleIntent.UpdateResultOpenedState -> updateResultOpenedState(intent.gameId, intent.isOpened)
         }
     }
 
@@ -53,7 +54,7 @@ class NBATeamScheduleViewModel @Inject constructor(
         // init data
         _games.value = displayModel.games
 
-        val gameResultOpenedStateList = games.value.associate { (it.gameSummary?.gameCode ?: "") to false }
+        val gameResultOpenedStateList = games.value.associate { (it.gameId) to false }
         _gameResultOpenedStateList.value = gameResultOpenedStateList
     }
 
@@ -66,9 +67,9 @@ class NBATeamScheduleViewModel @Inject constructor(
         _gameResultOpenedStateList.value = gameResultOpenedStateList.value.mapValues { newState }
     }
 
-    private fun updateResultOpenedState(gameCode: String, isOpened: Boolean) {
+    private fun updateResultOpenedState(gameId: String, isOpened: Boolean) {
         val newMap = gameResultOpenedStateList.value.toMutableMap()
-        newMap[gameCode] = isOpened
+        newMap[gameId] = isOpened
         _gameResultOpenedStateList.value = newMap
     }
 }

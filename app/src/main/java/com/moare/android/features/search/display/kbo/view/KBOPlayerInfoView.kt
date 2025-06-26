@@ -285,8 +285,7 @@ fun KBOPlayerInfoSecondItem(
             // TODO: "소속팀" 라벨 표시 필요
             URLImage(
                 url = KBOUtil.teamLogoUrl(player.teamId),
-                modifier = Modifier.alpha(contentsAlpha),
-                isSvg = true
+                modifier = Modifier.alpha(contentsAlpha)
             )
 
             Text(
@@ -721,8 +720,8 @@ fun KBOPlayerInfoSeventhItem(
             )
 
             lastGame?.let {
-                val homeTeamScore = it.lineScore.home.r.toInt()
-                val awayTeamScore = it.lineScore.away.r.toInt()
+                val homeTeamScore = it.lineScore?.home?.r?.toIntOrNull() ?: 0
+                val awayTeamScore = it.lineScore?.away?.r?.toIntOrNull() ?: 0
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
