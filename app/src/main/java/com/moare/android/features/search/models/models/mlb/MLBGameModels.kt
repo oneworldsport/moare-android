@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MLBGame(
-    val boxScore: MLBGameBoxscore? = null,
+    val boxscore: MLBGameBoxscore? = null,
     val decisions: MLBGameDecisions? = null,
     val game: MLBGameData,
     val gameInfo: MLBGameInfo,
@@ -77,11 +77,11 @@ data class MLBGameBoxscoreTeamPlayer(
     val gameStatus: MLBGameBoxscorePlayerStatus,
     @SerialName("jerseyNumber") private val _jerseyNumber: String? = null,
     @SerialName("parentTeamId") private val _parentTeamId: Int? = null,
-    val person: MLBFullNameObj,
-    val position: MLBAbbreviationCodeObj,
-    val seasonStats: MLBGameBoxscoreStats,
-    val stats: MLBGameBoxscoreStats,
-    val status: MLBCodeObj,
+    val person: MLBFullNameObj? = null,
+    val position: MLBAbbreviationCodeObj? = null,
+    val seasonStats: MLBGameBoxscoreStats? = null,
+    val stats: MLBGameBoxscoreStats? = null,
+    val status: MLBCodeObj? = null,
     @SerialName("battingOrder") private val _battingOrder: String? = null,
     @SerialName("allPositions") private val _allPositions: List<MLBAbbreviationCodeObj>? = null,
 ) {

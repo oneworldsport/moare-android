@@ -50,7 +50,7 @@ class KBOTeamScheduleViewModel @Inject constructor(
         // init data
         _games.value = displayModel.games
 
-        val gameResultOpenedStateList = games.value.associate { (it.gameId) to false }
+        val gameResultOpenedStateList = games.value.associate { (it.itemKey) to false }
         _gameResultOpenedStateList.value = gameResultOpenedStateList
     }
 

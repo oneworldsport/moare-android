@@ -23,11 +23,11 @@ abstract class BaseGameStatsViewModel<I, T>(
     /* ---------------------
        ui state
        --------------------- */
-    protected var _firstSelectedIndex = MutableStateFlow(0)
-    val firstSelectedIndex: StateFlow<Int> = _firstSelectedIndex
+    protected var _firstCategorySelectedIndex = MutableStateFlow(0)
+    val firstCategorySelectedIndex: StateFlow<Int> = _firstCategorySelectedIndex
 
-    protected var _secondSelectedIndex = MutableStateFlow(0)
-    val secondSelectedIndex: StateFlow<Int> = _secondSelectedIndex
+    protected var _secondCategorySelectedIndex = MutableStateFlow(0)
+    val secondCategorySelectedIndex: StateFlow<Int> = _secondCategorySelectedIndex
 
     protected var _selectedTeamIndex = MutableStateFlow(0)
     val selectedTeamIndex: StateFlow<Int> = _selectedTeamIndex
@@ -43,8 +43,8 @@ abstract class BaseGameStatsViewModel<I, T>(
         // init with default value
         _displayDataState.value = ApiFetchState.Idle
 
-        _firstSelectedIndex.value = 0
-        _secondSelectedIndex.value = 0
+        _firstCategorySelectedIndex.value = 0
+        _secondCategorySelectedIndex.value = 0
         _selectedTeamIndex.value = 0
 
         shouldScrollCategory = false
@@ -100,7 +100,7 @@ abstract class BaseGameStatsViewModel<I, T>(
 
     open fun selectSecondCategory(index: Int) {
         shouldScrollCategory = false
-        _secondSelectedIndex.value = index
+        _secondCategorySelectedIndex.value = index
     }
 
     open fun selectTeam(index: Int) {

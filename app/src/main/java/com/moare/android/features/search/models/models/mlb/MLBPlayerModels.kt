@@ -128,7 +128,7 @@ data class MLBPlayerFieldingStats(
     @SerialName("gamesPlayed") private val _gamesPlayed: Int? = null,
     @SerialName("gamesStarted") private val _gamesStarted: Int? = null,
     @SerialName("innings") private val _innings: String? = null,
-    val position: MLBPlayerPosition,
+    val position: MLBPlayerPosition? = null,
     @SerialName("putOuts") private val _putOuts: Int? = null,
     @SerialName("rangeFactorPer9Inn") private val _rangeFactorPer9Inn: String? = null,
     @SerialName("rangeFactorPerGame") private val _rangeFactorPerGame: String? = null,

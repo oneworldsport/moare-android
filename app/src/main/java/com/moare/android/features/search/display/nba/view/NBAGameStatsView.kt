@@ -59,11 +59,7 @@ import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsInten
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
 import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
 import com.moare.android.features.search.models.models.nba.NBALineScore
@@ -94,8 +90,8 @@ fun NBAGameStatsView(
        viewmodel state
        --------------------- */
     val displayModel by nbaGameStatsViewModel.displayModel.collectAsState()
-    val firstSelectedIndex by nbaGameStatsViewModel.firstSelectedIndex.collectAsState()
-    val secondSelectedIndex by nbaGameStatsViewModel.secondSelectedIndex.collectAsState()
+    val firstSelectedIndex by nbaGameStatsViewModel.firstCategorySelectedIndex.collectAsState()
+    val secondSelectedIndex by nbaGameStatsViewModel.secondCategorySelectedIndex.collectAsState()
     val season = displayModel?.game?.gameSummary?.season
 
     val poppedView by searchViewModel.poppedView.collectAsState()
@@ -788,7 +784,7 @@ fun NBAGameStatsFirstCategoryList(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val selectedIndex by nbaGameStatsViewModel.firstSelectedIndex.collectAsState()
+    val selectedIndex by nbaGameStatsViewModel.firstCategorySelectedIndex.collectAsState()
 
     val itemWidth = nbaGameStatsViewModel.itemWidth
     val barWidth = nbaGameStatsViewModel.barWidth
@@ -887,7 +883,7 @@ fun NBAGameStatsSecondCategoryList(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val selectedIndex by nbaGameStatsViewModel.secondSelectedIndex.collectAsState()
+    val selectedIndex by nbaGameStatsViewModel.secondCategorySelectedIndex.collectAsState()
 
     /* ---------------------
        animation

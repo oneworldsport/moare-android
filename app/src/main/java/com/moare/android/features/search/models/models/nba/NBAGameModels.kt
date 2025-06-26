@@ -6,15 +6,15 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NBAGame(
-    val boxScoreTraditional: NBABoxScoreTraditional?,
-    val gameInfo: NBAGameInfo?,
-    val gameSummary: NBAGameSummary?,
+    val boxScoreTraditional: NBABoxScoreTraditional? = null,
+    val gameInfo: NBAGameInfo? = null,
+    val gameSummary: NBAGameSummary? = null,
     val inativePlayers: List<NBAPlayerForInactive> = emptyList(),
-    val lastMeeting: NBALastMeeting?,
+    val lastMeeting: NBALastMeeting? = null,
     val lineScore: List<NBALineScore> = emptyList(),
     val officials: List<NBAOfficial> = emptyList(),
     val otherStats: List<NBAOtherStats>? = null,
-    val seasonSeries: NBASeasonSeries?
+    val seasonSeries: NBASeasonSeries? = null
 )
 
 @Serializable

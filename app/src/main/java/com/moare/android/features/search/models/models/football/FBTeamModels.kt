@@ -17,9 +17,9 @@ data class FBTeamStats(
     @SerialName("form") private val _form: String? = null,
     val fixtures: FBTeamStatsFixtures,
     val goals: FBTeamStatsGoals,
-    val biggest: FBTeamStatsBiggest?,
-    @SerialName("clean_sheet") val cleanSheet: FBHomeAwayIntStats?,
-    @SerialName("failed_to_score") val failedToScore: FBHomeAwayIntStats?,
+    val biggest: FBTeamStatsBiggest? = null,
+    @SerialName("clean_sheet") val cleanSheet: FBHomeAwayIntStats? = null,
+    @SerialName("failed_to_score") val failedToScore: FBHomeAwayIntStats? = null,
     val penalty: FBTeamStatsPenalty,
 //    val lineups: List<FBTeamStatsLineups>?,
 //    val cards: FBTeamStatsCards?

@@ -58,6 +58,7 @@ import com.moare.android.features.search.display.football.view.FBTeamInfoView
 import com.moare.android.features.search.display.football.view.FBTeamScheduleView
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
+import com.moare.android.features.search.display.kbo.view.KBOGameStatsView
 import com.moare.android.features.search.display.kbo.view.KBOLeagueScheduleView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerInfoView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerStatsView
@@ -65,6 +66,7 @@ import com.moare.android.features.search.display.kbo.view.KBOTeamInfoView
 import com.moare.android.features.search.display.kbo.view.KBOTeamScheduleView
 import com.moare.android.features.search.display.kbo.view.KBOTeamStandingsView
 import com.moare.android.features.search.display.kbo.view.KBOTeamStatsView
+import com.moare.android.features.search.display.mlb.view.MLBGameStatsView
 import com.moare.android.features.search.display.mlb.view.MLBLeagueScheduleView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerInfoView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerStatsView
@@ -458,10 +460,7 @@ fun SearchView(
                         KBOLeagueScheduleView(data = it as KBOLeagueScheduleDisplayModel)
                     }
                     displayModels[SportDisplayType.KBO_GAME_STATS]?.let {
-//                        KBOGameStatsView(data = it as KBOGameStatsDisplayModel)
-                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-                            Text(StringConstants.viewPreparingAdviseText("'KBO 경기 상세'"))
-                        }
+                        KBOGameStatsView(data = it as KBOGameStatsDisplayModel)
                     }
                     // mlb
                     displayModels[SportDisplayType.MLB_PLAYER_INFO]?.let {
@@ -492,10 +491,7 @@ fun SearchView(
                         MLBLeagueScheduleView(data = it as MLBLeagueScheduleDisplayModel)
                     }
                     displayModels[SportDisplayType.MLB_GAME_STATS]?.let {
-//                        MLBGameStatsView(data = it as MLBGameStatsDisplayModel)
-                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-                            Text(StringConstants.viewPreparingAdviseText("'MLB 경기 상세'"))
-                        }
+                        MLBGameStatsView(data = it as MLBGameStatsDisplayModel)
                     }
                 }
             }

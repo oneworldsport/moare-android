@@ -2,11 +2,8 @@ package com.moare.android.features.search.display.football.viewmodel
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
-import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
@@ -27,7 +24,6 @@ import com.moare.android.features.search.models.models.football.FBPlayerStatsTac
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed class FBGameStatsIntent {
@@ -114,12 +110,12 @@ class FBGameStatsViewModel @Inject constructor(
         val defendCategoriesSize = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES.size
 
         when (index) {
-            0 -> _secondSelectedIndex.value = 0
-            1 -> _secondSelectedIndex.value = attackCategoriesSize
-            2 -> _secondSelectedIndex.value = attackCategoriesSize + defendCategoriesSize
+            0 -> _secondCategorySelectedIndex.value = 0
+            1 -> _secondCategorySelectedIndex.value = attackCategoriesSize
+            2 -> _secondCategorySelectedIndex.value = attackCategoriesSize + defendCategoriesSize
         }
 
-        _firstSelectedIndex.value = index
+        _firstCategorySelectedIndex.value = index
 
         sortPlayers()
     }
@@ -131,9 +127,9 @@ class FBGameStatsViewModel @Inject constructor(
         val defendCategories = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES
 
         when (index) {
-            in attackCategories.indices -> _firstSelectedIndex.value = 0
-            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstSelectedIndex.value = 1
-            else -> _firstSelectedIndex.value = 2
+            in attackCategories.indices -> _firstCategorySelectedIndex.value = 0
+            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstCategorySelectedIndex.value = 1
+            else -> _firstCategorySelectedIndex.value = 2
         }
 
         sortPlayers()
@@ -164,7 +160,7 @@ class FBGameStatsViewModel @Inject constructor(
     override fun sortPlayers() {
         val playerStats = playerStats.value.toMutableList()
 
-        when (secondSelectedIndex.value) {
+        when (secondCategorySelectedIndex.value) {
             0 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.total ?: 0 }
             1 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.penalty?.scored ?: 0 }
             2 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.assists ?: 0 }

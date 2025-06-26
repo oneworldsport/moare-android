@@ -595,9 +595,9 @@ class ModelConverter(
         }
 
         val lastGamePlayerStats = if (response.lastGame?.teams?.home?.id == teamId) {
-            response.lastGame?.boxScore?.teams?.home?.players?.get("ID${info.player.id}")
+            response.lastGame?.boxscore?.teams?.home?.players?.get("ID${info.player.id}")
         } else if (response.lastGame?.teams?.away?.id == teamId) {
-            response.lastGame?.boxScore?.teams?.away?.players?.get("ID${info.player.id}")
+            response.lastGame?.boxscore?.teams?.away?.players?.get("ID${info.player.id}")
         } else {
             null
         }
