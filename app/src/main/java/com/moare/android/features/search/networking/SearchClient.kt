@@ -5,6 +5,8 @@ import com.moare.android.core.networking.ApiHelper
 import com.moare.android.features.search.models.DataModel
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.KeywordInfo
+import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.SportDisplayType
 import dagger.hilt.android.qualifiers.ApplicationContext
 
 //import com.moare.android.features.search.models.DataModelDeserializer
@@ -40,50 +42,49 @@ class SearchClient(
         return DataModel.fromJson(response.string())
     }
 
-    fun fetchFromJson(context: Context, query: String): DataModel {
-        val filePath = when (query) {
-            "손흥민" -> {
-                "football_player_info.json"
-            }
-            "토트넘" -> {
-                "football_team_info.json"
-            }
-            "손흥민 순위" -> {
-                "football_player_standings.json"
-            }
-            "손흥민 기록" -> {
-                "football_player_stats.json"
-            }
-            "토트넘 순위" -> {
-                "football_team_standings.json"
-            }
-            "토트넘 기록" -> {
-                "football_team_stats.json"
-            }
-            "프리미어리그 일정" -> {
-                "football_league_schedule.json"
-            }
-            "토트넘 뉴캐슬 기록" -> {
-                "football_game_stats.json"
-            }
-            "토트넘 일정" -> {
-                "football_team_schedule.json"
-            }
-            "커리" -> {
-                "basketball_player_info.json"
-            }
-            "커리 기록" -> {
-                "basketball_player_stats.json"
-            }
-            "커리 순위" -> {
-                "basketball_player_standings.json"
-            }
-            "워리어스" -> {
-                "basketball_team_info.json"
-            }
-            "워리어스 기록" -> {
-                "basketball_team_stats.json"
-            }
+    fun fetchFromJson(context: Context, viewForTest: SportDisplayType): DataModel {
+        val filePath = when (viewForTest) {
+            // football
+            SportDisplayType.FB_PLAYER_INFO -> { "football_player_info.json" }
+            SportDisplayType.FB_PLAYER_STATS -> { "football_player_stats.json" }
+            SportDisplayType.FB_PLAYER_STANDINGS -> { "football_player_standings.json" }
+            SportDisplayType.FB_TEAM_INFO -> { "football_team_info.json" }
+            SportDisplayType.FB_TEAM_STATS -> { "football_team_stats.json" }
+            SportDisplayType.FB_TEAM_STANDINGS -> { "football_team_standings.json" }
+            SportDisplayType.FB_TEAM_SCHEDULE -> { "football_team_schedule.json" }
+            SportDisplayType.FB_LEAGUE_SCHEDULE -> { "football_league_schedule.json" }
+            SportDisplayType.FB_GAME_STATS -> { "football_game_stats.json" }
+            // nba
+            SportDisplayType.NBA_PLAYER_INFO -> { "nba_player_info.json" }
+            SportDisplayType.NBA_PLAYER_STATS -> { "nba_player_stats.json" }
+            SportDisplayType.NBA_PLAYER_STANDINGS -> { "nba_player_standings.json" }
+            SportDisplayType.NBA_TEAM_INFO -> { "nba_team_info.json" }
+            SportDisplayType.NBA_TEAM_STATS -> { "nba_team_stats.json" }
+            SportDisplayType.NBA_TEAM_STANDINGS -> { "nba_team_standings.json" }
+            SportDisplayType.NBA_TEAM_SCHEDULE -> { "nba_team_schedule.json" }
+            SportDisplayType.NBA_LEAGUE_SCHEDULE -> { "nba_league_schedule.json" }
+            SportDisplayType.NBA_GAME_STATS -> { "nba_game_stats.json" }
+            SportDisplayType.NBA_LEAGUE_TOURNAMENT -> { "nba_league_tournament.json" }
+            // kbo
+            SportDisplayType.KBO_PLAYER_INFO -> { "kbo_player_info.json" }
+            SportDisplayType.KBO_PLAYER_STATS -> { "kbo_player_stats.json" }
+            SportDisplayType.KBO_PLAYER_STANDINGS -> { "kbo_player_standings.json" }
+            SportDisplayType.KBO_TEAM_INFO -> { "kbo_team_info.json" }
+            SportDisplayType.KBO_TEAM_STATS -> { "kbo_team_stats.json" }
+            SportDisplayType.KBO_TEAM_STANDINGS -> { "kbo_team_standings.json" }
+            SportDisplayType.KBO_TEAM_SCHEDULE -> { "kbo_team_schedule.json" }
+            SportDisplayType.KBO_LEAGUE_SCHEDULE -> { "kbo_league_schedule.json" }
+            SportDisplayType.KBO_GAME_STATS -> { "kbo_game_stats.json" }
+            // mlb
+            SportDisplayType.MLB_PLAYER_INFO -> { "mlb_player_info.json" }
+            SportDisplayType.MLB_PLAYER_STATS -> { "mlb_player_stats.json" }
+            SportDisplayType.MLB_PLAYER_STANDINGS -> { "mlb_player_standings.json" }
+            SportDisplayType.MLB_TEAM_INFO -> { "mlb_team_info.json" }
+            SportDisplayType.MLB_TEAM_STATS -> { "mlb_team_stats.json" }
+            SportDisplayType.MLB_TEAM_STANDINGS -> { "mlb_team_standings.json" }
+            SportDisplayType.MLB_TEAM_SCHEDULE -> { "mlb_team_schedule.json" }
+            SportDisplayType.MLB_LEAGUE_SCHEDULE -> { "mlb_league_schedule.json" }
+            SportDisplayType.MLB_GAME_STATS -> { "mlb_game_stats.json" }
             else -> {
                 "football_player_info.json"
             }
@@ -91,12 +92,6 @@ class SearchClient(
 
         val inputStream = context.assets.open(filePath)
         val jsonContent = inputStream.bufferedReader().use { it.readText() }
-
-//        val gson = GsonBuilder()
-//            .registerTypeAdapter(DataModel::class.java, DataModelDeserializer())
-//            .create()
-
-//        return gson.fromJson(jsonContent, DataModel::class.java)
 
         return DataModel.fromJson(jsonContent)
     }

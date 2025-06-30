@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.amazonaws.auth.BasicAWSCredentials
 import com.moare.android.features.search.display.search.SearchView
+import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.theme.MoareAndroidTheme
@@ -32,17 +33,22 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var isSplashFinished by remember { mutableStateOf(false) }
+            val viewForTest: SportDisplayType? = SportDisplayType.FB_PLAYER_INFO
 
             MoareAndroidTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    SearchView()
+                    if (viewForTest != null) {
+                        SearchView(viewForTest = viewForTest)
+                    } else {
+                        SearchView()
 
-                    if (!isSplashFinished) {
-                        SplashView {
-                            isSplashFinished = true
+                        if (!isSplashFinished) {
+                            SplashView {
+                                isSplashFinished = true
+                            }
                         }
                     }
                 }

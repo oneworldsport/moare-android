@@ -132,7 +132,8 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SearchView(
-    searchViewModel: SearchViewModel = hiltViewModel()
+    searchViewModel: SearchViewModel = hiltViewModel(),
+    viewForTest: SportDisplayType? = null
 ) {
     /* ---------------------
        constants
@@ -183,6 +184,12 @@ fun SearchView(
     /* ---------------------
        LaunchedEffect
        --------------------- */
+    LaunchedEffect(viewForTest) {
+        viewForTest?.let {
+            searchViewModel.send(SearchViewModel.Intent.TestSearch(viewForTest))
+        }
+    }
+
     LaunchedEffect(searchState, autoCompleteList) {
         isNoticeVisible = if (searchState) {
             isNoticeOpened = false
