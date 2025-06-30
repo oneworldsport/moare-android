@@ -10,6 +10,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +24,7 @@ import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.theme.MoareAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
@@ -33,7 +35,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var isSplashFinished by remember { mutableStateOf(false) }
-            val viewForTest: SportDisplayType? = SportDisplayType.FB_PLAYER_INFO
+
+            val viewForTest: SportDisplayType? = SportDisplayType.MLB_PLAYER_INFO
 
             MoareAndroidTheme {
                 Surface(
