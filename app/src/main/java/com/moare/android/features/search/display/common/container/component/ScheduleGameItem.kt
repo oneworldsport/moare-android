@@ -99,21 +99,15 @@ fun ScheduleGameItem(
             }
         }
 
-        // Add space to both sides of each score to place the score in the middle
-        Spacer(Modifier.weight(0.3f))
-
         // score
         Text(
             text = state.homeTeamScore.toString(),
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .width(20.dp)
+                .weight(0.8f)
                 .alpha(scoreAlpha),
             color = if (homeTeamScore >= awayTeamScore) MaterialTheme.colors.primary else Color.Black
         )
-
-        // Add space to both sides of each score to place the score in the middle
-        Spacer(Modifier.weight(0.3f))
 
         /* ---------------------
            game info
@@ -187,19 +181,15 @@ fun ScheduleGameItem(
         /* ---------------------
            away
            --------------------- */
-        Spacer(Modifier.weight(0.3f))
-
         // score
         Text(
             text = state.awayTeamScore.toString(),
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .width(20.dp)
+                .weight(0.8f)
                 .alpha(scoreAlpha),
             color = if (awayTeamScore >= homeTeamScore) MaterialTheme.colors.primary else Color.Black
         )
-
-        Spacer(Modifier.weight(0.3f))
 
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),

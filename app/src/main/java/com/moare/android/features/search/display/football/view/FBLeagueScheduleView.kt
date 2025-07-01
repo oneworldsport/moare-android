@@ -103,7 +103,8 @@ fun FBLeagueScheduleView(
                 }
 
                 // 현재 뷰로 뒤로가기를 통해서 왔을때는 달력을 애니메이션 없이 이동
-                // NOTE: 가장 처음에만 적용 안되는 버그 있음. 그 이후부터는 잘됨.
+                // NOTE: - 가장 처음에만 적용 안되는 버그 있음. 그 이후부터는 잘됨.
+                // - NBALeagueScheduleView에서는 작동안해서 일단 다른 뷰에는 추가 안함.
                 shouldAnimateScroll = false
             }
         }
