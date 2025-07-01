@@ -164,13 +164,13 @@ fun ScheduleGameItem(
             }
 
             // game type
-            if (state.shouldShowGameType) {
-//                Text(
-//                    text = state.gameType,
-//                    fontSize = 12.sp,
-//                    fontWeight = FontWeight.Light,
-//                    maxLines = 1,
-//                )
+            if (state.gameType != null && state.shouldShowGameType) {
+                Text(
+                    text = state.gameType,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Light,
+                    maxLines = 1,
+                )
             }
 
             // referee

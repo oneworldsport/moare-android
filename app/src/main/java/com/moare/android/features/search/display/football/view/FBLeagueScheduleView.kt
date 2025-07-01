@@ -57,6 +57,7 @@ fun FBLeagueScheduleView(
     /* ---------------------
        ui state
        --------------------- */
+    var shouldAnimateScroll by remember { mutableStateOf(true) }
 
     /* ---------------------
        viewmodel state
@@ -100,6 +101,10 @@ fun FBLeagueScheduleView(
                         searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
                     })
                 }
+
+                // 현재 뷰로 뒤로가기를 통해서 왔을때는 달력을 애니메이션 없이 이동
+                // NOTE: 가장 처음에만 적용 안되는 버그 있음. 그 이후부터는 잘됨.
+                shouldAnimateScroll = false
             }
         }
     }
@@ -116,13 +121,16 @@ fun FBLeagueScheduleView(
                 selectedYearMonthIndex,
                 selectedDayIndex,
                 yearMonthCalendarScrollTrigger,
-                dayCalendarScrollTrigger
+                dayCalendarScrollTrigger,
+                shouldAnimateScroll
             ),
             isAllResultOpened = isAllResultOpened
         ),
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
                 onSelectYearMonth = { yearMonth, index ->
+                    shouldAnimateScroll = true
+
                     fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.SelectYearMonth(yearMonth, index) { data ->
                         // 현재 구조 콜백 수정 필요?
                         searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))

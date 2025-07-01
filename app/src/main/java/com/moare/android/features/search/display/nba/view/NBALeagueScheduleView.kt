@@ -269,7 +269,7 @@ fun NBALeagueScheduleListItem(
             isCapsuleButtonDisabled = gameStatus != 3,
             date = data.date,
             venue = teamNameDic["venue_${homeTeamId}"] ?: "",
-            gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
+//            gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
             isSvgLogo = true
         ),
         actions = ScheduleGameItemActions(
