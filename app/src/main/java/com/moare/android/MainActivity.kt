@@ -6,10 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,10 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.amazonaws.auth.BasicAWSCredentials
 import com.moare.android.features.search.display.search.SearchView
+import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.theme.MoareAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
@@ -33,16 +37,24 @@ class MainActivity : ComponentActivity() {
         setContent {
             var isSplashFinished by remember { mutableStateOf(false) }
 
+            val viewForTest: SportDisplayType? = SportDisplayType.MLB_PLAYER_INFO
+
             MoareAndroidTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .systemBarsPadding()
+                        .fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    SearchView()
+                    if (viewForTest != null) {
+                        SearchView(viewForTest = viewForTest)
+                    } else {
+                        SearchView()
 
-                    if (!isSplashFinished) {
-                        SplashView {
-                            isSplashFinished = true
+                        if (!isSplashFinished) {
+                            SplashView {
+                                isSplashFinished = true
+                            }
                         }
                     }
                 }

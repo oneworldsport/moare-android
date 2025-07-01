@@ -182,6 +182,8 @@ class SearchViewModel @Inject constructor(
         data class SelectNBATournamentRound(val gameList: List<NBAGame>) : Intent()
 
         data class UpdateLastViewStack(val data: SportDecodableModel) : Intent()
+
+        data class TestSearch(val viewForTest: SportDisplayType) : Intent()
     }
 
     enum class SearchType {
@@ -219,6 +221,7 @@ class SearchViewModel @Inject constructor(
                 is Intent.RefreshGame -> refreshGame(intent.category)
                 is Intent.SelectNBATournamentRound -> selectNBATournamentRound(intent.gameList)
                 is Intent.UpdateLastViewStack -> updateLastViewStack(intent.data)
+                is Intent.TestSearch -> testSearch(intent.viewForTest)
             }
         }
     }
@@ -987,6 +990,92 @@ class SearchViewModel @Inject constructor(
         stack.add(data)
         _viewStack.value = stack
         _poppedView.value = null
+    }
+
+    // test code
+    private suspend fun testSearch(viewForTest: SportDisplayType) {
+        try {
+            _searchState.emit(true)
+            toggleFocusState(false)
+
+            val result = searchClient.fetchFromJson(context, viewForTest)
+
+            // TODO: updateMainDisplayModel로 정리해야함
+            _displayModels.value = initialMap
+
+            val newDisplayModels = displayModels.value.toMutableMap()
+            when (val data = result.data) {
+                // football
+                is SportDecodableModel.FBPlayerInfo -> { newDisplayModels[SportDisplayType.FB_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.FBPlayerStats -> { newDisplayModels[SportDisplayType.FB_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.FBPlayerStandings -> { newDisplayModels[SportDisplayType.FB_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = data.displayModel }
+                is SportDecodableModel.FBLeagueSchedule -> {
+                    newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = data.displayModel
+                    initialFBLeagueScheduleData = data.displayModel
+                }
+                is SportDecodableModel.FBGameStats -> { newDisplayModels[SportDisplayType.FB_GAME_STATS] = data.displayModel }
+                // nba
+                is SportDecodableModel.NBAPlayerInfo -> { newDisplayModels[SportDisplayType.NBA_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.NBAPlayerStats -> { newDisplayModels[SportDisplayType.NBA_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.NBAPlayerStandings -> { newDisplayModels[SportDisplayType.NBA_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
+                is SportDecodableModel.NBALeagueSchedule -> {
+                    newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel
+                    initialNBALeagueScheduleData = data.displayModel
+                }
+                is SportDecodableModel.NBAGameStats -> { newDisplayModels[SportDisplayType.NBA_GAME_STATS] = data.displayModel }
+                is SportDecodableModel.NBALeagueTournament -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT] = data.displayModel }
+                // kbo
+                is SportDecodableModel.KBOPlayerInfo -> { newDisplayModels[SportDisplayType.KBO_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.KBOPlayerStats -> { newDisplayModels[SportDisplayType.KBO_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.KBOPlayerStandings -> { newDisplayModels[SportDisplayType.KBO_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.KBOTeamInfo -> { newDisplayModels[SportDisplayType.KBO_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.KBOTeamStats -> { newDisplayModels[SportDisplayType.KBO_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.KBOTeamStandings -> { newDisplayModels[SportDisplayType.KBO_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.KBOTeamSchedule -> { newDisplayModels[SportDisplayType.KBO_TEAM_SCHEDULE] = data.displayModel }
+                is SportDecodableModel.KBOLeagueSchedule -> {
+                    newDisplayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE] = data.displayModel
+                    initialKBOLeagueScheduleData = data.displayModel
+                }
+                is SportDecodableModel.KBOGameStats -> { newDisplayModels[SportDisplayType.KBO_GAME_STATS] = data.displayModel }
+                // mlb
+                is SportDecodableModel.MLBPlayerInfo -> { newDisplayModels[SportDisplayType.MLB_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.MLBPlayerStats -> { newDisplayModels[SportDisplayType.MLB_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.MLBPlayerStandings -> { newDisplayModels[SportDisplayType.MLB_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.MLBTeamInfo -> { newDisplayModels[SportDisplayType.MLB_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.MLBTeamStats -> { newDisplayModels[SportDisplayType.MLB_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.MLBTeamStandings -> { newDisplayModels[SportDisplayType.MLB_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.MLBTeamSchedule -> { newDisplayModels[SportDisplayType.MLB_TEAM_SCHEDULE] = data.displayModel }
+                is SportDecodableModel.MLBLeagueSchedule -> {
+                    newDisplayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE] = data.displayModel
+                    initialMLBLeagueScheduleData = data.displayModel
+                }
+                is SportDecodableModel.MLBGameStats -> { newDisplayModels[SportDisplayType.MLB_GAME_STATS] = data.displayModel }
+
+                else -> {
+                    throw IllegalArgumentException("Unknown data type")
+                }
+            }
+            _displayModels.value = newDisplayModels
+
+            // add viewStack
+            val stack = viewStack.value.toMutableList()
+            stack.add(result.data)
+            _viewStack.emit(stack)
+            _poppedView.emit(null)
+
+            _resultVisibleState.emit(true)
+        } catch (e: Exception) {
+            _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
+            Log.e("dsdf", e.localizedMessage ?: "data type error")
+        }
     }
 }
 

@@ -417,8 +417,10 @@ fun FBPlayerInfoFourthItem(
             }
 
             Row(
+                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .alpha(contentsAlpha)
+                    .fillMaxWidth()
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -512,9 +514,10 @@ fun FBPlayerInfoFifthItem(
             )
 
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .alpha(contentsAlpha)
+                    .fillMaxWidth()
             ) {
                 lastGame?.let {
                     Column(
@@ -539,7 +542,7 @@ fun FBPlayerInfoFifthItem(
                             )
 
                             Text(
-                                text = " vs ",
+                                text = " - ",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium
                             )
