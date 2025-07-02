@@ -70,7 +70,7 @@ fun KBOPlayerStatsView(
 
     InfoViewContainer(
         itemCount = (statsList?.size ?: 0) + 1,
-        shouldShowMeasureContent = true,
+//        shouldShowMeasureContent = true,
         modifier = Modifier,
 //            .verticalScroll(rememberScrollState()),
         measureContent = {
