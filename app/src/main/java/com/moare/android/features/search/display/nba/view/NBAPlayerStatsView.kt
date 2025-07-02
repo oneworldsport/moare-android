@@ -333,8 +333,7 @@ fun NBAPlayerStatsItem(
         // league
         NBATitle(
             leagueName = "NBA 정규시즌",
-            leagueSeason = data.groupValue.split("-").firstOrNull()?.toIntOrNull() ?: 2024,
-            modifier = Modifier.alpha(contentsAlpha)
+            leagueSeason = data.groupValue.split("-").firstOrNull()?.toIntOrNull() ?: 2024
         )
 
         // stats
