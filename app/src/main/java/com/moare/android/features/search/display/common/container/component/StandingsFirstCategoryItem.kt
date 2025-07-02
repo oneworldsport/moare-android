@@ -24,6 +24,7 @@ fun StandingsFirstCategoryItem(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .width(132.dp)
             .height(height)
     ) {
         Text(
@@ -31,9 +32,12 @@ fun StandingsFirstCategoryItem(
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
-            modifier = Modifier.width(130.dp)
+            modifier = Modifier.weight(1f)
         )
 
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
+        VCapsuleBar(
+            modifier = Modifier.alpha(0.5f),
+            bottomRound = false
+        )
     }
 }

@@ -20,10 +20,13 @@ data class NewStandingsContainerState(
     val headerCategorySelectedIndex: Int = 0,
     val firstCategorySelectedIndex: Int = 0,
     val secondCategorySelectedIndex: Int = 0,
-    val highlightState: StandingsHighlightItemState? = null
+    val highlightState: StandingsHighlightItemState? = null,
+    val displayDataState: ApiFetchState? = null,
+    val columnWidthList: List<Dp> = emptyList()
 )
 
 data class StandingsItemState(
+    val id: Int = 0,
     val isGameStats: Boolean = false,
     val imageUrl: String?,
     val name: String,
@@ -43,5 +46,5 @@ data class StandingsContainerActions(
     val headerCategoryButtonAction: ((Int) -> Unit)? = null,
     val firstCategoryButtonAction: ((Int) -> Unit)? = null,
     val secondCategoryButtonAction: (Int) -> Unit,
-    val itemButtonAction: () -> Unit
+    val itemButtonAction: (Int) -> Unit
 )

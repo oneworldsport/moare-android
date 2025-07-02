@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,27 +29,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.container.component.StandingsFirstCategoryItem
 import com.moare.android.features.search.display.common.container.component.StandingsRankItem
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
-import com.moare.android.features.search.display.common.container.state.StandingsContainerState
-import com.moare.android.features.search.display.nba.view.NBATeamStandingsCategoryListItem
-import com.moare.android.features.search.display.nba.view.NBATeamStandingsDataItem
-import com.moare.android.features.search.display.nba.view.NBATeamStandingsFirstDataListItem
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsIntent
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.ProgressIndicator
-import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
+import com.moare.android.ui.util.CenterBox
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 import com.moare.android.ui.util.screenWidthDp
@@ -67,8 +56,9 @@ fun NewStandingsViewContainer(
 ) {
     val horizontalScrollState = rememberScrollState()
     val verticalScrollState = rememberScrollState()
+    val defaultColumnWidth = 100.dp
 
-    val secondCategoryItemWidth = 100.dp
+    val columnWidthList = state.columnWidthList
 
     val headerCategoryBarOffset by animateDpAsState(
         targetValue = getOffsetOfAniCapsuleBar(itemWidth = screenWidthDp() / (state.headerCategories?.size ?: 2), index = state.headerCategorySelectedIndex),
@@ -78,7 +68,11 @@ fun NewStandingsViewContainer(
         )
     )
     val secondCategoryBarOffset by animateDpAsState(
-        targetValue = getOffsetOfAniCapsuleBar(itemWidth = secondCategoryItemWidth, index = state.secondCategorySelectedIndex),
+        targetValue = if (columnWidthList.isNotEmpty()) {
+            getOffsetOfAniCapsuleBar(itemWidths = columnWidthList, index = state.secondCategorySelectedIndex)
+        } else {
+            getOffsetOfAniCapsuleBar(itemWidth = defaultColumnWidth, index = state.secondCategorySelectedIndex)
+        },
         animationSpec = tween(
             durationMillis = 500,
             easing = LinearOutSlowInEasing
@@ -141,22 +135,25 @@ fun NewStandingsViewContainer(
             ) {
                 Column {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .height(42.dp)
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         for ((index, item) in state.secondCategories.withIndex()) {
-                            Text(
-                                text = item,
-                                textAlign = TextAlign.Center,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
+                            CenterBox(
+                                height = 42.dp,
                                 modifier = Modifier
-                                    .width(secondCategoryItemWidth)
                                     .clickable {
                                         actions.secondCategoryButtonAction(index)
                                     }
-                            )
+                            ) {
+                                Text(
+                                    text = item,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier
+                                        .width(columnWidthList.getOrNull(index) ?: defaultColumnWidth)
+                                )
+                            }
                         }
                     }
 
@@ -169,108 +166,96 @@ fun NewStandingsViewContainer(
         }
 
         // loading
-//        AnimatedVisibility(
-//            visible = state.displayDataState == ApiFetchState.Fetching,
-//            enter = fadeIn(),
-//            exit = fadeOut()
-//        ) {
-//            Box(
-//                contentAlignment = Alignment.Center,
-//                modifier = Modifier.fillMaxSize()
-//            ) {
-//                ProgressIndicator()
-//            }
-//        }
+        AnimatedVisibility(
+            visible = state.displayDataState == ApiFetchState.Fetching,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                ProgressIndicator()
+            }
+        }
 
         // standings data
-//        AnimatedVisibility(
-//            visible = if (state.displayDataState == null) {
-//                true
-//            } else {
-//                state.displayDataState == ApiFetchState.Success
-//            }
-//        ) {
-//            Column(
-//                modifier = Modifier
-//                    .verticalScroll(verticalScrollState)
-//            ) {
-//                Row {
-//                    this.standingsFirstDataContent()
-//
-//                    Row(
-//                        Modifier.horizontalScroll(horizontalScrollState)
-//                    ) {
-//                        this.standingsDataContent()
-//                    }
-//                }
-//            }
-//        }
-        Column(
-            modifier = Modifier
-                .verticalScroll(verticalScrollState)
-        ) {
-            if (shouldUseCustomListContent) {
-                this.customListContent()
+        AnimatedVisibility(
+            visible = if (state.displayDataState == null) {
+                true
             } else {
-                Row {
-                    Column(
-                        modifier = Modifier.padding(bottom = 10.dp)
-                    ) {
-                        for ((index, item) in state.standings.withIndex()) {
-                            val highlightState = state.highlightState
+                state.displayDataState == ApiFetchState.Success
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(verticalScrollState)
+            ) {
+                if (shouldUseCustomListContent) {
+                    this.customListContent()
+                } else {
+                    Row {
+                        Column(
+                            modifier = Modifier.padding(bottom = 10.dp)
+                        ) {
+                            for ((index, item) in state.standings.withIndex()) {
+                                val highlightState = state.highlightState
 
-                            if (highlightState != null && highlightState.itemIndex == highlightState.standingsStartIndex + index) {
-                                Box(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(1.dp)
-                                        .background(Moare)
+                                if (highlightState != null && highlightState.itemIndex == highlightState.standingsStartIndex + index) {
+                                    Box(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(1.dp)
+                                            .background(Moare)
+                                    )
+                                }
+
+                                StandingsRankItem(
+                                    isGameStats = item.isGameStats,
+                                    id = item.id,
+                                    rank = index + 1,
+                                    imageUrl = item.imageUrl,
+                                    isSvgLogo = item.isSvgLogo,
+                                    name = item.name,
+                                    subName = item.subName,
+                                    extraInfo = item.extraInfo,
+                                    extraSubInfo = item.extraSubInfo,
+                                    isLastItem = index == state.standings.size - 1,
+                                    action = actions.itemButtonAction
                                 )
-                            }
 
-                            StandingsRankItem(
-                                isGameStats = item.isGameStats,
-                                rank = index + 1,
-                                imageUrl = item.imageUrl,
-                                isSvgLogo = item.isSvgLogo,
-                                name = item.name,
-                                subName = item.subName,
-                                extraInfo = item.extraInfo,
-                                extraSubInfo = item.extraSubInfo,
-                                action = actions.itemButtonAction
-                            )
-
-                            if (highlightState != null && highlightState.itemIndex == highlightState.standingsStartIndex + index) {
-                                Box(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(1.dp)
-                                        .background(Moare)
-                                )
+                                if (highlightState != null && highlightState.itemIndex == highlightState.standingsStartIndex + index) {
+                                    Box(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(1.dp)
+                                            .background(Moare)
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    Row(
-                        Modifier.horizontalScroll(horizontalScrollState)
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        Row(
+                            Modifier.horizontalScroll(horizontalScrollState)
                         ) {
-                            for (item in state.standings) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .height(40.dp)
-                                ) {
-                                    for (data in item.dataList) {
-                                        Text(
-                                            text = data,
-                                            textAlign = TextAlign.Center,
-                                            fontSize = 15.sp,
-                                            modifier = Modifier
-                                                .width(secondCategoryItemWidth)
-                                        )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                for (item in state.standings) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .height(40.dp)
+                                    ) {
+                                        for ((index, data) in item.dataList.withIndex()) {
+                                            Text(
+                                                text = data,
+                                                textAlign = TextAlign.Center,
+                                                fontSize = 15.sp,
+                                                modifier = Modifier
+                                                    .width(columnWidthList.getOrNull(index) ?: defaultColumnWidth)
+                                            )
+                                        }
                                     }
                                 }
                             }
