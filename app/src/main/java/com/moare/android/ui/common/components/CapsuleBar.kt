@@ -79,9 +79,11 @@ fun VCapsuleBar(
 }
 
 @Composable
-fun StatsDivider() {
+fun StatsDivider(
+    modifier: Modifier = Modifier
+) {
     VCapsuleBar(
-        modifier = Modifier.alpha(0.5f),
+        modifier = modifier.alpha(0.5f),
         customHeight = 40.dp,
         customWidth = 1.dp
     )
@@ -92,7 +94,7 @@ fun HDivider(
     modifier: Modifier = Modifier,
     height: Dp = 1.dp,
     color: Color = MaterialTheme.colors.primary,
-    alpha: Float = 1f
+//    alpha: Float = 1f
 ) {
     Box(
         modifier
@@ -101,7 +103,7 @@ fun HDivider(
             .height(height)
             .clip(RoundedCornerShape(10.dp))
             .background(color)
-            .alpha(alpha)
+//            .alpha(alpha)
     )
 }
 

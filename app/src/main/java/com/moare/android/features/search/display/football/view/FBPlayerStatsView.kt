@@ -309,7 +309,7 @@ fun FBPlayerStatsListItem(
 fun FBPlayerStatsItem(
     fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
     data: FBPlayerStats,
-    contentsAlpha: Float = 1f,
+    contentsAlpha: Float,
     measureContentAlpha: Float,
 ) {
     var attackStatsOpenState by remember { mutableStateOf(true) }
@@ -352,6 +352,8 @@ fun FBPlayerStatsItem(
             )
         }
 
+        // stats
+        // TODO: 수비수, 골기퍼, 공격수 별로 데이터 노출 다르게
         CenterRow(
             modifier = Modifier
                 .clickable { attackStatsOpenState = !attackStatsOpenState }
@@ -369,8 +371,6 @@ fun FBPlayerStatsItem(
             )
         }
 
-        // stats
-        // TODO: 수비수, 골기퍼, 공격수 별로 데이터 노출 다르게
         AnimatedVisibility(
             visible = attackStatsOpenState,
             enter = fadeIn() + expandVertically(),

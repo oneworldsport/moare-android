@@ -283,7 +283,7 @@ fun FBTeamStatsListItem(
 @Composable
 fun FBTeamStatsItem(
     data: FBTeamStats,
-    contentsAlpha: Float = 1f,
+    contentsAlpha: Float,
     measureContentAlpha: Float,
 ) {
     var basicStatsOpenState by remember { mutableStateOf(true) }
@@ -312,6 +312,7 @@ fun FBTeamStatsItem(
             )
         }
 
+        // stats
         CenterRow(
             modifier = Modifier
                 .clickable { basicStatsOpenState = !basicStatsOpenState }
@@ -329,7 +330,6 @@ fun FBTeamStatsItem(
             )
         }
 
-        // stats
         AnimatedVisibility(
             visible = basicStatsOpenState,
             enter = fadeIn() + expandVertically(),
