@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.KBOUtil
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.features.search.display.common.components.EmptyStatDataItem
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
@@ -312,9 +313,7 @@ fun KBOPlayerStatsItem(
         modifier = Modifier.alpha(contentsAlpha)
     ) {
         data.hitter?.let {
-            CenterRow(
-                modifier = Modifier.alpha(contentsAlpha)
-            ) {
+            CenterRow {
                 BaseballLeagueTitle(
                     url = KBOUtil.kboLogoUrl,
                     leagueName = "KBO",
@@ -543,9 +542,7 @@ fun KBOPlayerStatsItem(
         }
 
         data.pitcher?.let {
-            CenterRow(
-                modifier = Modifier.alpha(contentsAlpha)
-            ) {
+            CenterRow {
                 BaseballLeagueTitle(
                     url = KBOUtil.kboLogoUrl,
                     leagueName = "KBO",
@@ -801,27 +798,12 @@ fun KBOPlayerStatsItem(
                     customCategoryHeight = 30.dp,
                     modifier = Modifier.weight(1f)
                 )
-                StatsDivider()
-                FBStatDataItem(
-                    category = "",
-                    data = "",
-                    customCategoryHeight = 30.dp,
-                    modifier = Modifier.weight(1f)
-                )
-                StatsDivider()
-                FBStatDataItem(
-                    category = "",
-                    data = "",
-                    customCategoryHeight = 30.dp,
-                    modifier = Modifier.weight(1f)
-                )
-                StatsDivider()
-                FBStatDataItem(
-                    category = "",
-                    data = "",
-                    customCategoryHeight = 30.dp,
-                    modifier = Modifier.weight(1f)
-                )
+                StatsDivider(modifier = Modifier.alpha(0f))
+                EmptyStatDataItem(modifier = Modifier.weight(1f))
+                StatsDivider(modifier = Modifier.alpha(0f))
+                EmptyStatDataItem(modifier = Modifier.weight(1f))
+                StatsDivider(modifier = Modifier.alpha(0f))
+                EmptyStatDataItem(modifier = Modifier.weight(1f))
             }
         }
     }

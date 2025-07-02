@@ -298,8 +298,7 @@ fun KBOTeamStatsItem(
         BaseballLeagueTitle(
             url = KBOUtil.kboLogoUrl,
             leagueName = "KBO",
-            leagueSeason = data.season,
-            modifier = Modifier.alpha(contentsAlpha)
+            leagueSeason = data.season
         )
 
         // stats
