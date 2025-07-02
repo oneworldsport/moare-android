@@ -267,8 +267,8 @@ fun NBAPlayerStatsList(
                 aniPosition = aniPosition,
                 contentsAlpha = contentsAlpha,
                 containerModifier = containerModifier,
-                updateItemPosition = updateItemPosition,
-                measureContentAlpha = measureContentAlpha
+                measureContentAlpha = measureContentAlpha,
+                updateItemPosition = updateItemPosition
             )
         }
     }
