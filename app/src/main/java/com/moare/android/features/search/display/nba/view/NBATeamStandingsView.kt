@@ -34,7 +34,6 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.state.StandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.NewStandingsViewContainer
-import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsViewModel

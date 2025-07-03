@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -53,7 +54,7 @@ fun NewStandingsViewContainer(
     shouldUseCustomListContent: Boolean = false,
     modifier: Modifier = Modifier,
     titleContent: @Composable ColumnScope.() -> Unit = {},
-    customListContent: @Composable ColumnScope.() -> Unit = {}
+    customListContent: @Composable ColumnScope.(hScrollState: ScrollState) -> Unit = {}
 ) {
     val horizontalScrollState = rememberScrollState()
     val verticalScrollState = rememberScrollState()
@@ -196,7 +197,7 @@ fun NewStandingsViewContainer(
                     .verticalScroll(verticalScrollState)
             ) {
                 if (shouldUseCustomListContent) {
-                    this.customListContent()
+                    this.customListContent(horizontalScrollState)
                 } else {
                     Row {
                         Column(
