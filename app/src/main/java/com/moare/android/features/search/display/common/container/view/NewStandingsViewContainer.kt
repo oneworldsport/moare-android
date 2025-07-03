@@ -1,6 +1,7 @@
 package com.moare.android.features.search.display.common.container.view
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -84,7 +85,6 @@ fun NewStandingsViewContainer(
         // But if fillMaxSize not set, AnimatedVisibility doesn't work on first show.
         // Not sure why yet
 //        modifier = modifier.fillMaxSize()
-        modifier = modifier
     ) {
         // league title
         this.titleContent()
@@ -185,7 +185,11 @@ fun NewStandingsViewContainer(
                 true
             } else {
                 state.displayDataState == ApiFetchState.Success
-            }
+            },
+            // NOTE: Added for animation on first show. If not set, animation doesn't work on first show.
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize()
         ) {
             Column(
                 modifier = Modifier
