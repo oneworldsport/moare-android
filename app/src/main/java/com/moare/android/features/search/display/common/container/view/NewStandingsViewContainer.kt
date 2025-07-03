@@ -128,7 +128,7 @@ fun NewStandingsViewContainer(
         Row(
 //            modifier = Modifier.padding(top = 6.dp)
         ) {
-            StandingsFirstCategoryItem(state.firstCategoryText)
+            StandingsFirstCategoryItem(text = state.firstCategoryText, width = state.firstColumnWidth)
 
             Row(
                 Modifier.horizontalScroll(horizontalScrollState)
@@ -215,8 +215,9 @@ fun NewStandingsViewContainer(
                                 }
 
                                 StandingsRankItem(
-                                    isGameStats = item.isGameStats,
                                     id = item.id,
+                                    width = state.firstColumnWidth,
+                                    isGameStats = item.isGameStats,
                                     rank = index + 1,
                                     imageUrl = item.imageUrl,
                                     isSvgLogo = item.isSvgLogo,

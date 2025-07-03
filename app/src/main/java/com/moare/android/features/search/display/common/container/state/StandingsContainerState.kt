@@ -22,6 +22,7 @@ data class NewStandingsContainerState(
     val secondCategorySelectedIndex: Int = 0,
     val highlightState: StandingsHighlightItemState? = null,
     val displayDataState: ApiFetchState? = null,
+    val firstColumnWidth: Dp? = null,
     val columnWidthList: List<Dp> = emptyList()
 )
 

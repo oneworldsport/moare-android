@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.util.NBAUtil
@@ -26,6 +27,7 @@ import com.moare.android.ui.util.CenterColumn
 @Composable
 fun StandingsRankItem(
     id: Int = 0,
+    width: Dp? = null,
     isGameStats: Boolean = false,
     rank: Int = 0,
     imageUrl: String?,
@@ -40,7 +42,7 @@ fun StandingsRankItem(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .width(132.dp)
+            .width(width ?: 132.dp)
             .padding(start = 10.dp)
             .height(40.dp)
             .clickable {

@@ -30,12 +30,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.KBOUtil
 import com.moare.android.core.util.MLBUtil
+import com.moare.android.core.util.NBAUtil
+import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
+import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.state.StandingsContainerState
+import com.moare.android.features.search.display.common.container.state.StandingsItemState
+import com.moare.android.features.search.display.common.container.view.NewStandingsViewContainer
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsIntent
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsViewModel
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsViewModel
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsIntent
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
@@ -44,6 +50,7 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandin
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HCapsuleBar
+import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
@@ -66,10 +73,43 @@ fun KBOTeamStandingsView(
     val displayModel by kboTeamStandingsViewModel.displayModel.collectAsState()
     val selectedCategoryIndex by kboTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
     val isKeyword by kboTeamStandingsViewModel.isKeyword.collectAsState()
+    val standings by kboTeamStandingsViewModel.standings.collectAsState()
+    val teamNameDic = kboTeamStandingsViewModel.teamNameDictionary
 
     val season = displayModel?.standings?.firstOrNull()?.stats?.season
 
     val poppedView by searchViewModel.poppedView.collectAsState()
+
+    val teamStandings: List<StandingsItemState> = standings.map {
+        val rankData = it.stats.rankData
+        val hitterData = it.stats.hitterData
+        val pitcherData = it.stats.pitcherData
+        StandingsItemState(
+            id = it.team.id,
+            imageUrl = KBOUtil.teamLogoUrl(it.team.id),
+            name = teamNameDic["short_${it.team.id}"] ?: it.team.teamName,
+            dataList = listOf(
+                rankData.gb,
+                rankData.winpct,
+                rankData.wins,
+                rankData.losses,
+                rankData.gp,
+                rankData.streak,
+                hitterData.avg,
+                hitterData.h,
+                hitterData.hr,
+                hitterData.slg,
+                hitterData.r,
+                pitcherData.er,
+                pitcherData.avg,
+                pitcherData.h,
+                pitcherData.hr,
+                pitcherData.r,
+                it.stats.runnerData.sbPercent
+            )
+        )
+    }
+    val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 60.dp, 60.dp, 50.dp, 50.dp, 50.dp, 70.dp)
 
     /* ---------------------
        etc
@@ -101,207 +141,28 @@ fun KBOTeamStandingsView(
         }
     }
 
-    StandingsViewContainer(
-        state = StandingsContainerState(
-            firstCategoryItemHeight = kboTeamStandingsViewModel.categoryItemHeight
+    NewStandingsViewContainer(
+        state = NewStandingsContainerState(
+            secondCategories = StringConstants.KBO.TEAM_STANDINGS_CATEGORIES,
+            standings = teamStandings,
+            secondCategorySelectedIndex = selectedCategoryIndex,
+            firstColumnWidth = 100.dp,
+            columnWidthList = columnWidthList,
         ),
-        headerContent = {
+        actions = StandingsContainerActions(
+            secondCategoryButtonAction = { index ->
+                kboTeamStandingsViewModel.send(KBOTeamStandingsIntent.SelectCategory(index))
+            },
+            itemButtonAction = { id ->
+                searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = id))
+            }
+        ),
+        titleContent = {
             BaseballLeagueTitle(
                 url = KBOUtil.kboLogoUrl,
                 leagueName = "KBO",
                 leagueSeason = season ?: 2025,
             )
-        },
-        categoryListContent = {
-            KBOTeamStandingsCategoryList()
-        },
-        standingsFirstDataContent = {
-            KBOTeamStandingsFirstDataList()
-        },
-        standingsDataContent = {
-            KBOTeamStandingsDataList()
         }
-    )
-}
-
-@Composable
-fun KBOTeamStandingsCategoryList(
-    kboTeamStandingsViewModel: KBOTeamStandingsViewModel = hiltViewModel()
-) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val selectedCategoryIndex by kboTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
-
-    /* ---------------------
-       animation
-       --------------------- */
-    val barOffset by animateDpAsState(
-        targetValue = getOffsetOfAniCapsuleBar(itemWidth = kboTeamStandingsViewModel.dataItemWidth, index = selectedCategoryIndex),
-        animationSpec = tween(
-            durationMillis = 500,
-            easing = LinearOutSlowInEasing
-        )
-    )
-
-    Column {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .height(kboTeamStandingsViewModel.categoryItemHeight - 2.dp)
-        ) {
-            for ((index, value) in StringConstants.KBO.TEAM_STANDINGS_CATEGORIES.withIndex()) {
-                KBOTeamStandingsCategoryListItem(
-                    category = value,
-                    index = index
-                )
-            }
-        }
-
-        HCapsuleBar(
-            modifier = Modifier
-                .offset(x = barOffset)
-        )
-    }
-}
-
-@Composable
-fun KBOTeamStandingsCategoryListItem(
-    kboTeamStandingsViewModel: KBOTeamStandingsViewModel = hiltViewModel(),
-    category: String,
-    index: Int
-) {
-    Text(
-        text = category,
-        textAlign = TextAlign.Center,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Medium,
-        modifier = Modifier
-            .width(kboTeamStandingsViewModel.dataItemWidth)
-            .clickable {
-                kboTeamStandingsViewModel.send(KBOTeamStandingsIntent.SelectCategory(index))
-            }
-    )
-}
-
-@Composable
-fun KBOTeamStandingsFirstDataList(
-    kboTeamStandingsViewModel: KBOTeamStandingsViewModel = hiltViewModel()
-) {
-    val standings by kboTeamStandingsViewModel.standings.collectAsState()
-
-    Column(
-        modifier = Modifier.padding(bottom = 10.dp)
-    ) {
-        for ((index, value) in standings.withIndex()) {
-            KBOTeamStandingsFirstDataListItem(rank = index + 1, data = value)
-        }
-    }
-}
-
-@Composable
-fun KBOTeamStandingsFirstDataListItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    kboTeamStandingsViewModel: KBOTeamStandingsViewModel = hiltViewModel(),
-    rank: Int,
-    data: KBOTeamStandingsDisplay,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .width(kboTeamStandingsViewModel.firstCategoryItemWidth)
-            .padding(start = 10.dp)
-            .height(kboTeamStandingsViewModel.dataItemHeight)
-            .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = data.team.id))
-            }
-    ) {
-        Text(
-            text = "$rank",
-            fontWeight = FontWeight.Medium,
-            fontSize = kboTeamStandingsViewModel.dataFontSize,
-            modifier = Modifier
-                .width(22.dp)
-        )
-
-        URLImage(
-            url = KBOUtil.teamLogoUrl(data.team.id),
-            customSize = 25.dp,
-            modifier = Modifier.padding(end = 4.dp),
-            isSvg = true
-        )
-
-        Text(
-            text = kboTeamStandingsViewModel.teamNameDictionary["short_${data.team.id}"] ?: data.team.teamName,
-            fontSize = 12.sp,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .weight(1f)
-        )
-
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-    }
-}
-
-@Composable
-fun KBOTeamStandingsDataList(
-    kboTeamStandingsViewModel: KBOTeamStandingsViewModel = hiltViewModel()
-) {
-    val standings by kboTeamStandingsViewModel.standings.collectAsState()
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        for (value in standings) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .height(kboTeamStandingsViewModel.dataItemHeight)
-            ) {
-                for (index in 0 until StringConstants.KBO.TEAM_STANDINGS_CATEGORIES.size) {
-                    KBOTeamStandingsDataItem(
-                        data = value,
-                        index = index
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun KBOTeamStandingsDataItem(
-    kboTeamStandingsViewModel: KBOTeamStandingsViewModel = hiltViewModel(),
-    data: KBOTeamStandingsDisplay,
-    index: Int
-) {
-    val dataText = when (index) {
-        0 -> data.stats.rankData.winpct
-        1 -> data.stats.rankData.gb
-        2 -> data.stats.rankData.wins
-        3 -> data.stats.rankData.losses
-        4 -> data.stats.rankData.gp
-        5 -> data.stats.rankData.streak
-        6 -> data.stats.hitterData.avg
-        7 -> data.stats.hitterData.h
-        8 -> data.stats.hitterData.hr
-        9 -> data.stats.hitterData.slg
-        10 -> data.stats.hitterData.r
-        11 -> data.stats.pitcherData.er
-        12 -> data.stats.pitcherData.avg
-        13 -> data.stats.pitcherData.h
-        14 -> data.stats.pitcherData.hr
-        15 -> data.stats.pitcherData.r
-        16 -> data.stats.runnerData.sbPercent
-        else -> ""
-    }
-
-    Text(
-        text = dataText,
-        textAlign = TextAlign.Center,
-        fontSize = kboTeamStandingsViewModel.dataFontSize,
-        modifier = Modifier
-            .width(kboTeamStandingsViewModel.dataItemWidth)
     )
 }

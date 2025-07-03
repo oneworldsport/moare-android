@@ -57,7 +57,7 @@ class KBOTeamStandingsViewModel @Inject constructor(
         super.initData(displayModel)
 
         // init with default value
-        _selectedCategoryIndex.value = 0 // defalue category is "승률"
+        _selectedCategoryIndex.value = 1 // defalue category is "승률"
         _standings.value = displayModel.standings
 
         sortStandings()
@@ -76,8 +76,8 @@ class KBOTeamStandingsViewModel @Inject constructor(
         var standings = standings.value.toMutableList()
 
         when (selectedCategoryIndex.value) {
-            0 -> standings.sortByDescending { it.stats.rankData.winpct.toFloatOrNull() }
-            1 -> standings.sortBy { it.stats.rankData.gb.toFloatOrNull() }
+            0 -> standings.sortBy { it.stats.rankData.gb.toFloatOrNull() }
+            1 -> standings.sortByDescending { it.stats.rankData.winpct.toFloatOrNull() }
             2 -> standings.sortByDescending { it.stats.rankData.wins.toIntOrNull() }
             3 -> standings.sortBy { it.stats.rankData.losses.toIntOrNull() }
             4 -> standings.sortByDescending { it.stats.rankData.gp.toIntOrNull() }

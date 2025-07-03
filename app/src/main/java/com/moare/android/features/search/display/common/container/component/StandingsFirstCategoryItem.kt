@@ -19,12 +19,13 @@ import com.moare.android.ui.common.components.VCapsuleBar
 @Composable
 fun StandingsFirstCategoryItem(
     text: String = StringConstants.STANDINGS_FIRST_CATEGORY,
+    width: Dp? = null,
     height: Dp = 44.dp
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .width(132.dp)
+            .width(width ?: 132.dp)
             .height(height)
     ) {
         Text(
