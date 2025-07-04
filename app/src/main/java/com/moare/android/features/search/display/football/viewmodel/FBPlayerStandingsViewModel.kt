@@ -4,19 +4,15 @@ import android.util.Log
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
-import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.display.common.viewmodel.BasePlayerStandingsViewModel
 import com.moare.android.features.search.models.ApiFetchState
-import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -93,15 +89,15 @@ class FBPlayerStandingsViewModel @Inject constructor(
 
         when (index) {
             0 -> {
-                _secondSelectedIndex.value = 0
+                _secondCategorySelectedIndex.value = 0
                 secondCategory = "득점"
             }
             1 -> {
-                _secondSelectedIndex.value = attackCategoriesSize
+                _secondCategorySelectedIndex.value = attackCategoriesSize
                 secondCategory = "태클 시도"
             }
             2 -> {
-                _secondSelectedIndex.value = attackCategoriesSize + defendCategoriesSize
+                _secondCategorySelectedIndex.value = attackCategoriesSize + defendCategoriesSize
                 secondCategory = "패스 시도"
             }
         }

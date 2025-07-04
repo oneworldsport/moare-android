@@ -39,13 +39,13 @@ data class StandingsItemState(
 )
 
 data class StandingsHighlightItemState(
-    val itemIndex: Int,
+    val itemIndex: Int?,
     val standingsStartIndex: Int
 )
 
 data class StandingsContainerActions(
     val headerCategoryButtonAction: ((Int) -> Unit)? = null,
     val firstCategoryButtonAction: ((Int) -> Unit)? = null,
-    val secondCategoryButtonAction: (Int) -> Unit,
+    val secondCategoryButtonAction: (index: Int, category: String) -> Unit,
     val itemButtonAction: (Int) -> Unit
 )

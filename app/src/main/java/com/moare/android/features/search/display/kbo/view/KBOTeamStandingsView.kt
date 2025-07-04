@@ -149,7 +149,7 @@ fun KBOTeamStandingsView(
             columnWidthList = columnWidthList,
         ),
         actions = StandingsContainerActions(
-            secondCategoryButtonAction = { index ->
+            secondCategoryButtonAction = { index, _ ->
                 kboTeamStandingsViewModel.send(KBOTeamStandingsIntent.SelectCategory(index))
             },
             itemButtonAction = { id ->

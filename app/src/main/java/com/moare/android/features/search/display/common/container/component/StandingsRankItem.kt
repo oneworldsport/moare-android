@@ -55,7 +55,7 @@ fun StandingsRankItem(
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
                 modifier = Modifier
-                    .width(22.dp)
+                    .width(if (rank >= 100) 30.dp else 22.dp)
             )
         }
 

@@ -147,7 +147,7 @@ fun NBATeamStandingsView(
             headerCategoryButtonAction = { index ->
                 nbaTeamStandingsViewModel.send(NBATeamStandingsIntent.SelectConference(index))
             },
-            secondCategoryButtonAction = { index ->
+            secondCategoryButtonAction = { index, _ ->
                 nbaTeamStandingsViewModel.send(NBATeamStandingsIntent.SelectCategory(index))
             },
             itemButtonAction = { id ->

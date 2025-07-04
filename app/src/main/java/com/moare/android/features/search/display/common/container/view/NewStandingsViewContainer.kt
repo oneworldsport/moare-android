@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.features.search.display.common.container.component.StandingsFirstCategoryItem
@@ -51,16 +52,22 @@ import com.moare.android.ui.util.screenWidthDp
 fun NewStandingsViewContainer(
     state: NewStandingsContainerState,
     actions: StandingsContainerActions,
+    verticalScrollState: ScrollState = rememberScrollState(),
     shouldUseCustomListContent: Boolean = false,
     modifier: Modifier = Modifier,
     titleContent: @Composable ColumnScope.() -> Unit = {},
     customListContent: @Composable ColumnScope.(hScrollState: ScrollState) -> Unit = {}
 ) {
     val horizontalScrollState = rememberScrollState()
-    val verticalScrollState = rememberScrollState()
     val defaultColumnWidth = 100.dp
 
+    val highlightState = state.highlightState
     val columnWidthList = state.columnWidthList
+    val columnTotalWidth: Dp = if (columnWidthList.isNotEmpty()) {
+        columnWidthList.fold(0.dp) { acc, dp -> acc + dp }
+    } else {
+        defaultColumnWidth * state.standings.size
+    }
 
     val headerCategoryBarOffset by animateDpAsState(
         targetValue = getOffsetOfAniCapsuleBar(itemWidth = screenWidthDp() / (state.headerCategories?.size ?: 2), index = state.headerCategorySelectedIndex),
@@ -143,7 +150,7 @@ fun NewStandingsViewContainer(
                                 height = 42.dp,
                                 modifier = Modifier
                                     .clickable {
-                                        actions.secondCategoryButtonAction(index)
+                                        actions.secondCategoryButtonAction(index, item)
                                     }
                             ) {
                                 Text(
@@ -204,12 +211,10 @@ fun NewStandingsViewContainer(
                             modifier = Modifier.padding(bottom = 10.dp)
                         ) {
                             for ((index, item) in state.standings.withIndex()) {
-                                val highlightState = state.highlightState
-
                                 if (highlightState != null && highlightState.itemIndex == highlightState.standingsStartIndex + index) {
                                     Box(
                                         Modifier
-                                            .fillMaxWidth()
+                                            .width(132.dp)
                                             .height(1.dp)
                                             .background(Moare)
                                     )
@@ -219,7 +224,7 @@ fun NewStandingsViewContainer(
                                     id = item.id,
                                     width = state.firstColumnWidth,
                                     isGameStats = item.isGameStats,
-                                    rank = index + 1,
+                                    rank = if (highlightState != null) highlightState.standingsStartIndex + index + 1 else index + 1,
                                     imageUrl = item.imageUrl,
                                     isSvgLogo = item.isSvgLogo,
                                     name = item.name,
@@ -233,7 +238,7 @@ fun NewStandingsViewContainer(
                                 if (highlightState != null && highlightState.itemIndex == highlightState.standingsStartIndex + index) {
                                     Box(
                                         Modifier
-                                            .fillMaxWidth()
+                                            .width(132.dp)
                                             .height(1.dp)
                                             .background(Moare)
                                     )
@@ -242,12 +247,21 @@ fun NewStandingsViewContainer(
                         }
 
                         Row(
-                            Modifier.horizontalScroll(horizontalScrollState)
+                            modifier = Modifier.horizontalScroll(horizontalScrollState)
                         ) {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                for (item in state.standings) {
+                                for ((index, item) in state.standings.withIndex()) {
+                                    if (highlightState != null && highlightState.itemIndex == highlightState.standingsStartIndex + index) {
+                                        Box(
+                                            Modifier
+                                                .width(columnTotalWidth) // fillMaxWidth()로 했을때 선이 안보임
+                                                .height(1.dp)
+                                                .background(Moare)
+                                        )
+                                    }
+
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier
@@ -262,6 +276,15 @@ fun NewStandingsViewContainer(
                                                     .width(columnWidthList.getOrNull(index) ?: defaultColumnWidth)
                                             )
                                         }
+                                    }
+
+                                    if (highlightState != null && highlightState.itemIndex == highlightState.standingsStartIndex + index) {
+                                        Box(
+                                            Modifier
+                                                .width(columnTotalWidth)
+                                                .height(1.dp)
+                                                .background(Moare)
+                                        )
                                     }
                                 }
                             }

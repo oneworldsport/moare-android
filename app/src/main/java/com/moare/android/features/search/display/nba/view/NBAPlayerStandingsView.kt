@@ -1,25 +1,19 @@
 package com.moare.android.features.search.display.nba.view
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,22 +37,15 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.container.state.StandingsContainerState
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsDataList
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsFirstCategoryList
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsFirstDataList
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsSecondCategoryList
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HCapsuleBarSize
-import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.NBATitle
-import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
@@ -85,7 +72,7 @@ fun NBAPlayerStandingsView(
     val displayModel by nbaPlayerStandingsViewModel.displayModel.collectAsState()
     val displayDataState by nbaPlayerStandingsViewModel.displayDataState.collectAsState()
     val firstSelectedIndex by nbaPlayerStandingsViewModel.firstSelectedIndex.collectAsState()
-    val secondSelectedIndex by nbaPlayerStandingsViewModel.secondSelectedIndex.collectAsState()
+    val secondSelectedIndex by nbaPlayerStandingsViewModel.secondCategorySelectedIndex.collectAsState()
     val isKeyword by nbaPlayerStandingsViewModel.isKeyword.collectAsState()
     val filteredStandings by nbaPlayerStandingsViewModel.filteredStandings.collectAsState()
 
@@ -304,7 +291,7 @@ fun NBAPlayerStandingsSecondCategoryList(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val selectedIndex by nbaPlayerStandingsViewModel.secondSelectedIndex.collectAsState()
+    val selectedIndex by nbaPlayerStandingsViewModel.secondCategorySelectedIndex.collectAsState()
 
     /* ---------------------
        animation

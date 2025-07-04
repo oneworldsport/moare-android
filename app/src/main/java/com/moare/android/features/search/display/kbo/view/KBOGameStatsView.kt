@@ -201,7 +201,7 @@ fun KBOGameStatsView(
                     secondCategorySelectedIndex = firstCategorySelectedIndex
                 ),
                 actions = StandingsContainerActions(
-                    secondCategoryButtonAction = { index ->
+                    secondCategoryButtonAction = { index, _ ->
                         kboGameStatsViewModel.send(KBOGameStatsIntent.SelectFirstCategory(index))
                     },
                     itemButtonAction = {
@@ -236,7 +236,7 @@ fun KBOGameStatsView(
                     secondCategorySelectedIndex = secondCategorySelectedIndex
                 ),
                 actions = StandingsContainerActions(
-                    secondCategoryButtonAction = { index ->
+                    secondCategoryButtonAction = { index, _ ->
                         kboGameStatsViewModel.send(KBOGameStatsIntent.SelectSecondCategory(index))
                     },
                     itemButtonAction = {

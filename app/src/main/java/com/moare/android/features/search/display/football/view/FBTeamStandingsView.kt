@@ -133,7 +133,7 @@ fun FBTeamStandingsView(
             columnWidthList = columnWidthList
         ),
         actions = StandingsContainerActions(
-            secondCategoryButtonAction = { index ->
+            secondCategoryButtonAction = { index, _ ->
                 fbTeamStandingsViewModel.send(FBTeamStandingsIntent.SelectCategory(index))
             },
             itemButtonAction = { id ->

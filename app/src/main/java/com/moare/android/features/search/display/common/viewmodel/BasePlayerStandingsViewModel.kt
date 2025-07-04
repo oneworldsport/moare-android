@@ -32,8 +32,8 @@ abstract class BasePlayerStandingsViewModel<I, T>(
     protected var _firstSelectedIndex = MutableStateFlow(0)
     val firstSelectedIndex: StateFlow<Int> = _firstSelectedIndex
 
-    protected var _secondSelectedIndex = MutableStateFlow(0)
-    val secondSelectedIndex: StateFlow<Int> = _secondSelectedIndex
+    protected var _secondCategorySelectedIndex = MutableStateFlow(0)
+    val secondCategorySelectedIndex: StateFlow<Int> = _secondCategorySelectedIndex
 
     protected var _isKeyword = MutableStateFlow(false)
     val isKeyword: StateFlow<Boolean> = _isKeyword
@@ -58,7 +58,7 @@ abstract class BasePlayerStandingsViewModel<I, T>(
         _displayDataState.value = ApiFetchState.Idle
 
         _firstSelectedIndex.value = 0
-        _secondSelectedIndex.value = 0
+        _secondCategorySelectedIndex.value = 0
         _isKeyword.value = false
         _entityIndex.value = null
         _filteredStandingsStartIndex.value = 0
@@ -82,7 +82,7 @@ abstract class BasePlayerStandingsViewModel<I, T>(
                 }
 
                 if (index != -1) {
-                    _secondSelectedIndex.value = index
+                    _secondCategorySelectedIndex.value = index
                     _isKeyword.value = true
                 }
             }
@@ -133,7 +133,7 @@ abstract class BasePlayerStandingsViewModel<I, T>(
 
     open fun selectSecondCategory(index: Int, category: String) {
         shouldScrollCategory = false
-        _secondSelectedIndex.value = index
+        _secondCategorySelectedIndex.value = index
     }
 
     open fun fetchStandings(category: String) {
