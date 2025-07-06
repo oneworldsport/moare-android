@@ -23,7 +23,8 @@ data class NewStandingsContainerState(
     val highlightState: StandingsHighlightItemState? = null,
     val displayDataState: ApiFetchState? = null,
     val firstColumnWidth: Dp? = null,
-    val columnWidthList: List<Dp> = emptyList()
+    val columnWidthList: List<Dp> = emptyList(),
+    val isGameStats: Boolean = false
 )
 
 data class StandingsItemState(

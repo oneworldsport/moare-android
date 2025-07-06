@@ -179,6 +179,7 @@ fun FBLeagueScheduleList(
        --------------------- */
     val filteredGames by fbLeagueScheduleViewModel.filteredGames.collectAsState()
     val selectedDayIndex by fbLeagueScheduleViewModel.selectedDayIndex.collectAsState()
+    val teamNameDic = fbLeagueScheduleViewModel.teamNameDictionary
 
     val displayModels by searchViewModel.displayModels.collectAsState()
     val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
@@ -187,7 +188,7 @@ fun FBLeagueScheduleList(
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            FBLeagueScheduleListItem(data = item)
+            FBLeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
         }
 //        for (value in gameListToDisplay) {
 //            FBLeagueScheduleItem(data = value)
@@ -199,13 +200,13 @@ fun FBLeagueScheduleList(
 fun FBLeagueScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
     fbLeagueScheduleViewModel: FBLeagueScheduleViewModel = hiltViewModel(),
+    teamNameDic: Map<String, String>, // FBLeagueScheduleViewModel이 한번도 초기화 된적 없이 FBGameStatsView에서 함수가 호출될때 teamNameDictionary를 fbLeagueScheduleViewModel에서 가져올수가 없어 추가.
     data: FBGameForSchedule,
 ) {
     val gameId = data.gameId
     val homeTeamId = data.homeTeamId
     val awayTeamId = data.awayTeamId
     val gameStatus = data.gameStatus
-    val teamNameDic = fbLeagueScheduleViewModel.teamNameDictionary
 
     /* ---------------------
        ui state

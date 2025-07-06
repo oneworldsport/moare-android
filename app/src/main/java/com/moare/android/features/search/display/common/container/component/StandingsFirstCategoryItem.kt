@@ -29,7 +29,7 @@ fun StandingsFirstCategoryItem(
             .height(height)
     ) {
         Text(
-            text = StringConstants.STANDINGS_FIRST_CATEGORY,
+            text = text,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,

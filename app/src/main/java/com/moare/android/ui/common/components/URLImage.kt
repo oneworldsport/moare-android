@@ -44,7 +44,7 @@ fun URLImage(
     }
 
     if (url != null) {
-        if (isSvg) {
+        if (url.contains(".svg")) {
             AsyncImage(
                 model = url,
                 contentDescription = null,
