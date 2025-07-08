@@ -55,7 +55,6 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
 import com.moare.android.features.search.models.models.football.FBPerson
 import com.moare.android.ui.common.components.HCapsuleBar
@@ -91,7 +90,7 @@ fun FBGameStatsView(
     val displayModels by searchViewModel.displayModels.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
     val fbLeagueScheduleModel = displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] as? FBLeagueScheduleDisplayModel
-    val fbTeamScheduleModel = displayModels[SportDisplayType.FB_TEAM_SCHEDULE] as? FBTeamScheduleDisplayModel
+    val fbTeamScheduleModel = displayModels[SportDisplayType.FB_TEAM_SCHEDULE] as? FBLeagueScheduleDisplayModel
 
     /* ---------------------
        etc

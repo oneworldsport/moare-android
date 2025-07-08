@@ -75,7 +75,7 @@ fun FBTeamScheduleView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.FBTeamSchedule) {
+        if (poppedView == null || poppedView is SportDecodableModel.FBLeagueSchedule) {
             fbTeamScheduleViewModel.send(FBTeamScheduleIntent.InitData(data))
         }
     }

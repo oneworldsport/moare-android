@@ -399,7 +399,7 @@ fun SearchView(
                         FBTeamStandingsView(data = it as FBTeamStandingsDisplayModel)
                     }
                     displayModels[SportDisplayType.FB_TEAM_SCHEDULE]?.let {
-                        FBTeamScheduleView(data = it as FBTeamScheduleDisplayModel)
+                        FBLeagueScheduleView(data = it as FBLeagueScheduleDisplayModel)
                     }
                     displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE]?.let {
                         FBLeagueScheduleView(data = it as FBLeagueScheduleDisplayModel)

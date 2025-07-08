@@ -8,7 +8,6 @@ import com.moare.android.features.search.models.displaymodels.football.FBPlayerS
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
@@ -218,15 +217,6 @@ class ModelConverter(
         )
     }
 
-    fun fbTeamScheduleConverter(response: FBGameScheduleResponseModel): FBTeamScheduleDisplayModel {
-        return FBTeamScheduleDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.EPL,
-            keywords = keywords,
-            entityInfo = entityInfo,
-            games = response.schedule
-        )
-    }
-
     fun fbLeagueScheduleConverter(response: FBGameScheduleResponseModel): FBLeagueScheduleDisplayModel {
         val yearMonthList = response.scheduledMonths.map {
             val (year, month) = it.split("-")
@@ -237,6 +227,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule
         )
