@@ -157,7 +157,7 @@ data class DataModel(
                         SportDecodableModel.FBTeamStandings(responseModel, displayModel)
                     }
                 }
-                "football_team_schedule", "football_league_schedule" -> {
+                "football_league_schedule" -> {
                     val responseModel: FBGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
                     val displayModel = modelConverter.fbLeagueScheduleConverter(responseModel)
                     SportDecodableModel.FBLeagueSchedule(responseModel, displayModel)
