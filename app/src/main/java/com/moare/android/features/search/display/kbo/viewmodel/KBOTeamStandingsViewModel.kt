@@ -57,7 +57,7 @@ class KBOTeamStandingsViewModel @Inject constructor(
         super.initData(displayModel)
 
         // init with default value
-        _selectedCategoryIndex.value = 0 // defalue category is "승률"
+        _selectedCategoryIndex.value = 1 // defalue category is "승률"
         _standings.value = displayModel.standings
 
         sortStandings()
@@ -76,12 +76,18 @@ class KBOTeamStandingsViewModel @Inject constructor(
         var standings = standings.value.toMutableList()
 
         when (selectedCategoryIndex.value) {
-            0 -> standings.sortByDescending { it.stats.rankData.winpct.toFloatOrNull() }
-            1 -> standings.sortBy { it.stats.rankData.gb.toFloatOrNull() }
+            0 -> standings.sortBy { it.stats.rankData.gb.toFloatOrNull() }
+            1 -> standings.sortByDescending { it.stats.rankData.winpct.toFloatOrNull() }
             2 -> standings.sortByDescending { it.stats.rankData.wins.toIntOrNull() }
             3 -> standings.sortBy { it.stats.rankData.losses.toIntOrNull() }
             4 -> standings.sortByDescending { it.stats.rankData.gp.toIntOrNull() }
-            5 -> standings.sortByDescending { it.stats.rankData.streak.take(1).toIntOrNull() }
+            5 -> standings.sortByDescending {
+                // 승은 * 1, 패는 * (-1)을 해서 정렬
+                val streak = it.stats.rankData.streak
+                val num = streak.take(1).toIntOrNull() ?: 0
+                val sign = if (streak.contains("승")) 1 else -1
+                num * sign
+            }
             6 -> standings.sortByDescending { it.stats.hitterData.avg.toFloatOrNull() }
             7 -> standings.sortByDescending { it.stats.hitterData.h.toIntOrNull() }
             8 -> standings.sortByDescending { it.stats.hitterData.hr.toIntOrNull() }

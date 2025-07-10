@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,7 +36,9 @@ fun FBStatDataItem(
         ) {
             Text(
                 text = category,
-                fontSize = (customCategoryFontSize ?: 15).sp
+                fontSize = (customCategoryFontSize ?: 14).sp,
+                textAlign = TextAlign.Center,
+                maxLines = 2
             )
         }
 
@@ -52,4 +55,23 @@ fun FBStatDataItem(
             )
         }
     }
+}
+
+@Composable
+fun EmptyStatDataItem(
+    customCategoryFontSize: Int? = null,
+    customDataFontSize: Int? = null,
+    customWidth: Dp? = null,
+    customCategoryHeight: Dp? = null,
+    modifier: Modifier = Modifier,
+) {
+    FBStatDataItem(
+        category = "",
+        data = "",
+        customCategoryFontSize = customCategoryFontSize,
+        customDataFontSize = customDataFontSize,
+        customWidth = customWidth,
+        customCategoryHeight = customCategoryHeight,
+        modifier = modifier
+    )
 }

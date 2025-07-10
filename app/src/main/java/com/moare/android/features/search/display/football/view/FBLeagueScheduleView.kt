@@ -57,6 +57,7 @@ fun FBLeagueScheduleView(
     /* ---------------------
        ui state
        --------------------- */
+    var shouldAnimateScroll by remember { mutableStateOf(true) }
 
     /* ---------------------
        viewmodel state
@@ -100,6 +101,11 @@ fun FBLeagueScheduleView(
                         searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
                     })
                 }
+
+                // 현재 뷰로 뒤로가기를 통해서 왔을때는 달력을 애니메이션 없이 이동
+                // NOTE: - 가장 처음에만 적용 안되는 버그 있음. 그 이후부터는 잘됨.
+                // - NBALeagueScheduleView에서는 작동안해서 일단 다른 뷰에는 추가 안함.
+                shouldAnimateScroll = false
             }
         }
     }
@@ -116,13 +122,16 @@ fun FBLeagueScheduleView(
                 selectedYearMonthIndex,
                 selectedDayIndex,
                 yearMonthCalendarScrollTrigger,
-                dayCalendarScrollTrigger
+                dayCalendarScrollTrigger,
+                shouldAnimateScroll
             ),
             isAllResultOpened = isAllResultOpened
         ),
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
                 onSelectYearMonth = { yearMonth, index ->
+                    shouldAnimateScroll = true
+
                     fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.SelectYearMonth(yearMonth, index) { data ->
                         // 현재 구조 콜백 수정 필요?
                         searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
@@ -170,6 +179,7 @@ fun FBLeagueScheduleList(
        --------------------- */
     val filteredGames by fbLeagueScheduleViewModel.filteredGames.collectAsState()
     val selectedDayIndex by fbLeagueScheduleViewModel.selectedDayIndex.collectAsState()
+    val teamNameDic = fbLeagueScheduleViewModel.teamNameDictionary
 
     val displayModels by searchViewModel.displayModels.collectAsState()
     val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
@@ -178,7 +188,7 @@ fun FBLeagueScheduleList(
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            FBLeagueScheduleListItem(data = item)
+            FBLeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
         }
 //        for (value in gameListToDisplay) {
 //            FBLeagueScheduleItem(data = value)
@@ -190,13 +200,13 @@ fun FBLeagueScheduleList(
 fun FBLeagueScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
     fbLeagueScheduleViewModel: FBLeagueScheduleViewModel = hiltViewModel(),
+    teamNameDic: Map<String, String>, // FBLeagueScheduleViewModel이 한번도 초기화 된적 없이 FBGameStatsView에서 함수가 호출될때 teamNameDictionary를 fbLeagueScheduleViewModel에서 가져올수가 없어 추가.
     data: FBGameForSchedule,
 ) {
     val gameId = data.gameId
     val homeTeamId = data.homeTeamId
     val awayTeamId = data.awayTeamId
     val gameStatus = data.gameStatus
-    val teamNameDic = fbLeagueScheduleViewModel.teamNameDictionary
 
     /* ---------------------
        ui state

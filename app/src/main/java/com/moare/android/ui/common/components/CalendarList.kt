@@ -3,7 +3,6 @@ package com.moare.android.ui.common.components
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +21,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import com.moare.android.core.util.DayInfo
 import com.moare.android.ui.theme.MoareAndroidTheme
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
-import kotlinx.coroutines.delay
 import java.time.DayOfWeek
 
 enum class CalendarType {
@@ -46,6 +43,7 @@ fun <T> CalendarList(
     calendarType: CalendarType,
     selectedIndex: Int,
     scrollTrigger: String = "",
+    shouldAnimateSroll: Boolean = true,
     onItemSelected: (T, Int) -> Unit
 ) {
     /* ---------------------
@@ -84,7 +82,7 @@ fun <T> CalendarList(
     val barOffset by animateDpAsState(
         targetValue = 6.dp + getOffsetOfAniCapsuleBar(itemWidth = itemWidth + (hPadding * 2), barWidth = itemWidth, index = selectedIndex),
         animationSpec = tween(
-            durationMillis = 500,
+            durationMillis = if (shouldAnimateSroll) 500 else 0,
             easing = LinearOutSlowInEasing
         )
     )
@@ -93,13 +91,17 @@ fun <T> CalendarList(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(scrollTrigger) {
-        scrollState.animateScrollTo(
-            value = selectedItemPosition,
-            animationSpec = tween(
-                durationMillis = 500,
-                easing = LinearOutSlowInEasing
+        if (shouldAnimateSroll) {
+            scrollState.animateScrollTo(
+                value = selectedItemPosition,
+                animationSpec = tween(
+                    durationMillis = 500,
+                    easing = LinearOutSlowInEasing
+                )
             )
-        )
+        } else {
+            scrollState.scrollTo(selectedItemPosition)
+        }
     }
 
     /* ---------------------

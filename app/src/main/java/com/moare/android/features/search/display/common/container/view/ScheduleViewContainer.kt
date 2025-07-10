@@ -53,7 +53,8 @@ fun ScheduleViewContainer(
                 calendarState.yearMonthList,
                 CalendarType.YEARMONTH,
                 calendarState.selectedYearMonthIndex,
-                calendarState.yearMonthCalendarScrollTrigger
+                calendarState.yearMonthCalendarScrollTrigger,
+                shouldAnimateSroll = calendarState.shouldAnimateScroll
             ) { yearMonth, index ->
                 calendarActions.onSelectYearMonth(yearMonth, index)
             }
@@ -62,7 +63,8 @@ fun ScheduleViewContainer(
                 calendarState.days,
                 CalendarType.DAY,
                 calendarState.selectedDayIndex,
-                calendarState.dayCalendarScrollTrigger
+                calendarState.dayCalendarScrollTrigger,
+                shouldAnimateSroll = calendarState.shouldAnimateScroll
             ) { day, index ->
                 calendarActions.onSelectDay(day, index)
             }

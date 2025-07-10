@@ -224,7 +224,7 @@ fun MLBGameStatsView(
                     secondCategorySelectedIndex = firstCategorySelectedIndex
                 ),
                 actions = StandingsContainerActions(
-                    secondCategoryButtonAction = { index ->
+                    secondCategoryButtonAction = { index, _ ->
                         mlbGameStatsViewModel.send(MLBGameStatsIntent.SelectFirstCategory(index))
                     },
                     itemButtonAction = {
@@ -259,7 +259,7 @@ fun MLBGameStatsView(
                     secondCategorySelectedIndex = secondCategorySelectedIndex
                 ),
                 actions = StandingsContainerActions(
-                    secondCategoryButtonAction = { index ->
+                    secondCategoryButtonAction = { index, _ ->
                         mlbGameStatsViewModel.send(MLBGameStatsIntent.SelectSecondCategory(index))
                     },
                     itemButtonAction = {

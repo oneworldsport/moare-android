@@ -34,11 +34,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.rounded
+import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
+import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.state.StandingsContainerState
-import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
+import com.moare.android.features.search.display.common.container.state.StandingsHighlightItemState
+import com.moare.android.features.search.display.common.container.state.StandingsItemState
+import com.moare.android.features.search.display.common.container.view.NewStandingsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsViewModel
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsIntent
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
@@ -72,13 +78,49 @@ fun FBPlayerStandingsView(
     val displayModel by fbPlayerStandingsViewModel.displayModel.collectAsState()
     val displayDataState by fbPlayerStandingsViewModel.displayDataState.collectAsState()
     val firstSelectedIndex by fbPlayerStandingsViewModel.firstSelectedIndex.collectAsState()
-    val secondSelectedIndex by fbPlayerStandingsViewModel.secondSelectedIndex.collectAsState()
+    val secondCategorySelectedIndex by fbPlayerStandingsViewModel.secondCategorySelectedIndex.collectAsState()
     val isKeyword by fbPlayerStandingsViewModel.isKeyword.collectAsState()
     val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
+    val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
+    val filteredStandingsStartIndex by fbPlayerStandingsViewModel.filteredStandingsStartIndex.collectAsState()
+    val playerNameDic = fbPlayerStandingsViewModel.playerNameDictionary
+    val teamNameDic = fbPlayerStandingsViewModel.teamNameDictionary
 
     val league = displayModel?.standings?.first()?.stats?.league
 
     val poppedView by searchViewModel.poppedView.collectAsState()
+
+    val playerStandings: List<StandingsItemState> = filteredStandings.map {
+        val stats = it.stats
+        StandingsItemState(
+            id = it.player.id,
+            imageUrl = it.player.photo,
+            name = playerNameDic["${it.player.id}"] ?: it.player.name,
+            subName = teamNameDic["short_${it.stats.team.id}"] ?: it.stats.team.name,
+            dataList = listOf(
+                stats.goals.total.toString(),
+                stats.goals.assists.toString(),
+                (stats.goals.total + stats.goals.assists).toString(),
+                stats.shots.total.toString(),
+                stats.shots.on.toString(),
+                stats.passes.key.toString(),
+                stats.dribbles.success.toString(),
+                stats.penalty.scored.toString(),
+                stats.tackles.total.toString(),
+                stats.duels.won.toString(),
+                stats.passes.total.toString(),
+                stats.fouls.committed.toString(),
+                stats.cards.yellow.toString(),
+                stats.cards.red.toString(),
+                stats.games.appearences.toString(),
+                stats.games.lineups.toString(),
+                stats.substitutes.substituteIn.toString(),
+                stats.games.minutes.toString(),
+                (stats.games.rating.toDoubleOrNull()?.rounded(2) ?: 0.0).toString()
+            )
+        )
+    }
+    val columnWidthList = listOf(50.dp, 50.dp, 70.dp, 50.dp, 70.dp, 50.dp, 70.dp, 50.dp, 70.dp, 80.dp, 70.dp, 50.dp, 50.dp, 50.dp, 50.dp, 70.dp, 70.dp, 80.dp, 70.dp)
 
     /* ---------------------
        etc
@@ -87,12 +129,12 @@ fun FBPlayerStandingsView(
         val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
         val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
-        if (secondSelectedIndex in 0 until attackCategoriesSize) {
-            (fbPlayerStandingsViewModel.itemWidth * secondSelectedIndex).toPx()
-        } else if (secondSelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
-            ((fbPlayerStandingsViewModel.itemWidth * secondSelectedIndex) + fbPlayerStandingsViewModel.barWidth).toPx()
+        if (secondCategorySelectedIndex in 0 until attackCategoriesSize) {
+            (fbPlayerStandingsViewModel.itemWidth * secondCategorySelectedIndex).toPx()
+        } else if (secondCategorySelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
+            ((fbPlayerStandingsViewModel.itemWidth * secondCategorySelectedIndex) + fbPlayerStandingsViewModel.barWidth).toPx()
         } else {
-            ((fbPlayerStandingsViewModel.itemWidth * secondSelectedIndex) + (fbPlayerStandingsViewModel.barWidth * 2)).toPx()
+            ((fbPlayerStandingsViewModel.itemWidth * secondCategorySelectedIndex) + (fbPlayerStandingsViewModel.barWidth * 2)).toPx()
         }
     }.toInt()
 
@@ -148,434 +190,36 @@ fun FBPlayerStandingsView(
         }
     }
 
-    StandingsViewContainer(
-        state = StandingsContainerState(
+    NewStandingsViewContainer(
+        state = NewStandingsContainerState(
+            secondCategories = StringConstants.Football.PLAYER_STANDINGS_SECOND_CATEGORIES,
+            standings = playerStandings,
+            secondCategorySelectedIndex = secondCategorySelectedIndex,
+            highlightState = StandingsHighlightItemState(
+                itemIndex = entityIndex,
+                standingsStartIndex = filteredStandingsStartIndex
+            ),
             displayDataState = displayDataState,
-            firstCategoryItemHeight = fbPlayerStandingsViewModel.categoryItemHeight * 2
+            columnWidthList = columnWidthList
         ),
-        headerContent = {
+        actions = StandingsContainerActions(
+            secondCategoryButtonAction = { index, category ->
+                fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.SelectSecondCategory(index, category))
+            },
+            itemButtonAction = { id ->
+                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(category = "football", playerId = id))
+            }
+        ),
+        verticalScrollState = verticalScrollState,
+        titleContent = {
             league?.let {
                 LeagueTitle(
                     url = league.logo,
                     leagueName = league.name,
-                    leagueSeason = league.season
-                )
-            }
-        },
-        categoryListContent = {
-            Column {
-                FBPlayerStandingsFirstCategoryList()
-                FBPlayerStandingsSecondCategoryList()
-            }
-        },
-        standingsFirstDataContent = {
-            FBPlayerStandingsFirstDataList()
-        },
-        standingsDataContent = {
-            FBPlayerStandingsDataList()
-        }
-    )
-}
-
-@Composable
-fun FBPlayerStandingsFirstCategoryList(
-    fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
-) {
-    /* ---------------------
-       constants
-       --------------------- */
-    val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
-    val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
-    val commonCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_COMMON_CATEGORIES.size
-
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val selectedIndex by fbPlayerStandingsViewModel.firstSelectedIndex.collectAsState()
-
-    val itemWidth = fbPlayerStandingsViewModel.itemWidth
-    val barWidth = fbPlayerStandingsViewModel.barWidth
-
-    /* ---------------------
-       animation
-       --------------------- */
-    val barOffset by animateDpAsState(
-        targetValue = if (selectedIndex == 0) {
-            getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * attackCategoriesSize,
-                barWidth = 80.dp
-            )
-        } else if (selectedIndex == 1) {
-            (itemWidth * attackCategoriesSize) + barWidth + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * defendCategoriesSize,
-                barWidth = 80.dp
-            )
-        } else {
-            (itemWidth * attackCategoriesSize) + (barWidth * 2) + (itemWidth * defendCategoriesSize) + getOffsetOfAniCapsuleBar(
-                itemWidth = itemWidth * commonCategoriesSize,
-                barWidth = 80.dp
-            )
-        },
-        animationSpec = tween(
-            durationMillis = 500,
-            easing = LinearOutSlowInEasing
-        )
-    )
-
-    Column {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .height(fbPlayerStandingsViewModel.categoryItemHeight - 2.dp)
-        ) {
-            for ((index, value) in StringConstants.STATS_FIRST_CATEGORIES.withIndex()) {
-                FBPlayerStandingsFirstCategoryListItem(
-                    category = value,
-                    index = index
-                )
-
-                if (index != StringConstants.STATS_FIRST_CATEGORIES.size - 1) {
-                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
-                }
-            }
-        }
-
-        HCapsuleBar(
-            modifier = Modifier
-                .offset(x = barOffset),
-            size = HCapsuleBarSize.LARGE
-        )
-    }
-}
-
-@Composable
-fun FBPlayerStandingsFirstCategoryListItem(
-    fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel(),
-    category: String,
-    index: Int
-) {
-    val itemWidth = fbPlayerStandingsViewModel.itemWidth
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(
-                if (index == 0) {
-                    (itemWidth * StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size)
-                } else if (index == 1) {
-                    (itemWidth * StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size)
-                } else {
-                    (itemWidth * StringConstants.Football.PLAYER_STANDINGS_COMMON_CATEGORIES.size)
-                }
-            )
-            .clickable {
-                fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.SelectFirstCategory(index))
-            }
-    ) {
-        Text(
-            text = category,
-            fontSize = fbPlayerStandingsViewModel.categoryFontSize,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-fun FBPlayerStandingsSecondCategoryList(
-    fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
-) {
-    /* ---------------------
-       constants
-       --------------------- */
-    val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
-    val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
-
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val selectedIndex by fbPlayerStandingsViewModel.secondSelectedIndex.collectAsState()
-
-    /* ---------------------
-       animation
-       --------------------- */
-    val barOffset by animateDpAsState(
-        targetValue = if (selectedIndex in 0 until attackCategoriesSize) {
-            getOffsetOfAniCapsuleBar(itemWidth = fbPlayerStandingsViewModel.itemWidth, index = selectedIndex)
-        } else if (selectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
-            getOffsetOfAniCapsuleBar(itemWidth = fbPlayerStandingsViewModel.itemWidth, index = selectedIndex) + fbPlayerStandingsViewModel.barWidth
-        } else {
-            getOffsetOfAniCapsuleBar(itemWidth = fbPlayerStandingsViewModel.itemWidth, index = selectedIndex) + (fbPlayerStandingsViewModel.barWidth * 2)
-        },
-        animationSpec = tween(
-            durationMillis = 500,
-            easing = LinearOutSlowInEasing
-        )
-    )
-
-    Column {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .height(fbPlayerStandingsViewModel.categoryItemHeight - 2.dp)
-        ) {
-            for ((index, value) in StringConstants.Football.PLAYER_STANDINGS_SECOND_CATEGORIES.withIndex()) {
-                FBPlayerStandingsSecondCategoryListItem(
-                    category = value,
-                    index = index
-                )
-
-                if (index == attackCategoriesSize - 1 || index == (attackCategoriesSize + defendCategoriesSize - 1)) {
-                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
-                }
-            }
-        }
-
-        HCapsuleBar(
-            modifier = Modifier
-                .offset(x = barOffset)
-        )
-    }
-}
-
-@Composable
-fun FBPlayerStandingsSecondCategoryListItem(
-    fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel(),
-    category: String,
-    index: Int
-) {
-    val fontSize = when (index) {
-        6, 9, 17 -> 13.sp
-        else -> fbPlayerStandingsViewModel.categoryFontSize
-    }
-
-    Text(
-        text = category,
-        textAlign = TextAlign.Center,
-        fontSize = fontSize,
-        fontWeight = FontWeight.Medium,
-        modifier = Modifier
-            .width(fbPlayerStandingsViewModel.itemWidth)
-            .clickable {
-                fbPlayerStandingsViewModel.send(
-                    FBPlayerStandingsIntent.SelectSecondCategory(index, category)
-                )
-            }
-    )
-}
-
-@Composable
-fun FBPlayerStandingsFirstDataList(
-    fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
-) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
-    val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
-    val filterStandingsStartIndex by fbPlayerStandingsViewModel.filteredStandingsStartIndex.collectAsState()
-//    VSequentialListAni(
-//        items = dataList
-//    ) { index, item ->
-//        FBTeamStandingsFirstDataItem(rank = index + 1, data = item, itemHeight = itemHeight)
-//    }
-    Column (
-        modifier = Modifier.width(fbPlayerStandingsViewModel.firstCategoryItemWidth)
-    ) {
-        for ((index, value) in filteredStandings.withIndex()) {
-            val standingsIndex = filterStandingsStartIndex + index
-
-            if (entityIndex != null && entityIndex == standingsIndex) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(Moare)
-                )
-            }
-
-            FBPlayerStandingsFirstDataListItem(rank = standingsIndex + 1, data = value)
-
-            if (entityIndex != null && entityIndex == standingsIndex) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(Moare)
+                    leagueSeason = league.season,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
         }
-    }
-}
-
-@Composable
-fun FBPlayerStandingsFirstDataListItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel(),
-    rank: Int,
-    data: FBPlayerStandingsDisplay
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .padding(start = 10.dp)
-            .height(fbPlayerStandingsViewModel.dataItemHeight)
-            .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(category = "football", playerId = data.player.id))
-            }
-    ) {
-        Text(
-            text = "$rank",
-            fontWeight = FontWeight.Medium,
-            fontSize = fbPlayerStandingsViewModel.dataFontSize,
-            modifier = Modifier
-                .width(26.dp)
-        )
-
-        URLImage(
-            url = data.player.photo,
-            customSize = 25.dp,
-            modifier = Modifier.padding(end = 4.dp)
-        )
-
-        Row(
-            // added to make VCapsuleBar visible
-            modifier = Modifier.weight(1f)
-        ) {
-            Column {
-                Text(
-                    text = fbPlayerStandingsViewModel.playerNameDictionary["${data.player.id}"] ?: data.player.name,
-                    fontSize = 12.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .padding(bottom = 2.dp)
-                )
-
-                Text(
-                    text = fbPlayerStandingsViewModel.teamNameDictionary["short_${data.stats.team.id}"] ?: data.stats.team.name,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Light,
-                    color = Color.Gray,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                )
-            }
-        }
-
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-    }
-}
-
-@Composable
-fun FBPlayerStandingsDataList(
-    fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel()
-) {
-    /* ---------------------
-       constants
-       --------------------- */
-    val attackCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
-    val defendCategoriesSize = StringConstants.Football.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
-
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val filteredStandings by fbPlayerStandingsViewModel.filteredStandings.collectAsState()
-    val entityIndex by fbPlayerStandingsViewModel.entityIndex.collectAsState()
-    val filteredStandingsStartIndex by fbPlayerStandingsViewModel.filteredStandingsStartIndex.collectAsState()
-//    VSequentialListAni(
-//        items = dataList
-//    ) { _, item ->
-//        Row {
-//            for (index in 0 until 10) {
-//                FBTeamStandingsDataItem(
-//                    data = item,
-//                    isInt = !(index == 8 || index == 9),
-//                    index = index,
-//                    itemHeight = itemHeight
-//                )
-//            }
-//        }
-//    }
-    Column {
-        for ((index, value) in filteredStandings.withIndex()) {
-            val standingsIndex = filteredStandingsStartIndex + index
-            val categorySize = StringConstants.Football.PLAYER_STANDINGS_SECOND_CATEGORIES.size
-            val highlightWidth = (fbPlayerStandingsViewModel.itemWidth * categorySize) + (2.dp * 2)
-
-            if (entityIndex != null && entityIndex == standingsIndex) {
-                Box(
-                    Modifier
-                        .width(highlightWidth)
-                        .height(1.dp)
-                        .background(Moare)
-                )
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .height(fbPlayerStandingsViewModel.dataItemHeight)
-            ) {
-                for (index in 0 until categorySize) {
-                    FBPlayerStandingsDataListItem(
-                        data = value,
-                        index = index
-                    )
-
-                    if (index == attackCategoriesSize - 1 || index == (attackCategoriesSize + defendCategoriesSize - 1)) {
-                        VCapsuleBar(modifier = Modifier.alpha(0f))
-                    }
-                }
-            }
-
-            if (entityIndex != null && entityIndex == standingsIndex) {
-                Box(
-                    Modifier
-                        .width(highlightWidth)
-                        .height(1.dp)
-                        .background(Moare)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun FBPlayerStandingsDataListItem(
-    fbPlayerStandingsViewModel: FBPlayerStandingsViewModel = hiltViewModel(),
-    data: FBPlayerStandingsDisplay,
-    index: Int
-) {
-    val intDataText = when (index) {
-        0 -> "${data.stats.goals.total}"
-        1 -> "${data.stats.goals.assists}"
-        2 -> "${(data.stats.goals.total) + (data.stats.goals.assists)}"
-        3 -> "${data.stats.shots.total}"
-        4 -> "${data.stats.shots.on}"
-        5 -> "${data.stats.passes.key}"
-        6 -> "${data.stats.dribbles.success}"
-        7 -> "${data.stats.penalty.scored}"
-        8 -> "${data.stats.tackles.total}"
-        9 -> "${data.stats.duels.won}"
-        10 -> "${data.stats.passes.total}"
-        11 -> "${data.stats.fouls.committed}"
-        12 -> "${data.stats.cards.yellow}"
-        13 -> "${data.stats.cards.red}"
-        14 -> "${data.stats.games.appearences}"
-        15 -> "${data.stats.games.lineups}"
-        16 -> "${data.stats.substitutes.substituteIn}"
-        17 -> "${data.stats.games.minutes}"
-        18 -> "${data.stats.games.rating.toDoubleOrNull()?.rounded(2) ?: 0.0}"
-        else -> ""
-    }
-
-    Text(
-        text = intDataText,
-        textAlign = TextAlign.Center,
-        fontSize = fbPlayerStandingsViewModel.dataFontSize,
-        modifier = Modifier
-            .width(fbPlayerStandingsViewModel.itemWidth)
     )
 }

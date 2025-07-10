@@ -6,10 +6,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.features.search.display.common.scope.InfoViewScope
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.ui.util.CenterColumn
+import com.moare.android.ui.util.screenHeightPx
 import kotlinx.coroutines.delay
 
 /**
@@ -38,6 +43,7 @@ import kotlinx.coroutines.delay
 fun InfoViewContainer(
     searchViewModel: SearchViewModel = hiltViewModel(),
     itemCount: Int,
+    shouldShowMeasureContent: Boolean = false, // NOTE: StatsView가 아코디언 UI로 바뀌면서 measureContent를 사용해야하는 경우가 있어 추가.
     modifier: Modifier = Modifier,
     measureContent: @Composable InfoViewScope.() -> Unit,
     displayContent: @Composable InfoViewScope.() -> Unit
@@ -45,6 +51,8 @@ fun InfoViewContainer(
     /* ---------------------
        ui state
        --------------------- */
+    val screenHeight = screenHeightPx()
+
     val density = LocalDensity.current
     var parentPosition by remember { mutableStateOf(Offset.Zero) }
     var parentCenter by remember { mutableStateOf(Offset.Zero) }
@@ -59,6 +67,8 @@ fun InfoViewContainer(
             easing = LinearOutSlowInEasing
         )
     )
+    var startPosition by remember { mutableStateOf(Offset.Zero) }
+    var measureContentAlpha by remember { mutableFloatStateOf(0f) }
 
     /* ---------------------
        viewmodel state
@@ -74,6 +84,8 @@ fun InfoViewContainer(
         aniPositions = aniPositions,
         showContents = showContents,
         contentsAlpha = contentsAlpha,
+        startPosition = startPosition,
+        measureContentAlpha = measureContentAlpha,
         updateItemSizeInternal = { index, size -> itemSizes[index] = size },
         updateItemPositionInternal = { index, offset -> itemPositions[index] = offset }
 //        updateParentPosition = { parentPosition = it },
@@ -90,6 +102,12 @@ fun InfoViewContainer(
             aniPositions = true
             delay(1000)
             showContents = true
+
+            if (shouldShowMeasureContent) {
+                delay(500)
+                measureContentAlpha = 1f
+                showContents = false
+            }
         }
     }
 
@@ -100,23 +118,25 @@ fun InfoViewContainer(
         contentAlignment = Alignment.Center,
         modifier = modifier
     ) {
+        scope.displayContent()
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = if (shouldShowMeasureContent) 0.dp else 8.dp) // NOTE: shouldShowMeasureContent가 필요한 경우이 measureContent와 displayContent가 완전히 일치하지 않는 경우가 있어 조건 추가
                 .onGloballyPositioned { coordinates ->
                     parentPosition = coordinates.positionInWindow()
                     parentCenter = Offset(
                         x = coordinates.size.width / 2f,
                         y = coordinates.size.height / 2f
                     )
+
+//                        startPosition = Offset(x = 0f, y = -parentCenter.y + (screenHeight / 2))
                 }
-                .alpha(0f)
+                .alpha(measureContentAlpha)
         ) {
             scope.measureContent()
         }
-
-        scope.displayContent()
     }
 }
 

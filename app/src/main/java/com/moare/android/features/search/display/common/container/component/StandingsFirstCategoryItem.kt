@@ -19,21 +19,26 @@ import com.moare.android.ui.common.components.VCapsuleBar
 @Composable
 fun StandingsFirstCategoryItem(
     text: String = StringConstants.STANDINGS_FIRST_CATEGORY,
+    width: Dp? = null,
     height: Dp = 44.dp
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .width(width ?: 132.dp)
             .height(height)
     ) {
         Text(
-            text = StringConstants.STANDINGS_FIRST_CATEGORY,
+            text = text,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
-            modifier = Modifier.width(130.dp)
+            modifier = Modifier.weight(1f)
         )
 
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
+        VCapsuleBar(
+            modifier = Modifier.alpha(0.5f),
+            bottomRound = false
+        )
     }
 }

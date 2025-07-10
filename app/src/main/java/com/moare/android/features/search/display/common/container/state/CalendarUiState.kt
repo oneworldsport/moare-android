@@ -8,7 +8,8 @@ data class CalendarUiState(
     val selectedYearMonthIndex: Int,
     val selectedDayIndex: Int,
     val yearMonthCalendarScrollTrigger: String,
-    val dayCalendarScrollTrigger: String
+    val dayCalendarScrollTrigger: String,
+    val shouldAnimateScroll: Boolean = true
 )
 
 data class CalendarUiActions(

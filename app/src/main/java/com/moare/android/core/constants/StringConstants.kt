@@ -93,7 +93,7 @@ object StringConstants {
 
         val DIVISION_CATEGORY = listOf("내셔널 서부", "내셔널 동부", "내셔널 중부", "아메리칸 서부", "아메리칸 동부", "아메리칸 중부")
 
-        val TEAM_STANDINGS_CATEGORIES = listOf("승률", "게임차", "승", "패", "경기수", "연속", "타율", "안타", "홈런", "장타율", "득점", "평균자책", "피안타율", "피안타", "피홈런", "실점", "도루성공률")
+        val TEAM_STANDINGS_CATEGORIES = listOf("게임차", "승률", "승", "패", "경기수", "연속", "타율", "안타", "홈런", "장타율", "득점", "평균자책", "피안타율", "피안타", "피홈런", "실점", "도루성공률")
 
         val PLAYER_STANDINGS_HITTING_CATEGORIES = listOf("경기당 득점", "경기당 도움", "경기당 공격리바운드", "경기당 야투 시도", "경기당 야투 성공", "야투 성공률", "경기당 3점 시도", "경기당 3점 성공", "3점 성공률", "경기당 자유투 시도", "경기당 자유투 성공", "자유투 성공률")
         val PLAYER_STANDINGS_PITCHING_CATEGORIES = listOf("경기당 수비리바운드", "경기당 블록", "경기당 스틸")
@@ -115,9 +115,11 @@ object StringConstants {
         const val GAME_FINAL = "Final"
         val GAME_FINISHED_LIST = listOf(GAME_RAIN, GAME_FINAL)
 
+        val CONFERENCE_CATEGORY = listOf("내셔널리그", "아메리칸리그")
+
         val DIVISION_CATEGORY = listOf("내셔널 서부", "내셔널 동부", "내셔널 중부", "아메리칸 서부", "아메리칸 동부", "아메리칸 중부")
 
-        val TEAM_STANDINGS_CATEGORIES = listOf("승률", "게임차", "승", "패", "경기수", "연속", "타율", "안타", "홈런", "장타율", "득점", "평균자책", "피안타율", "피안타", "피홈런", "실점", "도루성공률")
+        val TEAM_STANDINGS_CATEGORIES = listOf("게임차", "승률", "승", "패", "경기수", "연속", "타율", "안타", "홈런", "장타율", "득점", "평균자책", "피안타율", "피안타", "피홈런", "실점", "도루성공률")
 
         val PLAYER_STANDINGS_HITTING_CATEGORIES = listOf("경기당 득점", "경기당 도움", "경기당 공격리바운드", "경기당 야투 시도", "경기당 야투 성공", "야투 성공률", "경기당 3점 시도", "경기당 3점 성공", "3점 성공률", "경기당 자유투 시도", "경기당 자유투 성공", "자유투 성공률")
         val PLAYER_STANDINGS_PITCHING_CATEGORIES = listOf("경기당 수비리바운드", "경기당 블록", "경기당 스틸")

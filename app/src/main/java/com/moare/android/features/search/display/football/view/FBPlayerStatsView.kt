@@ -1,5 +1,13 @@
 package com.moare.android.features.search.display.football.view
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,14 +28,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.R
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
+import com.moare.android.features.search.display.common.components.EmptyStatDataItem
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
@@ -38,7 +51,10 @@ import com.moare.android.features.search.models.displaymodels.football.FBPlayerS
 import com.moare.android.features.search.models.models.football.FBPlayerStats
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.util.CenterColumn
+import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBPlayerStatsView(
@@ -65,6 +81,7 @@ fun FBPlayerStatsView(
 
     InfoViewContainer(
         itemCount = (statsList?.size ?: 0) + 1,
+        shouldShowMeasureContent = true,
         modifier = Modifier
             .verticalScroll(rememberScrollState()),
         measureContent = {
@@ -76,28 +93,24 @@ fun FBPlayerStatsView(
                 updateItemPosition(index, coordinates)
             }
         }, displayContent = {
-//            val startPosition = if (parentCenter != Offset.Zero) {
-//                Offset(x = 0f, y = -parentCenter.y + (screenHeightPx() / 2))
-//            } else {
-//                Offset.Zero
-//            }
-
             FBPlayerStatsPlayerInfoItem(
                 isAniItem = true,
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
-//                startPosition = startPosition,
+                startPosition = startPosition,
                 aniPosition = aniPositions,
-                contentsAlpha = contentsAlpha
+                contentsAlpha = contentsAlpha,
+                measureContentAlpha = measureContentAlpha
             )
 
             FBPlayerStatsList(
                 isAniItem = true,
                 itemSizes = itemSizes,
                 itemPositions = itemPositions,
-//                startPosition = startPosition,
+                startPosition = startPosition,
                 aniPosition = aniPositions,
-                contentsAlpha = contentsAlpha
+                contentsAlpha = contentsAlpha,
+                measureContentAlpha = measureContentAlpha
             )
         }
     )
@@ -112,8 +125,9 @@ fun FBPlayerStatsPlayerInfoItem(
     itemPosition: Offset? = null,
     startPosition: Offset = Offset.Zero,
     aniPosition: Boolean = true,
-    contentsAlpha: Float = 0f,
+    contentsAlpha: Float = 1f,
     containerModifier: Modifier = Modifier,
+    measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by fbPlayerStatsViewModel.displayModel.collectAsState()
@@ -138,22 +152,24 @@ fun FBPlayerStatsPlayerInfoItem(
             updateItemPosition = { coordinates ->
                 updateItemPosition?.let { it(0, coordinates) }
             },
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = containerModifier.fillMaxWidth()
+            modifier = containerModifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
         ) {
-            HCapsuleBar()
+            HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
+                    .padding(top = 8.dp)
                     .alpha(contentsAlpha)
             ) {
                 URLImage(url = player.photo)
 
                 // name
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(start = 6.dp)
                 ) {
                     Text(
                         text = fbPlayerStatsViewModel.playerNameDictionary["${player.id}"] ?: player.name,
@@ -170,7 +186,8 @@ fun FBPlayerStatsPlayerInfoItem(
 
                 // nationality / team
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(start = 8.dp)
                 ) {
                     Row { // TODO: 가운데 정렬
                         // TODO: 나라 국기..?
@@ -220,8 +237,9 @@ fun FBPlayerStatsList(
     itemPositions: Map<Int, Offset>? = null,
     startPosition: Offset = Offset.Zero,
     aniPosition: Boolean = true,
-    contentsAlpha: Float = 0f,
+    contentsAlpha: Float = 1f,
     containerModifier: Modifier = Modifier,
+    measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by fbPlayerStatsViewModel.displayModel.collectAsState()
@@ -243,7 +261,8 @@ fun FBPlayerStatsList(
                 aniPosition = aniPosition,
                 contentsAlpha = contentsAlpha,
                 containerModifier = containerModifier,
-                updateItemPosition = updateItemPosition
+                updateItemPosition = updateItemPosition,
+                measureContentAlpha = measureContentAlpha
             )
         }
     }
@@ -260,6 +279,7 @@ fun FBPlayerStatsListItem(
     aniPosition: Boolean,
     contentsAlpha: Float,
     containerModifier: Modifier = Modifier,
+    measureContentAlpha: Float,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)?
 ) {
     MovingCapsuleItemContainer(
@@ -274,12 +294,13 @@ fun FBPlayerStatsListItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier
             .padding(top = if (isAniItem) 0.dp else 12.dp)
-            .padding(horizontal = if (isAniItem) 0.dp else 4.dp)
+            .padding(horizontal = 8.dp)
             .fillMaxWidth()
     ) {
         FBPlayerStatsItem(
             data = data,
-            contentsAlpha = contentsAlpha
+            contentsAlpha = contentsAlpha,
+            measureContentAlpha = measureContentAlpha
         )
     }
 }
@@ -288,135 +309,205 @@ fun FBPlayerStatsListItem(
 fun FBPlayerStatsItem(
     fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
     data: FBPlayerStats,
-    contentsAlpha: Float = 1f
+    contentsAlpha: Float,
+    measureContentAlpha: Float,
 ) {
+    var attackStatsOpenState by remember { mutableStateOf(true) }
+    var defendStatsOpenState by remember { mutableStateOf(false) }
+    var commonStatsOpenState by remember { mutableStateOf(false) }
+
     /* ---------------------
        ui
        --------------------- */
-    HCapsuleBar()
+    HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
 
-    // league / team
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .padding(bottom = 4.dp)
-            .alpha(contentsAlpha)
-    ) {
-        LeagueTitle(
-            url = data.league.logo,
-            leagueName = data.league.name,
-            leagueSeason = data.league.season
-        )
-
-        Text(
-            text = " - ",
-            fontWeight = FontWeight.Medium
-        )
-
-        URLImage(
-            url = data.team.logo,
-            customSize = 24.dp
-        )
-
-        Text(
-            text = fbPlayerStatsViewModel.teamNameDictionary["short_${data.team.id}"] ?: data.team.name,
-            fontWeight = FontWeight.Medium
-        )
-    }
-
-    // stats
-    // TODO: 수비수, 골기퍼, 공격수 별로 데이터 노출 다르게
-    Row(
+    CenterColumn(
         modifier = Modifier.alpha(contentsAlpha)
     ) {
-        FBStatDataItem(
-            category = "출전 경기수",
-            data = data.games.appearences.toString(),
-            customCategoryFontSize = 14,
-            customWidth = 70.dp
-        )
-//            FBPlayerStatsDataItem(
-//                category = "선발 출전",
-//                data =
+        // league / team
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(bottom = 4.dp)
+        ) {
+            LeagueTitle(
+                url = data.league.logo,
+                leagueName = data.league.name,
+                leagueSeason = data.league.season
+            )
+
+            Text(
+                text = " - ",
+                fontWeight = FontWeight.Medium
+            )
+
+            URLImage(
+                url = data.team.logo,
+                customSize = 24.dp
+            )
+
+            Text(
+                text = fbPlayerStatsViewModel.teamNameDictionary["short_${data.team.id}"] ?: data.team.name,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        // stats
+        // TODO: 수비수, 골기퍼, 공격수 별로 데이터 노출 다르게
+        CenterRow(
+            modifier = Modifier
+                .clickable { attackStatsOpenState = !attackStatsOpenState }
+        ) {
+            Text(
+                text = "공격 기록",
+                modifier = Modifier
+                    .padding(end = 4.dp)
+            )
+
+            Icon(
+                painter = painterResource(id = if (attackStatsOpenState) R.drawable.ic_round_arrow_drop_up_24 else R.drawable.ic_round_arrow_drop_down_24),
+                contentDescription = null,
+                tint = Color.Gray
+            )
+        }
+
+        AnimatedVisibility(
+            visible = attackStatsOpenState,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            CenterRow {
+                FBStatDataItem(
+                    category = "골",
+                    data = data.goals.total.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "도움",
+                    data = data.goals.assists.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "패널티 골",
+                    data = data.penalty.scored.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "슈팅",
+                    data = data.shots.total.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "유효 슈팅",
+                    data = data.shots.on.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "드리블",
+                    data = data.dribbles.attempts.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        CenterRow(
+            modifier = Modifier
+                .clickable { defendStatsOpenState = !defendStatsOpenState }
+        ) {
+            Text(
+                text = "수비 기록",
+                modifier = Modifier
+                    .padding(end = 4.dp)
+            )
+
+            Icon(
+                painter = painterResource(id = if (defendStatsOpenState) R.drawable.ic_round_arrow_drop_up_24 else R.drawable.ic_round_arrow_drop_down_24),
+                contentDescription = null,
+                tint = Color.Gray
+            )
+        }
+
+        AnimatedVisibility(
+            visible = defendStatsOpenState,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            CenterRow {
+                FBStatDataItem(
+                    category = "태클",
+                    data = data.tackles.total.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "파울",
+                    data = data.fouls.committed.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "경고",
+                    data = data.cards.yellow.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "퇴장",
+                    data = data.cards.red.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+//            EmptyStatDataItem(
+//                modifier = Modifier.weight(1f)
 //            )
-        FBStatDataItem(
-            category = "평균 평점",
-            data = data.games.rating.take(3),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "골",
-            data = data.goals.total.toString()
-        )
-        FBStatDataItem(
-            category = "패널티 골",
-            data = data.penalty.scored.toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "도움",
-            data = data.goals.assists.toString(),
-            customWidth = 70.dp
-        )
-    }
+            }
+        }
 
-    Row(
-        modifier = Modifier.alpha(contentsAlpha)
-    ) {
-        FBStatDataItem(
-            category = "슈팅",
-            data = data.shots.total.toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "유효 슈팅",
-            data = data.shots.on.toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "패스",
-            data = data.passes.total.toString()
-        )
-        FBStatDataItem(
-            category = "태클",
-            data = data.tackles.total.toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "드리블",
-            data = data.dribbles.attempts.toString(),
-            customWidth = 70.dp
-        )
-    }
+        CenterRow(
+            modifier = Modifier
+                .clickable { commonStatsOpenState = !commonStatsOpenState }
+        ) {
+            Text(
+                text = "공통 기록",
+                modifier = Modifier
+                    .padding(end = 4.dp)
+            )
 
-    Row(
-        modifier = Modifier
-            .padding(bottom = 6.dp)
-            .alpha(contentsAlpha)
-    ) {
-        FBStatDataItem(
-            category = "파울",
-            data = data.fouls.committed.toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "경고",
-            data = data.cards.yellow.toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "퇴장",
-            data = data.cards.red.toString()
-        )
-        FBStatDataItem(
-            category = "",
-            data = "",
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "",
-            data = "",
-            customWidth = 70.dp
-        )
+            Icon(
+                painter = painterResource(id = if (commonStatsOpenState) R.drawable.ic_round_arrow_drop_up_24 else R.drawable.ic_round_arrow_drop_down_24),
+                contentDescription = null,
+                tint = Color.Gray
+            )
+        }
+
+        AnimatedVisibility(
+            visible = commonStatsOpenState,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            CenterRow {
+                FBStatDataItem(
+                    category = "출전 경기수",
+                    data = data.games.appearences.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "패스",
+                    data = data.passes.total.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "평균 평점",
+                    data = data.games.rating.take(3),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
     }
 }

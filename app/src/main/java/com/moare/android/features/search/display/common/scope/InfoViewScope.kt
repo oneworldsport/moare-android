@@ -15,6 +15,8 @@ class InfoViewScope(
     val aniPositions: Boolean, // STUDY: 값 타입. 값 복사. 같은 값 공유하려면 setter(여기서는 updateAniPositions) 필요.
     val showContents: Boolean,
     val contentsAlpha: Float,
+    val startPosition: Offset,
+    val measureContentAlpha: Float,
 //    private val updateParentPosition: (Offset) -> Unit,
 //    private val updateParentCenter: (Offset) -> Unit,
 //    private val updateAniPositions: (Boolean) -> Unit,

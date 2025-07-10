@@ -3,9 +3,14 @@ package com.moare.android.features.search.display.mlb.view
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -24,13 +29,18 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.KBOUtil
 import com.moare.android.core.util.MLBUtil
+import com.moare.android.features.search.display.common.container.component.StandingsRankItem
+import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
+import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.state.StandingsContainerState
-import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
+import com.moare.android.features.search.display.common.container.view.NewStandingsViewContainer
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -41,6 +51,9 @@ import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.theme.Moare
+import com.moare.android.ui.util.CenterBox
+import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 import com.moare.android.ui.util.screenWidthDp
 
@@ -61,6 +74,10 @@ fun MLBTeamStandingsView(
     val displayModel by mlbTeamStandingsViewModel.displayModel.collectAsState()
     val selectedCategoryIndex by mlbTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
     val isKeyword by mlbTeamStandingsViewModel.isKeyword.collectAsState()
+    val headerCategorySelectedIndex by mlbTeamStandingsViewModel.headerCategorySelectedIndex.collectAsState()
+    val westStandings by mlbTeamStandingsViewModel.westStandings.collectAsState()
+    val eastStandings by mlbTeamStandingsViewModel.eastStandings.collectAsState()
+    val centralStandings by mlbTeamStandingsViewModel.centralStandings.collectAsState()
 
     val season = displayModel?.standings?.firstOrNull()?.team?.season
 
@@ -96,234 +113,131 @@ fun MLBTeamStandingsView(
         }
     }
 
-    StandingsViewContainer(
-        state = StandingsContainerState(
-            firstCategoryItemHeight = mlbTeamStandingsViewModel.categoryItemHeight,
-            isTopPaddingOnHeader = false
+    NewStandingsViewContainer(
+        state = NewStandingsContainerState(
+            headerCategories = StringConstants.MLB.CONFERENCE_CATEGORY,
+            secondCategories = StringConstants.MLB.TEAM_STANDINGS_CATEGORIES,
+            standings = emptyList(),
+            headerCategorySelectedIndex = headerCategorySelectedIndex,
+            secondCategorySelectedIndex = selectedCategoryIndex,
+            columnWidthList = mlbTeamStandingsViewModel.columnWidthList,
         ),
-        headerContent = {
+        actions = StandingsContainerActions(
+            headerCategoryButtonAction = { index ->
+                mlbTeamStandingsViewModel.send(MLBTeamStandingsIntent.SelectHeaderCategory(index))
+            },
+            secondCategoryButtonAction = { index, _ ->
+                mlbTeamStandingsViewModel.send(MLBTeamStandingsIntent.SelectCategory(index))
+            },
+            itemButtonAction = {}
+        ),
+        shouldUseCustomListContent = true,
+        titleContent = {
             BaseballLeagueTitle(
                 url = MLBUtil.mlbLogoUrl,
                 leagueName = "MLB",
                 leagueSeason = season ?: 2025
             )
-
-            // conference
-            Row(
-                modifier = Modifier.padding(top = 6.dp)
-            ) {
-                MLBDivisionButtonContainer()
-            }
         },
-        categoryListContent = {
-            MLBTeamStandingsCategoryList()
-        },
-        standingsFirstDataContent = {
-            MLBTeamStandingsFirstDataList()
-        },
-        standingsDataContent = {
-            MLBTeamStandingsDataList()
-        }
-    )
-}
-
-@Composable
-fun MLBDivisionButtonContainer(
-    mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel()
-) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val selectedConferenceIndex by mlbTeamStandingsViewModel.selectedDivisionIndex.collectAsState()
-
-    /* ---------------------
-       animation
-       --------------------- */
-    val barOffset by animateDpAsState(
-        targetValue = getOffsetOfAniCapsuleBar(itemWidth = screenWidthDp() / 6, index = selectedConferenceIndex),
-        animationSpec = tween(
-            durationMillis = 500,
-            easing = LinearOutSlowInEasing
-        )
-    )
-
-    Column {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .height(mlbTeamStandingsViewModel.categoryItemHeight - 2.dp)
-        ) {
-            for (index in 0 until StringConstants.MLB.DIVISION_CATEGORY.size) {
-                Text(
-                    text = StringConstants.MLB.DIVISION_CATEGORY[index],
-                    textAlign = TextAlign.Center,
-                    fontSize = mlbTeamStandingsViewModel.categoryFontSize,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .clickable {
-                            mlbTeamStandingsViewModel.send(
-                                MLBTeamStandingsIntent.SelectDivison(
-                                    index
-                                )
-                            )
-                        }
+        customListContent = { hScrollState ->
+            CenterColumn {
+                // west
+                MLBTeamStandingsDataList(
+                    divisionTitle = "서부",
+                    standings = westStandings,
+                    hScrollState = hScrollState
                 )
 
-                if (index == 2) {
-                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
-                }
-            }
-        }
+                // east
+                MLBTeamStandingsDataList(
+                    divisionTitle = "동부",
+                    standings = eastStandings,
+                    hScrollState = hScrollState
+                )
 
-        HCapsuleBar(
-            modifier = Modifier
-                .offset(x = barOffset)
-        )
-    }
-}
-
-@Composable
-fun MLBTeamStandingsCategoryList(
-    mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel()
-) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val selectedCategoryIndex by mlbTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
-
-    /* ---------------------
-       animation
-       --------------------- */
-    val barOffset by animateDpAsState(
-        targetValue = getOffsetOfAniCapsuleBar(itemWidth = mlbTeamStandingsViewModel.dataItemWidth, index = selectedCategoryIndex),
-        animationSpec = tween(
-            durationMillis = 500,
-            easing = LinearOutSlowInEasing
-        )
-    )
-
-    Column {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .height(mlbTeamStandingsViewModel.categoryItemHeight - 2.dp)
-        ) {
-            for ((index, value) in StringConstants.MLB.TEAM_STANDINGS_CATEGORIES.withIndex()) {
-                MLBTeamStandingsCategoryListItem(
-                    category = value,
-                    index = index
+                // central
+                MLBTeamStandingsDataList(
+                    divisionTitle = "중부",
+                    standings = centralStandings,
+                    hScrollState = hScrollState
                 )
             }
         }
-
-        HCapsuleBar(
-            modifier = Modifier
-                .offset(x = barOffset)
-        )
-    }
-}
-
-@Composable
-fun MLBTeamStandingsCategoryListItem(
-    mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel(),
-    category: String,
-    index: Int
-) {
-    Text(
-        text = category,
-        textAlign = TextAlign.Center,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Medium,
-        modifier = Modifier
-            .width(mlbTeamStandingsViewModel.dataItemWidth)
-            .clickable {
-                mlbTeamStandingsViewModel.send(MLBTeamStandingsIntent.SelectCategory(index))
-            }
     )
-}
-
-@Composable
-fun MLBTeamStandingsFirstDataList(
-    mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel()
-) {
-    val standings by mlbTeamStandingsViewModel.standings.collectAsState()
-
-    Column(
-        modifier = Modifier.padding(bottom = 10.dp)
-    ) {
-        for ((index, value) in standings.withIndex()) {
-            MLBTeamStandingsFirstDataListItem(rank = index + 1, data = value)
-        }
-    }
-}
-
-@Composable
-fun MLBTeamStandingsFirstDataListItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel(),
-    rank: Int,
-    data: MLBTeamStandingsDisplay,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .width(mlbTeamStandingsViewModel.firstCategoryItemWidth)
-            .padding(start = 10.dp)
-            .height(mlbTeamStandingsViewModel.dataItemHeight)
-            .clickable {
-                searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = data.team.id))
-            }
-    ) {
-        Text(
-            text = "$rank",
-            fontWeight = FontWeight.Medium,
-            fontSize = mlbTeamStandingsViewModel.dataFontSize,
-            modifier = Modifier
-                .width(22.dp)
-        )
-
-        URLImage(
-            url = MLBUtil.teamLogoUrl(data.team.id),
-            customSize = 25.dp,
-            modifier = Modifier.padding(end = 4.dp),
-            isSvg = true
-        )
-
-        Text(
-            text = mlbTeamStandingsViewModel.teamNameDictionary["short_${data.team.id}"] ?: data.team.teamName,
-            fontSize = 12.sp,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .weight(1f)
-        )
-
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-    }
 }
 
 @Composable
 fun MLBTeamStandingsDataList(
-    mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel()
+    searchViewModel: SearchViewModel = hiltViewModel(),
+    mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel(),
+    divisionTitle: String,
+    standings: List<MLBTeamStandingsDisplay>,
+    hScrollState: ScrollState
 ) {
-    val standings by mlbTeamStandingsViewModel.standings.collectAsState()
+    val teamNameDic = mlbTeamStandingsViewModel.teamNameDictionary
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        for (value in standings) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .height(mlbTeamStandingsViewModel.dataItemHeight)
-            ) {
-                for (index in 0 until StringConstants.MLB.TEAM_STANDINGS_CATEGORIES.size) {
-                    MLBTeamStandingsDataItem(
-                        data = value,
-                        index = index
+    Row {
+        CenterColumn(
+            modifier = Modifier.padding(bottom = 10.dp)
+        ) {
+            for (index in 0 until standings.size + 1) {
+                if (index == 0) {
+                    CenterBox(height = 40.dp) {
+                        CenterColumn {
+                            Text(
+                                text = divisionTitle,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(bottom = 6.dp)
+                            )
+
+                            HCapsuleBar()
+                        }
+                    }
+                } else {
+                    val data = standings[index - 1]
+                    val teamId = data.team.id
+
+                    StandingsRankItem(
+                        id = teamId,
+                        rank = index ,
+                        imageUrl = MLBUtil.teamLogoUrl(teamId),
+                        isSvgLogo = true,
+                        name = teamNameDic["short_${teamId}"] ?: data.team.shortName,
+                        isLastItem = index == standings.size,
+                        action = {
+                            searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = teamId))
+                        }
                     )
+                }
+            }
+        }
+
+        Row(
+            Modifier.horizontalScroll(hScrollState)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                for (index in 0 until standings.size + 1) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .height(40.dp)
+                    ) {
+                        if (index == 0) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        } else {
+                            val data = standings[index - 1]
+
+                            for (index in 0 until StringConstants.MLB.TEAM_STANDINGS_CATEGORIES.size) {
+                                MLBTeamStandingsDataListItem(
+                                    data = data,
+                                    index = index
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -331,18 +245,26 @@ fun MLBTeamStandingsDataList(
 }
 
 @Composable
-fun MLBTeamStandingsDataItem(
+fun MLBTeamStandingsDataListItem(
     mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel(),
     data: MLBTeamStandingsDisplay,
     index: Int
 ) {
     val dataText = when (index) {
-        0 -> data.stats.recordData?.winningPercentage
-        1 -> data.stats.recordData?.gamesBack
+        0 -> data.stats.recordData?.gamesBack
+        1 -> data.stats.recordData?.winningPercentage
         2 -> data.stats.recordData?.wins.toString()
         3 -> data.stats.recordData?.losses.toString()
         4 -> data.stats.recordData?.gamesPlayed.toString()
-        5 -> data.stats.recordData?.streak?.streakNumber.toString()
+        5 -> {
+            if (data.stats.recordData?.streak?.streakType?.lowercase()?.startsWith("w") == true) {
+                "${data.stats.recordData.streak.streakNumber}승"
+            } else if (data.stats.recordData?.streak?.streakType?.lowercase()?.startsWith("l") == true) {
+                "${data.stats.recordData.streak.streakNumber}패"
+            } else {
+                "-"
+            }
+        }
         6 -> data.stats.hitting?.avg
         7 -> data.stats.hitting?.hits.toString()
         8 -> data.stats.hitting?.homeRuns.toString()
@@ -360,8 +282,8 @@ fun MLBTeamStandingsDataItem(
     Text(
         text = dataText,
         textAlign = TextAlign.Center,
-        fontSize = mlbTeamStandingsViewModel.dataFontSize,
+        fontSize = 15.sp,
         modifier = Modifier
-            .width(mlbTeamStandingsViewModel.dataItemWidth)
+            .width(mlbTeamStandingsViewModel.columnWidthList.getOrNull(index) ?: 100.dp)
     )
 }

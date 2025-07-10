@@ -3,7 +3,9 @@ package com.moare.android.ui.common.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,21 +48,87 @@ fun HCapsuleBar(
 fun VCapsuleBar(
     modifier: Modifier = Modifier,
     color: Color = Color.Gray,
-    customHeight: Dp? = null
+    customHeight: Dp? = null,
+    customWidth: Dp? = null,
+    topRound: Boolean = true,
+    bottomRound: Boolean = true
 ) {
+    val cornerShape = RoundedCornerShape(
+        topStart = if (topRound) 10.dp else 0.dp,
+        topEnd = if (topRound) 10.dp else 0.dp,
+        bottomStart = if (bottomRound) 10.dp else 0.dp,
+        bottomEnd = if (bottomRound) 10.dp else 0.dp
+    )
+    val width: Dp = customWidth ?: 2.dp
+
     Box(
         if (customHeight != null) {
             modifier
                 .height(customHeight)
-                .width(2.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .width(width)
+                .clip(cornerShape)
                 .background(color)
         } else {
             modifier
-                .width(2.dp)
+                .width(width)
                 .fillMaxHeight()
-                .clip(RoundedCornerShape(10.dp))
+                .clip(cornerShape)
                 .background(color)
         }
     )
 }
+
+@Composable
+fun StatsDivider(
+    modifier: Modifier = Modifier
+) {
+    VCapsuleBar(
+        modifier = modifier.alpha(0.5f),
+        customHeight = 40.dp,
+        customWidth = 1.dp
+    )
+}
+
+@Composable
+fun HDivider(
+    modifier: Modifier = Modifier,
+    height: Dp = 1.dp,
+    color: Color = MaterialTheme.colors.primary,
+//    alpha: Float = 1f
+) {
+    Box(
+        modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+            .height(height)
+            .clip(RoundedCornerShape(10.dp))
+            .background(color)
+//            .alpha(alpha)
+    )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

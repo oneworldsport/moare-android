@@ -101,6 +101,17 @@ class FBTeamStandingsViewModel @Inject constructor(
         return ((data.wins.total) * 3 + (data.draws.total))
     }
 
+    fun getRecordString(
+        data: FBTeamStatsFixtures,
+        isHome: Boolean = true
+    ): String {
+        return if (isHome) {
+            "${data.wins.home}승 ${data.draws.home}무 ${data.loses.home}패"
+        } else {
+            "${data.wins.away}승 ${data.draws.away}무 ${data.loses.away}패"
+        }
+    }
+
     private fun calculateHomePoints(data: FBTeamStatsFixtures): Int {
         return ((data.wins.home) * 3 + (data.draws.home))
     }
