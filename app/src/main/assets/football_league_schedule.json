@@ -19,6 +19,7 @@
     }
   ],
   "data": {
+    "scheduleType": "league",
     "scheduledMonths": [
       "2024-08",
       "2024-09",

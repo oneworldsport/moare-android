@@ -7,7 +7,6 @@ import com.moare.android.features.search.models.displaymodels.football.FBPlayerI
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
@@ -158,12 +157,7 @@ data class DataModel(
                         SportDecodableModel.FBTeamStandings(responseModel, displayModel)
                     }
                 }
-                "football_team_schedule" -> {
-                    val responseModel: FBGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-                    val displayModel = modelConverter.fbTeamScheduleConverter(responseModel)
-                    SportDecodableModel.FBTeamSchedule(responseModel, displayModel)
-                }
-                "football_league_schedule" -> {
+                "football_team_schedule", "football_league_schedule" -> {
                     val responseModel: FBGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
                     val displayModel = modelConverter.fbLeagueScheduleConverter(responseModel)
                     SportDecodableModel.FBLeagueSchedule(responseModel, displayModel)
@@ -531,12 +525,6 @@ sealed class SportDecodableModel {
     data class FBTeamStandings(
         val responseModel: FBTeamStandingsResponseModel,
         val displayModel: FBTeamStandingsDisplayModel
-    ) : SportDecodableModel()
-
-    @Serializable
-    data class FBTeamSchedule(
-        val responseModel: FBGameScheduleResponseModel,
-        val displayModel: FBTeamScheduleDisplayModel
     ) : SportDecodableModel()
 
     @Serializable

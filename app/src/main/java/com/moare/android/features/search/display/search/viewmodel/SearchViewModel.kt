@@ -290,7 +290,6 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = data.displayModel }
                 is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = data.displayModel }
                 is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = data.displayModel }
-                is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.FBLeagueSchedule -> {
                     newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = data.displayModel
                     initialFBLeagueScheduleData = data.displayModel
@@ -508,7 +507,6 @@ class SearchViewModel @Inject constructor(
                         is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = viewToShow.displayModel }
                         is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = viewToShow.displayModel }
                         is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = viewToShow.displayModel }
-                        is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.FBLeagueSchedule -> {
                             if (lastView is SportDecodableModel.FBGameStats) {
                                 newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = initialFBLeagueScheduleData
@@ -945,7 +943,6 @@ class SearchViewModel @Inject constructor(
             is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = data.displayModel }
             is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = data.displayModel }
             is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = data.displayModel }
-            is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = data.displayModel }
             is SportDecodableModel.FBLeagueSchedule -> { newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = data.displayModel }
             is SportDecodableModel.FBGameStats -> { newDisplayModels[SportDisplayType.FB_GAME_STATS] = data.displayModel }
             // nba
@@ -1012,7 +1009,6 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = data.displayModel }
                 is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = data.displayModel }
                 is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = data.displayModel }
-                is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.FBLeagueSchedule -> {
                     newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = data.displayModel
                     initialFBLeagueScheduleData = data.displayModel
