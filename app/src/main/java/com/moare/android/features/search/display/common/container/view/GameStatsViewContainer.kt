@@ -165,9 +165,8 @@ fun GameStatsViewContainer(
         HDivider()
 
         Box {
-            LazyColumn(
-//            modifier = Modifier.verticalScroll(verticalScrollState)
-            ) {
+            // NOTE: stickyHeader 사용해야해서 StandingsViewContainer 사용안하고 동일한 코드지만 여기서 직접 작성함.
+            LazyColumn {
                 if (state.shouldShowStats) {
                     // team button
                     item {
