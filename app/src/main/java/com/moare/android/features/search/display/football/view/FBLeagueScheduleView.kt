@@ -289,7 +289,7 @@ fun FBLeagueScheduleListItem(
         actions = ScheduleGameItemActions(
             onGameItemClick = {
                 displayModel?.let {
-                    searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data, it.leagueId))
+                    searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data, it.season, it.leagueId))
                 }
 
                 // set selected game's isOpened true

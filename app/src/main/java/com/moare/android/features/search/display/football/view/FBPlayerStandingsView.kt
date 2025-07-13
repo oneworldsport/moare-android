@@ -207,7 +207,7 @@ fun FBPlayerStandingsView(
                 fbPlayerStandingsViewModel.send(FBPlayerStandingsIntent.SelectSecondCategory(index, category))
             },
             itemButtonAction = { id ->
-                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(category = "football", playerId = id))
+                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(season = displayModel?.season, category = "football", playerId = id))
             }
         ),
         verticalScrollState = verticalScrollState,

@@ -14,6 +14,7 @@ data class FBPlayerInfoDisplayModel(
     override val leagueId: Int,
     override val keywords: List<Keyword>,
     override val entityInfo: List<EntityInfo>,
+    override val season: Int,
     val info: FBPlayerInfo,
     val stats: FBPlayerStats?,
     val lastGame: FBGame?,

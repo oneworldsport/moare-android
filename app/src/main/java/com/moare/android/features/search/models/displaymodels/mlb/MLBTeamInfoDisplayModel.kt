@@ -14,6 +14,7 @@ data class MLBTeamInfoDisplayModel(
     override val leagueId: Int,
     override val keywords: List<Keyword>,
     override val entityInfo: List<EntityInfo>,
+    override val season: Int,
     val team: MLBTeamInfo,
     val venue: MLBNameObj,
     val stats: MLBTeamStats?,

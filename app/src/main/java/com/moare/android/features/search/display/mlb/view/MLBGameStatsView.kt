@@ -656,7 +656,7 @@ fun MLBGameStatsTeamButtonAdditionalInfoContainer(
                             .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
                             .padding(2.dp)
                             .clickable {
-                                searchViewModel.send(SearchViewModel.Intent.RefreshGame(category = "basketball"))
+                                searchViewModel.send(SearchViewModel.Intent.RefreshGame(season = displayModel.season, category = "basketball"))
                             }
                     ) {
                         Icon(

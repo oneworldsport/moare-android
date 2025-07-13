@@ -27,11 +27,13 @@ interface SearchApi {
     @POST("search/schedule")
     suspend fun getLeagueSchedule(
         @Body entity: EntityInfo,
+        @Query("season") season: Int,
         @Query("yearMonth") yearMonth: String
     ): ResponseBody
 
     @GET("search/id")
     suspend fun searchById(
+        @Query("season") season: Int,
         @Query("category") category: String,
         @Query("date") date: String?,
         @Query("dataType") dataType: String,

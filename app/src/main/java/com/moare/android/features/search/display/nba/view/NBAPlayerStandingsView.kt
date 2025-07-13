@@ -220,7 +220,7 @@ fun NBAPlayerStandingsView(
                 nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.SelectSecondCategory(index, category))
             },
             itemButtonAction = { id ->
-                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(category = "basketball", playerId = id))
+                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(season = displayModel?.season, category = "basketball", playerId = id))
             }
         ),
         verticalScrollState = verticalScrollState,

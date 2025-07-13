@@ -14,6 +14,7 @@ data class NBAPlayerInfoDisplayModel(
     override val leagueId: Int,
     override val keywords: List<Keyword>,
     override val entityInfo: List<EntityInfo>,
+    override val season: Int,
     val info: NBAPlayerInfo,
     val stats: NBAPlayerStats?,
     val lastGame: NBAGame?,

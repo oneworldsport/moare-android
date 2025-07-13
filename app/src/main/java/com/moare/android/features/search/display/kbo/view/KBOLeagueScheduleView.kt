@@ -154,6 +154,7 @@ fun KBOLeagueScheduleListItem(
        viewmodel state
        --------------------- */
     val gameResultOpenedStateList by kboLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
+    val displayModel by kboLeagueScheduleViewModel.displayModel.collectAsState()
 
     /* ---------------------
        constants
@@ -207,7 +208,9 @@ fun KBOLeagueScheduleListItem(
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-                searchViewModel.send(SearchViewModel.Intent.SelectKBOGame(data))
+                displayModel?.let {
+                    searchViewModel.send(SearchViewModel.Intent.SelectKBOGame(data, it.season))
+                }
 
                 // set selected game's isOpened true
                 kboLeagueScheduleViewModel.send(KBOLeagueScheduleIntent.UpdateResultOpenedState(itemKey, true))
