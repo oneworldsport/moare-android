@@ -1,7 +1,6 @@
 package com.moare.android.features.search.display.common.container.state
 
 import androidx.compose.ui.unit.Dp
-import com.moare.android.features.search.models.ApiFetchState
 
 data class GameStatsContainerState(
     val shouldShowTitle: Boolean = true,
@@ -18,7 +17,8 @@ data class GameStatsContainerState(
     val secondCategorySelectedIndex: Int = 0,
     val columnWidthList: List<Dp> = emptyList(),
     val playerList: List<StandingsItemState>,
-    val gameDetailInfo: String = ""
+    val gameDetailTitle: String = "",
+    val gameDetailContent: String = ""
 )
 
 data class GameStatsTeamState(

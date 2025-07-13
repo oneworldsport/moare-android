@@ -108,6 +108,7 @@ fun NewStandingsViewContainer(
         // But if fillMaxSize not set, AnimatedVisibility doesn't work on first show.
         // Not sure why yet
 //        modifier = modifier.fillMaxSize()
+        modifier = modifier
     ) {
         // league title
         this.titleContent()

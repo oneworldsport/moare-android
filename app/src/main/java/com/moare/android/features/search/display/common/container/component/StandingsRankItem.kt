@@ -23,6 +23,7 @@ import com.moare.android.features.search.display.search.viewmodel.SearchViewMode
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.util.CenterColumn
+import com.moare.android.ui.util.nullableOptionalClickable
 
 @Composable
 fun StandingsRankItem(
@@ -45,7 +46,7 @@ fun StandingsRankItem(
             .width(width ?: 132.dp)
             .padding(start = 10.dp)
             .height(40.dp)
-            .clickable {
+            .nullableOptionalClickable(apply = id != 0) {
                 action(id)
             }
     ) {
