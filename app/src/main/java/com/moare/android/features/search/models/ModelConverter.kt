@@ -381,6 +381,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )

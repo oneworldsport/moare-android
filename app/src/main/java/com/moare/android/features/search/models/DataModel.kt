@@ -234,11 +234,6 @@ data class DataModel(
                         SportDecodableModel.NBATeamStandings(responseModel, displayModel)
                     }
                 }
-                "basketball_team_schedule" -> {
-                    val responseModel: NBAGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-                    val displayModel = modelConverter.nbaTeamScheduleConverter(responseModel)
-                    SportDecodableModel.NBATeamSchedule(responseModel, displayModel)
-                }
                 "basketball_league_schedule" -> {
                     val responseModel: NBAGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
                     val displayModel = modelConverter.nbaLeagueScheduleConverter(responseModel)
