@@ -879,7 +879,7 @@ class SearchViewModel @Inject constructor(
                                 category = category,
                                 date = gameSummary.date,
                                 dataType = "${category}_game_stats",
-                                leagueId = 90001,
+                                leagueId = Constants.Ids.NBA,
                                 id = boxScoreTraditional.gameId
                             )
 
@@ -889,6 +889,51 @@ class SearchViewModel @Inject constructor(
 
                                 updateLastViewStack(data)
                             }
+                        }
+                    }
+                }
+
+                is SportDecodableModel.KBOGameStats -> {
+                    val game = (displayModels.value[SportDisplayType.KBO_GAME_STATS] as? KBOGameStatsDisplayModel)?.game
+                    val gameInfo = game?.gameInfo
+                    gameInfo?.let {
+                        // TODO: Has to add loading
+                        val result = searchClient.fetchById(
+                            season = season,
+                            category = category,
+                            date = gameInfo.date,
+                            dataType = "${category}_game_stats",
+                            leagueId = Constants.Ids.KBO,
+                            id = gameInfo.gameId
+                        )
+
+                        if (result.data is SportDecodableModel.KBOGameStats) {
+                            val data = result.data
+                            updateMainDisplayModel(data = data, shouldReset = false)
+
+                            updateLastViewStack(data)
+                        }
+                    }
+                }
+
+                is SportDecodableModel.MLBGameStats -> {
+                    val game = (displayModels.value[SportDisplayType.MLB_GAME_STATS] as? MLBGameStatsDisplayModel)?.game
+                    game?.let {
+                        // TODO: Has to add loading
+                        val result = searchClient.fetchById(
+                            season = season,
+                            category = category,
+                            date = game.gameInfo.gameDate,
+                            dataType = "${category}_game_stats",
+                            leagueId = Constants.Ids.MLB,
+                            id = game.game.pk.toString()
+                        )
+
+                        if (result.data is SportDecodableModel.MLBGameStats) {
+                            val data = result.data
+                            updateMainDisplayModel(data = data, shouldReset = false)
+
+                            updateLastViewStack(data)
                         }
                     }
                 }
