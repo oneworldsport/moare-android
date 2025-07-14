@@ -168,17 +168,17 @@ class SearchViewModel @Inject constructor(
         data object ToggleSearchBar : Intent()
         data object ToggleAutoCompleteListVisibleState : Intent()
 
-        data class SelectFBGame(val game: FBGameForSchedule, val leagueId: Int) : Intent()
-        data class SelectNBAGame(val game: NBAGameForSchedule) : Intent()
-        data class SelectKBOGame(val game: KBOGameForSchedule) : Intent()
-        data class SelectMLBGame(val game: MLBGameForSchedule) : Intent()
+        data class SelectFBGame(val game: FBGameForSchedule, val season: Int, val leagueId: Int) : Intent()
+        data class SelectNBAGame(val game: NBAGameForSchedule, val season: Int) : Intent()
+        data class SelectKBOGame(val game: KBOGameForSchedule, val season: Int) : Intent()
+        data class SelectMLBGame(val game: MLBGameForSchedule, val season: Int) : Intent()
 
         data class GoBack(val activity: Activity?) : Intent()
 
-        data class ShowPlayerStats(val category: String? = null, val playerId: Int) : Intent()
+        data class ShowPlayerStats(val season: Int? = null, val category: String? = null, val playerId: Int) : Intent()
         data class ShowTeamStats(val teamId: Int) : Intent()
         data class ShowGameStats(val gameType: String) : Intent()
-        data class RefreshGame(val category: String) : Intent()
+        data class RefreshGame(val season: Int, val category: String) : Intent()
         data class SelectNBATournamentRound(val gameList: List<NBAGame>) : Intent()
 
         data class UpdateLastViewStack(val data: SportDecodableModel) : Intent()
@@ -210,15 +210,15 @@ class SearchViewModel @Inject constructor(
                 is Intent.ToggleAutoCompleteListVisibleState -> toggleAutoCompleteListVisibleState()
                 is Intent.UpdateTextField -> updateTextField(intent.newValue, intent.updateAutoCompleteList)
                 is Intent.ToggleSearchBar -> toggleSearchBar()
-                is Intent.SelectFBGame -> selectFBGame(intent.game, intent.leagueId)
-                is Intent.SelectNBAGame -> selectNBAGame(intent.game)
-                is Intent.SelectKBOGame -> selectKBOGame(intent.game)
-                is Intent.SelectMLBGame -> selectMLBGame(intent.game)
+                is Intent.SelectFBGame -> selectFBGame(intent.game, intent.season, intent.leagueId)
+                is Intent.SelectNBAGame -> selectNBAGame(intent.game, intent.season)
+                is Intent.SelectKBOGame -> selectKBOGame(intent.game, intent.season)
+                is Intent.SelectMLBGame -> selectMLBGame(intent.game, intent.season)
                 is Intent.GoBack -> goBack(intent.activity)
-                is Intent.ShowPlayerStats -> showPlayerStats(intent.category, intent.playerId)
+                is Intent.ShowPlayerStats -> showPlayerStats(intent.season, intent.category, intent.playerId)
                 is Intent.ShowTeamStats -> showTeamStats(intent.teamId)
                 is Intent.ShowGameStats -> showGameStats(intent.gameType)
-                is Intent.RefreshGame -> refreshGame(intent.category)
+                is Intent.RefreshGame -> refreshGame(intent.season, intent.category)
                 is Intent.SelectNBATournamentRound -> selectNBATournamentRound(intent.gameList)
                 is Intent.UpdateLastViewStack -> updateLastViewStack(intent.data)
                 is Intent.TestSearch -> testSearch(intent.viewForTest)
@@ -410,8 +410,9 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun selectFBGame(game: FBGameForSchedule, leagueId: Int) {
+    private suspend fun selectFBGame(game: FBGameForSchedule, season: Int, leagueId: Int) {
         val result = searchClient.fetchById(
+            season = season,
             category = "football",
             date = game.date,
             dataType = "football_game_stats",
@@ -424,8 +425,9 @@ class SearchViewModel @Inject constructor(
         updateMainDisplayModel(result.data, false)
     }
 
-    private suspend fun selectNBAGame(game: NBAGameForSchedule) {
+    private suspend fun selectNBAGame(game: NBAGameForSchedule, season: Int) {
         val result = searchClient.fetchById(
+            season = season,
             category = "basketball",
             date = game.date,
             dataType = "basketball_game_stats",
@@ -437,8 +439,9 @@ class SearchViewModel @Inject constructor(
         updateMainDisplayModel(result.data)
     }
 
-    private suspend fun selectKBOGame(game: KBOGameForSchedule) {
+    private suspend fun selectKBOGame(game: KBOGameForSchedule, season: Int) {
         val result = searchClient.fetchById(
+            season = season,
             category = "baseball",
             date = game.date,
             dataType = "baseball_game_stats",
@@ -450,8 +453,9 @@ class SearchViewModel @Inject constructor(
         updateMainDisplayModel(result.data)
     }
 
-    private suspend fun selectMLBGame(game: MLBGameForSchedule) {
+    private suspend fun selectMLBGame(game: MLBGameForSchedule, season: Int) {
         val result = searchClient.fetchById(
+            season = season,
             category = "baseball",
             date = game.date,
             dataType = "baseball_game_stats",
@@ -573,7 +577,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun showPlayerStats(category: String?, playerId: Int) {
+    private suspend fun showPlayerStats(season: Int?, category: String?, playerId: Int) {
         val modelConverter = ModelConverter()
 
         val dataModel: SportDecodableModel
@@ -595,6 +599,7 @@ class SearchViewModel @Inject constructor(
 
                     // TODO: Has to add loading
                     val result = searchClient.fetchById(
+                        season = season,
                         category = category,
                         dataType = "${category}_player_stats",
                         leagueId = leagueId,
@@ -832,7 +837,7 @@ class SearchViewModel @Inject constructor(
         _resultVisibleState.emit(true)
     }
 
-    private suspend fun refreshGame(category: String) {
+    private suspend fun refreshGame(season: Int, category: String) {
         try {
             when (val lastView = viewStack.value.lastOrNull()) {
                 is SportDecodableModel.FBGameStats -> {
@@ -840,6 +845,7 @@ class SearchViewModel @Inject constructor(
                     game?.let {
                         // TODO: Has to add loading
                         val result = searchClient.fetchById(
+                            season = season,
                             category = category,
                             date = it.fixture.date,
                             dataType = "${category}_game_stats",
@@ -865,10 +871,11 @@ class SearchViewModel @Inject constructor(
                         boxScoreTraditional?.let { boxScoreTraditional->
                             // TODO: Has to add loading
                             val result = searchClient.fetchById(
+                                season = season,
                                 category = category,
                                 date = gameSummary.date,
                                 dataType = "${category}_game_stats",
-                                leagueId = 90001,
+                                leagueId = Constants.Ids.NBA,
                                 id = boxScoreTraditional.gameId
                             )
 
@@ -878,6 +885,51 @@ class SearchViewModel @Inject constructor(
 
                                 updateLastViewStack(data)
                             }
+                        }
+                    }
+                }
+
+                is SportDecodableModel.KBOGameStats -> {
+                    val game = (displayModels.value[SportDisplayType.KBO_GAME_STATS] as? KBOGameStatsDisplayModel)?.game
+                    val gameInfo = game?.gameInfo
+                    gameInfo?.let {
+                        // TODO: Has to add loading
+                        val result = searchClient.fetchById(
+                            season = season,
+                            category = category,
+                            date = gameInfo.date,
+                            dataType = "${category}_game_stats",
+                            leagueId = Constants.Ids.KBO,
+                            id = gameInfo.gameId
+                        )
+
+                        if (result.data is SportDecodableModel.KBOGameStats) {
+                            val data = result.data
+                            updateMainDisplayModel(data = data, shouldReset = false)
+
+                            updateLastViewStack(data)
+                        }
+                    }
+                }
+
+                is SportDecodableModel.MLBGameStats -> {
+                    val game = (displayModels.value[SportDisplayType.MLB_GAME_STATS] as? MLBGameStatsDisplayModel)?.game
+                    game?.let {
+                        // TODO: Has to add loading
+                        val result = searchClient.fetchById(
+                            season = season,
+                            category = category,
+                            date = game.gameInfo.gameDate,
+                            dataType = "${category}_game_stats",
+                            leagueId = Constants.Ids.MLB,
+                            id = game.game.pk.toString()
+                        )
+
+                        if (result.data is SportDecodableModel.MLBGameStats) {
+                            val data = result.data
+                            updateMainDisplayModel(data = data, shouldReset = false)
+
+                            updateLastViewStack(data)
                         }
                     }
                 }

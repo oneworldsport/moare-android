@@ -58,7 +58,7 @@ fun Modifier.optionalClickable(apply: Boolean, onClick: (() -> Unit)): Modifier 
     return if (apply) this.clickable(onClick = onClick) else this
 }
 
-fun Modifier.nullableOptionalClickable(apply: Boolean, onClick: (() -> Unit)?): Modifier {
+fun Modifier.nullableOptionalClickable(apply: Boolean = true, onClick: (() -> Unit)?): Modifier {
     return onClick?.let { if (apply) this.clickable(onClick = onClick) else this } ?: this
 }
 

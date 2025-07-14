@@ -139,6 +139,7 @@ fun NBATeamScheduleListItem(
        viewmodel state
        --------------------- */
     val gameResultOpenedStateList by nbaTeamScheduleViewModel.gameResultOpenedStateList.collectAsState()
+    val displayModel by nbaTeamScheduleViewModel.displayModel.collectAsState()
 
     /* ---------------------
        constants
@@ -211,7 +212,9 @@ fun NBATeamScheduleListItem(
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-                searchViewModel.send(SearchViewModel.Intent.SelectNBAGame(data))
+                displayModel?.let {
+                    searchViewModel.send(SearchViewModel.Intent.SelectNBAGame(data, it.season))
+                }
 
                 // set selected game's isOpened true
                 nbaTeamScheduleViewModel.send(NBATeamScheduleIntent.UpdateResultOpenedState(gameId, true))

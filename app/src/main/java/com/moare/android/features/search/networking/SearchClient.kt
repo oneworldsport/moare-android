@@ -2,6 +2,7 @@ package com.moare.android.features.search.networking
 
 import android.content.Context
 import com.moare.android.core.networking.ApiHelper
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.features.search.models.DataModel
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.KeywordInfo
@@ -26,19 +27,20 @@ class SearchClient(
         return DataModel.fromJson(response.string())
     }
 
-    suspend fun fetchLeagueSchedule(entity: EntityInfo, yearMonth: String): DataModel {
-        val response = apiHelper.searchApi.getLeagueSchedule(entity, yearMonth)
+    suspend fun fetchLeagueSchedule(entity: EntityInfo, season: Int?, yearMonth: String): DataModel {
+        val response = apiHelper.searchApi.getLeagueSchedule(entity, season ?: CalendarUtil.currentYear, yearMonth)
         return DataModel.fromJson(response.string())
     }
 
     suspend fun fetchById(
+        season: Int?,
         category: String,
         date: String? = null,
         dataType: String,
         leagueId: Int,
         id: String
     ): DataModel {
-        val response = apiHelper.searchApi.searchById(category, date, dataType, leagueId, id)
+        val response = apiHelper.searchApi.searchById(season ?: CalendarUtil.currentYear, category, date, dataType, leagueId, id)
         return DataModel.fromJson(response.string())
     }
 

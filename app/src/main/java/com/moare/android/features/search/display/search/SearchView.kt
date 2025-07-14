@@ -377,7 +377,7 @@ fun SearchView(
                 Column(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(top = 20.dp)
+                    modifier = Modifier.padding(top = 10.dp)
                 ) {
                     // football
                     displayModels[SportDisplayType.FB_PLAYER_INFO]?.let {

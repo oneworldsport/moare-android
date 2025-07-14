@@ -13,6 +13,7 @@ data class FBLeagueScheduleDisplayModel(
     override val leagueId: Int,
     override val keywords: List<Keyword>,
     override val entityInfo: List<EntityInfo>,
+    override val season: Int,
     val scheduleType: ScheduleType,
     val yearMonthList: List<String>,
     var games: List<FBGameForSchedule>

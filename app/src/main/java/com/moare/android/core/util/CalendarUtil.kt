@@ -29,6 +29,8 @@ enum class TimeFormatType {
 }
 
 object CalendarUtil {
+    val currentYear = LocalDate.now().year
+
     init {
         Locale.setDefault(Locale.KOREAN)
     }

@@ -1,20 +1,16 @@
 package com.moare.android.features.search.display.common.container.view
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,7 +20,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,9 +32,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,10 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -61,41 +51,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.moare.android.R
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.constants.UIConstants
 import com.moare.android.features.search.display.common.container.component.StandingsFirstCategoryItem
 import com.moare.android.features.search.display.common.container.component.StandingsRankItem
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
-import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
-import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
-import com.moare.android.features.search.display.common.container.state.StandingsContainerState
-import com.moare.android.features.search.display.common.container.state.StandingsHighlightItemState
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsIntent
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HDivider
-import com.moare.android.ui.common.components.LeagueTitle
-import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.common.components.VCapsuleBar
-import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterBox
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
-import com.moare.android.ui.util.screenWidthDp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GameStatsViewContainer(
     state: GameStatsContainerState,
     actions: GameStatsContainerActions,
-    titleContent: @Composable RowScope.() -> Unit,
+    titleContent: @Composable ColumnScope.() -> Unit,
     gameContent: @Composable ColumnScope.() -> Unit
 ) {
     val coachState = state.coachState
@@ -106,9 +83,11 @@ fun GameStatsViewContainer(
     } else {
         defaultColumnWidth * state.secondCategories.size
     }
+    val secondStatsColumnWidthList = state.secondStatsColumnWidthList
 
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
+    val secondStatsHorizontalScrollState = rememberScrollState()
 
     val density = LocalDensity.current
     var teamButtonWidth by remember { mutableStateOf(0.dp) }
@@ -116,9 +95,9 @@ fun GameStatsViewContainer(
 
     val teamCategoryBarOffset by animateDpAsState(
         targetValue = if (state.teamCategorySelectedIndex == 0) {
-            getOffsetOfAniCapsuleBar(itemWidth = teamButtonWidth, barWidth = 50.dp)
+            getOffsetOfAniCapsuleBar(itemWidth = teamButtonWidth)
         } else {
-            2.dp + getOffsetOfAniCapsuleBar(itemWidth = teamButtonWidth, barWidth = 50.dp, index = state.teamCategorySelectedIndex)
+            2.dp + getOffsetOfAniCapsuleBar(itemWidth = teamButtonWidth, index = state.teamCategorySelectedIndex)
         },
         animationSpec = tween(
             durationMillis = 500,
@@ -131,6 +110,18 @@ fun GameStatsViewContainer(
             getOffsetOfAniCapsuleBar(itemWidths = columnWidthList, index = state.secondCategorySelectedIndex)
         } else {
             getOffsetOfAniCapsuleBar(itemWidth = defaultColumnWidth, index = state.secondCategorySelectedIndex)
+        },
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+    val secondStatsCategoryBarOffset by animateDpAsState(
+        targetValue = if (secondStatsColumnWidthList.isNotEmpty()) {
+            getOffsetOfAniCapsuleBar(itemWidths = secondStatsColumnWidthList, index = state.secondStatsCategorySelectedIndex)
+        } else {
+            getOffsetOfAniCapsuleBar(itemWidth = defaultColumnWidth, index = state.secondStatsCategorySelectedIndex)
         },
         animationSpec = tween(
             durationMillis = 500,
@@ -151,11 +142,7 @@ fun GameStatsViewContainer(
         modifier = Modifier.fillMaxSize()
     ) {
         if (state.shouldShowTitle) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                this.titleContent()
-            }
+            this.titleContent()
         }
 
         if (state.shouldShowGameItem) {
@@ -171,7 +158,8 @@ fun GameStatsViewContainer(
                     // team button
                     item {
                         CenterRow {
-                            CenterColumn(
+                            Column(
+                                verticalArrangement = Arrangement.Center,
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Row(
@@ -314,29 +302,32 @@ fun GameStatsViewContainer(
                     /* ---------------------
                        players stats
                        --------------------- */
-//                NewStandingsViewContainer(
-//                    state = NewStandingsContainerState(
-//                        firstCategoryText = StringConstants.GAME_STATS_FIRST_CATEGORY,
-//                        secondCategories = state.secondCategories,
-//                        standings = state.playerList,
-//                        secondCategorySelectedIndex = state.secondCategorySelectedIndex,
-//                        columnWidthList = state.columnWidthList,
-//                        isGameStats = true
-//                    ),
-//                    actions = StandingsContainerActions(
-//                        secondCategoryButtonAction = { index, category ->
-//                            actions.secondCategoryButtonAction
-//                        },
-//                        itemButtonAction = {}
-//                    ),
-//                    verticalScrollState = verticalScrollState
-//                )
+                    state.firstStatsTitle?.let {
+                        item {
+                            Row {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.width(132.dp)
+                                ) {
+                                    Text(
+                                        text = state.firstStatsTitle,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+
+                                    HCapsuleBar()
+                                }
+
+                                Spacer(Modifier.weight(1f))
+                            }
+                        }
+                    }
 
                     stickyHeader {
                         Row(
                             modifier = Modifier.background(Color.White)
                         ) {
-                            StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY)
+                            StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY, width = state.firstColumnWidth)
 
                             Row(
                                 Modifier.horizontalScroll(horizontalScrollState)
@@ -382,8 +373,10 @@ fun GameStatsViewContainer(
                                 for ((index, item) in state.playerList.withIndex()) {
                                     StandingsRankItem(
                                         id = item.id,
-                                        isGameStats = item.isGameStats,
-                                        rank = index + 1,
+                                        width = state.firstColumnWidth,
+                                        shouldShowRank = item.numInfo != null,
+                                        shouldShowExtraInfo = true,
+                                        rank = item.numInfo ?: 0,
                                         imageUrl = item.imageUrl,
                                         isSvgLogo = item.isSvgLogo,
                                         name = item.name,
@@ -416,6 +409,124 @@ fun GameStatsViewContainer(
                                                     modifier = Modifier
                                                         .width(columnWidthList.getOrNull(index) ?: defaultColumnWidth)
                                                 )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 보여줄 Stats list가 두개인 경우의 두번째 Stats list. ex) KBO, MLB의 투수 기록
+                    state.secondStatsCategories?.let {
+                        state.secondStatsTitle?.let {
+                            item {
+                                Row {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.width(132.dp)
+                                    ) {
+                                        Text(
+                                            text = state.secondStatsTitle,
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Medium
+                                        )
+
+                                        HCapsuleBar()
+                                    }
+
+                                    Spacer(Modifier.weight(1f))
+                                }
+                            }
+                        }
+
+                        stickyHeader {
+                            Row(
+                                modifier = Modifier.background(Color.White)
+                            ) {
+                                StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY)
+
+                                Row(
+                                    Modifier.horizontalScroll(secondStatsHorizontalScrollState)
+                                ) {
+                                    Column {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            for ((index, item) in state.secondStatsCategories.withIndex()) {
+                                                CenterBox(
+                                                    height = 42.dp,
+                                                    modifier = Modifier
+                                                        .clickable {
+                                                            actions.secondStatsCategoryButtonAction?.let { it(index) }
+                                                        }
+                                                ) {
+                                                    Text(
+                                                        text = item,
+                                                        textAlign = TextAlign.Center,
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Medium,
+                                                        modifier = Modifier
+                                                            .width(secondStatsColumnWidthList.getOrNull(index) ?: defaultColumnWidth)
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        HCapsuleBar(
+                                            modifier = Modifier
+                                                .offset(x = secondStatsCategoryBarOffset)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        state.secondStatsPlayerList?.let {
+                            item {
+                                Row {
+                                    Column(
+                                        modifier = Modifier.padding(bottom = 10.dp)
+                                    ) {
+                                        for ((index, item) in state.secondStatsPlayerList.withIndex()) {
+                                            StandingsRankItem(
+                                                id = item.id,
+                                                shouldShowRank = item.numInfo != null,
+                                                shouldShowExtraInfo = true,
+                                                imageUrl = item.imageUrl,
+                                                isSvgLogo = item.isSvgLogo,
+                                                name = item.name,
+                                                subName = item.subName,
+                                                extraInfo = item.extraInfo,
+                                                extraSubInfo = item.extraSubInfo,
+                                                isLastItem = index == state.playerList.size - 1,
+                                                action = {}
+                                            )
+                                        }
+                                    }
+
+                                    Row(
+                                        modifier = Modifier.horizontalScroll(secondStatsHorizontalScrollState)
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            for ((index, item) in state.secondStatsPlayerList.withIndex()) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier
+                                                        .height(40.dp)
+                                                ) {
+                                                    for ((index, data) in item.dataList.withIndex()) {
+                                                        Text(
+                                                            text = data,
+                                                            textAlign = TextAlign.Center,
+                                                            fontSize = 15.sp,
+                                                            modifier = Modifier
+                                                                .width(secondStatsColumnWidthList.getOrNull(index) ?: defaultColumnWidth)
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -467,17 +578,27 @@ fun GameStatsViewContainer(
                         )
                     }
 
-                    Text(
-                        text = state.gameDetailInfo,
-                        fontSize = 12.sp,
-                        color = Color.Gray,
-                        textAlign = TextAlign.Center,
+                    Row(
                         modifier = Modifier
                             .heightIn(min = 80.dp)
                             .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(5.dp))
                             .background(Color.White)
                             .padding(vertical = 2.dp, horizontal = 4.dp)
-                    )
+                    ) {
+                        Text(
+                            text = state.gameDetailTitle,
+                            fontSize = 12.sp,
+                            lineHeight = 20.sp, // NOTE: title과 content의 정렬을 맞추기 위해 추가
+                            color = Color.Gray
+                        )
+
+                        Text(
+                            text = state.gameDetailContent,
+                            fontSize = 12.sp,
+                            color = Color.Gray,
+                            lineHeight = 20.sp
+                        )
+                    }
                 }
             }
         } // Box

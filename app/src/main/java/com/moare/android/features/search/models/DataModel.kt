@@ -74,6 +74,7 @@ data class DataModel(
     val dataType: String,
     val keywords: List<Keyword>,
     val entityInfo: List<EntityInfo>,
+    val season: Int,
     val data: SportDecodableModel
 ) {
     companion object {
@@ -90,10 +91,11 @@ data class DataModel(
             // TODO: data, keywords, entityInfo null 일때 처리
             val keywords: List<Keyword> = json.decodeFromJsonElement(jsonObject["keywords"]!!)
             val entityInfo: List<EntityInfo> = json.decodeFromJsonElement(jsonObject["entityInfo"]!!)
+            val season: Int = json.decodeFromJsonElement(jsonObject["season"]!!)
             val leagueId = entityInfo.firstOrNull()?.leagueId
 
             // TODO: entityInfo 로 nba 인지 basketball 인지 판단?
-            val modelConverter = ModelConverter(keywords, entityInfo)
+            val modelConverter = ModelConverter(keywords, entityInfo, season)
 
             val data = when (dataType) {
                 // football
@@ -435,7 +437,7 @@ data class DataModel(
                 else -> SportDecodableModel.NoResult
             }
 
-            return DataModel(dataType, keywords, entityInfo, data)
+            return DataModel(dataType, keywords, entityInfo, season, data)
         }
     }
 }
