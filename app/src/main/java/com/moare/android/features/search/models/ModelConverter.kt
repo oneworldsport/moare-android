@@ -1,6 +1,7 @@
 package com.moare.android.features.search.models
 
 import com.moare.android.core.constants.Constants
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
@@ -86,7 +87,8 @@ import com.moare.android.features.search.models.responsemodels.nba.NBATeamStandi
 
 class ModelConverter(
     val keywords: List<Keyword> = emptyList(),
-    val entityInfo: List<EntityInfo> = emptyList()
+    val entityInfo: List<EntityInfo> = emptyList(),
+    val season: Int = CalendarUtil.currentYear
 ) {
     val leagueId = entityInfo.firstOrNull()?.leagueId
 
@@ -105,6 +107,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             info = info.player,
             stats = stats,
             lastGame = response.lastGame,
@@ -122,6 +125,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             player = info.player,
             team = stats?.team,
             stats = info.statistics
@@ -149,6 +153,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -162,6 +167,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = stats,
@@ -177,6 +183,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics
@@ -212,6 +219,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             league = league,
             standings = standings
         )
@@ -227,6 +235,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule
@@ -239,6 +248,7 @@ class ModelConverter(
             leagueId = game.league.id,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             game = game
         )
     }
@@ -263,6 +273,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             info = info.player,
             stats = stats,
             lastGame = response.lastGame,
@@ -278,6 +289,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             player = info.player,
             stats = info.statistics,
         )
@@ -304,6 +316,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -317,6 +330,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = stats,
@@ -332,6 +346,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics
@@ -358,6 +373,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -367,6 +383,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             games = response.schedule
         )
     }
@@ -381,6 +398,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -391,6 +409,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             game = response.game!!
         )
     }
@@ -400,6 +419,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             yearMonthList = emptyList(),
             games = response.schedule
         )
@@ -435,6 +455,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             info = info.player,
             stats = stats,
             lastGame = response.lastGame,
@@ -451,6 +472,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             player = info.player,
             stats = info.statistics,
         )
@@ -477,6 +499,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -491,6 +514,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics.firstOrNull(),
@@ -506,6 +530,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics
@@ -533,6 +558,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -542,6 +568,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             games = response.schedule
         )
     }
@@ -556,6 +583,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -566,6 +594,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             game = response.game!!
         )
     }
@@ -597,6 +626,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             info = info.player,
             teamId = teamId,
             stats = stats,
@@ -622,6 +652,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             player = info.player,
             teamId = teamId,
             stats = info.statistics,
@@ -649,6 +680,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -663,6 +695,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics.firstOrNull(),
@@ -678,6 +711,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics
@@ -705,6 +739,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -714,6 +749,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             games = response.schedule
         )
     }
@@ -728,6 +764,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -738,6 +775,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             game = response.game!!
         )
     }

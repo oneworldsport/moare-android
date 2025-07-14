@@ -1,6 +1,5 @@
 package com.moare.android.features.search.display.common.container.view
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -22,32 +21,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
-import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.moare.android.features.search.display.common.container.component.StandingsFirstCategoryItem
 import com.moare.android.features.search.display.common.container.component.StandingsRankItem
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
@@ -59,7 +45,6 @@ import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterBox
 import com.moare.android.ui.util.CenterColumn
-import com.moare.android.ui.util.convertPxToDp
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 import com.moare.android.ui.util.screenWidthDp
 
@@ -108,6 +93,7 @@ fun NewStandingsViewContainer(
         // But if fillMaxSize not set, AnimatedVisibility doesn't work on first show.
         // Not sure why yet
 //        modifier = modifier.fillMaxSize()
+        modifier = modifier
     ) {
         // league title
         this.titleContent()
@@ -238,7 +224,7 @@ fun NewStandingsViewContainer(
                                 StandingsRankItem(
                                     id = item.id,
                                     width = state.firstColumnWidth,
-                                    isGameStats = item.isGameStats,
+                                    shouldShowRank = !item.isGameStats,
                                     rank = if (highlightState != null) highlightState.standingsStartIndex + index + 1 else index + 1,
                                     imageUrl = item.imageUrl,
                                     isSvgLogo = item.isSvgLogo,

@@ -101,7 +101,7 @@ object StringConstants {
         val PLAYER_STANDINGS_FIELDING_CATEGORIES = listOf("")
         val PLAYER_STANDINGS_SECOND_CATEGORIES = PLAYER_STANDINGS_HITTING_CATEGORIES + PLAYER_STANDINGS_PITCHING_CATEGORIES + PLAYER_STANDINGS_RUNNING_CATEGORIES
 
-        val GAME_STATS_HITTING_CATEGORIES = listOf("타수", "안타", "홈런", "타점", "득점", "도루", "볼넷", "삼진")
+        val GAME_STATS_HITTING_CATEGORIES = listOf("타수", "안타", "2루타", "홈런", "타점", "득점", "볼넷", "삼진", "병살타", "사구")
         val GAME_STATS_PITCHING_CATEGORIES = listOf("이닝", "실점", "자책", "볼넷", "삼진", "피안타")
         val GAME_STATS_RUNNING_CATEGORIES = listOf("")
         val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_HITTING_CATEGORIES + GAME_STATS_PITCHING_CATEGORIES + GAME_STATS_RUNNING_CATEGORIES
@@ -127,8 +127,8 @@ object StringConstants {
         val PLAYER_STANDINGS_FIELDING_CATEGORIES = listOf("")
         val PLAYER_STANDINGS_SECOND_CATEGORIES = PLAYER_STANDINGS_HITTING_CATEGORIES + PLAYER_STANDINGS_PITCHING_CATEGORIES + PLAYER_STANDINGS_RUNNING_CATEGORIES
 
-        val GAME_STATS_HITTING_CATEGORIES = listOf("타수", "안타", "홈런", "타점", "득점", "도루", "볼넷", "삼진", "타율")
-        val GAME_STATS_PITCHING_CATEGORIES = listOf("이닝", "실점", "자책", "볼넷", "삼진", "피안타", "평균자책")
+        val GAME_STATS_HITTING_CATEGORIES = listOf("타수", "안타", "홈런", "타점", "득점", "도루", "볼넷", "삼진")
+        val GAME_STATS_PITCHING_CATEGORIES = listOf("이닝", "실점", "자책", "볼넷", "삼진", "피안타")
         val GAME_STATS_RUNNING_CATEGORIES = listOf("")
         val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_HITTING_CATEGORIES + GAME_STATS_PITCHING_CATEGORIES + GAME_STATS_RUNNING_CATEGORIES
     }

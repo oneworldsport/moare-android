@@ -201,7 +201,7 @@ class FBLeagueScheduleViewModel @Inject constructor(
                     leagueId = 39
                 )
 
-                val result = searchClient.fetchLeagueSchedule(entity, yearMonth)
+                val result = searchClient.fetchLeagueSchedule(entity, displayModel.value?.season, yearMonth)
 
                 if (result.data is SportDecodableModel.FBLeagueSchedule) {
                     val data = result.data

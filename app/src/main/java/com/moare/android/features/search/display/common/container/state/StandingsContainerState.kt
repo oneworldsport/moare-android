@@ -30,6 +30,7 @@ data class NewStandingsContainerState(
 data class StandingsItemState(
     val id: Int = 0,
     val isGameStats: Boolean = false,
+    val numInfo: Int? = null,
     val imageUrl: String?,
     val name: String,
     val subName: String? = null,

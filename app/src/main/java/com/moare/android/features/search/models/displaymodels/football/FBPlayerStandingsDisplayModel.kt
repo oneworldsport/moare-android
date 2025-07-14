@@ -12,6 +12,7 @@ data class FBPlayerStandingsDisplayModel(
     override val leagueId: Int,
     override val keywords: List<Keyword>,
     override val entityInfo: List<EntityInfo>,
+    override val season: Int,
     var standings: List<FBPlayerStandingsDisplay>
 ) : SportDisplayModel
 

@@ -11,5 +11,6 @@ data class MLBTeamScheduleDisplayModel(
     override val leagueId: Int,
     override val keywords: List<Keyword>,
     override val entityInfo: List<EntityInfo>,
+    override val season: Int,
     var games: List<MLBGameForSchedule>
 ) : SportDisplayModel

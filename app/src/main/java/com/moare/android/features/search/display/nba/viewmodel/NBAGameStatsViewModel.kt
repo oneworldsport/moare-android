@@ -155,26 +155,26 @@ class NBAGameStatsViewModel @Inject constructor(
         val playerStats = playerStats.value.toMutableList()
 
         when (secondCategorySelectedIndex.value) {
-            0 -> playerStats.sortedByDescending { it.statistics.points }
-            1 -> playerStats.sortedByDescending { it.statistics.assists }
-            2 -> playerStats.sortedByDescending { it.statistics.reboundsOffensive }
-            3 -> playerStats.sortedByDescending { it.statistics.fieldGoalsAttempted }
-            4 -> playerStats.sortedByDescending { it.statistics.fieldGoalsMade }
-            5 -> playerStats.sortedByDescending { it.statistics.fieldGoalsPercentage }
-            6 -> playerStats.sortedByDescending { it.statistics.threePointersAttempted }
-            7 -> playerStats.sortedByDescending { it.statistics.threePointersMade }
-            8 -> playerStats.sortedByDescending { it.statistics.threePointersPercentage }
-            9 -> playerStats.sortedByDescending { it.statistics.freeThrowsAttempted }
-            10 -> playerStats.sortedByDescending { it.statistics.freeThrowsMade }
-            11 -> playerStats.sortedByDescending { it.statistics.freeThrowsPercentage }
-            12 -> playerStats.sortedByDescending { it.statistics.reboundsDefensive }
-            13 -> playerStats.sortedByDescending { it.statistics.blocks }
-            14 -> playerStats.sortedByDescending { it.statistics.steals }
-            15 -> playerStats.sortedByDescending { it.statistics.reboundsTotal }
-            16 -> playerStats.sortedByDescending { it.statistics.turnovers }
-            17 -> playerStats.sortedByDescending { it.statistics.foulsPersonal }
-            18 -> playerStats.sortedByDescending { it.statistics.plusMinusPoints }
-            19 -> playerStats.sortedByDescending { CalendarUtil.formatHourMinuteToMinutes(it.statistics.minutes) }
+            0 -> playerStats.sortByDescending { it.statistics.points }
+            1 -> playerStats.sortByDescending { it.statistics.assists }
+            2 -> playerStats.sortByDescending { it.statistics.reboundsOffensive }
+            3 -> playerStats.sortByDescending { it.statistics.fieldGoalsAttempted }
+            4 -> playerStats.sortByDescending { it.statistics.fieldGoalsMade }
+            5 -> playerStats.sortByDescending { it.statistics.fieldGoalsPercentage }
+            6 -> playerStats.sortByDescending { it.statistics.threePointersAttempted }
+            7 -> playerStats.sortByDescending { it.statistics.threePointersMade }
+            8 -> playerStats.sortByDescending { it.statistics.threePointersPercentage }
+            9 -> playerStats.sortByDescending { it.statistics.freeThrowsAttempted }
+            10 -> playerStats.sortByDescending { it.statistics.freeThrowsMade }
+            11 -> playerStats.sortByDescending { it.statistics.freeThrowsPercentage }
+            12 -> playerStats.sortByDescending { it.statistics.reboundsDefensive }
+            13 -> playerStats.sortByDescending { it.statistics.blocks }
+            14 -> playerStats.sortByDescending { it.statistics.steals }
+            15 -> playerStats.sortByDescending { it.statistics.reboundsTotal }
+            16 -> playerStats.sortByDescending { it.statistics.turnovers }
+            17 -> playerStats.sortByDescending { it.statistics.foulsPersonal }
+            18 -> playerStats.sortByDescending { it.statistics.plusMinusPoints }
+            19 -> playerStats.sortByDescending { CalendarUtil.formatHourMinuteToMinutes(it.statistics.minutes) }
             else -> {}
         }
 

@@ -13,6 +13,7 @@ data class NBATeamStatsDisplayModel(
     override val leagueId: Int,
     override val keywords: List<Keyword>,
     override val entityInfo: List<EntityInfo>,
+    override val season: Int,
     val team: NBATeamInfo,
     val venue: NBAVenue,
     val stats: List<NBATeamStats>,

@@ -148,6 +148,7 @@ fun CenterColumn(
     )
 }
 
+// TODO: Text() 컴포넌트 수직 가운데 정렬할때 사용하려고 해당 함수 만들었는데, Text에 lineHeight 적용하니깐 수직 가운데 정렬 돼서, 해당 속성 적용하는걸로 리팩토링 필요.
 @Composable
 fun CenterBox(
     modifier: Modifier = Modifier,
