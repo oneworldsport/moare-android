@@ -358,14 +358,14 @@ fun RowScope.KBOGameStatsLineScoreContainer(
                     modifier = Modifier.fillMaxHeight()
                 ) {
                     Text(
-                        text = homeTeamLineScore.toString(),
+                        text = awayTeamLineScore.toString(),
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Medium,
                         lineHeight = 50.sp,
                         modifier = Modifier
                             .padding(start = 4.dp, end = 8.dp)
                             .width(30.dp),
-                        color = if (homeTeamLineScore >= awayTeamLineScore) MaterialTheme.colors.primary else Color.Black
+                        color = if (awayTeamLineScore >= homeTeamLineScore) MaterialTheme.colors.primary else Color.Black
                     )
 
                     Box(
@@ -378,14 +378,14 @@ fun RowScope.KBOGameStatsLineScoreContainer(
                     )
 
                     Text(
-                        text = awayTeamLineScore.toString(),
+                        text = homeTeamLineScore.toString(),
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Medium,
                         lineHeight = 50.sp,
                         modifier = Modifier
                             .padding(start = 4.dp, end = 8.dp)
                             .width(30.dp),
-                        color = if (awayTeamLineScore >= homeTeamLineScore) MaterialTheme.colors.primary else Color.Black
+                        color = if (homeTeamLineScore >= awayTeamLineScore) MaterialTheme.colors.primary else Color.Black
                     )
                 }
 

@@ -110,16 +110,15 @@ class MLBGameStatsViewModel @Inject constructor(
     private fun sortHitters() {
         val teamHitters = teamHitters.value.toMutableList()
 
-        when (secondCategorySelectedIndex.value) {
-            0 -> teamHitters.sortedByDescending { it.second.stats?.batting?.atBats ?: 0 }
-            1 -> teamHitters.sortedByDescending { it.second.stats?.batting?.hits ?: 0 }
-            2 -> teamHitters.sortedByDescending { it.second.stats?.batting?.homeRuns ?: 0 }
-            3 -> teamHitters.sortedByDescending { it.second.stats?.batting?.rbi ?: 0 }
-            4 -> teamHitters.sortedByDescending { it.second.stats?.batting?.runs ?: 0 }
-            5 -> teamHitters.sortedByDescending { it.second.stats?.batting?.stolenBases ?: 0 }
-            6 -> teamHitters.sortedByDescending { it.second.stats?.batting?.baseOnBalls ?: 0 }
-            7 -> teamHitters.sortedByDescending { it.second.stats?.batting?.strikeOuts ?: 0 }
-            8 -> teamHitters.sortedByDescending { it.second.stats?.batting?.avg?.toDoubleOrNull() ?: 0.0 }
+        when (firstCategorySelectedIndex.value) {
+            0 -> teamHitters.sortByDescending { it.second.stats?.batting?.atBats ?: 0 }
+            1 -> teamHitters.sortByDescending { it.second.stats?.batting?.hits ?: 0 }
+            2 -> teamHitters.sortByDescending { it.second.stats?.batting?.homeRuns ?: 0 }
+            3 -> teamHitters.sortByDescending { it.second.stats?.batting?.rbi ?: 0 }
+            4 -> teamHitters.sortByDescending { it.second.stats?.batting?.runs ?: 0 }
+            5 -> teamHitters.sortByDescending { it.second.stats?.batting?.stolenBases ?: 0 }
+            6 -> teamHitters.sortByDescending { it.second.stats?.batting?.baseOnBalls ?: 0 }
+            7 -> teamHitters.sortByDescending { it.second.stats?.batting?.strikeOuts ?: 0 }
             else -> {}
         }
 
@@ -130,13 +129,12 @@ class MLBGameStatsViewModel @Inject constructor(
         val teamPitchers = teamPitchers.value.toMutableList()
 
         when (secondCategorySelectedIndex.value) {
-            0 -> teamPitchers.sortedByDescending { it.second.stats?.pitching?.inningsPitched?.toDoubleOrNull() ?: 0.0 }
-            1 -> teamPitchers.sortedByDescending { it.second.stats?.pitching?.runs ?: 0 }
-            2 -> teamPitchers.sortedByDescending { it.second.stats?.pitching?.earnedRuns ?: 0 }
-            3 -> teamPitchers.sortedByDescending { it.second.stats?.pitching?.baseOnBalls ?: 0 }
-            4 -> teamPitchers.sortedByDescending { it.second.stats?.pitching?.strikeOuts ?: 0 }
-            5 -> teamPitchers.sortedByDescending { it.second.stats?.pitching?.hits ?: 0 }
-            6 -> teamPitchers.sortedBy { it.second.stats?.pitching?.era?.toDoubleOrNull() ?: 0.0 }
+            0 -> teamPitchers.sortByDescending { it.second.stats?.pitching?.inningsPitched?.toDoubleOrNull() ?: 0.0 }
+            1 -> teamPitchers.sortByDescending { it.second.stats?.pitching?.runs ?: 0 }
+            2 -> teamPitchers.sortByDescending { it.second.stats?.pitching?.earnedRuns ?: 0 }
+            3 -> teamPitchers.sortByDescending { it.second.stats?.pitching?.baseOnBalls ?: 0 }
+            4 -> teamPitchers.sortByDescending { it.second.stats?.pitching?.strikeOuts ?: 0 }
+            5 -> teamPitchers.sortByDescending { it.second.stats?.pitching?.hits ?: 0 }
             else -> {}
         }
 
