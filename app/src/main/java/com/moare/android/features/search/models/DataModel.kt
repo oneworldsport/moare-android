@@ -400,19 +400,6 @@ data class DataModel(
                         SportDecodableModel.NoResult
                     }
                 }
-                "baseball_team_schedule" -> {
-                    if (leagueId == Constants.Ids.KBO) {
-                        val responseModel: KBOGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-                        val displayModel = modelConverter.kboTeamScheduleConverter(responseModel)
-                        SportDecodableModel.KBOTeamSchedule(responseModel, displayModel)
-                    } else if (leagueId == Constants.Ids.MLB) {
-                        val responseModel: MLBGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-                        val displayModel = modelConverter.mlbTeamScheduleConverter(responseModel)
-                        SportDecodableModel.MLBTeamSchedule(responseModel, displayModel)
-                    } else {
-                        SportDecodableModel.NoResult
-                    }
-                }
                 "baseball_league_schedule" -> {
                     if (leagueId == Constants.Ids.KBO) {
                         val responseModel: KBOGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
@@ -635,12 +622,6 @@ sealed class SportDecodableModel {
     data class KBOTeamStandings(
         val responseModel: KBOTeamStandingsResponseModel,
         val displayModel: KBOTeamStandingsDisplayModel
-    ) : SportDecodableModel()
-
-    @Serializable
-    data class KBOTeamSchedule(
-        val responseModel: KBOGameScheduleResponseModel,
-        val displayModel: KBOTeamScheduleDisplayModel
     ) : SportDecodableModel()
 
     @Serializable

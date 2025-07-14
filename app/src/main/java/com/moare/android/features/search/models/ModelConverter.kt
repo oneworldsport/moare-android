@@ -537,15 +537,6 @@ class ModelConverter(
         )
     }
 
-    fun kboTeamScheduleConverter(response: KBOGameScheduleResponseModel): KBOTeamScheduleDisplayModel {
-        return KBOTeamScheduleDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.KBO,
-            keywords = keywords,
-            entityInfo = entityInfo,
-            games = response.schedule
-        )
-    }
-
     fun kboLeagueScheduleConverter(response: KBOGameScheduleResponseModel): KBOLeagueScheduleDisplayModel {
         val yearMonthList = response.scheduledMonths.map {
             val (year, month) = it.split("-")
@@ -556,6 +547,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )

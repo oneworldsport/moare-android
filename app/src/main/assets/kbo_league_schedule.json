@@ -19,6 +19,7 @@
   ],
   "dataType": "baseball_league_schedule",
   "data": {
+    "scheduleType": "league",
     "scheduledMonths": [
       "2025-03",
       "2025-04",

@@ -35,8 +35,8 @@ import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 @Composable
 fun KBOTeamScheduleView(
     searchViewModel: SearchViewModel = hiltViewModel(),
-    kboTeamScheduleViewModel: KBOTeamScheduleViewModel = hiltViewModel(),
-    data: KBOTeamScheduleDisplayModel
+    kboTeamScheduleViewModel: KBOLeagueScheduleViewModel = hiltViewModel(),
+    data: KBOLeagueScheduleDisplayModel
 ) {
     /* ---------------------
        viewmodel state
@@ -53,8 +53,8 @@ fun KBOTeamScheduleView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.KBOTeamSchedule) {
-            kboTeamScheduleViewModel.send(KBOTeamScheduleIntent.InitData(data))
+        if (poppedView == null || poppedView is SportDecodableModel.KBOLeagueSchedule) {
+            kboTeamScheduleViewModel.send(KBOLeagueScheduleIntent.InitData(data))
         }
     }
 
@@ -66,7 +66,7 @@ fun KBOTeamScheduleView(
         ),
         actions = ScheduleContainerActions(
             allResultButtonAction = {
-                kboTeamScheduleViewModel.send(KBOTeamScheduleIntent.ToggleAllResult)
+                kboTeamScheduleViewModel.send(KBOLeagueScheduleIntent.ToggleAllResult)
             }
         ),
         titleContent = {},
@@ -96,7 +96,7 @@ fun KBOTeamScheduleList(
 @Composable
 fun KBOTeamScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
-    kboTeamScheduleViewModel: KBOTeamScheduleViewModel = hiltViewModel(),
+    kboTeamScheduleViewModel: KBOLeagueScheduleViewModel = hiltViewModel(),
     data: KBOGameForSchedule,
 ) {
     val itemKey = data.itemKey
@@ -171,10 +171,10 @@ fun KBOTeamScheduleListItem(
                 searchViewModel.send(SearchViewModel.Intent.SelectKBOGame(data))
 
                 // set selected game's isOpened true
-                kboTeamScheduleViewModel.send(KBOTeamScheduleIntent.UpdateResultOpenedState(itemKey, true))
+                kboTeamScheduleViewModel.send(KBOLeagueScheduleIntent.UpdateResultOpenedState(itemKey, true))
             },
             onCapsuleButtonClick = {
-                kboTeamScheduleViewModel.send(KBOTeamScheduleIntent.UpdateResultOpenedState(itemKey, !isResultOpened))
+                kboTeamScheduleViewModel.send(KBOLeagueScheduleIntent.UpdateResultOpenedState(itemKey, !isResultOpened))
             }
         )
     )
