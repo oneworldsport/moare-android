@@ -17,8 +17,9 @@
       "teamId": 1610612744
     }
   ],
-  "dataType": "basketball_team_schedule",
+  "dataType": "basketball_league_schedule",
   "data": {
+    "scheduleType": "team",
     "scheduledMonths": [
       "2024-10",
       "2024-11",

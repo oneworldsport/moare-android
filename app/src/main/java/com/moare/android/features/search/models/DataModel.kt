@@ -159,7 +159,7 @@ data class DataModel(
                         SportDecodableModel.FBTeamStandings(responseModel, displayModel)
                     }
                 }
-                "football_team_schedule", "football_league_schedule" -> {
+                "football_league_schedule" -> {
                     val responseModel: FBGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
                     val displayModel = modelConverter.fbLeagueScheduleConverter(responseModel)
                     SportDecodableModel.FBLeagueSchedule(responseModel, displayModel)
@@ -235,11 +235,6 @@ data class DataModel(
                         val displayModel = modelConverter.nbaTeamStandingsConverter(responseModel)
                         SportDecodableModel.NBATeamStandings(responseModel, displayModel)
                     }
-                }
-                "basketball_team_schedule" -> {
-                    val responseModel: NBAGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-                    val displayModel = modelConverter.nbaTeamScheduleConverter(responseModel)
-                    SportDecodableModel.NBATeamSchedule(responseModel, displayModel)
                 }
                 "basketball_league_schedule" -> {
                     val responseModel: NBAGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
@@ -398,19 +393,6 @@ data class DataModel(
                             val displayModel = modelConverter.mlbTeamStandingsConverter(responseModel)
                             SportDecodableModel.MLBTeamStandings(responseModel, displayModel)
                         }
-                    } else {
-                        SportDecodableModel.NoResult
-                    }
-                }
-                "baseball_team_schedule" -> {
-                    if (leagueId == Constants.Ids.KBO) {
-                        val responseModel: KBOGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-                        val displayModel = modelConverter.kboTeamScheduleConverter(responseModel)
-                        SportDecodableModel.KBOTeamSchedule(responseModel, displayModel)
-                    } else if (leagueId == Constants.Ids.MLB) {
-                        val responseModel: MLBGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
-                        val displayModel = modelConverter.mlbTeamScheduleConverter(responseModel)
-                        SportDecodableModel.MLBTeamSchedule(responseModel, displayModel)
                     } else {
                         SportDecodableModel.NoResult
                     }
@@ -640,12 +622,6 @@ sealed class SportDecodableModel {
     ) : SportDecodableModel()
 
     @Serializable
-    data class KBOTeamSchedule(
-        val responseModel: KBOGameScheduleResponseModel,
-        val displayModel: KBOTeamScheduleDisplayModel
-    ) : SportDecodableModel()
-
-    @Serializable
     data class KBOLeagueSchedule(
         val responseModel: KBOGameScheduleResponseModel,
         val displayModel: KBOLeagueScheduleDisplayModel
@@ -692,12 +668,6 @@ sealed class SportDecodableModel {
     data class MLBTeamStandings(
         val responseModel: MLBTeamStandingsResponseModel,
         val displayModel: MLBTeamStandingsDisplayModel
-    ) : SportDecodableModel()
-
-    @Serializable
-    data class MLBTeamSchedule(
-        val responseModel: MLBGameScheduleResponseModel,
-        val displayModel: MLBTeamScheduleDisplayModel
     ) : SportDecodableModel()
 
     @Serializable

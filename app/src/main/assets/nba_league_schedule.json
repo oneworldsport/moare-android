@@ -19,6 +19,7 @@
   ],
   "dataType": "basketball_league_schedule",
   "data": {
+    "scheduleType": "league",
     "scheduledMonths": [
       "2024-10",
       "2024-11",

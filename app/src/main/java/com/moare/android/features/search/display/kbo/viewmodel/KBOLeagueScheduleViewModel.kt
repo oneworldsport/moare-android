@@ -14,6 +14,7 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOGame
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -95,7 +96,11 @@ class KBOLeagueScheduleViewModel @Inject constructor(
         _selectedYearMonth.value = yearMonth
         _selectedYearMonthIndex.value = selectedIndex
 
-        fetchGames(updateViewStack)
+        when (displayModel.value?.scheduleType) {
+            ScheduleType.LEAGUE -> { fetchGames(updateViewStack) }
+            ScheduleType.TEAM -> { setDays() }
+            else -> {}
+        }
     }
 
     override fun toggleAllResult() {

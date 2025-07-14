@@ -461,7 +461,7 @@ fun SearchView(
                         KBOTeamStandingsView(data = it as KBOTeamStandingsDisplayModel)
                     }
                     displayModels[SportDisplayType.KBO_TEAM_SCHEDULE]?.let {
-                        KBOTeamScheduleView(data = it as KBOTeamScheduleDisplayModel)
+                        KBOLeagueScheduleView(data = it as KBOLeagueScheduleDisplayModel)
                     }
                     displayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE]?.let {
                         KBOLeagueScheduleView(data = it as KBOLeagueScheduleDisplayModel)
@@ -492,7 +492,7 @@ fun SearchView(
                         MLBTeamStandingsView(data = it as MLBTeamStandingsDisplayModel)
                     }
                     displayModels[SportDisplayType.MLB_TEAM_SCHEDULE]?.let {
-                        MLBTeamScheduleView(data = it as MLBTeamScheduleDisplayModel)
+                        MLBLeagueScheduleView(data = it as MLBLeagueScheduleDisplayModel)
                     }
                     displayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE]?.let {
                         MLBLeagueScheduleView(data = it as MLBLeagueScheduleDisplayModel)

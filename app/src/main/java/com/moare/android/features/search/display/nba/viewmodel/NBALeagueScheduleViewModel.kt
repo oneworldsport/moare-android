@@ -16,6 +16,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBLeagueS
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,7 +98,11 @@ class NBALeagueScheduleViewModel @Inject constructor(
         _selectedYearMonth.value = yearMonth
         _selectedYearMonthIndex.value = selectedIndex
 
-        fetchGames(updateViewStack)
+        when (displayModel.value?.scheduleType) {
+            ScheduleType.LEAGUE -> { fetchGames(updateViewStack) }
+            ScheduleType.TEAM -> { setDays() }
+            else -> {}
+        }
     }
 
     override fun toggleAllResult() {

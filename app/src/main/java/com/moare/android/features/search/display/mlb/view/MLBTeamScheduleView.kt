@@ -53,7 +53,7 @@ fun MLBTeamScheduleView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.MLBTeamSchedule) {
+        if (poppedView == null || poppedView is SportDecodableModel.MLBLeagueSchedule) {
             mlbTeamScheduleViewModel.send(MLBTeamScheduleIntent.InitData(data))
         }
     }

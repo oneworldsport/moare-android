@@ -399,6 +399,7 @@ class ModelConverter(
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -584,6 +585,7 @@ class ModelConverter(
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -765,6 +767,7 @@ class ModelConverter(
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
