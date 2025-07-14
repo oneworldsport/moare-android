@@ -15,10 +15,18 @@ data class GameStatsContainerState(
     val teamCategorySelectedIndex: Int = 0,
     val firstCategorySelectedIndex: Int = 0,
     val secondCategorySelectedIndex: Int = 0,
+    val firstColumnWidth: Dp? = null,
     val columnWidthList: List<Dp> = emptyList(),
     val playerList: List<StandingsItemState>,
     val gameDetailTitle: String = "",
-    val gameDetailContent: String = ""
+    val gameDetailContent: String = "",
+
+    val firstStatsTitle: String? = null,
+    val secondStatsTitle: String? = null,
+    val secondStatsCategories: List<String>? = null,
+    val secondStatsCategorySelectedIndex: Int = 0,
+    val secondStatsColumnWidthList: List<Dp> = emptyList(),
+    val secondStatsPlayerList: List<StandingsItemState>? = null
 )
 
 data class GameStatsTeamState(
@@ -35,5 +43,6 @@ data class GameStatsContainerActions(
     val teamCategoryButtonAction: ((Int) -> Unit)? = null,
     val firstCategoryButtonAction: ((Int) -> Unit)? = null,
     val secondCategoryButtonAction: (Int) -> Unit,
-    val refreshButtonAction: () -> Unit
+    val refreshButtonAction: () -> Unit,
+    val secondStatsCategoryButtonAction: ((Int) -> Unit)? = null
 )

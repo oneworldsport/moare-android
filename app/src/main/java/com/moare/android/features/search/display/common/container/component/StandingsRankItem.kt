@@ -1,9 +1,7 @@
 package com.moare.android.features.search.display.common.container.component
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -18,18 +16,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.moare.android.core.util.NBAUtil
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.VCapsuleBar
-import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.nullableOptionalClickable
 
 @Composable
 fun StandingsRankItem(
     id: Int = 0,
     width: Dp? = null,
-    isGameStats: Boolean = false,
+    shouldShowRank: Boolean = true,
+    shouldShowExtraInfo: Boolean = false,
     rank: Int = 0,
     imageUrl: String?,
     isSvgLogo: Boolean = false,
@@ -50,7 +46,7 @@ fun StandingsRankItem(
                 action(id)
             }
     ) {
-        if (!isGameStats) {
+        if (shouldShowRank) {
             Text(
                 text = "$rank",
                 fontWeight = FontWeight.Medium,
@@ -67,7 +63,7 @@ fun StandingsRankItem(
             isSvg = isSvgLogo
         )
 
-        if (isGameStats) {
+        if (shouldShowExtraInfo) {
             Text(
                 text = name,
                 fontSize = 12.sp,
@@ -79,26 +75,32 @@ fun StandingsRankItem(
 
             // TODO: goals, cards, number, captain
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+//                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .width(30.dp)
+                    .width((width ?: 132.dp) - 102.dp)
                     .padding(start = 2.dp)
             ) {
-                Text(
-                    text = extraInfo ?: "",
-                    fontSize = 11.sp,
-                    color = Color.Gray,
-                    modifier = Modifier
+                extraInfo?.let {
+                    Text(
+                        text = extraInfo,
+                        fontSize = 11.sp,
+                        color = Color.Gray,
+                        maxLines = 1,
+                        modifier = Modifier
 //                        .alpha(if (data.position.isNotBlank()) 1f else 0.7f)
-                )
+                    )
+                }
 
-                Text(
-                    text = extraSubInfo ?: "",
-                    fontSize = 11.sp,
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .alpha(0.7f)
-                )
+                extraSubInfo?.let {
+                    Text(
+                        text = extraSubInfo,
+                        fontSize = 11.sp,
+                        color = Color.Gray,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .alpha(0.7f)
+                    )
+                }
             }
         } else {
             Column (

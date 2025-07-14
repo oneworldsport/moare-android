@@ -420,7 +420,7 @@ fun RowScope.NBAGameStatsLineScoreContainer(
 
             Box(
                 Modifier
-                    .width(42.dp)
+                    .width(42.dp) // 30 + 8 + 4
                     .height(1.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(Color.Gray)
