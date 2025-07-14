@@ -674,12 +674,6 @@ sealed class SportDecodableModel {
     ) : SportDecodableModel()
 
     @Serializable
-    data class MLBTeamSchedule(
-        val responseModel: MLBGameScheduleResponseModel,
-        val displayModel: MLBTeamScheduleDisplayModel
-    ) : SportDecodableModel()
-
-    @Serializable
     data class MLBLeagueSchedule(
         val responseModel: MLBGameScheduleResponseModel,
         val displayModel: MLBLeagueScheduleDisplayModel

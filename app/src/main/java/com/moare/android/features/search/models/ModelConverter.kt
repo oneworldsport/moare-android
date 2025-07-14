@@ -701,15 +701,6 @@ class ModelConverter(
         )
     }
 
-    fun mlbTeamScheduleConverter(response: MLBGameScheduleResponseModel): MLBTeamScheduleDisplayModel {
-        return MLBTeamScheduleDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.MLB,
-            keywords = keywords,
-            entityInfo = entityInfo,
-            games = response.schedule
-        )
-    }
-
     fun mlbLeagueScheduleConverter(response: MLBGameScheduleResponseModel): MLBLeagueScheduleDisplayModel {
         val yearMonthList = response.scheduledMonths.map {
             val (year, month) = it.split("-")
@@ -720,6 +711,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )

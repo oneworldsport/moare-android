@@ -492,7 +492,7 @@ fun SearchView(
                         MLBTeamStandingsView(data = it as MLBTeamStandingsDisplayModel)
                     }
                     displayModels[SportDisplayType.MLB_TEAM_SCHEDULE]?.let {
-                        MLBTeamScheduleView(data = it as MLBTeamScheduleDisplayModel)
+                        MLBLeagueScheduleView(data = it as MLBLeagueScheduleDisplayModel)
                     }
                     displayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE]?.let {
                         MLBLeagueScheduleView(data = it as MLBLeagueScheduleDisplayModel)
