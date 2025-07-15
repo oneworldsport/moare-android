@@ -8,6 +8,9 @@ plugins {
     id("kotlinx-serialization")
 //    id("com.google.dagger.hilt.android")
 
+    // Firebase
+    id("com.google.gms.google-services")
+
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
@@ -86,6 +89,10 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    implementation("com.google.firebase:firebase-analytics")
 
     // Retrofit
     implementation(libs.retrofit.core)
