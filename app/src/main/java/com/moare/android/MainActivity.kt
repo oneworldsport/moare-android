@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             var isSplashFinished by remember { mutableStateOf(false) }
 
-            val viewForTest: SportDisplayType? = SportDisplayType.MLB_PLAYER_INFO
+            val viewForTest: SportDisplayType? = null
 
             MoareAndroidTheme {
                 Surface(
