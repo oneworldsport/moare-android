@@ -80,14 +80,24 @@ class NBALeagueScheduleViewModel @Inject constructor(
         _yearMonthList.value = displayModel.yearMonthList
 
         when (displayModel.scheduleType) {
-            ScheduleType.LEAGUE, ScheduleType.TEAM -> {
-                // select default yearMonth
+            ScheduleType.LEAGUE -> {
                 displayModel.games.firstOrNull()?.date?.let {
-                    val defaultYearMonth = CalendarUtil.formatDate(it, TimeFormatType.YEAR_MONTH)
-                    val defaultYearMonthIndex = yearMonthList.value.withIndex().first { (_, value) -> value == defaultYearMonth }
-                    _selectedYearMonth.value = defaultYearMonth
-                    _selectedYearMonthIndex.value = defaultYearMonthIndex.index
-                    _yearMonthCalendarScrollTrigger.value = UUID.randomUUID().toString()
+                    setDefaultYearMonth(it)
+                }
+
+                setDays(true)
+            }
+            ScheduleType.TEAM -> {
+                val upcomingGame = displayModel.games.firstOrNull { game ->
+                    CalendarUtil.isUpcomingDay(game.date)
+                }
+
+                if (upcomingGame != null) {
+                    setDefaultYearMonth(upcomingGame.date)
+                } else {
+                    displayModel.games.lastOrNull()?.date?.let {
+                        setDefaultYearMonth(it)
+                    }
                 }
 
                 setDays(true)

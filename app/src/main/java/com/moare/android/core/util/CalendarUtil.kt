@@ -209,6 +209,12 @@ object CalendarUtil {
             return 0
         }
     }
+
+    fun isUpcomingDay(date: String): Boolean {
+        val gameDate = OffsetDateTime.parse(date).toLocalDate()
+        val today = LocalDate.now()
+        return !gameDate.isBefore(today) // 오늘이거나 미래 날짜면 true
+    }
 }
 
 
