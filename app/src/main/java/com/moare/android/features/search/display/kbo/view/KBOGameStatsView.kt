@@ -65,6 +65,7 @@ import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsInten
 import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsViewModel
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsIntent
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOGameLineScore
@@ -167,7 +168,7 @@ fun KBOGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowStats = game?.gameInfo?.gameStatus?.toIntOrNull() != StringConstants.KBO.GAME_SCHEDULED,
+            shouldShowStats = game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_LIVE || game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_FINAL,
             teamCategories = teamCategories,
             secondCategories = StringConstants.KBO.GAME_STATS_HITTING_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,
@@ -177,6 +178,7 @@ fun KBOGameStatsView(
             playerList = hitterList,
             gameDetailTitle = gameDetailTitle,
             gameDetailContent = gameDetailContent,
+            noStatsText = if (game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_CANCELED) "취소된 경기입니다." else null,
             firstStatsTitle = "타자",
             secondStatsTitle = "투수",
             secondStatsCategories = StringConstants.KBO.GAME_STATS_PITCHING_CATEGORIES,
@@ -215,7 +217,17 @@ fun KBOGameStatsView(
             }
         },
         gameContent = {
-            KBOGameStatsScoreInfoItem()
+            if (
+                game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_SCHEDULED ||
+                game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_CANCELED
+            ) {
+                KBOLeagueScheduleListItem(
+                    data = ModelConverter().kboGameToGameScheduleConverter(game),
+                    teamNameDic = teamNameDic
+                )
+            } else {
+                KBOGameStatsScoreInfoItem()
+            }
         }
     )
 }

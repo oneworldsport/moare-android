@@ -170,27 +170,31 @@ fun MLBLeagueScheduleList(
        --------------------- */
     val filteredGames by mlbLeagueScheduleViewModel.filteredGames.collectAsState()
     val selectedDayIndex by mlbLeagueScheduleViewModel.selectedDayIndex.collectAsState()
+    val teamNameDic = mlbLeagueScheduleViewModel.teamNameDictionary
 
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            MLBLeagueScheduleListItem(data = item)
+            MLBLeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
         }
     }
 }
 
+// NOTE: 경기 시작 전 게임의 경우 MLBGameStatsView에서 MLBGameStatsScoreInfoItem를 사용하지 않고 MLBLeagueScheduleListItem를 사용함에 따라
+// FBLeagueScheduleListItem에서처럼 nbaGameStatsModel을 가져와 사용하는 로직이 일부 추가됨. KBO, NBA에서도 마찬가지.
+// 계속 MLBGameStatsScoreInfoItem를 사용할거는 아니기때문에(축구처럼 애니메이션 적용을 위해) 나중에 바뀔 여지 있음.
 @Composable
 fun MLBLeagueScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
     mlbLeagueScheduleViewModel: MLBLeagueScheduleViewModel = hiltViewModel(),
+    teamNameDic: Map<String, String>,
     data: MLBGameForSchedule,
 ) {
     val gameId = data.gameId
     val homeTeamId = data.homeTeamId
     val awayTeamId = data.awayTeamId
     val gameStatus = data.gameStatus
-    val teamNameDic = mlbLeagueScheduleViewModel.teamNameDictionary
 
     /* ---------------------
        ui state
@@ -202,6 +206,9 @@ fun MLBLeagueScheduleListItem(
        --------------------- */
     val gameResultOpenedStateList by mlbLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
     val displayModel by mlbLeagueScheduleViewModel.displayModel.collectAsState()
+
+    val displayModels by searchViewModel.displayModels.collectAsState()
+    val mlbGameStatsModel = displayModels[SportDisplayType.MLB_GAME_STATS] as? MLBGameStatsDisplayModel
 
     /* ---------------------
        constants
@@ -237,9 +244,17 @@ fun MLBLeagueScheduleListItem(
             isResultOpened = gameResultOpenedStateList[gameId] ?: false
         }
     }
+    LaunchedEffect(mlbGameStatsModel) {
+        mlbGameStatsModel?.let {
+            if (gameStatus != StringConstants.MLB.GAME_SCHEDULED) {
+                isResultOpened = true
+            }
+        }
+    }
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
+            isClickEnabled = mlbGameStatsModel == null,
             homeTeamLogo = MLBUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
@@ -249,9 +264,13 @@ fun MLBLeagueScheduleListItem(
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
-            isCapsuleButtonDisabled = !StringConstants.MLB.GAME_FINISHED_LIST.contains(gameStatus),
+            isCapsuleButtonDisabled = mlbGameStatsModel != null || !StringConstants.MLB.GAME_FINISHED_LIST.contains(gameStatus),
             date = data.date,
             venue = teamNameDic["venue_${homeTeamId}"] ?: "",
+            shouldShowOnlyDateTime = mlbGameStatsModel == null,
+            shouldShowVenue = mlbGameStatsModel != null,
+            shouldShowHomeLabel = mlbGameStatsModel != null,
+            shouldShowAwayLabel = mlbGameStatsModel != null,
             isSvgLogo = true
         ),
         actions = ScheduleGameItemActions(

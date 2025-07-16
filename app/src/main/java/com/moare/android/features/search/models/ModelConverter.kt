@@ -809,7 +809,7 @@ class ModelConverter(
             _awayTeamId = awayTeamId,
             _homeTeamScore = homeTeamScore,
             _awayTeamScore = awayTeamScore,
-            _gameStatus = game.status.statusCode,
+            _gameStatus = game.status.detailedState,
             gameInfo = gameInfo
         )
     }

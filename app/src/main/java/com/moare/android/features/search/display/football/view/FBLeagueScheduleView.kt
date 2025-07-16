@@ -258,7 +258,7 @@ fun FBLeagueScheduleListItem(
     }
     LaunchedEffect(fbGameStatsModel) {
         fbGameStatsModel?.let {
-            if (it.game.fixture.status.short != StringConstants.Football.GAME_NOT_STARTED) {
+            if (gameStatus != StringConstants.Football.GAME_NOT_STARTED) {
                 isResultOpened = true
             }
         }

@@ -26,7 +26,10 @@ import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueSchedule
 import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.SportDisplayType
+import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 
 @Composable
@@ -123,12 +126,13 @@ fun KBOLeagueScheduleList(
        --------------------- */
     val filteredGames by kboLeagueScheduleViewModel.filteredGames.collectAsState()
     val selectedDayIndex by kboLeagueScheduleViewModel.selectedDayIndex.collectAsState()
+    val teamNameDic = kboLeagueScheduleViewModel.teamNameDictionary
 
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            KBOLeagueScheduleListItem(data = item)
+            KBOLeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
         }
     }
 }
@@ -137,13 +141,13 @@ fun KBOLeagueScheduleList(
 fun KBOLeagueScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
     kboLeagueScheduleViewModel: KBOLeagueScheduleViewModel = hiltViewModel(),
+    teamNameDic: Map<String, String>,
     data: KBOGameForSchedule,
 ) {
     val itemKey = data.itemKey
     val homeTeamId = data.homeTeamId
     val awayTeamId = data.awayTeamId
     val gameStatus = data.gameStatus.toIntOrNull() ?: 0
-    val teamNameDic = kboLeagueScheduleViewModel.teamNameDictionary
 
     /* ---------------------
        ui state
@@ -155,6 +159,9 @@ fun KBOLeagueScheduleListItem(
        --------------------- */
     val gameResultOpenedStateList by kboLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
     val displayModel by kboLeagueScheduleViewModel.displayModel.collectAsState()
+
+    val displayModels by searchViewModel.displayModels.collectAsState()
+    val kboGameStatsModel = displayModels[SportDisplayType.KBO_GAME_STATS] as? KBOGameStatsDisplayModel
 
     /* ---------------------
        constants
@@ -190,9 +197,17 @@ fun KBOLeagueScheduleListItem(
             isResultOpened = gameResultOpenedStateList[itemKey] ?: false
         }
     }
+    LaunchedEffect(kboGameStatsModel) {
+        kboGameStatsModel?.let {
+            if (gameStatus == StringConstants.KBO.GAME_LIVE || gameStatus == StringConstants.KBO.GAME_FINAL) {
+                isResultOpened = true
+            }
+        }
+    }
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
+            isClickEnabled = kboGameStatsModel == null,
             homeTeamLogo = KBOUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
@@ -202,9 +217,13 @@ fun KBOLeagueScheduleListItem(
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
-            isCapsuleButtonDisabled = gameStatus != StringConstants.KBO.GAME_FINAL,
+            isCapsuleButtonDisabled = kboGameStatsModel != null || gameStatus != StringConstants.KBO.GAME_FINAL,
             date = data.date,
-            venue = teamNameDic["venue_${homeTeamId}"] ?: ""
+            venue = teamNameDic["venue_${homeTeamId}"] ?: "",
+            shouldShowOnlyDateTime = kboGameStatsModel == null,
+            shouldShowVenue = kboGameStatsModel != null,
+            shouldShowHomeLabel = kboGameStatsModel != null,
+            shouldShowAwayLabel = kboGameStatsModel != null,
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
