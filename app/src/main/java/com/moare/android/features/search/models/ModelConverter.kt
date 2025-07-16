@@ -19,7 +19,6 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStand
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
@@ -30,13 +29,11 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStand
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
@@ -378,16 +375,6 @@ class ModelConverter(
         )
     }
 
-    fun nbaTeamScheduleConverter(response: NBAGameScheduleResponseModel): NBATeamScheduleDisplayModel {
-        return NBATeamScheduleDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.NBA,
-            keywords = keywords,
-            entityInfo = entityInfo,
-            season = season,
-            games = response.schedule
-        )
-    }
-
     fun nbaLeagueScheduleConverter(response: NBAGameScheduleResponseModel): NBALeagueScheduleDisplayModel {
         val yearMonthList = response.scheduledMonths.map {
             val (year, month) = it.split("-")
@@ -564,16 +551,6 @@ class ModelConverter(
         )
     }
 
-    fun kboTeamScheduleConverter(response: KBOGameScheduleResponseModel): KBOTeamScheduleDisplayModel {
-        return KBOTeamScheduleDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.KBO,
-            keywords = keywords,
-            entityInfo = entityInfo,
-            season = season,
-            games = response.schedule
-        )
-    }
-
     fun kboLeagueScheduleConverter(response: KBOGameScheduleResponseModel): KBOLeagueScheduleDisplayModel {
         val yearMonthList = response.scheduledMonths.map {
             val (year, month) = it.split("-")
@@ -746,16 +723,6 @@ class ModelConverter(
         )
     }
 
-    fun mlbTeamScheduleConverter(response: MLBGameScheduleResponseModel): MLBTeamScheduleDisplayModel {
-        return MLBTeamScheduleDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.MLB,
-            keywords = keywords,
-            entityInfo = entityInfo,
-            season = season,
-            games = response.schedule
-        )
-    }
-
     fun mlbLeagueScheduleConverter(response: MLBGameScheduleResponseModel): MLBLeagueScheduleDisplayModel {
         val yearMonthList = response.scheduledMonths.map {
             val (year, month) = it.split("-")
@@ -818,7 +785,7 @@ class ModelConverter(
         val awayTeamScore = game.lineScore.firstOrNull { it.teamId == awayTeamId }?.pts ?: 0
 
         return NBAGameForSchedule(
-            _itemKey = if (date != null) "${date}#${gameSummary.gameCode}" else "",
+            _itemKey = if (date != null) "${date}#${gameSummary.gameId}" else "",
             _homeTeamId = homeTeamId,
             _awayTeamId = awayTeamId,
             _homeTeamScore = homeTeamScore,

@@ -66,7 +66,6 @@ fun FBGameStatsView(
     val displayModels by searchViewModel.displayModels.collectAsState()
     val poppedView by searchViewModel.poppedView.collectAsState()
     val fbLeagueScheduleModel = displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] as? FBLeagueScheduleDisplayModel
-    val fbTeamScheduleModel = displayModels[SportDisplayType.FB_TEAM_SCHEDULE] as? FBLeagueScheduleDisplayModel
 
     val teamIds = listOf(displayModel?.game?.teams?.home?.id, displayModel?.game?.teams?.away?.id)
     val teamCategories = teamIds.map {
@@ -211,8 +210,8 @@ fun FBGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowTitle = fbLeagueScheduleModel == null && fbTeamScheduleModel == null,
-            shouldShowGameItem = fbLeagueScheduleModel == null && fbTeamScheduleModel == null,
+            shouldShowTitle = fbLeagueScheduleModel == null,
+            shouldShowGameItem = fbLeagueScheduleModel == null,
             shouldShowStats = displayModel?.game?.fixture?.status?.short != "NS",
             shouldShowCoach = true,
             teamCategories = teamCategories,

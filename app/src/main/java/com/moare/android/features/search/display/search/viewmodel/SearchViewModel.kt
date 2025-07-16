@@ -303,7 +303,6 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
                 is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
                 is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
-                is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.NBALeagueSchedule -> {
                     newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel
                     initialNBALeagueScheduleData = data.displayModel
@@ -525,7 +524,6 @@ class SearchViewModel @Inject constructor(
                         is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = viewToShow.displayModel }
                         is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = viewToShow.displayModel }
                         is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = viewToShow.displayModel }
-                        is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.NBALeagueSchedule -> {
                             if (lastView is SportDecodableModel.NBAGameStats) {
                                 newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = initialNBALeagueScheduleData
@@ -1005,7 +1003,6 @@ class SearchViewModel @Inject constructor(
             is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
             is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
             is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
-            is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
             is SportDecodableModel.NBALeagueSchedule -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel }
             is SportDecodableModel.NBAGameStats -> { newDisplayModels[SportDisplayType.NBA_GAME_STATS] = data.displayModel }
             is SportDecodableModel.NBALeagueTournament -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT] = data.displayModel }
@@ -1072,7 +1069,6 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
                 is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
                 is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
-                is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.NBALeagueSchedule -> {
                     newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel
                     initialNBALeagueScheduleData = data.displayModel
