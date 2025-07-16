@@ -64,6 +64,7 @@ import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDi
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.common.components.CapsuleButton
@@ -127,6 +128,8 @@ fun NBALeagueScheduleView(
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
+            shouldShowCalendar = displayModel?.scheduleType != ScheduleType.TEAM_FLAT,
+            shouldFetchSchedule = displayModel?.scheduleType == ScheduleType.LEAGUE,
             displayDataState = displayDataState,
             calendarUiState = CalendarUiState(
                 yearMonthList,
@@ -271,6 +274,7 @@ fun NBALeagueScheduleListItem(
             date = data.date,
             venue = teamNameDic["venue_${homeTeamId}"] ?: "",
 //            gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
+            shouldShowOnlyDateTime = displayModel?.scheduleType != ScheduleType.TEAM_FLAT,
             isSvgLogo = true
         ),
         actions = ScheduleGameItemActions(

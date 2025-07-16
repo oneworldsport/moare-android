@@ -16,7 +16,8 @@ data class FBGameScheduleResponseModel(
 enum class ScheduleType {
     @SerialName("team")
     TEAM,
-
     @SerialName("league")
-    LEAGUE
+    LEAGUE,
+    @SerialName("team_flat")
+    TEAM_FLAT
 }

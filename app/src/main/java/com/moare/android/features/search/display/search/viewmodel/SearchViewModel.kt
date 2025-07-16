@@ -38,6 +38,7 @@ import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
@@ -948,10 +949,14 @@ class SearchViewModel @Inject constructor(
 
         when (val lastView = viewStack.value.lastOrNull()) {
             is SportDecodableModel.NBALeagueTournament-> {
-                val responseModel = NBAGameScheduleResponseModel(scheduledMonths = emptyList(), schedule = modelConverter.nbaGameListToGameScheduleListConverter(gameList))
-                dataModel = SportDecodableModel.NBATeamSchedule(
+                val responseModel = NBAGameScheduleResponseModel(
+                    scheduleType = ScheduleType.TEAM_FLAT,
+                    scheduledMonths = emptyList(),
+                    schedule = modelConverter.nbaGameListToGameScheduleListConverter(gameList)
+                )
+                dataModel = SportDecodableModel.NBALeagueSchedule(
                     responseModel = responseModel,
-                    displayModel = modelConverter.nbaTeamScheduleConverter(responseModel)
+                    displayModel = modelConverter.nbaLeagueScheduleConverter(responseModel)
                 )
             }
 
