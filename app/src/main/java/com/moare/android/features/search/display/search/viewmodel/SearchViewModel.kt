@@ -181,6 +181,7 @@ class SearchViewModel @Inject constructor(
         data class ShowGameStats(val gameType: String) : Intent()
         data class RefreshGame(val season: Int, val category: String) : Intent()
         data class SelectNBATournamentRound(val gameList: List<NBAGame>) : Intent()
+        data class SearchById(val id: String, val season: Int, val category: String, val dataType: String, val leagueId: Int) : Intent()
 
         data class UpdateLastViewStack(val data: SportDecodableModel) : Intent()
 
@@ -221,6 +222,7 @@ class SearchViewModel @Inject constructor(
                 is Intent.ShowGameStats -> showGameStats(intent.gameType)
                 is Intent.RefreshGame -> refreshGame(intent.season, intent.category)
                 is Intent.SelectNBATournamentRound -> selectNBATournamentRound(intent.gameList)
+                is Intent.SearchById -> searchById(intent.id, intent.season, intent.category, intent.dataType, intent.leagueId)
                 is Intent.UpdateLastViewStack -> updateLastViewStack(intent.data)
                 is Intent.TestSearch -> testSearch(intent.viewForTest)
             }
@@ -972,6 +974,25 @@ class SearchViewModel @Inject constructor(
         _poppedView.emit(null)
 
         _resultVisibleState.emit(true)
+    }
+
+    private suspend fun searchById(
+        id: String,
+        season: Int,
+        category: String,
+        dataType: String, // TODO: Should make constants
+        leagueId: Int
+    ) {
+        val result = searchClient.fetchById(
+            season = season,
+            category = category,
+            dataType = dataType,
+            leagueId = leagueId,
+            id = id
+        )
+
+        addViewStack(result.data)
+        updateMainDisplayModel(result.data)
     }
 
     private suspend fun updateLastViewStack(data: SportDecodableModel) {
