@@ -451,26 +451,17 @@ fun NBAPlayerInfoFourthItem(
                 )
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            // TODO: 은퇴한 경우 -> 2010~2023(14시즌/은퇴)
+            Text(
+                text = buildAnnotatedString {
+                    append("경력: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append("${player.fromYear}~현재 (${player.seasonExp + 1}년차)")
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = buildAnnotatedString {
-                        append("경력: ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
-                            append("${player.fromYear}~현재 (${player.seasonExp + 1}년차)")
-                        }
-                    },
-                    fontSize = 15.sp
-                )
-
-                // TODO: 은퇴한 경우 -> 2010~2023(14시즌/은퇴)
-//                Text(
-//                    text = "${player.fromYear}~현재 (${player.seasonExp + 1}년차)",
-//                    fontWeight = FontWeight.Medium
-//                )
-            }
+            )
         }
     }
 }

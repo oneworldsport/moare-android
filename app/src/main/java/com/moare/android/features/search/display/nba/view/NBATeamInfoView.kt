@@ -33,9 +33,12 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -54,7 +57,9 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.NBATitle
+import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.util.CenterRow
 import com.moare.android.ui.util.screenWidthDp
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
@@ -208,13 +213,6 @@ fun NBATeamInfoFirstItem(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
             URLImage(
                 url = NBAUtil.teamLogoUrl(team.id),
                 modifier = Modifier.alpha(contentsAlpha),
@@ -268,13 +266,6 @@ fun NBATeamInfoSecondItem(
             modifier = containerModifier
         ) {
             Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
-            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.alpha(contentsAlpha)
             ) {
@@ -289,19 +280,16 @@ fun NBATeamInfoSecondItem(
                 )
             }
 
-            Column(
+            Text(
+                text = buildAnnotatedString {
+                    append("연고지: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(team.state)
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "연고지: ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = team.state,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            )
 
             Column(
                 modifier = Modifier.alpha(contentsAlpha)
@@ -350,13 +338,6 @@ fun NBATeamInfoThirdItem(
             horizontalAlignment = Alignment.Start,
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.alpha(contentsAlpha)
@@ -439,8 +420,6 @@ fun NBATeamInfoFourthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
             }
         ) {
-            HCapsuleBar()
-
             NBATitle(
                 leagueName = "NBA 정규시즌",
                 leagueSeason = stats?.groupValue?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024,
@@ -450,9 +429,10 @@ fun NBATeamInfoFourthItem(
             )
 
             stats?.let {
-                Row(
+                CenterRow(
                     modifier = Modifier
                         .alpha(contentsAlpha)
+                        .fillMaxWidth()
                 ) {
                     FBStatDataItem(
                         category = "${NBAUtil.translateEastWest(team.teamConference)} 컨퍼런스 순위",
@@ -460,19 +440,19 @@ fun NBATeamInfoFourthItem(
                         customCategoryFontSize = 13,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "승",
                         data = stats.wins.toString(),
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "패",
                         data = stats.losses.toString(),
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "경기당 득점",
                         data = stats.ptsPG.toString(),
@@ -516,8 +496,6 @@ fun NBATeamInfoFifthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
             }
         ) {
-            HCapsuleBar()
-
             Text(
                 text = "최근경기",
                 fontSize = 17.sp,
@@ -536,49 +514,51 @@ fun NBATeamInfoFifthItem(
                     modifier = Modifier
                         .alpha(contentsAlpha)
                 ) {
-                    Text(
-                        text = if (homeTeam == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${homeTeam.teamId}"] ?: homeTeam.teamCity,
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
                         modifier = Modifier.weight(1f)
-                    )
+                    ) {
+                        Text(
+                            text = if (homeTeam == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${homeTeam.teamId}"] ?: homeTeam.teamCity,
+                            fontSize = 15.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = " $homeTeamScore",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
+                        )
+                    }
 
                     Text(
-                        text = (homeTeamScore).toString(),
+                        text = " - ",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.4f),
-                        color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
+                        textAlign = TextAlign.Center
                     )
 
-                    Text(
-                        text = " vs ",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.3f)
-                    )
-
-                    Text(
-                        text = (awayTeamScore).toString(),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.4f),
-                        color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
-                    )
-
-                    Text(
-                        text = if (awayTeam == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${awayTeam.teamId}"] ?: awayTeam.teamCity,
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
-                    )
+                    ) {
+                        Text(
+                            text = "$awayTeamScore ",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
+                        )
+
+                        Text(
+                            text = if (awayTeam == null) "" else nbaTeamInfoViewModel.teamNameDictionary["short_${awayTeam.teamId}"] ?: awayTeam.teamCity,
+                            fontSize = 15.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
 
                 Text(
@@ -623,8 +603,6 @@ fun NBATeamInfoSixthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
             }
         ) {
-            HCapsuleBar()
-
             Text(
                 text = "다음경기",
                 fontSize = 17.sp,
@@ -632,7 +610,7 @@ fun NBATeamInfoSixthItem(
                 modifier = Modifier.alpha(contentsAlpha)
             )
 
-            nextGame?.let {
+            if (nextGame != null) {
                 val lastMeeting = nextGame.lastMeeting
 
                 Row(
@@ -669,6 +647,12 @@ fun NBATeamInfoSixthItem(
 
                 Text(
                     text = CalendarUtil.formatDate(nextGame.gameSummary?.date),
+                    fontSize = 15.sp,
+                    modifier = Modifier.alpha(contentsAlpha)
+                )
+            } else {
+                Text(
+                    text = "예정된 경기가 없습니다.",
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )
