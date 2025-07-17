@@ -33,6 +33,7 @@ import com.moare.android.core.constants.Constants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.KBOUtil
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
@@ -699,7 +700,7 @@ fun KBOPlayerInfoSeventhItem(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .padding(end = 4.dp)
-                            .weight(0.4f)
+                            .weight(0.45f)
                     ) {
                         CenterRow {
                             Row(
@@ -754,7 +755,7 @@ fun KBOPlayerInfoSeventhItem(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = CalendarUtil.formatDate(it.gameInfo?.date),
+                                text = CalendarUtil.formatDate(it.gameInfo?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                                 fontSize = 15.sp
                             )
                         }
@@ -762,7 +763,7 @@ fun KBOPlayerInfoSeventhItem(
 
                     if (lastGamePlayerHitterStats != null && lastGamePlayerPitcherStats == null) {
                         CenterRow(
-                            modifier = Modifier.weight(0.6f)
+                            modifier = Modifier.weight(0.55f)
                         ) {
                             StatsDivider()
                             FBStatDataItem(
@@ -795,7 +796,7 @@ fun KBOPlayerInfoSeventhItem(
                         }
                     } else if (lastGamePlayerPitcherStats != null && lastGamePlayerHitterStats == null) {
                         CenterRow(
-                            modifier = Modifier.weight(0.6f)
+                            modifier = Modifier.weight(0.55f)
                         ) {
                             StatsDivider()
                             FBStatDataItem(
@@ -911,7 +912,7 @@ fun KBOPlayerInfoEighthItem(
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(nextGame.gameInfo?.date),
+                    text = CalendarUtil.formatDate(nextGame.gameInfo?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )

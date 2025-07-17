@@ -109,7 +109,7 @@ object CalendarUtil {
                 when (formatType) {
                     TimeFormatType.AMPM -> "a hh:mm"
                     TimeFormatType.AMPM_WITH_DATE -> "yyyy.MM.dd a hh:mm"
-                    TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE -> "yyyy.MM.dd(E) a hh:mm"
+                    TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE -> "yyyy.MM.dd (E) a hh:mm"
                     TimeFormatType.YEAR_MONTH -> "yy/MM"
                 }, Locale("ko", "KR")
             )

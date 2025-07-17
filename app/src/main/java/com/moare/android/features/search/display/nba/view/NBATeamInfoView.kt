@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.viewmodel.BaseInfoViewModel
@@ -562,7 +563,7 @@ fun NBATeamInfoFifthItem(
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(lastGame.gameSummary?.date),
+                    text = CalendarUtil.formatDate(lastGame.gameSummary?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )
@@ -646,7 +647,7 @@ fun NBATeamInfoSixthItem(
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(nextGame.gameSummary?.date),
+                    text = CalendarUtil.formatDate(nextGame.gameSummary?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )

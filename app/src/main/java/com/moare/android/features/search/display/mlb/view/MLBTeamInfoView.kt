@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.MLBUtil
+import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
@@ -542,7 +543,7 @@ fun MLBTeamInfoFifthItem(
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(it.gameInfo.gameDate),
+                    text = CalendarUtil.formatDate(it.gameInfo.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )
@@ -623,7 +624,7 @@ fun MLBTeamInfoSixthItem(
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(nextGame.gameInfo.gameDate),
+                    text = CalendarUtil.formatDate(nextGame.gameInfo.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )
