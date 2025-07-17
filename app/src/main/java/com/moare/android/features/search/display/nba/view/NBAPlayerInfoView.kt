@@ -764,7 +764,7 @@ fun NBAPlayerInfoEighthItem(
                                 )
 
                                 Text(
-                                    text = " ${homeTeamScore}",
+                                    text = " $homeTeamScore",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = if (homeTeamScore >= awayTeamScore) MaterialTheme.colors.primary else Color.Black
@@ -782,7 +782,7 @@ fun NBAPlayerInfoEighthItem(
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Text(
-                                    text = "${awayTeamScore} ",
+                                    text = "$awayTeamScore ",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = if (awayTeamScore >= homeTeamScore) MaterialTheme.colors.primary else Color.Black
