@@ -591,11 +591,10 @@ fun FBTeamInfoSixthItem(
                     )
 
                     Text(
-                        text = " vs ",
+                        text = "  vs  ",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.3f)
+                        textAlign = TextAlign.Center
                     )
 
                     Text(
