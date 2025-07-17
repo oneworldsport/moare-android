@@ -697,7 +697,8 @@ fun KBOPlayerInfoSeventhItem(
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(end = 4.dp)
+                        modifier = Modifier
+                            .padding(end = 4.dp)
                             .weight(0.4f)
                     ) {
                         CenterRow {
@@ -874,6 +875,7 @@ fun KBOPlayerInfoEighthItem(
         ) {
             Text(
                 text = "다음경기",
+                fontSize = 17.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.alpha(contentsAlpha)
             )

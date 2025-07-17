@@ -614,6 +614,7 @@ fun FBPlayerInfoSixthItem(
         ) {
             Text(
                 text = "다음경기",
+                fontSize = 17.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.alpha(contentsAlpha)
             )

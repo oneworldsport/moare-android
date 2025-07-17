@@ -19,12 +19,17 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.KBOUtil
 import com.moare.android.core.util.MLBUtil
@@ -44,7 +49,9 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoD
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HCapsuleBar
+import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun MLBPlayerInfoView(
@@ -219,13 +226,6 @@ fun MLBPlayerInfoFirstItem(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
             URLImage(
                 url = MLBUtil.playerPhotoUrl(player.id),
                 modifier = Modifier.alpha(contentsAlpha)
@@ -251,6 +251,7 @@ fun MLBPlayerInfoFirstItem(
 // logo, team, name
 @Composable
 fun MLBPlayerInfoSecondItem(
+    searchViewModel: SearchViewModel = hiltViewModel(),
     mlbPlayerInfoViewModel: MLBPlayerInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -272,15 +273,19 @@ fun MLBPlayerInfoSecondItem(
                 updateItemPosition?.let { it(1, coordinates) }
             },
             verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = containerModifier
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
+            modifier = containerModifier,
+            onClick = {
+                searchViewModel.send(
+                    SearchViewModel.Intent.SearchById(
+                        id = it.teamId.toString(),
+                        season = it.season,
+                        category = "baseball",
+                        dataType = "baseball_team_info",
+                        leagueId = Constants.Ids.MLB
+                    )
+                )
             }
-
+        ) {
             // TODO: "소속팀" 라벨 표시 필요
             URLImage(
                 url = MLBUtil.teamLogoUrl(it.teamId),
@@ -326,13 +331,6 @@ fun MLBPlayerInfoThirdItem(
             horizontalAlignment = Alignment.Start,
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.alpha(contentsAlpha)
@@ -410,57 +408,38 @@ fun MLBPlayerInfoFourthItem(
             horizontalAlignment = Alignment.Start,
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Text(
+                text = buildAnnotatedString {
+                    append("국적: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(player.birthCountry)
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "국적: ",
-                    fontSize = 15.sp
-                )
+            )
 
-                Text(
-                    text = player.birthCountry,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Text(
+                text = buildAnnotatedString {
+                    append("출생: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(player.birthDate)
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "출생: ",
-                    fontSize = 15.sp
-                )
+            )
 
-                Text(
-                    text = player.birthDate,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Text(
+                text = buildAnnotatedString {
+                    append("나이: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append("${CalendarUtil.calculateAge(player.birthDate)}")
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "나이: ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = "${CalendarUtil.calculateAge(player.birthDate)}",
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            )
         }
     }
 }
@@ -495,40 +474,27 @@ fun MLBPlayerInfoFifthItem(
             horizontalAlignment = Alignment.Start,
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
-            Column(
+            Text(
+                text = buildAnnotatedString {
+                    append("키(cm/ft): ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append("${MLBUtil.changeToCm(player.height)} / ${player.height}")
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "키(cm/ft): ",
-                    fontSize = 15.sp
-                )
+            )
 
-                Text(
-                    text = "${MLBUtil.changeToCm(player.height)} / ${player.height}",
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Column(
+            Text(
+                text = buildAnnotatedString {
+                    append("몸무게(kg/lb): ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append("${playerKgWeight} / ${player.weight}")
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "몸무게(kg/lb): ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = "${playerKgWeight} / ${player.weight}",
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            )
         }
     }
 }
@@ -570,8 +536,6 @@ fun MLBPlayerInfoSixthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(playerId = it.info.id))
             }
         ) {
-            HCapsuleBar()
-
             BaseballLeagueTitle(
                 url = MLBUtil.mlbLogoUrl,
                 leagueName = "MLB",
@@ -580,7 +544,7 @@ fun MLBPlayerInfoSixthItem(
             )
 
             stats?.hitting?.stat?.let {
-                Row(
+                CenterRow(
                     modifier = Modifier
                         .alpha(contentsAlpha)
                 ) {
@@ -590,28 +554,28 @@ fun MLBPlayerInfoSixthItem(
                         customCategoryFontSize = 11,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "타율",
                         data = it.avg,
                         customCategoryFontSize = 11,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "홈런",
                         data = it.homeRuns.toString(),
                         customCategoryFontSize = 11,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "ops",
                         data = it.ops,
                         customCategoryFontSize = 11,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "도루",
                         data = it.stolenBases.toString(),
@@ -622,7 +586,7 @@ fun MLBPlayerInfoSixthItem(
             }
 
             stats?.pitching?.stat?.let {
-                Row(
+                CenterRow(
                     modifier = Modifier
                         .alpha(contentsAlpha)
                 ) {
@@ -632,28 +596,28 @@ fun MLBPlayerInfoSixthItem(
                         customCategoryFontSize = 11,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "평균자책점",
                         data = it.era,
                         customCategoryFontSize = 11,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "피안타율",
                         data = it.avg,
                         customCategoryFontSize = 11,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "승리",
                         data = it.wins.toString(),
                         customCategoryFontSize = 11,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "이닝당 평균 투구수",
                         data = it.pitchesPerInning,
@@ -701,8 +665,6 @@ fun MLBPlayerInfoSeventhItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
             }
         ) {
-            HCapsuleBar()
-
             Text(
                 text = "최근경기",
                 fontSize = 17.sp,
@@ -714,57 +676,68 @@ fun MLBPlayerInfoSeventhItem(
                 val homeTeamScore = it.linescore.teams.home.runs
                 val awayTeamScore = it.linescore.teams.away.runs
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                CenterRow(
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
                         .alpha(contentsAlpha)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(end = 4.dp)
+                        modifier = Modifier
+                            .padding(end = 4.dp)
+                            .weight(0.45f)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.height(25.dp)
-                        ) {
-                            Text(
-                                text = mlbPlayerInfoViewModel.teamNameDictionary["short_${it.teams.home.id}"] ?: "",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Light,
-                                maxLines = 1
-                            )
+                        CenterRow {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = mlbPlayerInfoViewModel.teamNameDictionary["short_${it.teams.home.id}"] ?: "",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Light,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+
+                                Text(
+                                    text = " $homeTeamScore",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = if (homeTeamScore >= awayTeamScore) MaterialTheme.colors.primary else Color.Black
+                                )
+                            }
 
                             Text(
-                                text = homeTeamScore.toString(),
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = if (homeTeamScore >= awayTeamScore) MaterialTheme.colors.primary else Color.Black
-                            )
-
-                            Text(
-                                text = " vs ",
+                                text = " - ",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium
                             )
 
-                            Text(
-                                text = awayTeamScore.toString(),
-                                fontWeight = FontWeight.Medium,
-                                color = if (awayTeamScore >= homeTeamScore) MaterialTheme.colors.primary else Color.Black
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "$awayTeamScore ",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = if (awayTeamScore >= homeTeamScore) MaterialTheme.colors.primary else Color.Black
+                                )
 
-                            Text(
-                                text = mlbPlayerInfoViewModel.teamNameDictionary["short_${it.teams.away.id}"] ?: "",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Light,
-                                maxLines = 1
-                            )
+                                Text(
+                                    text = mlbPlayerInfoViewModel.teamNameDictionary["short_${it.teams.away.id}"] ?: "",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Light,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
 
                         Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.height(30.dp)
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = CalendarUtil.formatDate(it.gameInfo.gameDate),
@@ -773,69 +746,80 @@ fun MLBPlayerInfoSeventhItem(
                         }
                     }
 
-                    if (lastGamePlayerHitterStats != null && lastGamePlayerPitcherStats == null) {
-                        FBStatDataItem(
-                            category = "타수",
-                            data = lastGamePlayerHitterStats.atBats.toString(),
-                            customCategoryFontSize = 12,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        FBStatDataItem(
-                            category = "안타",
-                            data = lastGamePlayerHitterStats.hits.toString(),
-                            customCategoryFontSize = 12,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        FBStatDataItem(
-                            category = "득점",
-                            data = lastGamePlayerHitterStats.runs.toString(),
-                            customCategoryFontSize = 12,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        FBStatDataItem(
-                            category = "타점",
-                            data = lastGamePlayerHitterStats.rbi.toString(),
-                            customCategoryFontSize = 12,
-                            modifier = Modifier.weight(1f)
-                        )
-                    } else if (lastGamePlayerPitcherStats != null && lastGamePlayerHitterStats == null) {
-                        FBStatDataItem(
-                            category = "이닝",
-                            data = lastGamePlayerPitcherStats.inningsPitched,
-                            customCategoryFontSize = 12,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        FBStatDataItem(
-                            category = "삼진",
-                            data = lastGamePlayerPitcherStats.strikeOuts.toString(),
-                            customCategoryFontSize = 12,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        FBStatDataItem(
-                            category = "볼넷",
-                            data = lastGamePlayerPitcherStats.baseOnBalls.toString(),
-                            customCategoryFontSize = 12,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        FBStatDataItem(
-                            category = "실점",
-                            data = lastGamePlayerPitcherStats.runs.toString(),
-                            customCategoryFontSize = 12,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        FBStatDataItem(
-                            category = "자책점",
-                            data = lastGamePlayerPitcherStats.earnedRuns.toString(),
-                            customCategoryFontSize = 12,
-                            modifier = Modifier.weight(1f)
-                        )
+                    // NOTE: lastGamePlayerHitterStats, lastGamePlayerPitcherStats가 null인 경우는 없어서 안에 있는 기본 데이터로 해당 선수 기록 보여줘야할지 판단
+                    if (lastGamePlayerHitterStats?._atBats != null && lastGamePlayerPitcherStats?._numberOfPitches == null) {
+                        CenterRow(
+                            modifier = Modifier.weight(0.55f)
+                        ) {
+                            StatsDivider()
+                            FBStatDataItem(
+                                category = "타수",
+                                data = lastGamePlayerHitterStats.atBats.toString(),
+                                customCategoryFontSize = 12,
+                                modifier = Modifier.weight(1f)
+                            )
+                            StatsDivider()
+                            FBStatDataItem(
+                                category = "안타",
+                                data = lastGamePlayerHitterStats.hits.toString(),
+                                customCategoryFontSize = 12,
+                                modifier = Modifier.weight(1f)
+                            )
+                            StatsDivider()
+                            FBStatDataItem(
+                                category = "득점",
+                                data = lastGamePlayerHitterStats.runs.toString(),
+                                customCategoryFontSize = 12,
+                                modifier = Modifier.weight(1f)
+                            )
+                            StatsDivider()
+                            FBStatDataItem(
+                                category = "타점",
+                                data = lastGamePlayerHitterStats.rbi.toString(),
+                                customCategoryFontSize = 12,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    } else if (lastGamePlayerPitcherStats?._numberOfPitches != null && lastGamePlayerHitterStats?._atBats == null) {
+                        CenterRow(
+                            modifier = Modifier.weight(0.55f)
+                        ) {
+                            StatsDivider()
+                            FBStatDataItem(
+                                category = "이닝",
+                                data = lastGamePlayerPitcherStats.inningsPitched,
+                                customCategoryFontSize = 12,
+                                modifier = Modifier.weight(1f)
+                            )
+                            StatsDivider()
+                            FBStatDataItem(
+                                category = "삼진",
+                                data = lastGamePlayerPitcherStats.strikeOuts.toString(),
+                                customCategoryFontSize = 12,
+                                modifier = Modifier.weight(1f)
+                            )
+                            StatsDivider()
+                            FBStatDataItem(
+                                category = "볼넷",
+                                data = lastGamePlayerPitcherStats.baseOnBalls.toString(),
+                                customCategoryFontSize = 12,
+                                modifier = Modifier.weight(1f)
+                            )
+                            StatsDivider()
+                            FBStatDataItem(
+                                category = "실점",
+                                data = lastGamePlayerPitcherStats.runs.toString(),
+                                customCategoryFontSize = 12,
+                                modifier = Modifier.weight(1f)
+                            )
+                            StatsDivider()
+                            FBStatDataItem(
+                                category = "자책점",
+                                data = lastGamePlayerPitcherStats.earnedRuns.toString(),
+                                customCategoryFontSize = 12,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }
@@ -876,15 +860,14 @@ fun MLBPlayerInfoEighthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
             }
         ) {
-            HCapsuleBar()
-
             Text(
                 text = "다음경기",
+                fontSize = 17.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.alpha(contentsAlpha)
             )
 
-            nextGame?.let {
+            if (nextGame != null) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -892,7 +875,7 @@ fun MLBPlayerInfoEighthItem(
                         .alpha(contentsAlpha)
                 ) {
                     Text(
-                        text = mlbPlayerInfoViewModel.teamNameDictionary["short_${it.teams.home.id}"] ?: "",
+                        text = mlbPlayerInfoViewModel.teamNameDictionary["short_${nextGame.teams.home.id}"] ?: "",
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.End,
                         modifier = Modifier.weight(1f)
@@ -907,7 +890,7 @@ fun MLBPlayerInfoEighthItem(
                     )
 
                     Text(
-                        text = mlbPlayerInfoViewModel.teamNameDictionary["short_${it.teams.away.id}"] ?: "",
+                        text = mlbPlayerInfoViewModel.teamNameDictionary["short_${nextGame.teams.away.id}"] ?: "",
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Start,
                         modifier = Modifier.weight(1f)
@@ -915,7 +898,13 @@ fun MLBPlayerInfoEighthItem(
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(it.gameInfo.gameDate),
+                    text = CalendarUtil.formatDate(nextGame.gameInfo.gameDate),
+                    fontSize = 15.sp,
+                    modifier = Modifier.alpha(contentsAlpha)
+                )
+            } else {
+                Text(
+                    text = "예정된 경기가 없습니다.",
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )
