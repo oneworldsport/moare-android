@@ -54,6 +54,7 @@ import com.moare.android.features.search.display.common.container.view.GameStats
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsIntent
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.models.nba.NBALineScore
@@ -244,7 +245,14 @@ fun NBAGameStatsView(
             }
         },
         gameContent = {
-            NBAGameStatsScoreInfoItem()
+            if (displayModel?.game?.gameSummary?.gameStatusId == StringConstants.NBA.GAME_SCHEDULED) {
+                NBALeagueScheduleListItem(
+                    data = ModelConverter().nbaGameToGameScheduleConverter(displayModel!!.game),
+                    teamNameDic = teamNameDic
+                )
+            } else {
+                NBAGameStatsScoreInfoItem()
+            }
         }
     )
 }

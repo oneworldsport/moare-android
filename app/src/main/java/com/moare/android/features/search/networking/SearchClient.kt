@@ -53,8 +53,10 @@ class SearchClient(
             SportDisplayType.FB_TEAM_INFO -> { "football_team_info.json" }
             SportDisplayType.FB_TEAM_STATS -> { "football_team_stats.json" }
             SportDisplayType.FB_TEAM_STANDINGS -> { "football_team_standings.json" }
-            SportDisplayType.FB_TEAM_SCHEDULE -> { "football_team_schedule.json" }
-            SportDisplayType.FB_LEAGUE_SCHEDULE -> { "football_league_schedule.json" }
+            SportDisplayType.FB_LEAGUE_SCHEDULE -> {
+                "football_league_schedule.json"
+//                "football_team_schedule.json"
+            }
             SportDisplayType.FB_GAME_STATS -> { "football_game_stats.json" }
             // nba
             SportDisplayType.NBA_PLAYER_INFO -> { "nba_player_info.json" }
@@ -63,8 +65,10 @@ class SearchClient(
             SportDisplayType.NBA_TEAM_INFO -> { "nba_team_info.json" }
             SportDisplayType.NBA_TEAM_STATS -> { "nba_team_stats.json" }
             SportDisplayType.NBA_TEAM_STANDINGS -> { "nba_team_standings.json" }
-            SportDisplayType.NBA_TEAM_SCHEDULE -> { "nba_team_schedule.json" }
-            SportDisplayType.NBA_LEAGUE_SCHEDULE -> { "nba_league_schedule.json" }
+            SportDisplayType.NBA_LEAGUE_SCHEDULE -> {
+                "nba_league_schedule.json"
+//                "nba_team_schedule.json"
+            }
             SportDisplayType.NBA_GAME_STATS -> { "nba_game_stats.json" }
             SportDisplayType.NBA_LEAGUE_TOURNAMENT -> { "nba_league_tournament.json" }
             // kbo
@@ -74,8 +78,10 @@ class SearchClient(
             SportDisplayType.KBO_TEAM_INFO -> { "kbo_team_info.json" }
             SportDisplayType.KBO_TEAM_STATS -> { "kbo_team_stats.json" }
             SportDisplayType.KBO_TEAM_STANDINGS -> { "kbo_team_standings.json" }
-            SportDisplayType.KBO_TEAM_SCHEDULE -> { "kbo_team_schedule.json" }
-            SportDisplayType.KBO_LEAGUE_SCHEDULE -> { "kbo_league_schedule.json" }
+            SportDisplayType.KBO_LEAGUE_SCHEDULE -> {
+                "kbo_league_schedule.json"
+//                "kbo_team_schedule.json"
+            }
             SportDisplayType.KBO_GAME_STATS -> { "kbo_game_stats.json" }
             // mlb
             SportDisplayType.MLB_PLAYER_INFO -> { "mlb_player_info.json" }
@@ -84,8 +90,10 @@ class SearchClient(
             SportDisplayType.MLB_TEAM_INFO -> { "mlb_team_info.json" }
             SportDisplayType.MLB_TEAM_STATS -> { "mlb_team_stats.json" }
             SportDisplayType.MLB_TEAM_STANDINGS -> { "mlb_team_standings.json" }
-            SportDisplayType.MLB_TEAM_SCHEDULE -> { "mlb_team_schedule.json" }
-            SportDisplayType.MLB_LEAGUE_SCHEDULE -> { "mlb_league_schedule.json" }
+            SportDisplayType.MLB_LEAGUE_SCHEDULE -> {
+                "mlb_league_schedule.json"
+//                "mlb_team_schedule.json"
+            }
             SportDisplayType.MLB_GAME_STATS -> { "mlb_game_stats.json" }
             else -> {
                 "football_player_info.json"

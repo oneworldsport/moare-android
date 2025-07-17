@@ -60,10 +60,12 @@ import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
 import com.moare.android.ui.common.components.CapsuleButton
@@ -127,6 +129,8 @@ fun NBALeagueScheduleView(
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
+            shouldShowCalendar = displayModel?.scheduleType != ScheduleType.TEAM_FLAT,
+            shouldFetchSchedule = displayModel?.scheduleType == ScheduleType.LEAGUE,
             displayDataState = displayDataState,
             calendarUiState = CalendarUiState(
                 yearMonthList,
@@ -171,12 +175,13 @@ fun NBALeagueScheduleList(
        --------------------- */
     val filteredGames by nbaLeagueScheduleViewModel.filteredGames.collectAsState()
     val selectedDayIndex by nbaLeagueScheduleViewModel.selectedDayIndex.collectAsState()
+    val teamNameDic = nbaLeagueScheduleViewModel.teamNameDictionary
 
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            NBALeagueScheduleListItem(data = item)
+            NBALeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
         }
     }
 }
@@ -185,19 +190,18 @@ fun NBALeagueScheduleList(
 fun NBALeagueScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
     nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel(),
+    teamNameDic: Map<String, String>,
     data: NBAGameForSchedule,
 ) {
     val gameId = data.gameId
     val homeTeamId = data.homeTeamId
     val awayTeamId = data.awayTeamId
     val gameStatus = data.gameStatus.toIntOrNull() ?: 0
-    val teamNameDic = nbaLeagueScheduleViewModel.teamNameDictionary
 
     /* ---------------------
        ui state
        --------------------- */
     var isResultOpened by remember { mutableStateOf(false) }
-    val noRippleInteractionSource = remember { MutableInteractionSource() }
 
     /* ---------------------
        viewmodel state
@@ -205,12 +209,15 @@ fun NBALeagueScheduleListItem(
     val gameResultOpenedStateList by nbaLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
     val displayModel by nbaLeagueScheduleViewModel.displayModel.collectAsState()
 
+    val displayModels by searchViewModel.displayModels.collectAsState()
+    val nbaGameStatsModel = displayModels[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel
+
     /* ---------------------
        constants
        --------------------- */
     val gameStatusText = when (gameStatus) {
-        1 -> StringConstants.GAME_NOT_STARTED_STR
-        2 -> StringConstants.GAME_LIVE_STR
+        StringConstants.NBA.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
+        StringConstants.NBA.GAME_LIVE -> StringConstants.GAME_LIVE_STR
 //            if (data.lineScore.firstOrNull()?.ptsOt3 != null) {
 //            StringConstants.NBA.GAME_OT_3
 //        } else if (data.lineScore.firstOrNull()?.ptsOt2 != null) {
@@ -228,11 +235,11 @@ fun NBALeagueScheduleListItem(
 //        } else {
 //            ""
 //        }
-        3 -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
+        StringConstants.NBA.GAME_FINAL -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
         else -> ""
     }
 
-    val gameStatusColor = if (gameStatus == 2) {
+    val gameStatusColor = if (gameStatus == StringConstants.NBA.GAME_LIVE) {
         MaterialTheme.colors.primary
     } else {
         Color.Gray
@@ -242,22 +249,30 @@ fun NBALeagueScheduleListItem(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (gameStatus == 3) {
+        if (gameStatus == StringConstants.NBA.GAME_FINAL) {
             isResultOpened = gameResultOpenedStateList[gameId] ?: false
-        } else if (gameStatus == 1) {
+        } else if (gameStatus == StringConstants.NBA.GAME_SCHEDULED) {
             isResultOpened = false
         } else {
             isResultOpened = true
         }
     }
     LaunchedEffect(gameResultOpenedStateList) {
-        if (gameStatus == 3) {
+        if (gameStatus == StringConstants.NBA.GAME_FINAL) {
             isResultOpened = gameResultOpenedStateList[gameId] ?: false
+        }
+    }
+    LaunchedEffect(nbaGameStatsModel) {
+        nbaGameStatsModel?.let {
+            if (gameStatus != StringConstants.NBA.GAME_SCHEDULED) {
+                isResultOpened = true
+            }
         }
     }
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
+            isClickEnabled = nbaGameStatsModel == null,
             homeTeamLogo = NBAUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
@@ -267,10 +282,14 @@ fun NBALeagueScheduleListItem(
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
-            isCapsuleButtonDisabled = gameStatus != 3,
+            isCapsuleButtonDisabled = nbaGameStatsModel != null || gameStatus != StringConstants.NBA.GAME_FINAL,
             date = data.date,
             venue = teamNameDic["venue_${homeTeamId}"] ?: "",
 //            gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
+            shouldShowOnlyDateTime = (displayModel?.scheduleType != ScheduleType.TEAM_FLAT && nbaGameStatsModel == null), // (리그, 팀)일정 화면에서만 true
+            shouldShowVenue = nbaGameStatsModel != null,
+            shouldShowHomeLabel = nbaGameStatsModel != null,
+            shouldShowAwayLabel = nbaGameStatsModel != null,
             isSvgLogo = true
         ),
         actions = ScheduleGameItemActions(

@@ -20,6 +20,7 @@ data class GameStatsContainerState(
     val playerList: List<StandingsItemState>,
     val gameDetailTitle: String = "",
     val gameDetailContent: String = "",
+    val noStatsText: String? = null,
 
     val firstStatsTitle: String? = null,
     val secondStatsTitle: String? = null,

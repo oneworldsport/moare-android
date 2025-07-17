@@ -38,6 +38,7 @@ import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
@@ -180,6 +181,7 @@ class SearchViewModel @Inject constructor(
         data class ShowGameStats(val gameType: String) : Intent()
         data class RefreshGame(val season: Int, val category: String) : Intent()
         data class SelectNBATournamentRound(val gameList: List<NBAGame>) : Intent()
+        data class SearchById(val id: String, val season: Int, val category: String, val dataType: String, val leagueId: Int) : Intent()
 
         data class UpdateLastViewStack(val data: SportDecodableModel) : Intent()
 
@@ -220,6 +222,7 @@ class SearchViewModel @Inject constructor(
                 is Intent.ShowGameStats -> showGameStats(intent.gameType)
                 is Intent.RefreshGame -> refreshGame(intent.season, intent.category)
                 is Intent.SelectNBATournamentRound -> selectNBATournamentRound(intent.gameList)
+                is Intent.SearchById -> searchById(intent.id, intent.season, intent.category, intent.dataType, intent.leagueId)
                 is Intent.UpdateLastViewStack -> updateLastViewStack(intent.data)
                 is Intent.TestSearch -> testSearch(intent.viewForTest)
             }
@@ -302,7 +305,6 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
                 is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
                 is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
-                is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.NBALeagueSchedule -> {
                     newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel
                     initialNBALeagueScheduleData = data.displayModel
@@ -524,7 +526,6 @@ class SearchViewModel @Inject constructor(
                         is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = viewToShow.displayModel }
                         is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = viewToShow.displayModel }
                         is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = viewToShow.displayModel }
-                        is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.NBALeagueSchedule -> {
                             if (lastView is SportDecodableModel.NBAGameStats) {
                                 newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = initialNBALeagueScheduleData
@@ -948,10 +949,14 @@ class SearchViewModel @Inject constructor(
 
         when (val lastView = viewStack.value.lastOrNull()) {
             is SportDecodableModel.NBALeagueTournament-> {
-                val responseModel = NBAGameScheduleResponseModel(scheduledMonths = emptyList(), schedule = modelConverter.nbaGameListToGameScheduleListConverter(gameList))
-                dataModel = SportDecodableModel.NBATeamSchedule(
+                val responseModel = NBAGameScheduleResponseModel(
+                    scheduleType = ScheduleType.TEAM_FLAT,
+                    scheduledMonths = emptyList(),
+                    schedule = modelConverter.nbaGameListToGameScheduleListConverter(gameList)
+                )
+                dataModel = SportDecodableModel.NBALeagueSchedule(
                     responseModel = responseModel,
-                    displayModel = modelConverter.nbaTeamScheduleConverter(responseModel)
+                    displayModel = modelConverter.nbaLeagueScheduleConverter(responseModel)
                 )
             }
 
@@ -969,6 +974,25 @@ class SearchViewModel @Inject constructor(
         _poppedView.emit(null)
 
         _resultVisibleState.emit(true)
+    }
+
+    private suspend fun searchById(
+        id: String,
+        season: Int,
+        category: String,
+        dataType: String, // TODO: Should make constants
+        leagueId: Int
+    ) {
+        val result = searchClient.fetchById(
+            season = season,
+            category = category,
+            dataType = dataType,
+            leagueId = leagueId,
+            id = id
+        )
+
+        addViewStack(result.data)
+        updateMainDisplayModel(result.data)
     }
 
     private suspend fun updateLastViewStack(data: SportDecodableModel) {
@@ -1000,7 +1024,6 @@ class SearchViewModel @Inject constructor(
             is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
             is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
             is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
-            is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
             is SportDecodableModel.NBALeagueSchedule -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel }
             is SportDecodableModel.NBAGameStats -> { newDisplayModels[SportDisplayType.NBA_GAME_STATS] = data.displayModel }
             is SportDecodableModel.NBALeagueTournament -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT] = data.displayModel }
@@ -1067,7 +1090,6 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
                 is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
                 is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
-                is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.NBALeagueSchedule -> {
                     newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel
                     initialNBALeagueScheduleData = data.displayModel

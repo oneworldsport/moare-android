@@ -167,7 +167,7 @@ data class MLBPlayerHittingData(
 @Serializable
 data class MLBPlayerHittingStats(
     @SerialName("airOuts") private val _airOuts: Int? = null,
-    @SerialName("atBats") private val _atBats: Int? = null,
+    @SerialName("atBats") val _atBats: Int? = null, // MLBPlayerInfoView에서 선수 기록 있는지 판단할때 사용하기 위해 private 제거함.
     @SerialName("atBatsPerHomeRun") private val _atBatsPerHomeRun: String? = null,
     @SerialName("avg") private val _avg: String? = null,
     @SerialName("babip") private val _babip: String? = null,
@@ -283,7 +283,7 @@ data class MLBPlayerPitchingStats(
     @SerialName("inningsPitched") private val _inningsPitched: String? = null,
     @SerialName("intentionalWalks") private val _intentionalWalks: Int? = null,
     @SerialName("losses") private val _losses: Int? = null,
-    @SerialName("numberOfPitches") private val _numberOfPitches: Int? = null,
+    @SerialName("numberOfPitches") val _numberOfPitches: Int? = null, // MLBPlayerInfoView에서 선수 기록 있는지 판단할때 사용하기 위해 private 제거함.
     @SerialName("obp") private val _obp: String? = null,
     @SerialName("ops") private val _ops: String? = null,
     @SerialName("outs") private val _outs: Int? = null,

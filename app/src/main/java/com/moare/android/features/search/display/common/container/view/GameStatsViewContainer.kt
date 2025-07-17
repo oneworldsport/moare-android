@@ -537,7 +537,7 @@ fun GameStatsViewContainer(
                 } else {
                     item {
                         Text(
-                            text = "경기 시작 후 데이터가 업데이트됩니다.",
+                            text = state.noStatsText ?: "경기 시작 후 데이터가 업데이트됩니다.",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.Gray

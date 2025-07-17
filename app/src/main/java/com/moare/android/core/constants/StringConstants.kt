@@ -61,6 +61,10 @@ object StringConstants {
     }
 
     object NBA {
+        const val GAME_SCHEDULED = 1
+        const val GAME_LIVE = 2
+        const val GAME_FINAL = 3
+
         const val GAME_QTR_1 = "1쿼터"
         const val GAME_QTR_2 = "2쿼터"
         const val GAME_QTR_3 = "3쿼터"

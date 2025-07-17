@@ -258,7 +258,9 @@ fun FBLeagueScheduleListItem(
     }
     LaunchedEffect(fbGameStatsModel) {
         fbGameStatsModel?.let {
-            isResultOpened = true
+            if (gameStatus != StringConstants.Football.GAME_NOT_STARTED) {
+                isResultOpened = true
+            }
         }
     }
 
@@ -278,11 +280,9 @@ fun FBLeagueScheduleListItem(
             date = data.date,
             venue = teamNameDic["venue_${homeTeamId}"] ?: (fbGameStatsModel?.game?.fixture?.venue?.name ?: ""),
             gameType = MatchDescriptionConverter.convert(input = data.gameInfo?.round ?: ""),
-            referee = fbGameStatsModel?.game?.fixture?.referee,
             shouldShowOnlyDateTime = fbGameStatsModel == null,
             shouldShowVenue = fbGameStatsModel != null,
             shouldShowGameType = fbGameStatsModel == null,
-            shouldShowReferee = fbGameStatsModel != null,
             shouldShowHomeLabel = fbGameStatsModel != null,
             shouldShowAwayLabel = fbGameStatsModel != null
         ),

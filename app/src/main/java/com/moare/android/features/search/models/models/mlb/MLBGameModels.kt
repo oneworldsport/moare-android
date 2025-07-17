@@ -108,7 +108,7 @@ data class MLBGameBoxscorePlayerStatus(
 data class MLBGameBoxscoreStats(
     val batting: MLBPlayerHittingStats?,
     val fielding: MLBPlayerFieldingStats?,
-    val pitching: MLBPlayerPitchingStats?,
+    val pitching: MLBPlayerPitchingStats?, // 데이터 없으면 null이 아니라 {}으로 옴. 위 다른 필드도 마찬가지일듯.
 )
 
 @Serializable

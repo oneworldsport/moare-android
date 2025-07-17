@@ -66,6 +66,7 @@ import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsInten
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.mlb.MLBGameLineScoreInning
@@ -233,7 +234,14 @@ fun MLBGameStatsView(
             }
         },
         gameContent = {
-            MLBGameStatsScoreInfoItem()
+            if (game?.status?.detailedState == StringConstants.MLB.GAME_SCHEDULED) {
+                MLBLeagueScheduleListItem(
+                    data = ModelConverter().mlbGameToGameScheduleConverter(game),
+                    teamNameDic = teamNameDic
+                )
+            } else {
+                MLBGameStatsScoreInfoItem()
+            }
         }
     )
 }
