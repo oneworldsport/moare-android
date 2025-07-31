@@ -3,31 +3,41 @@ package com.moare.android
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Chat
+import androidx.compose.material.icons.rounded.PersonOutline
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import com.amazonaws.auth.BasicAWSCredentials
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.moare.android.features.search.display.search.SearchView
 import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.ui.common.components.CalendarList
-import com.moare.android.ui.common.components.CalendarType
+import com.moare.android.features.sign.display.signin.view.SignView
+import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.serialization.json.Json
-import java.io.IOException
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -37,7 +47,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             var isSplashFinished by remember { mutableStateOf(false) }
 
+//            val viewForTest: SportDisplayType = SportDisplayType.KBO_PLAYER_INFO
             val viewForTest: SportDisplayType? = null
+
+            val navController = rememberNavController()
+            val items = listOf(Screen.Search, Screen.Moat, Screen.Profile)
 
             MoareAndroidTheme {
                 Surface(
@@ -49,7 +63,56 @@ class MainActivity : ComponentActivity() {
                     if (viewForTest != null) {
                         SearchView(viewForTest = viewForTest)
                     } else {
-                        SearchView()
+                        Scaffold(
+                            bottomBar = {
+                                BottomNavigation(
+                                    backgroundColor = Color.White,
+                                ) {
+                                    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+                                    items.forEach { screen ->
+                                        val showLabel = screen == Screen.Moat
+
+                                        BottomNavigationItem(
+                                            icon = { Icon(screen.icon, contentDescription = screen.label) },
+                                            label = if (showLabel) {
+                                                { Text(screen.label) }
+                                            } else {
+                                                null
+                                            },
+                                            selected = currentDestination == screen.route,
+                                            selectedContentColor = Moare,
+                                            unselectedContentColor = Color.Gray,
+                                            onClick = {
+                                                navController.navigate(screen.route) {
+                                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                                    launchSingleTop = true
+                                                    restoreState = true
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        ) { innerPadding ->
+                            NavHost(
+                                navController = navController,
+                                startDestination = Screen.Moat.route,
+                                modifier = Modifier.padding(innerPadding)
+                            ) {
+                                composable(Screen.Search.route) { SearchView() }
+                                composable(Screen.Moat.route) {
+                                    SignView()
+                                }
+                                composable(Screen.Profile.route) {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Text("profile")
+                                    }
+                                }
+                            }
+                        }
 
                         if (!isSplashFinished) {
                             SplashView {
@@ -61,6 +124,12 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
+    object Search : Screen("search", "검색", Icons.Rounded.Search)
+    object Moat : Screen("moat", "모트", Icons.AutoMirrored.Outlined.Chat)
+    object Profile : Screen("profile", "내 프로필", Icons.Rounded.PersonOutline)
 }
 
 @Preview(showBackground = true)
