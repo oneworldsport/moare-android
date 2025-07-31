@@ -4,6 +4,7 @@ import android.content.Context
 import com.moare.android.core.networking.ApiHelper
 import com.moare.android.features.search.networking.KeywordsClient
 import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.sign.networking.SignClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,4 +29,8 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideKeywordsClient(apiHelper: ApiHelper): KeywordsClient = KeywordsClient(apiHelper)
+
+    @Provides
+    @Singleton
+    fun provideSignClient(apiHelper: ApiHelper): SignClient = SignClient(apiHelper)
 }

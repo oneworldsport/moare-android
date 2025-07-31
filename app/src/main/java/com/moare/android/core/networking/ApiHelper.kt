@@ -2,6 +2,7 @@ package com.moare.android.core.networking
 
 import com.google.gson.GsonBuilder
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.moare.android.core.networking.apiendpoint.AuthApi
 import com.moare.android.core.networking.apiendpoint.KeywordsApi
 import com.moare.android.core.networking.apiendpoint.SearchApi
 import com.moare.android.features.search.models.DataModel
@@ -42,4 +43,5 @@ class ApiHelper {
 
     val searchApi: SearchApi = searchRetrofit.create(SearchApi::class.java)
     val keywordsApi: KeywordsApi = searchRetrofit.create(KeywordsApi::class.java)
+    val authApi: AuthApi = searchRetrofit.create(AuthApi::class.java)
 }
