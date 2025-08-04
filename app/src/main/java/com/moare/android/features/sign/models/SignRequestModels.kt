@@ -51,3 +51,8 @@ data class UserProfileCreateRequest(
     val bio: String? = null,
     val sportsInterests: List<String>? = null
 )
+
+@Serializable
+data class NicknameReserveRequest(
+    val nickname: String
+)

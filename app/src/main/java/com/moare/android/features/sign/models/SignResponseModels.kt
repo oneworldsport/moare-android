@@ -11,6 +11,11 @@ data class AuthResponse(
 )
 
 @Serializable
+enum class AuthResponseType {
+    SUCCESS, RETRY, EXPIRED, LIMIT_EXCEEDED, ERROR
+}
+
+@Serializable
 data class AuthTokenData(
     val idToken: String,
     val accessToken: String,
@@ -18,6 +23,12 @@ data class AuthTokenData(
 )
 
 @Serializable
-enum class AuthResponseType {
-    SUCCESS, RETRY, EXPIRED, LIMIT_EXCEEDED, ERROR
-}
+data class AuthSessionResponse(
+    val session: String
+)
+
+@Serializable
+data class SimpleResponse(
+    val success: Boolean,
+    val message: String
+)
