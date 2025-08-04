@@ -32,6 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.moare.android.features.moat.display.timeline.view.MoatTimelineView
 import com.moare.android.features.search.display.search.SearchView
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.sign.display.signin.view.SignView
@@ -101,7 +102,7 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 composable(Screen.Search.route) { SearchView() }
                                 composable(Screen.Moat.route) {
-                                    SignView()
+                                    MoatTimelineView()
                                 }
                                 composable(Screen.Profile.route) {
                                     Box(
