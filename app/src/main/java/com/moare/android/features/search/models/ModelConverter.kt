@@ -801,7 +801,7 @@ class ModelConverter(
         val awayTeamId = game.teams.away.id
         val homeTeamScore = game.linescore.teams.home.runs
         val awayTeamScore = game.linescore.teams.away.runs
-        val gameInfo = MLBGameInfoForSchedule(_currentInning = game.linescore.currentInning)
+        val gameInfo = MLBGameInfoForSchedule(_currentInning = "${game.linescore.currentInning}회${if (game.linescore.isTopInning) "초" else "말"}")
 
         return MLBGameForSchedule(
             _itemKey = if (date != null) "${date}#${game.game.id}" else "",
