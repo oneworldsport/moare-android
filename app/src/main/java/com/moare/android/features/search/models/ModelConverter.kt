@@ -1,6 +1,7 @@
 package com.moare.android.features.search.models
 
 import com.moare.android.core.constants.Constants
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
@@ -50,6 +51,7 @@ import com.moare.android.features.search.models.models.football.FBLeague
 import com.moare.android.features.search.models.models.kbo.KBOGame
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
+import com.moare.android.features.search.models.models.kbo.KBOGameInfoForSchedule
 import com.moare.android.features.search.models.models.kbo.KBOGamePitcherStats
 import com.moare.android.features.search.models.models.mlb.MLBGame
 import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
@@ -820,6 +822,7 @@ class ModelConverter(
         val awayTeamId = game.gameInfo?.awayTeamId ?: 0
         val homeTeamScore = game.lineScore?.home?.r ?: "0"
         val awayTeamScore = game.lineScore?.away?.r ?: "0"
+        val gameInfo = KBOGameInfoForSchedule(_currentInning = game.lineScore?.currentInning)
 
         return KBOGameForSchedule(
             _itemKey = if (date != null) "${date}#${game.gameInfo.gameId}" else "",
@@ -828,7 +831,7 @@ class ModelConverter(
             _homeTeamScore = homeTeamScore.toIntOrNull(),
             _awayTeamScore = awayTeamScore.toIntOrNull(),
             _gameStatus = game.gameInfo?.gameStatus,
-            gameInfo = null
+            gameInfo = gameInfo
         )
     }
 }

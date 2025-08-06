@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.kbo.view
 
+import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -127,14 +128,14 @@ fun KBOGameStatsView(
             dataList = listOf(
                 it.ab,
                 it.h,
-                it.doubles.toString(),
+//                it.doubles.toString(), // live 제공 X
                 it.homeRuns.toString(),
                 it.rbi,
                 it.r,
                 it.baseOnBalls.toString(),
                 it.strikeOuts.toString(),
                 it.groundIntoDoublePlay.toString(),
-                it.hitByPitch.toString()
+//                it.hitByPitch.toString() // live 제공 X
             )
         )
     }
@@ -148,7 +149,7 @@ fun KBOGameStatsView(
         )
     }
 
-    val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp)
+    val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp)
     val secondStatsColumnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp)
     val gameDetailTitle = "날짜: \n\n장소: "
     val gameDetailContent = buildString {
@@ -254,7 +255,7 @@ fun KBOGameStatsScoreInfoItem(
        --------------------- */
     val gameStatusText = when (gameStatus) {
         StringConstants.KBO.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.KBO.GAME_LIVE -> StringConstants.GAME_LIVE_STR
+        StringConstants.KBO.GAME_LIVE -> game?.lineScore?.currentInning ?: StringConstants.GAME_LIVE_STR
         StringConstants.KBO.GAME_FINAL -> StringConstants.GAME_FINISHED_STR
         StringConstants.KBO.GAME_CANCELED -> StringConstants.GAME_CANCELED_STR
         else -> ""
