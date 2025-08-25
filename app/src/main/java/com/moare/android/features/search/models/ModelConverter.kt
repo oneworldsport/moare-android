@@ -759,7 +759,7 @@ class ModelConverter(
         val awayTeamId = game.teams.away.id
         val homeTeamScore = game.goals.home
         val awayTeamScore = game.goals.away
-        val gameInfo = FBGameInfoForSchedule(_round = game.league.round, _elapsed = game.fixture.status.elapsed)
+        val gameInfo = FBGameInfoForSchedule(_round = game.league.round, status = game.fixture.status)
 
         return FBGameForSchedule(
             _itemKey = if (date != null) "${date}#${game.fixture.id}" else "",

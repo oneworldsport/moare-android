@@ -136,7 +136,7 @@ fun MLBTeamStandingsView(
             BaseballLeagueTitle(
                 url = MLBUtil.mlbLogoUrl,
                 leagueName = "MLB",
-                leagueSeason = season ?: 2025
+                leagueSeason = season
             )
         },
         customListContent = { hScrollState ->

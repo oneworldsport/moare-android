@@ -161,8 +161,6 @@ fun NBATeamStatsTeamInfoItem(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
         ) {
-            HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -351,15 +349,13 @@ fun NBATeamStatsItem(
     /* ---------------------
        ui
        --------------------- */
-    HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
     CenterColumn(
         modifier = Modifier.alpha(contentsAlpha)
     ) {
         // league
         NBATitle(
             leagueName = "NBA 정규시즌",
-            leagueSeason = data.groupValue.split("-").firstOrNull()?.toIntOrNull() ?: 2024
+            leagueSeason = data.groupValue.split("-").firstOrNull()?.toIntOrNull()
         )
 
         // stats
@@ -393,6 +389,7 @@ fun NBATeamStatsItem(
                     customCategoryHeight = 30.dp,
                     modifier = Modifier.weight(1f)
                 )
+                StatsDivider()
                 FBStatDataItem(
                     category = "승",
                     data = data.wins.toString(),
@@ -400,6 +397,7 @@ fun NBATeamStatsItem(
                     customCategoryHeight = 30.dp,
                     modifier = Modifier.weight(1f)
                 )
+                StatsDivider()
                 FBStatDataItem(
                     category = "패",
                     data = data.losses.toString(),
@@ -407,6 +405,7 @@ fun NBATeamStatsItem(
                     customCategoryHeight = 30.dp,
                     modifier = Modifier.weight(1f)
                 )
+                StatsDivider()
                 FBStatDataItem(
                     category = "경기수",
                     data = data.gp.toString(),
@@ -414,6 +413,7 @@ fun NBATeamStatsItem(
                     customCategoryHeight = 30.dp,
                     modifier = Modifier.weight(1f)
                 )
+                StatsDivider()
                 FBStatDataItem(
                     category = "승률",
                     data = data.winsPct.toString(),

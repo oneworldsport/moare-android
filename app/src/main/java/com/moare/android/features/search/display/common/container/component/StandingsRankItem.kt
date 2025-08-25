@@ -36,10 +36,12 @@ fun StandingsRankItem(
     isLastItem: Boolean = false,
     action: (id: Int) -> Unit
 ) {
+    val width = width ?: 132.dp
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .width(width ?: 132.dp)
+            .width(width)
             .padding(start = 10.dp)
             .height(40.dp)
             .nullableOptionalClickable(apply = id != 0) {
@@ -77,7 +79,7 @@ fun StandingsRankItem(
             Column(
 //                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .width((width ?: 132.dp) - 102.dp)
+                    .width(if (extraInfo != null || extraSubInfo != null) (width - 102.dp) else 0.dp)
                     .padding(start = 2.dp)
             ) {
                 extraInfo?.let {

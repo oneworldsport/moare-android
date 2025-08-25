@@ -137,8 +137,6 @@ fun KBOPlayerStatsPlayerInfoItem(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
         ) {
-            HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -307,8 +305,6 @@ fun KBOPlayerStatsItem(
     /* ---------------------
        ui
        --------------------- */
-    HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
     CenterColumn(
         modifier = Modifier.alpha(contentsAlpha)
     ) {

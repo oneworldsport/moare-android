@@ -96,7 +96,7 @@ fun FBPlayerStandingsView(
             id = it.player.id,
             imageUrl = it.player.photo,
             name = playerNameDic["${it.player.id}"] ?: it.player.name,
-            subName = teamNameDic["short_${it.stats.team.id}"] ?: it.stats.team.name,
+            subName = teamNameDic["short_${stats.team.id}"] ?: stats.team.name,
             dataList = listOf(
                 stats.goals.total.toString(),
                 stats.goals.assists.toString(),

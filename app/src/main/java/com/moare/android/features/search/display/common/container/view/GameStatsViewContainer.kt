@@ -155,9 +155,9 @@ fun GameStatsViewContainer(
             // NOTE: stickyHeader 사용해야해서 StandingsViewContainer 사용안하고 동일한 코드지만 여기서 직접 작성함.
             LazyColumn {
                 if (state.shouldShowStats) {
-                    // team button
                     item {
                         CenterRow {
+                            // team button
                             Column(
                                 verticalArrangement = Arrangement.Center,
                                 modifier = Modifier.weight(1f)

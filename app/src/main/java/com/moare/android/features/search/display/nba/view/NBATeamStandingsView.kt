@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
@@ -157,7 +158,7 @@ fun NBATeamStandingsView(
         titleContent = {
             NBATitle(
                 leagueName = "NBA 정규시즌",
-                leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
+                leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: CalendarUtil.currentYear
             )
         }
     )

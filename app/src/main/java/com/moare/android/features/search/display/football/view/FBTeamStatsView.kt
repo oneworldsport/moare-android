@@ -141,8 +141,6 @@ fun FBTeamStatsTeamInfoItem(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
         ) {
-            HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -293,8 +291,6 @@ fun FBTeamStatsItem(
     /* ---------------------
        ui
        --------------------- */
-    HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
     CenterColumn(
         modifier = Modifier.alpha(contentsAlpha)
     ) {

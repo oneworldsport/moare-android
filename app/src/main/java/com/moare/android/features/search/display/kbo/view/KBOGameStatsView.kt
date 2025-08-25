@@ -103,7 +103,6 @@ fun KBOGameStatsView(
     val teamHitters by kboGameStatsViewModel.teamHitters.collectAsState()
     val teamPitchers by kboGameStatsViewModel.teamPitchers.collectAsState()
     val teamNameDic = kboGameStatsViewModel.teamNameDictionary
-    val playerNameDic = kboGameStatsViewModel.playerNameDictionary
 
     val game = displayModel?.game
 
@@ -211,7 +210,7 @@ fun KBOGameStatsView(
                 BaseballLeagueTitle(
                     url = KBOUtil.kboLogoUrl,
                     leagueName = "KBO",
-                    leagueSeason = 2025
+                    leagueSeason = displayModel?.season
                 )
 
                 Spacer(Modifier.weight(1f))
