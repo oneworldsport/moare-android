@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             var isSplashFinished by remember { mutableStateOf(false) }
 
+//            val viewForTest: SportDisplayType? = SportDisplayType.KBO_GAME_STATS
             val viewForTest: SportDisplayType? = null
 
             MoareAndroidTheme {

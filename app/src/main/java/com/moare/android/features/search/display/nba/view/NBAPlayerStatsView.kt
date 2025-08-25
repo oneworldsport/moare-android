@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.components.EmptyStatDataItem
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
@@ -144,8 +145,6 @@ fun NBAPlayerStatsPlayerInfoItem(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
         ) {
-            HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -325,15 +324,13 @@ fun NBAPlayerStatsItem(
     /* ---------------------
        ui
        --------------------- */
-    HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
     CenterColumn(
         modifier = Modifier.alpha(contentsAlpha)
     ) {
         // league
         NBATitle(
             leagueName = "NBA 정규시즌",
-            leagueSeason = data.groupValue.split("-").firstOrNull()?.toIntOrNull() ?: 2024
+            leagueSeason = data.groupValue.split("-").firstOrNull()?.toIntOrNull() ?: CalendarUtil.currentYear
         )
 
         // stats
@@ -622,16 +619,16 @@ fun NBAPlayerStatsItem(
                     )
                     StatsDivider()
                     FBStatDataItem(
-                        category = "(출전 경기)승률",
-                        data = data.winsPct.toString(),
+                        category = "(출전 경기)패",
+                        data = data.losses.toString(),
                         customCategoryFontSize = 11,
                         customCategoryHeight = 30.dp,
                         modifier = Modifier.weight(1f)
                     )
                     StatsDivider()
                     FBStatDataItem(
-                        category = "(출전 경기)패",
-                        data = data.losses.toString(),
+                        category = "(출전 경기)승률",
+                        data = data.winsPct.toString(),
                         customCategoryFontSize = 11,
                         customCategoryHeight = 30.dp,
                         modifier = Modifier.weight(1f)

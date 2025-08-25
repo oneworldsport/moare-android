@@ -69,6 +69,7 @@ fun NewStandingsViewContainer(
         defaultColumnWidth * state.secondCategories.size
     }
 
+    // TODO: HCapsuleBar() widths 만큼 더해야함? 근데 더 정확히 하려면 screenWidthDp()에서 먼저 HCapsuleBar() widths를 뺴야함..
     val headerCategoryBarOffset by animateDpAsState(
         targetValue = getOffsetOfAniCapsuleBar(itemWidth = screenWidthDp() / (state.headerCategories?.size ?: 2), index = state.headerCategorySelectedIndex),
         animationSpec = tween(

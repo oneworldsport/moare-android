@@ -168,7 +168,7 @@ fun KBOLeagueScheduleListItem(
        --------------------- */
     val gameStatusText = when (gameStatus) {
         StringConstants.KBO.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.KBO.GAME_LIVE -> StringConstants.GAME_LIVE_STR
+        StringConstants.KBO.GAME_LIVE -> data.gameInfo?.currentInning ?: StringConstants.GAME_LIVE_STR
         StringConstants.KBO.GAME_FINAL -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
         StringConstants.KBO.GAME_CANCELED -> StringConstants.GAME_CANCELED_STR
         else -> ""

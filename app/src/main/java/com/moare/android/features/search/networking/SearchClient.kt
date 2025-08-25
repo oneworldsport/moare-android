@@ -79,8 +79,8 @@ class SearchClient(
             SportDisplayType.KBO_TEAM_STATS -> { "kbo_team_stats.json" }
             SportDisplayType.KBO_TEAM_STANDINGS -> { "kbo_team_standings.json" }
             SportDisplayType.KBO_LEAGUE_SCHEDULE -> {
-                "kbo_league_schedule.json"
-//                "kbo_team_schedule.json"
+//                "kbo_league_schedule.json"
+                "kbo_team_schedule.json"
             }
             SportDisplayType.KBO_GAME_STATS -> { "kbo_game_stats.json" }
             // mlb

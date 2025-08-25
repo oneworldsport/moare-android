@@ -19,9 +19,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -323,20 +326,16 @@ fun FBTeamInfoThirdItem(
             horizontalAlignment = Alignment.Start,
             modifier = containerModifier
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Text(
+                text = buildAnnotatedString {
+                    append("홈구장: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(fbTeamInfoViewModel.teamNameDictionary["venue_${displayModel?.team?.id}"] ?: venue.name)
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "홈구장: ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = fbTeamInfoViewModel.teamNameDictionary["venue_${displayModel?.team?.id}"] ?: venue.name,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            )
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -406,27 +405,32 @@ fun FBTeamInfoFourthItem(
                 ) {
                     FBStatDataItem(
                         category = "승",
-                        data = stats.fixtures.wins.total.toString()
+                        data = stats.fixtures.wins.total.toString(),
+                        modifier = Modifier.weight(1f)
                     )
                     StatsDivider()
                     FBStatDataItem(
                         category = "무",
-                        data = stats.fixtures.draws.total.toString()
+                        data = stats.fixtures.draws.total.toString(),
+                        modifier = Modifier.weight(1f)
                     )
                     StatsDivider()
                     FBStatDataItem(
                         category = "패",
-                        data = stats.fixtures.loses.total.toString()
+                        data = stats.fixtures.loses.total.toString(),
+                        modifier = Modifier.weight(1f)
                     )
                     StatsDivider()
                     FBStatDataItem(
                         category = "득점",
-                        data = stats.goals.teamGoalsFor.total.total.toString()
+                        data = stats.goals.teamGoalsFor.total.total.toString(),
+                        modifier = Modifier.weight(1f)
                     )
                     StatsDivider()
                     FBStatDataItem(
                         category = "실점",
-                        data = stats.goals.teamGoalsAgainst.total.total.toString()
+                        data = stats.goals.teamGoalsAgainst.total.total.toString(),
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }

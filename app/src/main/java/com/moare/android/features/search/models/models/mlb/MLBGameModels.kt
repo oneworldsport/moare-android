@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.models.mlb
 
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -386,9 +387,9 @@ data class MLBGameWeather(
 
 @Serializable
 data class MLBGameInfoForSchedule(
-    @SerialName("currentInning") private val _currentInning: Int? = null
+    @SerialName("currentInning") private val _currentInning: String? = null
 ) {
-    val currentInning: Int get() = _currentInning ?: 0
+    val currentInning: String get() = _currentInning ?: StringConstants.GAME_LIVE_STR
 }
 
 typealias MLBGameForSchedule = GameForSchedule<MLBGameInfoForSchedule>

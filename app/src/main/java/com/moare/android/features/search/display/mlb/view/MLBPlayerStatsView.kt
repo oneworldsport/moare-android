@@ -147,8 +147,6 @@ fun MLBPlayerStatsPlayerInfoItem(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
         ) {
-            HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -166,6 +164,13 @@ fun MLBPlayerStatsPlayerInfoItem(
                     Text(
                         text = mlbPlayerStatsViewModel.playerNameDictionary["${player.id}"] ?: player.fullName,
                         fontWeight = FontWeight.Medium
+                    )
+
+                    Text(
+                        text = player.fullName,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Light,
+                        maxLines = 2
                     )
 
                     Row(
@@ -322,8 +327,6 @@ fun MLBPlayerStatsItem(
     /* ---------------------
        ui
        --------------------- */
-    HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
     CenterColumn(
         modifier = Modifier.alpha(contentsAlpha)
     ) {
@@ -332,7 +335,7 @@ fun MLBPlayerStatsItem(
                 BaseballLeagueTitle(
                     url = MLBUtil.mlbLogoUrl,
                     leagueName = "MLB",
-                    leagueSeason = season?.toIntOrNull() ?: 2025
+                    leagueSeason = season?.toIntOrNull()
                 )
                 Text(" - [타자]")
             }
@@ -555,7 +558,7 @@ fun MLBPlayerStatsItem(
                 BaseballLeagueTitle(
                     url = MLBUtil.mlbLogoUrl,
                     leagueName = "MLB",
-                    leagueSeason = season?.toIntOrNull() ?: 2025
+                    leagueSeason = season?.toIntOrNull()
                 )
                 Text(" - [투수]")
             }

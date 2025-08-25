@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.models.kbo
 
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -32,7 +33,10 @@ data class KBOGameInfo(
 data class KBOGameLineScoreInfo(
     val away: KBOGameLineScore,
     val home: KBOGameLineScore,
-)
+    @SerialName("currentInning") private val _currentInning: String? = null
+) {
+    val currentInning: String get() = _currentInning ?: ""
+}
 
 @Serializable
 data class KBOGameLineScore(
@@ -108,6 +112,8 @@ data class KBOGameHitterStats(
     @SerialName("baseOnBalls") private val _baseOnBalls: Int? = null,
     @SerialName("hitByPitch") private val _hitByPitch: Int? = null,
     @SerialName("inningStats") private val _inningStats: List<KBOGameHitterInningStat>? = null,
+    @SerialName("stolenBases") private val _stolenBases: Int? = null,
+    @SerialName("errors") private val _errors: Int? = null,
 ) {
     val id: Int get() = _id ?: 0
     val name: String get() = _name ?: ""
@@ -128,6 +134,8 @@ data class KBOGameHitterStats(
     val strikeOuts: Int get() = _strikeOuts ?: 0 // 삼진
     val baseOnBalls: Int get() = _baseOnBalls ?: 0 // 볼넷
     val hitByPitch: Int get() = _hitByPitch ?: 0 // 사구
+    val stolenBases: Int get() = _stolenBases ?: 0 // 도루
+    val errors: Int get() = _errors ?: 0 // 실책
 }
 
 @Serializable
@@ -180,4 +188,11 @@ data class KBOGamePitcherStats(
     val era: String get() = _era ?: "0.0" // 평균자책점
 }
 
-typealias KBOGameForSchedule = GameForSchedule<String>
+@Serializable
+data class KBOGameInfoForSchedule(
+    @SerialName("currentInning") private val _currentInning: String? = null
+) {
+    val currentInning: String get() = _currentInning ?: StringConstants.GAME_LIVE_STR
+}
+
+typealias KBOGameForSchedule = GameForSchedule<KBOGameInfoForSchedule>

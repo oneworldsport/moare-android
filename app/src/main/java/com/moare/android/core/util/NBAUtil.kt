@@ -30,7 +30,7 @@ object NBAUtil {
             "정규시즌"
         } else if (gameSummary.gameLabel.lowercase().contains("play-in")) {
             "플레이인 토너먼트"
-        } else if (!gameSummary.seriesGameNumber.isEmpty()) {
+        } else if (gameSummary.seriesGameNumber.isNotEmpty()) {
             val label = gameSummary.gameLabel.lowercase()
             val subLabel = gameSummary.gameSubLabel
             val conference = if (label.contains("west")) "서부" else "동부"

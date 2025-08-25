@@ -200,13 +200,16 @@ fun FBLeagueScheduleList(
 fun FBLeagueScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
     fbLeagueScheduleViewModel: FBLeagueScheduleViewModel = hiltViewModel(),
-    teamNameDic: Map<String, String>, // FBLeagueScheduleViewModel이 한번도 초기화 된적 없이 FBGameStatsView에서 함수가 호출될때 teamNameDictionary를 fbLeagueScheduleViewModel에서 가져올수가 없어 추가.
+    // FBLeagueScheduleViewModel이 한번도 초기화 된적 없이 FBGameStatsView에서 함수가 호출될때 teamNameDictionary를 fbLeagueScheduleViewModel에서 가져올수가 없어 추가.
+    // TODO: 그러면 결국 fbLeagueScheduleViewModel는 nullable이어도 된다는건데..?
+    teamNameDic: Map<String, String>,
     data: FBGameForSchedule,
 ) {
     val gameId = data.gameId
     val homeTeamId = data.homeTeamId
     val awayTeamId = data.awayTeamId
     val gameStatus = data.gameStatus
+    val gameInfo = data.gameInfo
 
     /* ---------------------
        ui state
@@ -227,9 +230,21 @@ fun FBLeagueScheduleListItem(
        --------------------- */
     val gameStatusText = when (gameStatus) {
         StringConstants.Football.GAME_NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.Football.GAME_FIRST_HALF -> StringConstants.Football.GAME_FIRST_HALF_STR
+        StringConstants.Football.GAME_FIRST_HALF -> {
+            if (gameInfo != null) {
+                "전반${gameInfo.status.elapsed}'"
+            } else {
+                StringConstants.Football.GAME_FIRST_HALF_STR
+            }
+        }
         StringConstants.Football.GAME_HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
-        StringConstants.Football.GAME_SECOND_HALF -> StringConstants.Football.GAME_SECOND_HALF_STR
+        StringConstants.Football.GAME_SECOND_HALF -> {
+            if (gameInfo != null) {
+                "후반${gameInfo.status.elapsed}'"
+            } else {
+                StringConstants.Football.GAME_SECOND_HALF_STR
+            }
+        }
         in StringConstants.Football.GAME_FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
         else -> ""
     }

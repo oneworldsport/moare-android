@@ -215,7 +215,7 @@ fun MLBLeagueScheduleListItem(
        --------------------- */
     val gameStatusText = when (gameStatus) {
         StringConstants.MLB.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.MLB.GAME_LIVE -> StringConstants.GAME_LIVE_STR
+        StringConstants.MLB.GAME_LIVE -> data.gameInfo?.currentInning ?: StringConstants.GAME_LIVE_STR
         StringConstants.MLB.GAME_POSTPONED -> StringConstants.GAME_POSTPONED_STR
         in StringConstants.MLB.GAME_FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
         else -> ""

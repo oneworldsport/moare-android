@@ -226,10 +226,9 @@ data class FBGamePlayerStatsGames(
 @Serializable
 data class FBGameInfoForSchedule(
     @SerialName("round") private val _round: String? = null,
-    @SerialName("elapsed") private val _elapsed: Int? = null
+    val status: FBGameStatus
 ) {
     val round: String get() = _round ?: ""
-    val elapsed: Int get() = _elapsed ?: 0
 }
 
 typealias FBGameForSchedule = GameForSchedule<FBGameInfoForSchedule>

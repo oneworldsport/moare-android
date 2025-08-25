@@ -160,7 +160,7 @@ fun KBOTeamStandingsView(
             BaseballLeagueTitle(
                 url = KBOUtil.kboLogoUrl,
                 leagueName = "KBO",
-                leagueSeason = season ?: 2025,
+                leagueSeason = season,
             )
         }
     )

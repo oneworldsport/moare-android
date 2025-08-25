@@ -99,8 +99,7 @@ fun FBPlayerStatsView(
                 itemPosition = itemPositions[0],
                 startPosition = startPosition,
                 aniPosition = aniPositions,
-                contentsAlpha = contentsAlpha,
-                measureContentAlpha = measureContentAlpha
+                contentsAlpha = contentsAlpha
             )
 
             FBPlayerStatsList(
@@ -109,8 +108,7 @@ fun FBPlayerStatsView(
                 itemPositions = itemPositions,
                 startPosition = startPosition,
                 aniPosition = aniPositions,
-                contentsAlpha = contentsAlpha,
-                measureContentAlpha = measureContentAlpha
+                contentsAlpha = contentsAlpha
             )
         }
     )
@@ -127,7 +125,6 @@ fun FBPlayerStatsPlayerInfoItem(
     aniPosition: Boolean = true,
     contentsAlpha: Float = 1f,
     containerModifier: Modifier = Modifier,
-    measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by fbPlayerStatsViewModel.displayModel.collectAsState()
@@ -156,8 +153,6 @@ fun FBPlayerStatsPlayerInfoItem(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
         ) {
-            HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -239,7 +234,6 @@ fun FBPlayerStatsList(
     aniPosition: Boolean = true,
     contentsAlpha: Float = 1f,
     containerModifier: Modifier = Modifier,
-    measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by fbPlayerStatsViewModel.displayModel.collectAsState()
@@ -261,8 +255,7 @@ fun FBPlayerStatsList(
                 aniPosition = aniPosition,
                 contentsAlpha = contentsAlpha,
                 containerModifier = containerModifier,
-                updateItemPosition = updateItemPosition,
-                measureContentAlpha = measureContentAlpha
+                updateItemPosition = updateItemPosition
             )
         }
     }
@@ -279,7 +272,6 @@ fun FBPlayerStatsListItem(
     aniPosition: Boolean,
     contentsAlpha: Float,
     containerModifier: Modifier = Modifier,
-    measureContentAlpha: Float,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)?
 ) {
     MovingCapsuleItemContainer(
@@ -299,8 +291,7 @@ fun FBPlayerStatsListItem(
     ) {
         FBPlayerStatsItem(
             data = data,
-            contentsAlpha = contentsAlpha,
-            measureContentAlpha = measureContentAlpha
+            contentsAlpha = contentsAlpha
         )
     }
 }
@@ -309,8 +300,7 @@ fun FBPlayerStatsListItem(
 fun FBPlayerStatsItem(
     fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
     data: FBPlayerStats,
-    contentsAlpha: Float,
-    measureContentAlpha: Float,
+    contentsAlpha: Float
 ) {
     var attackStatsOpenState by remember { mutableStateOf(true) }
     var defendStatsOpenState by remember { mutableStateOf(false) }
@@ -319,8 +309,6 @@ fun FBPlayerStatsItem(
     /* ---------------------
        ui
        --------------------- */
-    HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
     CenterColumn(
         modifier = Modifier.alpha(contentsAlpha)
     ) {

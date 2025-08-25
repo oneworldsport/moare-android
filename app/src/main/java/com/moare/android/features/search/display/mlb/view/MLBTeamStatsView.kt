@@ -27,7 +27,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -147,8 +150,6 @@ fun MLBTeamStatsTeamInfoItem(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
         ) {
-            HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -178,19 +179,15 @@ fun MLBTeamStatsTeamInfoItem(
                         maxLines = 2
                     )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "연고지: ",
-                            fontSize = 15.sp
-                        )
-
-                        Text(
-                            text = team.locationName,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    Text(
+                        text = buildAnnotatedString {
+                            append("연고지: ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                                append(team.locationName)
+                            }
+                        },
+                        fontSize = 15.sp
+                    )
                 }
 
                 // venue, conference, division
@@ -198,47 +195,35 @@ fun MLBTeamStatsTeamInfoItem(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.padding(start = 8.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "홈구장: ",
-                            fontSize = 15.sp
-                        )
+                    Text(
+                        text = buildAnnotatedString {
+                            append("홈구장: ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                                append(mlbTeamStatsViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name)
+                            }
+                        },
+                        fontSize = 15.sp
+                    )
 
-                        Text(
-                            text = mlbTeamStatsViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    Text(
+                        text = buildAnnotatedString {
+                            append("리그: ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                                append(MLBUtil.leagueDivisionMap[team.league.id] ?: team.league.name)
+                            }
+                        },
+                        fontSize = 15.sp
+                    )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "리그: ",
-                            fontSize = 15.sp
-                        )
-
-                        Text(
-                            text = team.league.name,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "디비전: ",
-                            fontSize = 15.sp
-                        )
-
-                        Text(
-                            text = team.division.name,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    Text(
+                        text = buildAnnotatedString {
+                            append("디비전: ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                                append(MLBUtil.leagueDivisionMap[team.division.id] ?: team.division.name)
+                            }
+                        },
+                        fontSize = 15.sp
+                    )
                 }
             }
         }
@@ -340,8 +325,6 @@ fun MLBTeamStatsItem(
     /* ---------------------
        ui
        --------------------- */
-    HCapsuleBar(modifier = Modifier.alpha(if (measureContentAlpha == 1f) 0f else 1f))
-
     CenterColumn(
         modifier = Modifier.alpha(contentsAlpha)
     ) {

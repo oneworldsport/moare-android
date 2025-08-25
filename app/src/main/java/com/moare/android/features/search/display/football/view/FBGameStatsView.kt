@@ -212,7 +212,7 @@ fun FBGameStatsView(
         state = GameStatsContainerState(
             shouldShowTitle = fbLeagueScheduleModel == null,
             shouldShowGameItem = fbLeagueScheduleModel == null,
-            shouldShowStats = displayModel?.game?.fixture?.status?.short != "NS",
+            shouldShowStats = displayModel?.game?.fixture?.status?.short != StringConstants.Football.GAME_NOT_STARTED,
             shouldShowCoach = true,
             teamCategories = teamCategories,
             secondCategories = StringConstants.Football.GAME_STATS_SECOND_CATEGORIES,

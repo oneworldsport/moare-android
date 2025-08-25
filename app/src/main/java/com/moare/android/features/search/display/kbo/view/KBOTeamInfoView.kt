@@ -518,7 +518,7 @@ fun KBOTeamInfoFifthItem(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = "$homeTeamScore ",
+                            text = "$awayTeamScore ",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium,
                             color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black

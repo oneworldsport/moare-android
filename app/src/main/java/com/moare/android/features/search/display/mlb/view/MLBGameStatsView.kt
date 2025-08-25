@@ -106,7 +106,7 @@ fun MLBGameStatsView(
     val teamNameDic = mlbGameStatsViewModel.teamNameDictionary
 
     val game = displayModel?.game
-    val season = game?.game?.season?.toIntOrNull() ?: 2025
+    val season = game?.game?.season?.toIntOrNull()
 
     val poppedView by searchViewModel.poppedView.collectAsState()
 

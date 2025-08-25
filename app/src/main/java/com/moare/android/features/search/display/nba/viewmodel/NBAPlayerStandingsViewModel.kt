@@ -178,7 +178,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
 
         // Get 20 items based on index
         val rangeSize = 20
-        val startIndex = maxOf(0, index - (rangeSize / 2) + 1)
+        val startIndex = maxOf(0, (entityIndex.value ?: 0) - (rangeSize / 2) + 1)
         val endIndex = minOf(standings.size, startIndex + rangeSize)
 
         val newStandings = standings.subList(startIndex, endIndex)
