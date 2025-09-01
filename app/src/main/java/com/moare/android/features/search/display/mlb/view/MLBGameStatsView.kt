@@ -269,7 +269,7 @@ fun MLBGameStatsScoreInfoItem(
        --------------------- */
     val gameStatusText = when (gameStatus) {
         StringConstants.MLB.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.MLB.GAME_LIVE -> "${game.linescore.currentInning}회${if (game.linescore.isTopInning) "초" else "말"}"
+        StringConstants.MLB.GAME_LIVE -> "${game.linescore?.currentInning ?: 1}회${if (game.linescore?.isTopInning ?: true) "초" else "말"}"
         StringConstants.MLB.GAME_POSTPONED -> StringConstants.GAME_POSTPONED_STR
         in StringConstants.MLB.GAME_FINISHED_LIST -> StringConstants.GAME_FINISHED_STR
         else -> ""
@@ -372,8 +372,8 @@ fun RowScope.MLBGameStatsLineScoreContainer(
         val game = it.game
         val isGameScheduled = game.status.detailedState == StringConstants.MLB.GAME_SCHEDULED
         val lineScore = game.linescore
-        val homeTeamLineScore = lineScore.teams.home.runs
-        val awayTeamLineScore = lineScore.teams.away.runs
+        val homeTeamLineScore = lineScore?.teams?.home?.runs ?: 0
+        val awayTeamLineScore = lineScore?.teams?.away?.runs ?: 0
 
         Row(
             modifier = Modifier
@@ -445,7 +445,7 @@ fun RowScope.MLBGameStatsLineScoreContainer(
             Column(
                 Modifier.weight(1f)
             ) {
-                MLBGameStatsLineScoreTitle(lineScore.innings)
+                MLBGameStatsLineScoreTitle(lineScore?.innings ?: emptyList())
 
                 Box(
                     Modifier
@@ -456,7 +456,7 @@ fun RowScope.MLBGameStatsLineScoreContainer(
                         .alpha(0.5f)
                 )
 
-                MLBGameStatsLineScoreItem(isHome = false, lineScoreInnings = lineScore.innings)
+                MLBGameStatsLineScoreItem(isHome = false, lineScoreInnings = lineScore?.innings ?: emptyList())
 
                 Box(
                     Modifier
@@ -467,7 +467,7 @@ fun RowScope.MLBGameStatsLineScoreContainer(
                         .alpha(0.5f)
                 )
 
-                MLBGameStatsLineScoreItem(isHome = true, lineScoreInnings = lineScore.innings)
+                MLBGameStatsLineScoreItem(isHome = true, lineScoreInnings = lineScore?.innings ?: emptyList())
             }
         }
     }

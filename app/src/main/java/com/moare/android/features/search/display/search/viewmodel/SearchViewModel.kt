@@ -2,11 +2,13 @@ package com.moare.android.features.search.display.search.viewmodel
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.ColorSpace.Model
 import android.util.Log
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.Constants
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.Trie
 import com.moare.android.core.util.getChosung
@@ -444,31 +446,59 @@ class SearchViewModel @Inject constructor(
     }
 
     private suspend fun selectKBOGame(game: KBOGameForSchedule, season: Int) {
-        val result = searchClient.fetchById(
-            season = season,
-            category = "baseball",
-            date = game.date,
-            dataType = "baseball_game_stats",
-            leagueId = Constants.Ids.KBO,
-            id = game.gameId
-        )
+        val modelConverter = ModelConverter()
 
-        addViewStack(result.data)
-        updateMainDisplayModel(result.data)
+        val dataModel: SportDecodableModel
+
+        // 취소된 경기는 DB에 데이터 없어서 KBOGameForSchedule을 사용해 KBOGameStatsView를 보여준다.
+        if (game.gameStatus.toIntOrNull() == StringConstants.KBO.GAME_CANCELED) {
+            val game = modelConverter.kboGameScheduleToGameConverter(game = game)
+
+            val responseModel = KBOGameStatsResponseModel(game = game)
+            dataModel = SportDecodableModel.KBOGameStats(responseModel, modelConverter.kboGameStatsConverter(responseModel))
+        } else {
+            val result = searchClient.fetchById(
+                season = season,
+                category = "baseball",
+                date = game.date,
+                dataType = "baseball_game_stats",
+                leagueId = Constants.Ids.KBO,
+                id = game.gameId
+            )
+
+            dataModel = result.data
+        }
+
+        addViewStack(dataModel)
+        updateMainDisplayModel(dataModel)
     }
 
     private suspend fun selectMLBGame(game: MLBGameForSchedule, season: Int) {
-        val result = searchClient.fetchById(
-            season = season,
-            category = "baseball",
-            date = game.date,
-            dataType = "baseball_game_stats",
-            leagueId = Constants.Ids.MLB,
-            id = game.gameId
-        )
+        val modelConverter = ModelConverter()
 
-        addViewStack(result.data)
-        updateMainDisplayModel(result.data)
+        val dataModel: SportDecodableModel
+
+        // Postponed된 경기는 DB에 데이터 없어서 MLBGameForSchedule을 사용해 MLBGameStatsView를 보여준다.
+        if (game.gameStatus == StringConstants.MLB.GAME_POSTPONED) {
+            val game = modelConverter.mlbGameScheduleToGameConverter(game = game)
+
+            val responseModel = MLBGameStatsResponseModel(game = game)
+            dataModel = SportDecodableModel.MLBGameStats(responseModel, modelConverter.mlbGameStatsConverter(responseModel))
+        } else {
+            val result = searchClient.fetchById(
+                season = season,
+                category = "baseball",
+                date = game.date,
+                dataType = "baseball_game_stats",
+                leagueId = Constants.Ids.MLB,
+                id = game.gameId
+            )
+
+            dataModel = result.data
+        }
+
+        addViewStack(dataModel)
+        updateMainDisplayModel(dataModel)
     }
 
     private suspend fun goBack(activity: Activity?) {
