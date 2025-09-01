@@ -40,7 +40,9 @@ import com.moare.android.features.search.models.responsemodels.football.FBPlayer
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
@@ -711,10 +713,33 @@ class SearchViewModel @Inject constructor(
                 )
             }
 
+            is SportDecodableModel.KBOTeamStandings -> {
+                val team = lastView.responseModel.standings.find { team ->
+                    team.team.id == teamId
+                }
+
+                val responseModel = KBOTeamInfoResponseModel(info = team)
+                dataModel = SportDecodableModel.KBOTeamStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.kboTeamStatsConverter(responseModel)
+                )
+            }
             is SportDecodableModel.KBOTeamInfo -> {
                 dataModel = SportDecodableModel.KBOTeamStats(
                     responseModel = lastView.responseModel,
                     displayModel = modelConverter.kboTeamStatsConverter(lastView.responseModel)
+                )
+            }
+
+            is SportDecodableModel.MLBTeamStandings -> {
+                val team = lastView.responseModel.standings.find { team ->
+                    team.team.id == teamId
+                }
+
+                val responseModel = MLBTeamInfoResponseModel(info = team)
+                dataModel = SportDecodableModel.MLBTeamStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.mlbTeamStatsConverter(responseModel)
                 )
             }
             is SportDecodableModel.MLBTeamInfo -> {

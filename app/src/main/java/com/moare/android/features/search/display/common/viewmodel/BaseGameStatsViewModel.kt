@@ -79,6 +79,10 @@ abstract class BaseGameStatsViewModel<I, T>(
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_PLAYER_DIC)
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_TEAM_DIC)
             }
+            Constants.Ids.MLS -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.MLS_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.MLS_TEAM_DIC)
+            }
             Constants.Ids.NBA -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_PLAYER_DIC)
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
