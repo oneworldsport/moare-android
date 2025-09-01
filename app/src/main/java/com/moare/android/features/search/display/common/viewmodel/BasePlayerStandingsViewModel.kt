@@ -35,9 +35,6 @@ abstract class BasePlayerStandingsViewModel<I, T>(
     protected var _secondCategorySelectedIndex = MutableStateFlow(0)
     val secondCategorySelectedIndex: StateFlow<Int> = _secondCategorySelectedIndex
 
-    protected var _isKeyword = MutableStateFlow(false)
-    val isKeyword: StateFlow<Boolean> = _isKeyword
-
     protected var _entityIndex = MutableStateFlow<Int?>(null)
     val entityIndex: StateFlow<Int?> = _entityIndex
 
@@ -59,7 +56,6 @@ abstract class BasePlayerStandingsViewModel<I, T>(
 
         _firstSelectedIndex.value = 0
         _secondCategorySelectedIndex.value = 0
-        _isKeyword.value = false
         _entityIndex.value = null
         _filteredStandingsStartIndex.value = 0
 
@@ -83,7 +79,6 @@ abstract class BasePlayerStandingsViewModel<I, T>(
 
                 if (index != -1) {
                     _secondCategorySelectedIndex.value = index
-                    _isKeyword.value = true
                 }
             }
         }

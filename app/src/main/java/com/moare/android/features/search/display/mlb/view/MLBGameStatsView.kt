@@ -1,12 +1,6 @@
 package com.moare.android.features.search.display.mlb.view
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,16 +8,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -40,29 +30,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.moare.android.R
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.KBOUtil
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
-import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
-import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.common.container.view.NewStandingsViewContainer
-import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -72,15 +54,12 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDi
 import com.moare.android.features.search.models.models.mlb.MLBGameLineScoreInning
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.CapsuleButton
-import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterColumn
-import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 
 @Composable
 fun MLBGameStatsView(
