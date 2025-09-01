@@ -125,12 +125,12 @@ fun KBOGameStatsView(
                 .replace("#", "•")
                 .replace("지명타자", "지명"),
             dataList = listOf(
-                it.ab,
-                it.h,
+                it.ab.toString(),
+                it.h.toString(),
 //                it.doubles.toString(), // live 제공 X
                 it.homeRuns.toString(),
-                it.rbi,
-                it.r,
+                it.rbi.toString(),
+                it.r.toString(),
                 it.baseOnBalls.toString(),
                 it.strikeOuts.toString(),
                 it.groundIntoDoublePlay.toString(),
@@ -169,6 +169,7 @@ fun KBOGameStatsView(
     GameStatsViewContainer(
         state = GameStatsContainerState(
             shouldShowStats = game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_LIVE || game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_FINAL,
+            shouldShowRefreshButton = game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_LIVE,
             teamCategories = teamCategories,
             secondCategories = StringConstants.KBO.GAME_STATS_HITTING_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,

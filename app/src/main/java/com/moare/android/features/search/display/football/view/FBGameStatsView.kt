@@ -214,6 +214,7 @@ fun FBGameStatsView(
             shouldShowGameItem = fbLeagueScheduleModel == null,
             shouldShowStats = displayModel?.game?.fixture?.status?.short != StringConstants.Football.GAME_NOT_STARTED,
             shouldShowCoach = true,
+            shouldShowRefreshButton = StringConstants.Football.GAME_LIVE_LIST.contains(displayModel?.game?.fixture?.status?.short),
             teamCategories = teamCategories,
             secondCategories = StringConstants.Football.GAME_STATS_SECOND_CATEGORIES,
             coachState = GameStatsCoachState(

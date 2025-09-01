@@ -247,26 +247,28 @@ fun GameStatsViewContainer(
 //                                }
 
                                 // refresh button
-                                // TODO: Make it component
-                                Box(
-                                    Modifier
+                                if (state.shouldShowRefreshButton) {
+                                    // TODO: Make it component
+                                    Box(
+                                        Modifier
 //                                .padding(end = UIConstants.Padding.DEFAULT_H_PADDING)
-                                        .alpha(0.6f)
-                                        .border(
-                                            BorderStroke(1.dp, Color.Gray),
-                                            RoundedCornerShape(10.dp)
+                                            .alpha(0.6f)
+                                            .border(
+                                                BorderStroke(1.dp, Color.Gray),
+                                                RoundedCornerShape(10.dp)
+                                            )
+                                            .padding(2.dp)
+                                            .clickable {
+                                                actions.refreshButtonAction()
+                                            }
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_round_refresh_24),
+                                            contentDescription = null,
+                                            tint = Color.Gray,
+                                            modifier = Modifier.size(22.dp)
                                         )
-                                        .padding(2.dp)
-                                        .clickable {
-                                            actions.refreshButtonAction()
-                                        }
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_round_refresh_24),
-                                        contentDescription = null,
-                                        tint = Color.Gray,
-                                        modifier = Modifier.size(22.dp)
-                                    )
+                                    }
                                 }
                             }
                         }

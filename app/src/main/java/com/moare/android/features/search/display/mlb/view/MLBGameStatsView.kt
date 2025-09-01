@@ -188,6 +188,7 @@ fun MLBGameStatsView(
     GameStatsViewContainer(
         state = GameStatsContainerState(
             shouldShowStats = game?.status?.detailedState != StringConstants.MLB.GAME_SCHEDULED,
+            shouldShowRefreshButton = game?.status?.detailedState == StringConstants.MLB.GAME_LIVE,
             teamCategories = teamCategories,
             secondCategories = StringConstants.MLB.GAME_STATS_HITTING_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,

@@ -107,11 +107,11 @@ class KBOGameStatsViewModel @Inject constructor(
         val teamHitters = teamHitters.value.toMutableList()
 
         when (secondCategorySelectedIndex.value) {
-            0 -> teamHitters.sortByDescending { it.ab.toDoubleOrNull() ?: 0.0 }
-            1 -> teamHitters.sortByDescending { it.h.toDoubleOrNull() ?: 0.0 }
+            0 -> teamHitters.sortByDescending { it.ab }
+            1 -> teamHitters.sortByDescending { it.h }
             2 -> teamHitters.sortByDescending { it.homeRuns }
-            3 -> teamHitters.sortByDescending { it.rbi.toDoubleOrNull() ?: 0.0 }
-            4 -> teamHitters.sortByDescending { it.r.toDoubleOrNull() ?: 0.0 }
+            3 -> teamHitters.sortByDescending { it.rbi }
+            4 -> teamHitters.sortByDescending { it.r }
             5 -> teamHitters.sortByDescending { it.baseOnBalls }
             6 -> teamHitters.sortByDescending { it.strikeOuts }
             7 -> teamHitters.sortByDescending { it.groundIntoDoublePlay }
