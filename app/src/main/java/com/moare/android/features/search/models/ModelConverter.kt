@@ -1,6 +1,8 @@
 package com.moare.android.features.search.models
 
 import com.moare.android.core.constants.Constants
+import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
@@ -8,7 +10,6 @@ import com.moare.android.features.search.models.displaymodels.football.FBPlayerS
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
@@ -19,7 +20,6 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStand
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
@@ -30,13 +30,11 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStand
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
@@ -53,10 +51,17 @@ import com.moare.android.features.search.models.models.football.FBLeague
 import com.moare.android.features.search.models.models.kbo.KBOGame
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
+import com.moare.android.features.search.models.models.kbo.KBOGameInfo
+import com.moare.android.features.search.models.models.kbo.KBOGameInfoForSchedule
 import com.moare.android.features.search.models.models.kbo.KBOGamePitcherStats
 import com.moare.android.features.search.models.models.mlb.MLBGame
+import com.moare.android.features.search.models.models.mlb.MLBGameData
 import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
+import com.moare.android.features.search.models.models.mlb.MLBGameInfo
 import com.moare.android.features.search.models.models.mlb.MLBGameInfoForSchedule
+import com.moare.android.features.search.models.models.mlb.MLBGameStatus
+import com.moare.android.features.search.models.models.mlb.MLBGameTeamDetail
+import com.moare.android.features.search.models.models.mlb.MLBGameTeams
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
@@ -87,7 +92,8 @@ import com.moare.android.features.search.models.responsemodels.nba.NBATeamStandi
 
 class ModelConverter(
     val keywords: List<Keyword> = emptyList(),
-    val entityInfo: List<EntityInfo> = emptyList()
+    val entityInfo: List<EntityInfo> = emptyList(),
+    val season: Int = CalendarUtil.currentYear
 ) {
     val leagueId = entityInfo.firstOrNull()?.leagueId
 
@@ -106,6 +112,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             info = info.player,
             stats = stats,
             lastGame = response.lastGame,
@@ -123,6 +130,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             player = info.player,
             team = stats?.team,
             stats = info.statistics
@@ -150,6 +158,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -163,6 +172,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = stats,
@@ -178,6 +188,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics
@@ -213,17 +224,9 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             league = league,
             standings = standings
-        )
-    }
-
-    fun fbTeamScheduleConverter(response: FBGameScheduleResponseModel): FBTeamScheduleDisplayModel {
-        return FBTeamScheduleDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.EPL,
-            keywords = keywords,
-            entityInfo = entityInfo,
-            games = response.schedule
         )
     }
 
@@ -237,6 +240,8 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.EPL,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule
         )
@@ -248,6 +253,7 @@ class ModelConverter(
             leagueId = game.league.id,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             game = game
         )
     }
@@ -272,6 +278,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             info = info.player,
             stats = stats,
             lastGame = response.lastGame,
@@ -287,6 +294,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             player = info.player,
             stats = info.statistics,
         )
@@ -313,6 +321,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -326,6 +335,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = stats,
@@ -341,6 +351,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics
@@ -367,16 +378,8 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
-        )
-    }
-
-    fun nbaTeamScheduleConverter(response: NBAGameScheduleResponseModel): NBATeamScheduleDisplayModel {
-        return NBATeamScheduleDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.NBA,
-            keywords = keywords,
-            entityInfo = entityInfo,
-            games = response.schedule
         )
     }
 
@@ -390,6 +393,8 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -400,6 +405,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             game = response.game!!
         )
     }
@@ -409,6 +415,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             yearMonthList = emptyList(),
             games = response.schedule
         )
@@ -444,6 +451,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             info = info.player,
             stats = stats,
             lastGame = response.lastGame,
@@ -460,6 +468,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             player = info.player,
             stats = info.statistics,
         )
@@ -486,6 +495,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -500,6 +510,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics.firstOrNull(),
@@ -515,6 +526,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics
@@ -542,16 +554,8 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
-        )
-    }
-
-    fun kboTeamScheduleConverter(response: KBOGameScheduleResponseModel): KBOTeamScheduleDisplayModel {
-        return KBOTeamScheduleDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.KBO,
-            keywords = keywords,
-            entityInfo = entityInfo,
-            games = response.schedule
         )
     }
 
@@ -565,6 +569,8 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -575,6 +581,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.KBO,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             game = response.game!!
         )
     }
@@ -606,6 +613,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             info = info.player,
             teamId = teamId,
             stats = stats,
@@ -631,6 +639,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             player = info.player,
             teamId = teamId,
             stats = info.statistics,
@@ -658,6 +667,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
         )
     }
@@ -672,6 +682,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics.firstOrNull(),
@@ -687,6 +698,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             team = info.team,
             venue = info.venue,
             stats = info.statistics
@@ -714,16 +726,8 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             standings = standings
-        )
-    }
-
-    fun mlbTeamScheduleConverter(response: MLBGameScheduleResponseModel): MLBTeamScheduleDisplayModel {
-        return MLBTeamScheduleDisplayModel(
-            leagueId = leagueId ?: Constants.Ids.MLB,
-            keywords = keywords,
-            entityInfo = entityInfo,
-            games = response.schedule
         )
     }
 
@@ -737,6 +741,8 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -747,6 +753,7 @@ class ModelConverter(
             leagueId = leagueId ?: Constants.Ids.MLB,
             keywords = keywords,
             entityInfo = entityInfo,
+            season = season,
             game = response.game!!
         )
     }
@@ -758,7 +765,7 @@ class ModelConverter(
         val awayTeamId = game.teams.away.id
         val homeTeamScore = game.goals.home
         val awayTeamScore = game.goals.away
-        val gameInfo = FBGameInfoForSchedule(_round = game.league.round, _elapsed = game.fixture.status.elapsed)
+        val gameInfo = FBGameInfoForSchedule(_round = game.league.round, status = game.fixture.status)
 
         return FBGameForSchedule(
             _itemKey = if (date != null) "${date}#${game.fixture.id}" else "",
@@ -786,7 +793,7 @@ class ModelConverter(
         val awayTeamScore = game.lineScore.firstOrNull { it.teamId == awayTeamId }?.pts ?: 0
 
         return NBAGameForSchedule(
-            _itemKey = if (date != null) "${date}#${gameSummary.gameCode}" else "",
+            _itemKey = if (date != null) "${date}#${gameSummary.gameId}" else "",
             _homeTeamId = homeTeamId,
             _awayTeamId = awayTeamId,
             _homeTeamScore = homeTeamScore,
@@ -800,9 +807,9 @@ class ModelConverter(
         val date = game.gameInfo.gameDate.split("+").firstOrNull()
         val homeTeamId = game.teams.home.id
         val awayTeamId = game.teams.away.id
-        val homeTeamScore = game.linescore.teams.home.runs
-        val awayTeamScore = game.linescore.teams.away.runs
-        val gameInfo = MLBGameInfoForSchedule(_currentInning = game.linescore.currentInning)
+        val homeTeamScore = game.linescore?.teams?.home?.runs
+        val awayTeamScore = game.linescore?.teams?.away?.runs
+        val gameInfo = MLBGameInfoForSchedule(_currentInning = "${game.linescore?.currentInning ?: 1}회${if (game.linescore?.isTopInning ?: true) "초" else "말"}")
 
         return MLBGameForSchedule(
             _itemKey = if (date != null) "${date}#${game.game.id}" else "",
@@ -810,8 +817,22 @@ class ModelConverter(
             _awayTeamId = awayTeamId,
             _homeTeamScore = homeTeamScore,
             _awayTeamScore = awayTeamScore,
-            _gameStatus = game.status.statusCode,
+            _gameStatus = game.status.detailedState,
             gameInfo = gameInfo
+        )
+    }
+
+    fun mlbGameScheduleToGameConverter(game: MLBGameForSchedule): MLBGame {
+        val gameData = MLBGameData(_id = game.gameId)
+        val gameInfo = MLBGameInfo(_gameDate = game.date)
+        val status = MLBGameStatus(_detailedState = game.gameStatus)
+        val teams = MLBGameTeams(away = MLBGameTeamDetail(_id = game.awayTeamId), home = MLBGameTeamDetail(_id = game.homeTeamId))
+
+        return MLBGame(
+            game = gameData,
+            gameInfo = gameInfo,
+            status = status,
+            teams = teams
         )
     }
 
@@ -821,6 +842,7 @@ class ModelConverter(
         val awayTeamId = game.gameInfo?.awayTeamId ?: 0
         val homeTeamScore = game.lineScore?.home?.r ?: "0"
         val awayTeamScore = game.lineScore?.away?.r ?: "0"
+        val gameInfo = KBOGameInfoForSchedule(_currentInning = game.lineScore?.currentInning)
 
         return KBOGameForSchedule(
             _itemKey = if (date != null) "${date}#${game.gameInfo.gameId}" else "",
@@ -829,7 +851,21 @@ class ModelConverter(
             _homeTeamScore = homeTeamScore.toIntOrNull(),
             _awayTeamScore = awayTeamScore.toIntOrNull(),
             _gameStatus = game.gameInfo?.gameStatus,
-            gameInfo = null
+            gameInfo = gameInfo
+        )
+    }
+
+    fun kboGameScheduleToGameConverter(game: KBOGameForSchedule): KBOGame {
+        return KBOGame(
+            gameInfo = KBOGameInfo(
+                _awayTeamId = game.awayTeamId,
+                _date = game.date,
+                _gameId = game.gameId,
+                _homeTeamId = game.homeTeamId,
+                _gameStatus = game.gameStatus
+            ),
+            lineScore = null,
+            lineup = null
         )
     }
 }

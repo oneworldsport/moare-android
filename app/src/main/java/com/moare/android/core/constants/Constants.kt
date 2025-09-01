@@ -12,6 +12,8 @@ object Constants {
         const val LIGUE1_TEAM_DIC = "ligue1_team"
         const val SERIEA_PLAYER_DIC = "seriea_player"
         const val SERIEA_TEAM_DIC = "seriea_team"
+        const val MLS_PLAYER_DIC = "mls_player"
+        const val MLS_TEAM_DIC = "mls_team"
         const val NBA_PLAYER_DIC = "nba_player"
         const val NBA_TEAM_DIC = "nba_team"
         const val KBO_PLAYER_DIC = "kbo_player"
@@ -27,11 +29,14 @@ object Constants {
         const val BUNDESLIGA = 78
         const val LIGUE1 = 61
         const val SERIEA = 135
+        const val MLS = 253
         const val NBA = 90001
         const val KBO = 90101
         const val MLB = 90102
+        val FOOTBALL_LEAGUES = listOf(EPL, LALIGA, BUNDESLIGA, LIGUE1, SERIEA, MLS)
 
         // nba team
+        // TODO: Move to object NBATeam
         const val ATL = 1610612737
         const val BOS = 1610612738
         const val CLE = 1610612739
@@ -62,6 +67,41 @@ object Constants {
         const val WAS = 1610612764
         const val DET = 1610612765
         const val CHA = 1610612766
+
+        object MLSTeam {
+            const val SEA = 1595
+            const val JOS = 1596
+            const val DAL = 1597
+            const val ORL = 1598
+            const val PHI = 1599
+            const val HOU = 1600
+            const val TOR = 1601
+            const val YOR = 1602
+            const val VAN = 1603
+            const val NYK = 1604
+            const val ANG = 1605
+            const val SAL = 1606
+            const val CHI = 1607
+            const val ATL = 1608
+            const val ENG = 1609
+            const val COR = 1610
+            const val KAN = 1611
+            const val MIN = 1612
+            const val COL = 1613
+            const val MON = 1614
+            const val UNI = 1615
+            const val LAF = 1616
+            const val POR = 1617
+            const val CIN = 2242
+            const val MIA = 9568
+            const val NAS = 9569
+            const val AUS = 16489
+            const val CHA = 18310
+            const val STL = 20787
+            const val SAN = 25484
+            val eastConference = listOf(ORL, PHI, TOR, YOR, NYK, CHI, ATL, ENG, COL, MON, UNI, CIN, MIA, NAS, CHA)
+            val westConference = listOf(SEA, JOS, DAL, HOU, VAN, ANG, SAL, COR, KAN, MIN, LAF, POR, AUS, STL, SAN)
+        }
 
         // mlb league, division
         const val AMERICAN_LEAGUE = 103

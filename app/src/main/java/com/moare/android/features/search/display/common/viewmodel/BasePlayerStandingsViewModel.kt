@@ -32,11 +32,8 @@ abstract class BasePlayerStandingsViewModel<I, T>(
     protected var _firstSelectedIndex = MutableStateFlow(0)
     val firstSelectedIndex: StateFlow<Int> = _firstSelectedIndex
 
-    protected var _secondSelectedIndex = MutableStateFlow(0)
-    val secondSelectedIndex: StateFlow<Int> = _secondSelectedIndex
-
-    protected var _isKeyword = MutableStateFlow(false)
-    val isKeyword: StateFlow<Boolean> = _isKeyword
+    protected var _secondCategorySelectedIndex = MutableStateFlow(0)
+    val secondCategorySelectedIndex: StateFlow<Int> = _secondCategorySelectedIndex
 
     protected var _entityIndex = MutableStateFlow<Int?>(null)
     val entityIndex: StateFlow<Int?> = _entityIndex
@@ -58,8 +55,7 @@ abstract class BasePlayerStandingsViewModel<I, T>(
         _displayDataState.value = ApiFetchState.Idle
 
         _firstSelectedIndex.value = 0
-        _secondSelectedIndex.value = 0
-        _isKeyword.value = false
+        _secondCategorySelectedIndex.value = 0
         _entityIndex.value = null
         _filteredStandingsStartIndex.value = 0
 
@@ -82,8 +78,7 @@ abstract class BasePlayerStandingsViewModel<I, T>(
                 }
 
                 if (index != -1) {
-                    _secondSelectedIndex.value = index
-                    _isKeyword.value = true
+                    _secondCategorySelectedIndex.value = index
                 }
             }
         }
@@ -112,6 +107,10 @@ abstract class BasePlayerStandingsViewModel<I, T>(
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_PLAYER_DIC)
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_TEAM_DIC)
             }
+            Constants.Ids.MLS -> {
+                playerNameDictionary = nameProvider.getDictionary(Constants.Keys.MLS_PLAYER_DIC)
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.MLS_TEAM_DIC)
+            }
             Constants.Ids.NBA -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_PLAYER_DIC)
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
@@ -133,7 +132,7 @@ abstract class BasePlayerStandingsViewModel<I, T>(
 
     open fun selectSecondCategory(index: Int, category: String) {
         shouldScrollCategory = false
-        _secondSelectedIndex.value = index
+        _secondCategorySelectedIndex.value = index
     }
 
     open fun fetchStandings(category: String) {

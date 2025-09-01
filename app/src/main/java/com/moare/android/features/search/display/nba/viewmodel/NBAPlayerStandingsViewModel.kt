@@ -6,15 +6,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.features.search.display.common.viewmodel.BasePlayerStandingsViewModel
 import com.moare.android.features.search.models.ApiFetchState
-import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
 import com.moare.android.features.search.networking.SearchClient
@@ -91,19 +88,19 @@ class NBAPlayerStandingsViewModel @Inject constructor(
     override fun selectFirstCategory(index: Int) {
         super.selectFirstCategory(index)
 
-        val beforeSecondSelectedIndex = secondSelectedIndex.value
+        val beforeSecondSelectedIndex = secondCategorySelectedIndex.value
         val attackCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES.size
         val defendCategoriesSize = StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES.size
 
         when (index) {
             0 -> {
-                _secondSelectedIndex.value = 0
+                _secondCategorySelectedIndex.value = 0
             }
             1 -> {
-                _secondSelectedIndex.value = attackCategoriesSize
+                _secondCategorySelectedIndex.value = attackCategoriesSize
             }
             2 -> {
-                _secondSelectedIndex.value = attackCategoriesSize + defendCategoriesSize
+                _secondCategorySelectedIndex.value = attackCategoriesSize + defendCategoriesSize
             }
         }
 
@@ -118,7 +115,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
     override fun selectSecondCategory(index: Int, category: String) {
         super.selectSecondCategory(index, category)
 
-        val beforeSecondSelectedIndex = secondSelectedIndex.value
+        val beforeSecondSelectedIndex = secondCategorySelectedIndex.value
         val attackCategories = StringConstants.NBA.PLAYER_STANDINGS_ATTACK_CATEGORIES
         val defendCategories = StringConstants.NBA.PLAYER_STANDINGS_DEFEND_CATEGORIES
 
@@ -138,7 +135,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
     }
 
     private fun sortStandings() {
-        standings = when (secondSelectedIndex.value) {
+        standings = when (secondCategorySelectedIndex.value) {
             0 -> standings.sortedByDescending { it.stats.ptsPG }
             1 -> standings.sortedByDescending { it.stats.astPG }
             2 -> standings.sortedByDescending { it.stats.orebPG }
@@ -181,7 +178,7 @@ class NBAPlayerStandingsViewModel @Inject constructor(
 
         // Get 20 items based on index
         val rangeSize = 20
-        val startIndex = maxOf(0, index - (rangeSize / 2) + 1)
+        val startIndex = maxOf(0, (entityIndex.value ?: 0) - (rangeSize / 2) + 1)
         val endIndex = minOf(standings.size, startIndex + rangeSize)
 
         val newStandings = standings.subList(startIndex, endIndex)

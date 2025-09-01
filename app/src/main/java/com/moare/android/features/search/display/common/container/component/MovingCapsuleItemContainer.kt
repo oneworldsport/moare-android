@@ -2,18 +2,25 @@ package com.moare.android.features.search.display.common.container.component
 
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.nullableOptionalClickable
 import com.moare.android.ui.util.nullableSize
@@ -40,9 +47,8 @@ fun MovingCapsuleItemContainer(
         animationSpec = tween(1000),
     )
 
-    CenterColumn(
-        verticalArrangement = verticalArrangement,
-        horizontalAlignment = horizontalAlignment,
+    Box(
+        contentAlignment = Alignment.TopCenter,
         modifier = modifier
 //            .optionalFillMaxWidth(!isAniItem)
             .onGloballyPositioned { coordinates ->
@@ -59,6 +65,14 @@ fun MovingCapsuleItemContainer(
             }
             .nullableOptionalClickable(apply = isAniItem, onClick = onClick)
     ) {
-        this.content()
+        HCapsuleBar()
+
+        CenterColumn(
+            verticalArrangement = verticalArrangement,
+            horizontalAlignment = horizontalAlignment,
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            this.content()
+        }
     }
 }

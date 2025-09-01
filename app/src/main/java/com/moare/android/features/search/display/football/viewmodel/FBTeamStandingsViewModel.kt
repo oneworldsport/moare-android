@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsViewModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
@@ -17,6 +18,7 @@ import javax.inject.Inject
 
 sealed class FBTeamStandingsIntent {
     data class InitData(val displayModel: FBTeamStandingsDisplayModel) : FBTeamStandingsIntent()
+    data class SelectConference(val index: Int) : FBTeamStandingsIntent()
     data class SelectCategory(val index: Int) : FBTeamStandingsIntent()
 }
 
@@ -42,10 +44,20 @@ class FBTeamStandingsViewModel @Inject constructor(
     private var _standings = MutableStateFlow<List<FBTeamStandingsDisplay>>(emptyList())
     val standings: StateFlow<List<FBTeamStandingsDisplay>> = _standings
 
+    private var _isMLS = MutableStateFlow(false)
+    val isMLS: StateFlow<Boolean> = _isMLS
+
+    /* ---------------------
+       ui state
+       --------------------- */
+    private var _selectedConferenceIndex = MutableStateFlow(0)
+    val selectedConferenceIndex: StateFlow<Int> = _selectedConferenceIndex
+
     override fun send(intent: FBTeamStandingsIntent) {
         viewModelScope.launch {
             when (intent) {
                 is FBTeamStandingsIntent.InitData -> initData(intent.displayModel)
+                is FBTeamStandingsIntent.SelectConference -> selectConference(intent.index)
                 is FBTeamStandingsIntent.SelectCategory -> selectCategory(intent.index)
             }
         }
@@ -55,14 +67,57 @@ class FBTeamStandingsViewModel @Inject constructor(
         super.initData(displayModel)
 
         // init data
+        _selectedConferenceIndex.value = 0
         _standings.value = displayModel.standings
+        _isMLS.value = displayModel.leagueId == Constants.Ids.MLS
 
-        sortStandings()
+        if (isMLS.value) {
+            selectConference(isInit = true)
+        } else {
+            sortStandings()
+        }
     }
 
     /* ---------------------
        implements
        --------------------- */
+    private fun selectConference(index: Int = 0, isInit: Boolean = false) {
+        val standings = if (isInit) {
+            val entityTeam = displayModel.value?.standings?.firstOrNull { team ->
+                // Any first team that matches with any team in entityInfo
+                displayModel.value?.entityInfo?.firstOrNull { it.teamId == team.team.id } != null
+            }
+
+            // When init, if entity's conference is east, set index 1.
+            // Otherwise do nothing, which would be set as default(0).
+            if (Constants.Ids.MLSTeam.eastConference.contains(entityTeam?.team?.id)) {
+                _selectedConferenceIndex.value = 1
+            }
+
+            displayModel.value?.standings?.filter {
+                if (entityTeam != null) {
+                    Constants.Ids.MLSTeam.eastConference.contains(it.team.id)
+                } else {
+                    Constants.Ids.MLSTeam.westConference.contains(it.team.id)
+                }
+            }
+        } else {
+            _selectedConferenceIndex.value = index
+
+            displayModel.value?.standings?.filter {
+                if (index == 0) {
+                    Constants.Ids.MLSTeam.westConference.contains(it.team.id)
+                } else {
+                    Constants.Ids.MLSTeam.eastConference.contains(it.team.id)
+                }
+            }
+        }
+
+        _standings.value = standings ?: emptyList()
+
+        sortStandings()
+    }
+
     override fun selectCategory(index: Int) {
         super.selectCategory(index)
 
@@ -99,6 +154,17 @@ class FBTeamStandingsViewModel @Inject constructor(
 
     fun calculatePoints(data: FBTeamStatsFixtures): Int {
         return ((data.wins.total) * 3 + (data.draws.total))
+    }
+
+    fun getRecordString(
+        data: FBTeamStatsFixtures,
+        isHome: Boolean = true
+    ): String {
+        return if (isHome) {
+            "${data.wins.home}승 ${data.draws.home}무 ${data.loses.home}패"
+        } else {
+            "${data.wins.away}승 ${data.draws.away}무 ${data.loses.away}패"
+        }
     }
 
     private fun calculateHomePoints(data: FBTeamStatsFixtures): Int {

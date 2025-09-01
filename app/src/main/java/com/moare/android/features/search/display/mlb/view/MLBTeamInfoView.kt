@@ -17,15 +17,19 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.MLBUtil
+import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
@@ -36,7 +40,9 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HCapsuleBar
+import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun MLBTeamInfoView(
@@ -187,13 +193,6 @@ fun MLBTeamInfoFirstItem(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
             URLImage(
                 url = MLBUtil.teamLogoUrl(team.id),
                 modifier = Modifier.alpha(contentsAlpha),
@@ -207,7 +206,7 @@ fun MLBTeamInfoFirstItem(
             )
 
             Text(
-                text = team.teamName,
+                text = team.name,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Light,
                 maxLines = 2,
@@ -247,13 +246,6 @@ fun MLBTeamInfoSecondItem(
             modifier = containerModifier
         ) {
             Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
-            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.alpha(contentsAlpha)
             ) {
@@ -268,19 +260,16 @@ fun MLBTeamInfoSecondItem(
                 )
             }
 
-            Column(
+            Text(
+                text = buildAnnotatedString {
+                    append("연고지: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(team.locationName)
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "연고지: ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = team.locationName,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            )
 
             Column(
                 modifier = Modifier.alpha(contentsAlpha)
@@ -291,7 +280,8 @@ fun MLBTeamInfoSecondItem(
                 )
 
                 Text(
-                    text = "${team.league.name} / ${team.division.name}",
+                    text = "${MLBUtil.leagueDivisionMap[team.league.id]} / ${MLBUtil.leagueDivisionMap[team.division.id]}",
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -329,27 +319,16 @@ fun MLBTeamInfoThirdItem(
             horizontalAlignment = Alignment.Start,
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Text(
+                text = buildAnnotatedString {
+                    append("홈구장: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(mlbTeamInfoViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name)
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "홈구장: ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = mlbTeamInfoViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            )
 
 //            Row(
 //                verticalAlignment = Alignment.CenterVertically,
@@ -418,8 +397,6 @@ fun MLBTeamInfoFourthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
             }
         ) {
-            HCapsuleBar()
-
             BaseballLeagueTitle(
                 url = MLBUtil.mlbLogoUrl,
                 leagueName = "MLB",
@@ -429,7 +406,7 @@ fun MLBTeamInfoFourthItem(
             )
 
             stats?.recordData?.let {
-                Row(
+                CenterRow(
                     modifier = Modifier
                         .alpha(contentsAlpha)
                 ) {
@@ -440,25 +417,25 @@ fun MLBTeamInfoFourthItem(
                         customCategoryFontSize = 13,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "승",
                         data = it.wins.toString(),
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "패",
                         data = it.losses.toString(),
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "무",
                         data = it.leagueRecord.ties.toString(),
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "타율",
                         data = stats.hitting?.avg ?: "0.0",
@@ -502,8 +479,6 @@ fun MLBTeamInfoFifthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
             }
         ) {
-            HCapsuleBar()
-
             Text(
                 text = "최근경기",
                 fontSize = 17.sp,
@@ -512,61 +487,63 @@ fun MLBTeamInfoFifthItem(
             )
 
             lastGame?.let {
-                val homeTeamScore = it.linescore.teams.home.runs
-                val awayTeamScore = it.linescore.teams.away.runs
+                val homeTeamScore = it.linescore?.teams?.home?.runs ?: 0
+                val awayTeamScore = it.linescore?.teams?.away?.runs ?: 0
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .alpha(contentsAlpha)
                 ) {
-                    Text(
-                        text = mlbTeamInfoViewModel.teamNameDictionary["short_${it.teams.home.id}"] ?: "",
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
                         modifier = Modifier.weight(1f)
-                    )
+                    ) {
+                        Text(
+                            text = mlbTeamInfoViewModel.teamNameDictionary["short_${it.teams.home.id}"] ?: "",
+                            fontSize = 15.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = " $homeTeamScore",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
+                        )
+                    }
 
                     Text(
-                        text = homeTeamScore.toString(),
+                        text = " - ",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.4f),
-                        color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
+                        textAlign = TextAlign.Center
                     )
 
-                    Text(
-                        text = " vs ",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.3f)
-                    )
-
-                    Text(
-                        text = awayTeamScore.toString(),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.4f),
-                        color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
-                    )
-
-                    Text(
-                        text = mlbTeamInfoViewModel.teamNameDictionary["short_${it.teams.away.id}"] ?: "",
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
-                    )
+                    ) {
+                        Text(
+                            text = "$homeTeamScore ",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
+                        )
+
+                        Text(
+                            text = mlbTeamInfoViewModel.teamNameDictionary["short_${it.teams.away.id}"] ?: "",
+                            fontSize = 15.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(it.gameInfo.gameDate),
+                    text = CalendarUtil.formatDate(it.gameInfo.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )
@@ -607,8 +584,6 @@ fun MLBTeamInfoSixthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
             }
         ) {
-            HCapsuleBar()
-
             Text(
                 text = "다음경기",
                 fontSize = 17.sp,
@@ -616,33 +591,32 @@ fun MLBTeamInfoSixthItem(
                 modifier = Modifier.alpha(contentsAlpha)
             )
 
-            nextGame?.let {
+            if (nextGame != null) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .alpha(contentsAlpha)
                 ) {
                     Text(
-                        text = mlbTeamInfoViewModel.teamNameDictionary["short_${it.teams.home.id}"] ?: "",
+                        text = mlbTeamInfoViewModel.teamNameDictionary["short_${nextGame.teams.home.id}"] ?: "",
                         fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.End,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
 
                     Text(
-                        text = " vs ",
+                        text = "  vs  ",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.3f)
+                        textAlign = TextAlign.Center
                     )
 
                     Text(
-                        text = mlbTeamInfoViewModel.teamNameDictionary["short_${it.teams.away.id}"] ?: "",
+                        text = mlbTeamInfoViewModel.teamNameDictionary["short_${nextGame.teams.away.id}"] ?: "",
                         fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Start,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
@@ -650,7 +624,13 @@ fun MLBTeamInfoSixthItem(
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(it.gameInfo.gameDate),
+                    text = CalendarUtil.formatDate(nextGame.gameInfo.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                    fontSize = 15.sp,
+                    modifier = Modifier.alpha(contentsAlpha)
+                )
+            } else {
+                Text(
+                    text = "예정된 경기가 없습니다.",
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )

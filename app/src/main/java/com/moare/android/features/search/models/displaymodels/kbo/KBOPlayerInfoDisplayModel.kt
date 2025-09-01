@@ -15,6 +15,7 @@ data class KBOPlayerInfoDisplayModel(
     override val leagueId: Int,
     override val keywords: List<Keyword>,
     override val entityInfo: List<EntityInfo>,
+    override val season: Int,
     val info: KBOPlayerInfo,
     val stats: KBOPlayerStats?,
     val lastGame: KBOGame?,

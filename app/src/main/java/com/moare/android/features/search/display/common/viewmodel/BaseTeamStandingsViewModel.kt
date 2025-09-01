@@ -23,9 +23,6 @@ abstract class BaseTeamStandingsViewModel<I, T>(
     protected var _selectedCategoryIndex = MutableStateFlow(0)
     val selectedCategoryIndex: StateFlow<Int> = _selectedCategoryIndex
 
-    protected var _isKeyword = MutableStateFlow(false)
-    val isKeyword: StateFlow<Boolean> = _isKeyword
-
     /* ---------------------
        etc
        --------------------- */
@@ -34,7 +31,6 @@ abstract class BaseTeamStandingsViewModel<I, T>(
     override fun initData(displayModel: T) {
         // init with default value
         _selectedCategoryIndex.value = 0
-        _isKeyword.value = false
 
         // init data
         _displayModel.value = displayModel
@@ -51,7 +47,6 @@ abstract class BaseTeamStandingsViewModel<I, T>(
 
                 if (index != -1) {
                     _selectedCategoryIndex.value = index
-                    _isKeyword.value = true
                 }
             }
         }
@@ -73,6 +68,9 @@ abstract class BaseTeamStandingsViewModel<I, T>(
             }
             Constants.Ids.SERIEA -> {
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_TEAM_DIC)
+            }
+            Constants.Ids.MLS -> {
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.MLS_TEAM_DIC)
             }
             Constants.Ids.NBA -> {
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)

@@ -55,7 +55,6 @@ import com.moare.android.features.search.display.football.view.FBPlayerInfoView
 import com.moare.android.features.search.display.football.view.FBPlayerStandingsView
 import com.moare.android.features.search.display.football.view.FBPlayerStatsView
 import com.moare.android.features.search.display.football.view.FBTeamInfoView
-import com.moare.android.features.search.display.football.view.FBTeamScheduleView
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.kbo.view.KBOGameStatsView
@@ -63,7 +62,6 @@ import com.moare.android.features.search.display.kbo.view.KBOLeagueScheduleView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerInfoView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerStatsView
 import com.moare.android.features.search.display.kbo.view.KBOTeamInfoView
-import com.moare.android.features.search.display.kbo.view.KBOTeamScheduleView
 import com.moare.android.features.search.display.kbo.view.KBOTeamStandingsView
 import com.moare.android.features.search.display.kbo.view.KBOTeamStatsView
 import com.moare.android.features.search.display.mlb.view.MLBGameStatsView
@@ -71,7 +69,6 @@ import com.moare.android.features.search.display.mlb.view.MLBLeagueScheduleView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerInfoView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerStatsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamInfoView
-import com.moare.android.features.search.display.mlb.view.MLBTeamScheduleView
 import com.moare.android.features.search.display.mlb.view.MLBTeamStandingsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAGameStatsView
@@ -81,7 +78,6 @@ import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStandingsView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
 import com.moare.android.features.search.display.nba.view.NBATeamInfoView
-import com.moare.android.features.search.display.nba.view.NBATeamScheduleView
 import com.moare.android.features.search.display.nba.view.NBATeamStandingsView
 import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -93,7 +89,6 @@ import com.moare.android.features.search.models.displaymodels.football.FBPlayerI
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
@@ -101,7 +96,6 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueSched
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
@@ -109,7 +103,6 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueSched
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
@@ -119,7 +112,6 @@ import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoD
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATournamentDisplayModel
@@ -132,7 +124,8 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SearchView(
-    searchViewModel: SearchViewModel = hiltViewModel()
+    searchViewModel: SearchViewModel = hiltViewModel(),
+    viewForTest: SportDisplayType? = null
 ) {
     /* ---------------------
        constants
@@ -183,6 +176,12 @@ fun SearchView(
     /* ---------------------
        LaunchedEffect
        --------------------- */
+    LaunchedEffect(viewForTest) {
+        viewForTest?.let {
+            searchViewModel.send(SearchViewModel.Intent.TestSearch(viewForTest))
+        }
+    }
+
     LaunchedEffect(searchState, autoCompleteList) {
         isNoticeVisible = if (searchState) {
             isNoticeOpened = false
@@ -370,7 +369,7 @@ fun SearchView(
                 Column(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(top = 20.dp)
+                    modifier = Modifier.padding(top = 10.dp)
                 ) {
                     // football
                     displayModels[SportDisplayType.FB_PLAYER_INFO]?.let {
@@ -390,9 +389,6 @@ fun SearchView(
                     }
                     displayModels[SportDisplayType.FB_TEAM_STANDINGS]?.let {
                         FBTeamStandingsView(data = it as FBTeamStandingsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.FB_TEAM_SCHEDULE]?.let {
-                        FBTeamScheduleView(data = it as FBTeamScheduleDisplayModel)
                     }
                     displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE]?.let {
                         FBLeagueScheduleView(data = it as FBLeagueScheduleDisplayModel)
@@ -418,9 +414,6 @@ fun SearchView(
                     }
                     displayModels[SportDisplayType.NBA_TEAM_STANDINGS]?.let {
                         NBATeamStandingsView(data = it as NBATeamStandingsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.NBA_TEAM_SCHEDULE]?.let {
-                        NBATeamScheduleView(data = it as NBATeamScheduleDisplayModel)
                     }
                     displayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE]?.let {
                         NBALeagueScheduleView(data = it as NBALeagueScheduleDisplayModel)
@@ -453,9 +446,6 @@ fun SearchView(
                     displayModels[SportDisplayType.KBO_TEAM_STANDINGS]?.let {
                         KBOTeamStandingsView(data = it as KBOTeamStandingsDisplayModel)
                     }
-                    displayModels[SportDisplayType.KBO_TEAM_SCHEDULE]?.let {
-                        KBOTeamScheduleView(data = it as KBOTeamScheduleDisplayModel)
-                    }
                     displayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE]?.let {
                         KBOLeagueScheduleView(data = it as KBOLeagueScheduleDisplayModel)
                     }
@@ -483,9 +473,6 @@ fun SearchView(
                     }
                     displayModels[SportDisplayType.MLB_TEAM_STANDINGS]?.let {
                         MLBTeamStandingsView(data = it as MLBTeamStandingsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.MLB_TEAM_SCHEDULE]?.let {
-                        MLBTeamScheduleView(data = it as MLBTeamScheduleDisplayModel)
                     }
                     displayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE]?.let {
                         MLBLeagueScheduleView(data = it as MLBLeagueScheduleDisplayModel)

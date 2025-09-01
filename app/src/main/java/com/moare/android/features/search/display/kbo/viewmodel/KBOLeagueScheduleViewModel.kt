@@ -14,6 +14,7 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOGame
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.networking.SearchClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,16 +77,31 @@ class KBOLeagueScheduleViewModel @Inject constructor(
         // init data
         _yearMonthList.value = displayModel.yearMonthList
 
-        // select default yearMonth
-        displayModel.games.firstOrNull()?.date?.let {
-            val defaultYearMonth = CalendarUtil.formatDate(it, TimeFormatType.YEAR_MONTH)
-            val defaultYearMonthIndex = yearMonthList.value.withIndex().first { (_, value) -> value == defaultYearMonth }
-            _selectedYearMonth.value = defaultYearMonth
-            _selectedYearMonthIndex.value = defaultYearMonthIndex.index
-            _yearMonthCalendarScrollTrigger.value = UUID.randomUUID().toString()
-        }
+        when (displayModel.scheduleType) {
+            ScheduleType.LEAGUE -> {
+                displayModel.games.firstOrNull()?.date?.let {
+                    setDefaultYearMonth(it)
+                }
 
-        setDays(true)
+                setDays(true)
+            }
+            ScheduleType.TEAM -> {
+                val upcomingGame = displayModel.games.firstOrNull { game ->
+                    CalendarUtil.isUpcomingDay(game.date)
+                }
+
+                if (upcomingGame != null) {
+                    setDefaultYearMonth(upcomingGame.date)
+                } else {
+                    displayModel.games.lastOrNull()?.date?.let {
+                        setDefaultYearMonth(it)
+                    }
+                }
+
+                setDays(true)
+            }
+            else -> {}
+        }
     }
 
     /* ---------------------
@@ -95,7 +111,11 @@ class KBOLeagueScheduleViewModel @Inject constructor(
         _selectedYearMonth.value = yearMonth
         _selectedYearMonthIndex.value = selectedIndex
 
-        fetchGames(updateViewStack)
+        when (displayModel.value?.scheduleType) {
+            ScheduleType.LEAGUE -> { fetchGames(updateViewStack) }
+            ScheduleType.TEAM -> { setDays() }
+            else -> {}
+        }
     }
 
     override fun toggleAllResult() {
@@ -191,7 +211,7 @@ class KBOLeagueScheduleViewModel @Inject constructor(
                     leagueId = 90001
                 )
 
-                val result = searchClient.fetchLeagueSchedule(entity, yearMonth)
+                val result = searchClient.fetchLeagueSchedule(entity, displayModel.value?.season, yearMonth)
 
                 if (result.data is SportDecodableModel.KBOLeagueSchedule) {
                     val data = result.data

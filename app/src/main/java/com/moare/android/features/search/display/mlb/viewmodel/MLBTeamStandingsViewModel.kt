@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 sealed class MLBTeamStandingsIntent {
     data class InitData(val displayModel: MLBTeamStandingsDisplayModel) : MLBTeamStandingsIntent()
-    data class SelectDivison(val index: Int) : MLBTeamStandingsIntent()
+    data class SelectHeaderCategory(val index: Int) : MLBTeamStandingsIntent()
     data class SelectCategory(val index: Int) : MLBTeamStandingsIntent()
 }
 
@@ -33,24 +33,31 @@ class MLBTeamStandingsViewModel @Inject constructor(
     val dataItemWidth = 50.dp
     val categoryFontSize = 15.sp
     val dataFontSize = 15.sp
+    val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 60.dp, 60.dp, 50.dp, 50.dp, 50.dp, 70.dp)
 
     /* ---------------------
        data state
        --------------------- */
-    private var _standings = MutableStateFlow<List<MLBTeamStandingsDisplay>>(emptyList())
-    val standings: StateFlow<List<MLBTeamStandingsDisplay>> = _standings
+    private var _westStandings = MutableStateFlow<List<MLBTeamStandingsDisplay>>(emptyList())
+    val westStandings: StateFlow<List<MLBTeamStandingsDisplay>> = _westStandings
+
+    private var _eastStandings = MutableStateFlow<List<MLBTeamStandingsDisplay>>(emptyList())
+    val eastStandings: StateFlow<List<MLBTeamStandingsDisplay>> = _eastStandings
+
+    private var _centralStandings = MutableStateFlow<List<MLBTeamStandingsDisplay>>(emptyList())
+    val centralStandings: StateFlow<List<MLBTeamStandingsDisplay>> = _centralStandings
 
     /* ---------------------
        ui state
        --------------------- */
-    private var _selectedDivisionIndex = MutableStateFlow(0)
-    val selectedDivisionIndex: StateFlow<Int> = _selectedDivisionIndex
+    private var _headerCategorySelectedIndex = MutableStateFlow(0)
+    val headerCategorySelectedIndex: StateFlow<Int> = _headerCategorySelectedIndex
 
     override fun send(intent: MLBTeamStandingsIntent) {
         viewModelScope.launch {
             when (intent) {
                 is MLBTeamStandingsIntent.InitData -> initData(intent.displayModel)
-                is MLBTeamStandingsIntent.SelectDivison -> selectDivision(intent.index)
+                is MLBTeamStandingsIntent.SelectHeaderCategory -> selectHeaderCategory(intent.index)
                 is MLBTeamStandingsIntent.SelectCategory -> selectCategory(intent.index)
             }
         }
@@ -63,57 +70,81 @@ class MLBTeamStandingsViewModel @Inject constructor(
         super.initData(displayModel)
 
         // init with default value
-        _selectedDivisionIndex.value = 0
-        _selectedCategoryIndex.value = 0 // defalue category is "승률"
-        _standings.value = emptyList()
+        _selectedCategoryIndex.value = 1 // defalue category is "승률"
+        _westStandings.value = emptyList()
+        _eastStandings.value = emptyList()
+        _centralStandings.value = emptyList()
 
-        selectDivision(isInit = true)
+        selectHeaderCategory(index = 0, isInit = true)
     }
 
     /* ---------------------
        implements
        --------------------- */
-    private fun selectDivision(index: Int = 0, isInit: Boolean = false) {
-        val standings = if (isInit) {
+    private fun selectHeaderCategory(index: Int = 0, isInit: Boolean = false) {
+        if (isInit) {
             val entityTeam = displayModel.value?.standings?.firstOrNull { team ->
                 // Any first team that matches with any team in entityInfo
                 displayModel.value?.entityInfo?.firstOrNull { it.teamId == team.team.id } != null
             }
+            val teamLeagueId = entityTeam?.team?.league?.id
 
-            // When init, if set to matching index with entity's division.
-            when (entityTeam?.team?.division?.id) {
-                Constants.Ids.NATIONAL_LEAGUE_WEST -> _selectedDivisionIndex.value = 0
-                Constants.Ids.NATIONAL_LEAGUE_EAST -> _selectedDivisionIndex.value = 1
-                Constants.Ids.NATIONAL_LEAGUE_CENTRAL -> _selectedDivisionIndex.value = 2
-                Constants.Ids.AMERICAN_LEAGUE_WEST -> _selectedDivisionIndex.value = 3
-                Constants.Ids.AMERICAN_LEAGUE_EAST -> _selectedDivisionIndex.value = 4
-                Constants.Ids.AMERICAN_LEAGUE_CENTRAL -> _selectedDivisionIndex.value = 5
+            // When init, if entity's league is american, set index 1.
+            // Otherwise do nothing, which would be set as default(0).
+            if (teamLeagueId == Constants.Ids.AMERICAN_LEAGUE) {
+                _headerCategorySelectedIndex.value = 1
             }
 
-            displayModel.value?.standings?.filter {
-                if (entityTeam != null) {
-                    it.team.division.id == entityTeam.team.division.id
+            val standings = displayModel.value?.standings
+
+            _westStandings.value = standings?.filter {
+                if (teamLeagueId == Constants.Ids.AMERICAN_LEAGUE) {
+                    it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_WEST
                 } else {
-                    it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_WEST // default
+                    it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_WEST
                 }
-            }
+            } ?: emptyList()
+            _eastStandings.value = standings?.filter {
+                if (teamLeagueId == Constants.Ids.AMERICAN_LEAGUE) {
+                    it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_EAST
+                } else {
+                    it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_EAST
+                }
+            } ?: emptyList()
+            _centralStandings.value = standings?.filter {
+                if (teamLeagueId == Constants.Ids.AMERICAN_LEAGUE) {
+                    it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_CENTRAL
+                } else {
+                    it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_CENTRAL
+                }
+            } ?: emptyList()
         } else {
-            _selectedDivisionIndex.value = index
+            _headerCategorySelectedIndex.value = index
 
-            displayModel.value?.standings?.filter {
-                when (index) {
-                    0 -> it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_WEST
-                    1 -> it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_EAST
-                    2 -> it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_CENTRAL
-                    3 -> it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_WEST
-                    4 -> it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_EAST
-                    5 -> it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_CENTRAL
-                    else -> it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_WEST
+            val standings = displayModel.value?.standings
+
+            _westStandings.value = standings?.filter {
+                if (index == 0) {
+                    it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_WEST
+                } else {
+                    it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_WEST
                 }
-            }
+            } ?: emptyList()
+            _eastStandings.value = standings?.filter {
+                if (index == 0) {
+                    it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_EAST
+                } else {
+                    it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_EAST
+                }
+            } ?: emptyList()
+            _centralStandings.value = standings?.filter {
+                if (index == 0) {
+                    it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_CENTRAL
+                } else {
+                    it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_CENTRAL
+                }
+            } ?: emptyList()
         }
-
-        _standings.value = standings ?: emptyList()
 
         sortStandings()
     }
@@ -125,28 +156,115 @@ class MLBTeamStandingsViewModel @Inject constructor(
     }
 
     private fun sortStandings() {
-        var standings = standings.value.toMutableList()
+        val westStandings = westStandings.value.toMutableList()
+        val eastStandings = eastStandings.value.toMutableList()
+        val centralStandings = centralStandings.value.toMutableList()
 
         when (selectedCategoryIndex.value) {
-            0 -> standings.sortByDescending { it.stats.recordData?.winningPercentage?.toFloatOrNull() }
-            1 -> standings.sortBy { it.stats.recordData?.gamesBack?.toFloatOrNull() }
-            2 -> standings.sortByDescending { it.stats.recordData?.wins }
-            3 -> standings.sortBy { it.stats.recordData?.losses }
-            4 -> standings.sortByDescending { it.stats.recordData?.gamesPlayed }
-            5 -> standings.sortByDescending { it.stats.recordData?.streak?.streakNumber } // TODO: type 구분필요
-            6 -> standings.sortByDescending { it.stats.hitting?.avg?.toFloatOrNull() }
-            7 -> standings.sortByDescending { it.stats.hitting?.hits }
-            8 -> standings.sortByDescending { it.stats.hitting?.homeRuns }
-            9 -> standings.sortByDescending { it.stats.hitting?.slg?.toFloatOrNull() }
-            10 -> standings.sortByDescending { it.stats.hitting?.runs }
-            11 -> standings.sortBy { it.stats.pitching?.era?.toFloatOrNull() }
-            12 -> standings.sortBy { it.stats.pitching?.avg?.toFloatOrNull() }
-            13 -> standings.sortBy { it.stats.pitching?.hits }
-            14 -> standings.sortBy { it.stats.pitching?.homeRuns }
-            15 -> standings.sortBy { it.stats.pitching?.runs }
-            16 -> standings.sortByDescending { it.stats.hitting?.stolenBasePercentage?.toFloatOrNull() }
+            0 -> {
+                westStandings.sortBy { it.stats.recordData?.gamesBack?.toFloatOrNull() }
+                eastStandings.sortBy { it.stats.recordData?.gamesBack?.toFloatOrNull() }
+                centralStandings.sortBy { it.stats.recordData?.gamesBack?.toFloatOrNull() }
+            }
+            1 -> {
+                westStandings.sortByDescending { it.stats.recordData?.winningPercentage?.toFloatOrNull() }
+                eastStandings.sortByDescending { it.stats.recordData?.winningPercentage?.toFloatOrNull() }
+                centralStandings.sortByDescending { it.stats.recordData?.winningPercentage?.toFloatOrNull() }
+            }
+            2 -> {
+                westStandings.sortByDescending { it.stats.recordData?.wins }
+                eastStandings.sortByDescending { it.stats.recordData?.wins }
+                centralStandings.sortByDescending { it.stats.recordData?.wins }
+            }
+            3 -> {
+                westStandings.sortBy { it.stats.recordData?.losses }
+                eastStandings.sortBy { it.stats.recordData?.losses }
+                centralStandings.sortBy { it.stats.recordData?.losses }
+            }
+            4 -> {
+                westStandings.sortByDescending { it.stats.recordData?.gamesPlayed }
+                eastStandings.sortByDescending { it.stats.recordData?.gamesPlayed }
+                centralStandings.sortByDescending { it.stats.recordData?.gamesPlayed }
+            }
+            5 -> {
+                westStandings.sortByDescending {
+                    val streak = it.stats.recordData?.streak
+                    val streakNumber = streak?.streakNumber ?: 0
+                    val sign = if (streak?.streakType?.lowercase()?.startsWith("w") == true) 1 else -1
+                    streakNumber * sign
+                }
+                eastStandings.sortByDescending {
+                    val streak = it.stats.recordData?.streak
+                    val streakNumber = streak?.streakNumber ?: 0
+                    val sign = if (streak?.streakType?.lowercase()?.startsWith("w") == true) 1 else -1
+                    streakNumber * sign
+                }
+                centralStandings.sortByDescending {
+                    val streak = it.stats.recordData?.streak
+                    val streakNumber = streak?.streakNumber ?: 0
+                    val sign = if (streak?.streakType?.lowercase()?.startsWith("w") == true) 1 else -1
+                    streakNumber * sign
+                }
+            }
+            6 -> {
+                westStandings.sortByDescending { it.stats.hitting?.avg?.toFloatOrNull() }
+                eastStandings.sortByDescending { it.stats.hitting?.avg?.toFloatOrNull() }
+                centralStandings.sortByDescending { it.stats.hitting?.avg?.toFloatOrNull() }
+            }
+            7 -> {
+                westStandings.sortByDescending { it.stats.hitting?.hits }
+                eastStandings.sortByDescending { it.stats.hitting?.hits }
+                centralStandings.sortByDescending { it.stats.hitting?.hits }
+            }
+            8 -> {
+                westStandings.sortByDescending { it.stats.hitting?.homeRuns }
+                eastStandings.sortByDescending { it.stats.hitting?.homeRuns }
+                centralStandings.sortByDescending { it.stats.hitting?.homeRuns }
+            }
+            9 -> {
+                westStandings.sortByDescending { it.stats.hitting?.slg?.toFloatOrNull() }
+                eastStandings.sortByDescending { it.stats.hitting?.slg?.toFloatOrNull() }
+                centralStandings.sortByDescending { it.stats.hitting?.slg?.toFloatOrNull() }
+            }
+            10 -> {
+                westStandings.sortByDescending { it.stats.hitting?.runs }
+                eastStandings.sortByDescending { it.stats.hitting?.runs }
+                centralStandings.sortByDescending { it.stats.hitting?.runs }
+            }
+            11 -> {
+                westStandings.sortBy { it.stats.pitching?.era?.toFloatOrNull() }
+                eastStandings.sortBy { it.stats.pitching?.era?.toFloatOrNull() }
+                centralStandings.sortBy { it.stats.pitching?.era?.toFloatOrNull() }
+            }
+            12 -> {
+                westStandings.sortBy { it.stats.pitching?.avg?.toFloatOrNull() }
+                eastStandings.sortBy { it.stats.pitching?.avg?.toFloatOrNull() }
+                centralStandings.sortBy { it.stats.pitching?.avg?.toFloatOrNull() }
+            }
+            13 -> {
+                westStandings.sortBy { it.stats.pitching?.hits }
+                eastStandings.sortBy { it.stats.pitching?.hits }
+                centralStandings.sortBy { it.stats.pitching?.hits }
+            }
+            14 -> {
+                westStandings.sortBy { it.stats.pitching?.homeRuns }
+                eastStandings.sortBy { it.stats.pitching?.homeRuns }
+                centralStandings.sortBy { it.stats.pitching?.homeRuns }
+            }
+            15 -> {
+                westStandings.sortBy { it.stats.pitching?.runs }
+                eastStandings.sortBy { it.stats.pitching?.runs }
+                centralStandings.sortBy { it.stats.pitching?.runs }
+            }
+            16 -> {
+                westStandings.sortByDescending { it.stats.hitting?.stolenBasePercentage?.toFloatOrNull() }
+                eastStandings.sortByDescending { it.stats.hitting?.stolenBasePercentage?.toFloatOrNull() }
+                centralStandings.sortByDescending { it.stats.hitting?.stolenBasePercentage?.toFloatOrNull() }
+            }
         }
 
-        _standings.value = standings
+        _westStandings.value = westStandings
+        _eastStandings.value = eastStandings
+        _centralStandings.value = centralStandings
     }
 }

@@ -17,9 +17,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.KBOUtil
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
@@ -41,7 +45,9 @@ import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDis
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.NBATitle
+import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun KBOTeamInfoView(
@@ -192,13 +198,6 @@ fun KBOTeamInfoFirstItem(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
             URLImage(
                 url = KBOUtil.teamLogoUrl(team.id),
                 modifier = Modifier.alpha(contentsAlpha),
@@ -244,13 +243,6 @@ fun KBOTeamInfoSecondItem(
             modifier = containerModifier
         ) {
             Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
-            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.alpha(contentsAlpha)
             ) {
@@ -265,33 +257,27 @@ fun KBOTeamInfoSecondItem(
                 )
             }
 
-            Column(
+            Text(
+                text = buildAnnotatedString {
+                    append("연고지: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(team.city)
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "연고지: ",
-                    fontSize = 15.sp
-                )
+            )
 
-                Text(
-                    text = team.city,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Column(
+            Text(
+                text = buildAnnotatedString {
+                    append("감독: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(team.coach)
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "감독: ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = team.coach,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            )
         }
     }
 }
@@ -326,27 +312,16 @@ fun KBOTeamInfoThirdItem(
             horizontalAlignment = Alignment.Start,
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Text(
+                text = buildAnnotatedString {
+                    append("홈구장: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(kboTeamInfoViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name)
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "홈구장: ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = kboTeamInfoViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            )
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -415,8 +390,6 @@ fun KBOTeamInfoFourthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
             }
         ) {
-            HCapsuleBar()
-
             BaseballLeagueTitle(
                 url = KBOUtil.kboLogoUrl,
                 leagueName = "KBO",
@@ -425,7 +398,7 @@ fun KBOTeamInfoFourthItem(
             )
 
             stats?.let {
-                Row(
+                CenterRow(
                     modifier = Modifier
                         .alpha(contentsAlpha)
                 ) {
@@ -435,25 +408,25 @@ fun KBOTeamInfoFourthItem(
                         customCategoryFontSize = 13,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "승",
                         data = it.rankData.wins,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "패",
                         data = it.rankData.losses,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "무",
                         data = it.rankData.draws,
                         modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "타율",
                         data = it.hitterData.avg,
@@ -497,8 +470,6 @@ fun KBOTeamInfoFifthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
             }
         ) {
-            HCapsuleBar()
-
             Text(
                 text = "최근경기",
                 fontSize = 17.sp,
@@ -515,53 +486,55 @@ fun KBOTeamInfoFifthItem(
                     modifier = Modifier
                         .alpha(contentsAlpha)
                 ) {
-                    Text(
-                        text = kboTeamInfoViewModel.teamNameDictionary["short_${it.gameInfo?.homeTeamId}"] ?: "",
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
                         modifier = Modifier.weight(1f)
-                    )
+                    ) {
+                        Text(
+                            text = kboTeamInfoViewModel.teamNameDictionary["short_${it.gameInfo?.homeTeamId}"] ?: "",
+                            fontSize = 15.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = " $homeTeamScore",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
+                        )
+                    }
 
                     Text(
-                        text = homeTeamScore.toString(),
+                        text = " - ",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.4f),
-                        color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
+                        textAlign = TextAlign.Center
                     )
 
-                    Text(
-                        text = " vs ",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.3f)
-                    )
-
-                    Text(
-                        text = awayTeamScore.toString(),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.4f),
-                        color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
-                    )
-
-                    Text(
-                        text = kboTeamInfoViewModel.teamNameDictionary["short_${it.gameInfo?.awayTeamId}"] ?: "",
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
-                    )
+                    ) {
+                        Text(
+                            text = "$awayTeamScore ",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
+                        )
+
+                        Text(
+                            text = kboTeamInfoViewModel.teamNameDictionary["short_${it.gameInfo?.awayTeamId}"] ?: "",
+                            fontSize = 15.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(it.gameInfo?.date),
+                    text = CalendarUtil.formatDate(it.gameInfo?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )
@@ -602,8 +575,6 @@ fun KBOTeamInfoSixthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
             }
         ) {
-            HCapsuleBar()
-
             Text(
                 text = "다음경기",
                 fontSize = 17.sp,
@@ -611,33 +582,32 @@ fun KBOTeamInfoSixthItem(
                 modifier = Modifier.alpha(contentsAlpha)
             )
 
-            nextGame?.let {
+            if (nextGame != null) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .alpha(contentsAlpha)
                 ) {
                     Text(
-                        text = kboTeamInfoViewModel.teamNameDictionary["short_${it.gameInfo?.homeTeamId}"] ?: "",
+                        text = kboTeamInfoViewModel.teamNameDictionary["short_${nextGame.gameInfo?.homeTeamId}"] ?: "",
                         fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.End,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
 
                     Text(
-                        text = " vs ",
+                        text = "  vs  ",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.3f)
+                        textAlign = TextAlign.Center
                     )
 
                     Text(
-                        text = kboTeamInfoViewModel.teamNameDictionary["short_${it.gameInfo?.awayTeamId}"] ?: "",
+                        text = kboTeamInfoViewModel.teamNameDictionary["short_${nextGame.gameInfo?.awayTeamId}"] ?: "",
                         fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Start,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
@@ -645,7 +615,13 @@ fun KBOTeamInfoSixthItem(
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(it.gameInfo?.date),
+                    text = CalendarUtil.formatDate(nextGame.gameInfo?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                    fontSize = 15.sp,
+                    modifier = Modifier.alpha(contentsAlpha)
+                )
+            } else {
+                Text(
+                    text = "예정된 경기가 없습니다.",
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )

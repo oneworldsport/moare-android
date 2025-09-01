@@ -3,10 +3,13 @@ package com.moare.android.ui.util
 import android.graphics.Rect
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
@@ -68,6 +71,30 @@ fun getOffsetOfAniCapsuleBar(
     return (itemWidth * index) + ((itemWidth - barWidth) / 2)
 }
 
+/**
+ * Calculate the CapsuleBar position for each item, considering different item widths.
+ *
+ * Example (barWidth = 20.dp):
+ * - Index 0: (itemWidths[0] - 20) / 2
+ * - Index 1: itemWidths[0] + (itemWidths[1] - 20) / 2
+ * - Index 2: itemWidths[0] + itemWidths[1] + (itemWidths[2] - 20) / 2
+ * - Index 3: itemWidths[0] + itemWidths[1] + itemWidths[2] + (itemWidths[3] - 20) / 2
+ */
+@Composable
+fun getOffsetOfAniCapsuleBar(
+    itemWidths: List<Dp>,
+    barWidth: Dp = 20.dp,
+    index: Int
+): Dp {
+    // 앞 아이템들의 width 합
+    val totalPreviousWidth = itemWidths.take(index).fold(0.dp) { acc, dp -> acc + dp }
+
+    // 현재 아이템의 위치에서 가운데에 bar를 정렬
+    val centerOffset = ((itemWidths.getOrNull(index) ?: 0.dp) - barWidth) / 2
+
+    return totalPreviousWidth + centerOffset
+}
+
 @Composable
 fun rememberKeyboardVisibility(): State<Boolean> {
     val context = LocalContext.current
@@ -117,6 +144,20 @@ fun CenterColumn(
         verticalArrangement = verticalArrangement,
         horizontalAlignment = horizontalAlignment,
         modifier = modifier,
+        content = content
+    )
+}
+
+// TODO: Text() 컴포넌트 수직 가운데 정렬할때 사용하려고 해당 함수 만들었는데, Text에 lineHeight 적용하니깐 수직 가운데 정렬 돼서, 해당 속성 적용하는걸로 리팩토링 필요.
+@Composable
+fun CenterBox(
+    modifier: Modifier = Modifier,
+    height: Dp,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.height(height),
         content = content
     )
 }

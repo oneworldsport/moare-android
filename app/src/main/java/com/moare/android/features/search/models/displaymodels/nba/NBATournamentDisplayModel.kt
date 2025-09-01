@@ -11,6 +11,7 @@ data class NBATournamentDisplayModel(
     override val leagueId: Int,
     override val keywords: List<Keyword>,
     override val entityInfo: List<EntityInfo>,
+    override val season: Int,
     val yearMonthList: List<String>,
     var games: List<NBAGame>
 ) : SportDisplayModel

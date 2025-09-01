@@ -107,14 +107,14 @@ class KBOGameStatsViewModel @Inject constructor(
         val teamHitters = teamHitters.value.toMutableList()
 
         when (secondCategorySelectedIndex.value) {
-            0 -> teamHitters.sortedByDescending { it.ab.toDoubleOrNull() ?: 0.0 }
-            1 -> teamHitters.sortedByDescending { it.h.toDoubleOrNull() ?: 0.0 }
-            2 -> teamHitters.sortedByDescending { it.hr.toDoubleOrNull() ?: 0.0 }
-            3 -> teamHitters.sortedByDescending { it.rbi.toDoubleOrNull() ?: 0.0 }
-            4 -> teamHitters.sortedByDescending { it.r.toDoubleOrNull() ?: 0.0 }
-            5 -> teamHitters.sortedByDescending { it.sb.toDoubleOrNull() ?: 0.0 }
-            6 -> teamHitters.sortedByDescending { it.bb.toDoubleOrNull() ?: 0.0 }
-            7 -> teamHitters.sortedByDescending { it.so.toDoubleOrNull() ?: 0.0 }
+            0 -> teamHitters.sortByDescending { it.ab }
+            1 -> teamHitters.sortByDescending { it.h }
+            2 -> teamHitters.sortByDescending { it.homeRuns }
+            3 -> teamHitters.sortByDescending { it.rbi }
+            4 -> teamHitters.sortByDescending { it.r }
+            5 -> teamHitters.sortByDescending { it.baseOnBalls }
+            6 -> teamHitters.sortByDescending { it.strikeOuts }
+            7 -> teamHitters.sortByDescending { it.groundIntoDoublePlay }
             else -> {}
         }
 
@@ -125,12 +125,12 @@ class KBOGameStatsViewModel @Inject constructor(
         val teamPitchers = teamPitchers.value.toMutableList()
 
         when (secondCategorySelectedIndex.value) {
-            0 -> teamPitchers.sortedByDescending { it.ip.toDoubleOrNull() ?: 0.0 }
-            1 -> teamPitchers.sortedByDescending { it.r.toDoubleOrNull() ?: 0.0 }
-            2 -> teamPitchers.sortedByDescending { it.er.toDoubleOrNull() ?: 0.0 }
-            3 -> teamPitchers.sortedByDescending { it.bb.toDoubleOrNull() ?: 0.0 }
-            4 -> teamPitchers.sortedByDescending { it.so.toDoubleOrNull() ?: 0.0 }
-            5 -> teamPitchers.sortedByDescending { it.h.toDoubleOrNull() ?: 0.0 }
+            0 -> teamPitchers.sortByDescending { it.ip.toDoubleOrNull() ?: 0.0 }
+            1 -> teamPitchers.sortByDescending { it.r.toDoubleOrNull() ?: 0.0 }
+            2 -> teamPitchers.sortByDescending { it.er.toDoubleOrNull() ?: 0.0 }
+            3 -> teamPitchers.sortByDescending { it.bb.toDoubleOrNull() ?: 0.0 }
+            4 -> teamPitchers.sortByDescending { it.so.toDoubleOrNull() ?: 0.0 }
+            5 -> teamPitchers.sortByDescending { it.h.toDoubleOrNull() ?: 0.0 }
             else -> {}
         }
 

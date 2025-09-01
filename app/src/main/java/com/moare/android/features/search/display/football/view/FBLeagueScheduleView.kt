@@ -57,6 +57,7 @@ fun FBLeagueScheduleView(
     /* ---------------------
        ui state
        --------------------- */
+    var shouldAnimateScroll by remember { mutableStateOf(true) }
 
     /* ---------------------
        viewmodel state
@@ -100,6 +101,11 @@ fun FBLeagueScheduleView(
                         searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
                     })
                 }
+
+                // 현재 뷰로 뒤로가기를 통해서 왔을때는 달력을 애니메이션 없이 이동
+                // NOTE: - 가장 처음에만 적용 안되는 버그 있음. 그 이후부터는 잘됨.
+                // - NBALeagueScheduleView에서는 작동안해서 일단 다른 뷰에는 추가 안함.
+                shouldAnimateScroll = false
             }
         }
     }
@@ -116,13 +122,16 @@ fun FBLeagueScheduleView(
                 selectedYearMonthIndex,
                 selectedDayIndex,
                 yearMonthCalendarScrollTrigger,
-                dayCalendarScrollTrigger
+                dayCalendarScrollTrigger,
+                shouldAnimateScroll
             ),
             isAllResultOpened = isAllResultOpened
         ),
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
                 onSelectYearMonth = { yearMonth, index ->
+                    shouldAnimateScroll = true
+
                     fbLeagueScheduleViewModel.send(FBLeagueScheduleIntent.SelectYearMonth(yearMonth, index) { data ->
                         // 현재 구조 콜백 수정 필요?
                         searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
@@ -170,6 +179,7 @@ fun FBLeagueScheduleList(
        --------------------- */
     val filteredGames by fbLeagueScheduleViewModel.filteredGames.collectAsState()
     val selectedDayIndex by fbLeagueScheduleViewModel.selectedDayIndex.collectAsState()
+    val teamNameDic = fbLeagueScheduleViewModel.teamNameDictionary
 
     val displayModels by searchViewModel.displayModels.collectAsState()
     val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
@@ -178,7 +188,7 @@ fun FBLeagueScheduleList(
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            FBLeagueScheduleListItem(data = item)
+            FBLeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
         }
 //        for (value in gameListToDisplay) {
 //            FBLeagueScheduleItem(data = value)
@@ -190,13 +200,16 @@ fun FBLeagueScheduleList(
 fun FBLeagueScheduleListItem(
     searchViewModel: SearchViewModel = hiltViewModel(),
     fbLeagueScheduleViewModel: FBLeagueScheduleViewModel = hiltViewModel(),
+    // FBLeagueScheduleViewModel이 한번도 초기화 된적 없이 FBGameStatsView에서 함수가 호출될때 teamNameDictionary를 fbLeagueScheduleViewModel에서 가져올수가 없어 추가.
+    // TODO: 그러면 결국 fbLeagueScheduleViewModel는 nullable이어도 된다는건데..?
+    teamNameDic: Map<String, String>,
     data: FBGameForSchedule,
 ) {
     val gameId = data.gameId
     val homeTeamId = data.homeTeamId
     val awayTeamId = data.awayTeamId
     val gameStatus = data.gameStatus
-    val teamNameDic = fbLeagueScheduleViewModel.teamNameDictionary
+    val gameInfo = data.gameInfo
 
     /* ---------------------
        ui state
@@ -217,9 +230,21 @@ fun FBLeagueScheduleListItem(
        --------------------- */
     val gameStatusText = when (gameStatus) {
         StringConstants.Football.GAME_NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.Football.GAME_FIRST_HALF -> StringConstants.Football.GAME_FIRST_HALF_STR
+        StringConstants.Football.GAME_FIRST_HALF -> {
+            if (gameInfo != null) {
+                "전반${gameInfo.status.elapsed}'"
+            } else {
+                StringConstants.Football.GAME_FIRST_HALF_STR
+            }
+        }
         StringConstants.Football.GAME_HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
-        StringConstants.Football.GAME_SECOND_HALF -> StringConstants.Football.GAME_SECOND_HALF_STR
+        StringConstants.Football.GAME_SECOND_HALF -> {
+            if (gameInfo != null) {
+                "후반${gameInfo.status.elapsed}'"
+            } else {
+                StringConstants.Football.GAME_SECOND_HALF_STR
+            }
+        }
         in StringConstants.Football.GAME_FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
         else -> ""
     }
@@ -248,7 +273,9 @@ fun FBLeagueScheduleListItem(
     }
     LaunchedEffect(fbGameStatsModel) {
         fbGameStatsModel?.let {
-            isResultOpened = true
+            if (gameStatus != StringConstants.Football.GAME_NOT_STARTED) {
+                isResultOpened = true
+            }
         }
     }
 
@@ -268,18 +295,16 @@ fun FBLeagueScheduleListItem(
             date = data.date,
             venue = teamNameDic["venue_${homeTeamId}"] ?: (fbGameStatsModel?.game?.fixture?.venue?.name ?: ""),
             gameType = MatchDescriptionConverter.convert(input = data.gameInfo?.round ?: ""),
-            referee = fbGameStatsModel?.game?.fixture?.referee,
             shouldShowOnlyDateTime = fbGameStatsModel == null,
             shouldShowVenue = fbGameStatsModel != null,
             shouldShowGameType = fbGameStatsModel == null,
-            shouldShowReferee = fbGameStatsModel != null,
             shouldShowHomeLabel = fbGameStatsModel != null,
             shouldShowAwayLabel = fbGameStatsModel != null
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
                 displayModel?.let {
-                    searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data, it.leagueId))
+                    searchViewModel.send(SearchViewModel.Intent.SelectFBGame(data, it.season, it.leagueId))
                 }
 
                 // set selected game's isOpened true

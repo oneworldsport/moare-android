@@ -1,5 +1,11 @@
 package com.moare.android.features.search.display.football.view
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,21 +13,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.R
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
@@ -33,7 +46,10 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamSta
 import com.moare.android.features.search.models.models.football.FBTeamStats
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.util.CenterColumn
+import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBTeamStatsView(
@@ -60,6 +76,7 @@ fun FBTeamStatsView(
 
     InfoViewContainer(
         itemCount = (statsList?.size ?: 0) + 1,
+        shouldShowMeasureContent = true,
         modifier = Modifier
             .verticalScroll(rememberScrollState()),
         measureContent = {
@@ -76,7 +93,8 @@ fun FBTeamStatsView(
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
                 aniPosition = aniPositions,
-                contentsAlpha = contentsAlpha
+                contentsAlpha = contentsAlpha,
+                measureContentAlpha = measureContentAlpha
             )
 
             FBTeamStatsList(
@@ -84,7 +102,8 @@ fun FBTeamStatsView(
                 itemSizes = itemSizes,
                 itemPositions = itemPositions,
                 aniPosition = aniPositions,
-                contentsAlpha = contentsAlpha
+                contentsAlpha = contentsAlpha,
+                measureContentAlpha = measureContentAlpha
             )
         }
     )
@@ -98,8 +117,9 @@ fun FBTeamStatsTeamInfoItem(
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
     aniPosition: Boolean = true,
-    contentsAlpha: Float = 0f,
+    contentsAlpha: Float = 1f,
     containerModifier: Modifier = Modifier,
+    measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by fbTeamStatsViewModel.displayModel.collectAsState()
@@ -117,21 +137,22 @@ fun FBTeamStatsTeamInfoItem(
                 updateItemPosition?.let { it(0, coordinates) }
             },
             verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = containerModifier.fillMaxWidth()
+            modifier = containerModifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
         ) {
-            HCapsuleBar()
-
             Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
+                    .padding(top = 8.dp)
                     .alpha(contentsAlpha)
             ) {
                 URLImage(url = team.logo)
 
                 // name
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(start = 4.dp)
                 ) {
                     Text(
                         text = fbTeamStatsViewModel.teamNameDictionary["full_${team.id}"] ?: team.name,
@@ -149,6 +170,7 @@ fun FBTeamStatsTeamInfoItem(
                 // venue
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(start = 8.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
@@ -191,31 +213,26 @@ fun FBTeamStatsList(
     itemSizes: Map<Int, DpSize>? = null,
     itemPositions: Map<Int, Offset>? = null,
     aniPosition: Boolean = true,
-    contentsAlpha: Float = 0f,
+    contentsAlpha: Float = 1f,
     containerModifier: Modifier = Modifier,
+    measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by fbTeamStatsViewModel.displayModel.collectAsState()
+    val statsList by fbTeamStatsViewModel.statsList.collectAsState()
 
-    displayModel?.let {
-        val statsList = it.stats
-
-        /* ---------------------
-           ui
-           --------------------- */
-        for ((index, value) in statsList.withIndex()) {
-            FBTeamStatsListItem(
-                index = index,
-                data = value,
-                isAniItem = isAniItem,
-                itemSizes = itemSizes,
-                itemPositions = itemPositions,
-                aniPosition = aniPosition,
-                contentsAlpha = contentsAlpha,
-                containerModifier = containerModifier,
-                updateItemPosition = updateItemPosition
-            )
-        }
+    for ((index, value) in statsList.withIndex()) {
+        FBTeamStatsListItem(
+            index = index,
+            data = value,
+            isAniItem = isAniItem,
+            itemSizes = itemSizes,
+            itemPositions = itemPositions,
+            aniPosition = aniPosition,
+            contentsAlpha = contentsAlpha,
+            containerModifier = containerModifier,
+            updateItemPosition = updateItemPosition,
+            measureContentAlpha = measureContentAlpha
+        )
     }
 }
 
@@ -229,6 +246,7 @@ fun FBTeamStatsListItem(
     aniPosition: Boolean,
     contentsAlpha: Float,
     containerModifier: Modifier = Modifier,
+    measureContentAlpha: Float,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)?
 ) {
     MovingCapsuleItemContainer(
@@ -242,12 +260,13 @@ fun FBTeamStatsListItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier
             .padding(top = if (isAniItem) 0.dp else 12.dp)
-            .padding(horizontal = if (isAniItem) 0.dp else 4.dp)
+            .padding(horizontal = 8.dp)
             .fillMaxWidth()
     ) {
         FBTeamStatsItem(
             data = data,
-            contentsAlpha = contentsAlpha
+            contentsAlpha = contentsAlpha,
+            measureContentAlpha = measureContentAlpha
         )
     }
 }
@@ -255,133 +274,169 @@ fun FBTeamStatsListItem(
 @Composable
 fun FBTeamStatsItem(
     data: FBTeamStats,
-    contentsAlpha: Float = 1f
+    contentsAlpha: Float,
+    measureContentAlpha: Float,
 ) {
+    var basicStatsOpenState by remember { mutableStateOf(true) }
+    var attackStatsOpenState by remember { mutableStateOf(false) }
+    var defendStatsOpenState by remember { mutableStateOf(false) }
+
     /* ---------------------
        ui
        --------------------- */
-    HCapsuleBar()
-
-    // league
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .padding(vertical = 4.dp)
-            .alpha(contentsAlpha)
-    ) {
-        LeagueTitle(
-            url = data.league.logo,
-            leagueName = data.league.name,
-            leagueSeason = data.league.season
-        )
-
-//        Text(
-//            text = " - ",
-//            fontWeight = FontWeight.Medium
-//        )
-//
-//        URLImage(
-//            url = stats.team.logo,
-//            customSize = 24.dp
-//        )
-//
-//        Text(
-//            text = EnNameTranslationUtils.translateByDic(TranslationType.TEAM, input = stats.team.name),
-//            fontWeight = FontWeight.Medium,
-//            modifier = Modifier.padding(start = 4.dp)
-//        )
-    }
-
-    // stats
-    Row(
+    CenterColumn(
         modifier = Modifier.alpha(contentsAlpha)
     ) {
-        FBStatDataItem(
-            category = "경기수",
-            data = data.fixtures.played.total.toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "승",
-            data = data.fixtures.wins.total.toString(),
-            customWidth = 80.dp
-        )
-        FBStatDataItem(
-            category = "무",
-            data = data.fixtures.draws.total.toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "패",
-            data = data.fixtures.loses.total.toString(),
-            customWidth = 80.dp
-        )
-//            FBTeamStatsDataItem(
-//                category = "득점",
-//                data = data
-//            )
-    }
+        // league
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(vertical = 4.dp)
+                .alpha(contentsAlpha)
+        ) {
+            LeagueTitle(
+                url = data.league.logo,
+                leagueName = data.league.name,
+                leagueSeason = data.league.season
+            )
+        }
 
-    Row(
-        modifier = Modifier.alpha(contentsAlpha)
-    ) {
-        FBStatDataItem(
-            category = "득점",
-            data = data.goals.teamGoalsFor.total.total.toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "경기당 평균득점",
-            data = data.goals.teamGoalsFor.average.total,
-            customCategoryFontSize = 11,
-            customWidth = 80.dp
-        )
-        FBStatDataItem(
-            category = "실점",
-            data = data.goals.teamGoalsAgainst.total.total.toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "경기당 평균실점",
-            data = data.goals.teamGoalsAgainst.average.total,
-            customCategoryFontSize = 11,
-            customWidth = 80.dp
-        )
-//            FBTeamStatsDataItem(
-//                category = "",
-//                data = data
-//            )
-    }
+        // stats
+        CenterRow(
+            modifier = Modifier
+                .clickable { basicStatsOpenState = !basicStatsOpenState }
+        ) {
+            Text(
+                text = "기본 기록",
+                modifier = Modifier
+                    .padding(end = 4.dp)
+            )
 
-    Row(
-        modifier = Modifier
-            .padding(bottom = 6.dp)
-            .alpha(contentsAlpha)
-    ) {
-        FBStatDataItem(
-            category = "득실차",
-            data = ((data.goals.teamGoalsFor.total.total) - (data.goals.teamGoalsAgainst.total.total)).toString(),
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "클린시트",
-            data = (data.cleanSheet?.total ?: 0).toString(),
-            customWidth = 80.dp
-        )
-        FBStatDataItem(
-            category = "홈성적",
-            data = "",
-            customWidth = 70.dp
-        )
-        FBStatDataItem(
-            category = "원정성적",
-            data = "",
-            customWidth = 80.dp
-        )
-//            FBTeamStatsDataItem(
-//                category = "",
-//                data = data
-//            )
+            Icon(
+                painter = painterResource(id = if (basicStatsOpenState) R.drawable.ic_round_arrow_drop_up_24 else R.drawable.ic_round_arrow_drop_down_24),
+                contentDescription = null,
+                tint = Color.Gray
+            )
+        }
+
+        AnimatedVisibility(
+            visible = basicStatsOpenState,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            CenterRow {
+                FBStatDataItem(
+                    category = "경기수",
+                    data = data.fixtures.played.total.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "승",
+                    data = data.fixtures.wins.total.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "무",
+                    data = data.fixtures.draws.total.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "패",
+                    data = data.fixtures.loses.total.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        CenterRow(
+            modifier = Modifier
+                .clickable { attackStatsOpenState = !attackStatsOpenState }
+        ) {
+            Text(
+                text = "공격 기록",
+                modifier = Modifier
+                    .padding(end = 4.dp)
+            )
+
+            Icon(
+                painter = painterResource(id = if (attackStatsOpenState) R.drawable.ic_round_arrow_drop_up_24 else R.drawable.ic_round_arrow_drop_down_24),
+                contentDescription = null,
+                tint = Color.Gray
+            )
+        }
+
+        AnimatedVisibility(
+            visible = attackStatsOpenState,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            CenterRow {
+                FBStatDataItem(
+                    category = "득점",
+                    data = data.goals.teamGoalsFor.total.total.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "경기당 평균득점",
+                    data = data.goals.teamGoalsFor.average.total,
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "득실차",
+                    data = ((data.goals.teamGoalsFor.total.total) - (data.goals.teamGoalsAgainst.total.total)).toString(),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        CenterRow(
+            modifier = Modifier
+                .clickable { defendStatsOpenState = !defendStatsOpenState }
+        ) {
+            Text(
+                text = "수비 기록",
+                modifier = Modifier
+                    .padding(end = 4.dp)
+            )
+
+            Icon(
+                painter = painterResource(id = if (defendStatsOpenState) R.drawable.ic_round_arrow_drop_up_24 else R.drawable.ic_round_arrow_drop_down_24),
+                contentDescription = null,
+                tint = Color.Gray
+            )
+        }
+
+        AnimatedVisibility(
+            visible = defendStatsOpenState,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            CenterRow {
+                FBStatDataItem(
+                    category = "실점",
+                    data = data.goals.teamGoalsAgainst.total.total.toString(),
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "경기당 평균실점",
+                    data = data.goals.teamGoalsAgainst.average.total,
+                    customCategoryFontSize = 11,
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "클린시트",
+                    data = (data.cleanSheet?.total ?: 0).toString(),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
     }
 }
 

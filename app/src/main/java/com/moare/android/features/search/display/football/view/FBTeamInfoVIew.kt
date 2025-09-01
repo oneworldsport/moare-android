@@ -19,15 +19,19 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.EnNameTranslationUtils
+import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
@@ -39,7 +43,9 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBTeamInfoView(
@@ -185,13 +191,6 @@ fun FBTeamInfoFirstItem(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
             URLImage(
                 url = team.logo,
                 modifier = Modifier.alpha(contentsAlpha)
@@ -250,13 +249,6 @@ fun FBTeamInfoSecondItem(
             horizontalAlignment = Alignment.Start,
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.alpha(contentsAlpha)
@@ -334,27 +326,16 @@ fun FBTeamInfoThirdItem(
             horizontalAlignment = Alignment.Start,
             modifier = containerModifier
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HCapsuleBar()
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Text(
+                text = buildAnnotatedString {
+                    append("홈구장: ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                        append(fbTeamInfoViewModel.teamNameDictionary["venue_${displayModel?.team?.id}"] ?: venue.name)
+                    }
+                },
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "홈구장: ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = fbTeamInfoViewModel.teamNameDictionary["venue_${displayModel?.team?.id}"] ?: venue.name,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            )
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -407,8 +388,6 @@ fun FBTeamInfoFourthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
             }
         ) {
-            HCapsuleBar()
-
             league?.let {
                 LeagueTitle(
                     url = league.logo,
@@ -419,33 +398,39 @@ fun FBTeamInfoFourthItem(
             }
 
             stats?.let {
-                Row(
+                CenterRow(
                     modifier = Modifier
                         .alpha(contentsAlpha)
+                        .fillMaxWidth()
                 ) {
                     FBStatDataItem(
                         category = "승",
-                        data = stats.fixtures.wins.total.toString()
+                        data = stats.fixtures.wins.total.toString(),
+                        modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "무",
-                        data = stats.fixtures.draws.total.toString()
+                        data = stats.fixtures.draws.total.toString(),
+                        modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "패",
-                        data = stats.fixtures.loses.total.toString()
+                        data = stats.fixtures.loses.total.toString(),
+                        modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "득점",
-                        data = stats.goals.teamGoalsFor.total.total.toString()
+                        data = stats.goals.teamGoalsFor.total.total.toString(),
+                        modifier = Modifier.weight(1f)
                     )
-
+                    StatsDivider()
                     FBStatDataItem(
                         category = "실점",
-                        data = stats.goals.teamGoalsAgainst.total.total.toString()
+                        data = stats.goals.teamGoalsAgainst.total.total.toString(),
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -485,8 +470,6 @@ fun FBTeamInfoFifthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
             }
         ) {
-            HCapsuleBar()
-
             Text(
                 text = "최근경기",
                 fontSize = 17.sp,
@@ -500,53 +483,55 @@ fun FBTeamInfoFifthItem(
                     modifier = Modifier
                         .alpha(contentsAlpha)
                 ) {
-                    Text(
-                        text = fbTeamInfoViewModel.teamNameDictionary["short_${lastGame.teams.home.id}"] ?: lastGame.teams.home.name,
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
                         modifier = Modifier.weight(1f)
-                    )
+                    ) {
+                        Text(
+                            text = fbTeamInfoViewModel.teamNameDictionary["short_${lastGame.teams.home.id}"] ?: lastGame.teams.home.name,
+                            fontSize = 15.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = " ${lastGame.goals.home}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if ((lastGame.goals.home) >= (lastGame.goals.away)) MaterialTheme.colors.primary else Color.Black
+                        )
+                    }
 
                     Text(
-                        text = lastGame.goals.home.toString(),
+                        text = " - ",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.3f),
-                        color = if ((lastGame.goals.home) >= (lastGame.goals.away)) MaterialTheme.colors.primary else Color.Black
                     )
 
-                    Text(
-                        text = " vs ",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.3f)
-                    )
-
-                    Text(
-                        text = lastGame.goals.away.toString(),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.3f),
-                        color = if ((lastGame.goals.away) >= (lastGame.goals.home)) MaterialTheme.colors.primary else Color.Black
-                    )
-
-                    Text(
-                        text = fbTeamInfoViewModel.teamNameDictionary["short_${lastGame.teams.away.id}"] ?: lastGame.teams.away.name,
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
-                    )
+                    ) {
+                        Text(
+                            text = "${lastGame.goals.away} ",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if ((lastGame.goals.away) >= (lastGame.goals.home)) MaterialTheme.colors.primary else Color.Black
+                        )
+
+                        Text(
+                            text = fbTeamInfoViewModel.teamNameDictionary["short_${lastGame.teams.away.id}"] ?: lastGame.teams.away.name,
+                            fontSize = 15.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(lastGame.fixture.date),
+                    text = CalendarUtil.formatDate(lastGame.fixture.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )
@@ -587,8 +572,6 @@ fun FBTeamInfoSixthItem(
                 searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
             }
         ) {
-            HCapsuleBar()
-
             Text(
                 text = "다음경기",
                 fontSize = 17.sp,
@@ -596,7 +579,7 @@ fun FBTeamInfoSixthItem(
                 modifier = Modifier.alpha(contentsAlpha)
             )
 
-            nextGame?.let {
+            if (nextGame != null) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -605,24 +588,23 @@ fun FBTeamInfoSixthItem(
                     Text(
                         text = fbTeamInfoViewModel.teamNameDictionary["short_${nextGame.teams.home.id}"] ?: nextGame.teams.home.name,
                         fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.End,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
 
                     Text(
-                        text = " vs ",
+                        text = "  vs  ",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(0.3f)
+                        textAlign = TextAlign.Center
                     )
 
                     Text(
                         text = fbTeamInfoViewModel.teamNameDictionary["short_${nextGame.teams.away.id}"] ?: nextGame.teams.away.name,
                         fontSize = 15.sp,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Start,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
@@ -630,7 +612,13 @@ fun FBTeamInfoSixthItem(
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(nextGame.fixture.date),
+                    text = CalendarUtil.formatDate(nextGame.fixture.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                    fontSize = 15.sp,
+                    modifier = Modifier.alpha(contentsAlpha)
+                )
+            } else {
+                Text(
+                    text = "예정된 경기가 없습니다.",
                     fontSize = 15.sp,
                     modifier = Modifier.alpha(contentsAlpha)
                 )

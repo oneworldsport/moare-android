@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.models.kbo
 
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -32,7 +33,10 @@ data class KBOGameInfo(
 data class KBOGameLineScoreInfo(
     val away: KBOGameLineScore,
     val home: KBOGameLineScore,
-)
+    @SerialName("currentInning") private val _currentInning: String? = null
+) {
+    val currentInning: String get() = _currentInning ?: ""
+}
 
 @Serializable
 data class KBOGameLineScore(
@@ -89,39 +93,49 @@ data class KBOGameLineup(
 @Serializable
 data class KBOGameHitterStats(
     @SerialName("id") private val _id: Int? = null,
-    @SerialName("ab") private val _ab: String? = null,
-    @SerialName("bb") private val _bb: String? = null,
-    @SerialName("e") private val _e: String? = null,
-    @SerialName("gdp") private val _gdp: String? = null,
-    @SerialName("h") private val _h: String? = null,
-    @SerialName("hr") private val _hr: String? = null,
     @SerialName("name") private val _name: String? = null,
-    @SerialName("r") private val _r: String? = null,
-    @SerialName("rbi") private val _rbi: String? = null,
-    @SerialName("sb") private val _sb: String? = null,
-    @SerialName("sf") private val _sf: String? = null,
-    @SerialName("so") private val _so: String? = null,
-    @SerialName("avg") private val _avg: String? = null,
-    @SerialName("batting_number") private val _battingNumber: Int? = null,
+    @SerialName("battingNumber") private val _battingNumber: Int? = null,
     @SerialName("position") private val _position: String? = null,
+    @SerialName("ab") private val _ab: Int? = null,
+    @SerialName("h") private val _h: Int? = null,
+    @SerialName("r") private val _r: Int? = null,
+    @SerialName("rbi") private val _rbi: Int? = null,
+    @SerialName("avg") private val _avg: String? = null,
+    @SerialName("airOuts") private val _airOuts: Int? = null,
+    @SerialName("groundOuts") private val _groundOuts: Int? = null,
+    @SerialName("groundIntoDoublePlay") private val _groundIntoDoublePlay: Int? = null,
+    @SerialName("sacBunts") private val _sacBunts: Int? = null,
+    @SerialName("sacFlies") private val _sacFlies: Int? = null,
+    @SerialName("doubles") private val _doubles: Int? = null,
+    @SerialName("homeRuns") private val _homeRuns: Int? = null,
+    @SerialName("strikeOuts") private val _strikeOuts: Int? = null,
+    @SerialName("baseOnBalls") private val _baseOnBalls: Int? = null,
+    @SerialName("hitByPitch") private val _hitByPitch: Int? = null,
     @SerialName("inningStats") private val _inningStats: List<KBOGameHitterInningStat>? = null,
+    @SerialName("stolenBases") private val _stolenBases: Int? = null,
+    @SerialName("errors") private val _errors: Int? = null,
 ) {
     val id: Int get() = _id ?: 0
-    val ab: String get() = _ab ?: "0" // 타수
-    val bb: String get() = _bb ?: "0" // 볼넷
-    val e: String get() = _e ?: "0" // 실책
-    val gdp: String get() = _gdp ?: "0" // 병살타
-    val h: String get() = _h ?: "0" // 안타
-    val hr: String get() = _hr ?: "0" // 홈런
     val name: String get() = _name ?: ""
-    val r: String get() = _r ?: "0" // 득점
-    val rbi: String get() = _rbi ?: "0" // 타점
-    val sb: String get() = _sb ?: "0" // 도루
-    val sf: String get() = _sf ?: "0" // 희생플라이
-    val so: String get() = _so ?: "0" // 삼진
-    val avg: String get() = _avg ?: "0.000" // 타율
     val battingNumber: Int get() = _battingNumber ?: 0
     val position: String get() = _position ?: ""
+    val ab: Int get() = _ab ?: 0 // 타수
+    val h: Int get() = _h ?: 0 // 안타
+    val r: Int get() = _r ?: 0 // 득점
+    val rbi: Int get() = _rbi ?: 0 // 타점
+    val avg: String get() = _avg ?: "0.000" // 타율
+    val airOuts: Int get() = _airOuts ?: 0 // 뜬공아웃
+    val groundOuts: Int get() = _groundOuts ?: 0 // 땅볼아웃
+    val groundIntoDoublePlay: Int get() = _groundIntoDoublePlay ?: 0 // 병살타
+    val sacBunts: Int get() = _sacBunts ?: 0 // 희생번트
+    val sacFlies: Int get() = _sacFlies ?: 0 // 희생플라이
+    val doubles: Int get() = _doubles ?: 0 // 2루타
+    val homeRuns: Int get() = _homeRuns ?: 0 // 홈런
+    val strikeOuts: Int get() = _strikeOuts ?: 0 // 삼진
+    val baseOnBalls: Int get() = _baseOnBalls ?: 0 // 볼넷
+    val hitByPitch: Int get() = _hitByPitch ?: 0 // 사구
+    val stolenBases: Int get() = _stolenBases ?: 0 // 도루
+    val errors: Int get() = _errors ?: 0 // 실책
 }
 
 @Serializable
@@ -174,4 +188,11 @@ data class KBOGamePitcherStats(
     val era: String get() = _era ?: "0.0" // 평균자책점
 }
 
-typealias KBOGameForSchedule = GameForSchedule<String>
+@Serializable
+data class KBOGameInfoForSchedule(
+    @SerialName("currentInning") private val _currentInning: String? = null
+) {
+    val currentInning: String get() = _currentInning ?: StringConstants.GAME_LIVE_STR
+}
+
+typealias KBOGameForSchedule = GameForSchedule<KBOGameInfoForSchedule>

@@ -123,7 +123,7 @@ class NBATeamStandingsViewModel @Inject constructor(
         var standings = standings.value.toMutableList()
 
         when (selectedCategoryIndex.value) {
-            0 -> standings.sortByDescending { calculateGamesBack(it.stats) }
+            0 -> standings.sortBy { calculateGamesBack(it.stats) }
             1 -> standings.sortByDescending { it.stats.winsPct }
             2 -> standings.sortByDescending { it.stats.wins }
             3 -> standings.sortBy { it.stats.losses }

@@ -17,6 +17,7 @@ object EnNameTranslationUtils {
 
     private val countryTranslationDic = mapOf(
         "Korea Republic" to "대한민국",
+        "Republic of Korea" to "대한민국",
         "England" to "영국"
     )
 

@@ -3,7 +3,9 @@ package com.moare.android.features.search.display.common.viewmodel
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.mvi.MVIViewModel
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
+import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,6 +96,9 @@ abstract class BaseScheduleViewModel<I, T>(
             Constants.Ids.SERIEA -> {
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_TEAM_DIC)
             }
+            Constants.Ids.MLS -> {
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.MLS_TEAM_DIC)
+            }
             Constants.Ids.NBA -> {
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
             }
@@ -113,6 +118,14 @@ abstract class BaseScheduleViewModel<I, T>(
     }
 
     open fun setDays(isInit: Boolean = false) {}
+
+    open fun setDefaultYearMonth(date: String) {
+        val defaultYearMonth = CalendarUtil.formatDate(date, TimeFormatType.YEAR_MONTH)
+        val defaultYearMonthIndex = yearMonthList.value.withIndex().first{ (_, value) -> value == defaultYearMonth }
+        _selectedYearMonth.value = defaultYearMonth
+        _selectedYearMonthIndex.value = defaultYearMonthIndex.index
+        _yearMonthCalendarScrollTrigger.value = UUID.randomUUID().toString()
+    }
 
     abstract fun toggleAllResult()
 }

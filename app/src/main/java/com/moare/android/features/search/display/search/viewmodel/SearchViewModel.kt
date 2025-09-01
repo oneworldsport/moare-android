@@ -2,11 +2,13 @@ package com.moare.android.features.search.display.search.viewmodel
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.ColorSpace.Model
 import android.util.Log
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.Constants
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.Trie
 import com.moare.android.core.util.getChosung
@@ -38,8 +40,11 @@ import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
@@ -168,20 +173,23 @@ class SearchViewModel @Inject constructor(
         data object ToggleSearchBar : Intent()
         data object ToggleAutoCompleteListVisibleState : Intent()
 
-        data class SelectFBGame(val game: FBGameForSchedule, val leagueId: Int) : Intent()
-        data class SelectNBAGame(val game: NBAGameForSchedule) : Intent()
-        data class SelectKBOGame(val game: KBOGameForSchedule) : Intent()
-        data class SelectMLBGame(val game: MLBGameForSchedule) : Intent()
+        data class SelectFBGame(val game: FBGameForSchedule, val season: Int, val leagueId: Int) : Intent()
+        data class SelectNBAGame(val game: NBAGameForSchedule, val season: Int) : Intent()
+        data class SelectKBOGame(val game: KBOGameForSchedule, val season: Int) : Intent()
+        data class SelectMLBGame(val game: MLBGameForSchedule, val season: Int) : Intent()
 
         data class GoBack(val activity: Activity?) : Intent()
 
-        data class ShowPlayerStats(val category: String? = null, val playerId: Int) : Intent()
+        data class ShowPlayerStats(val season: Int? = null, val category: String? = null, val playerId: Int) : Intent()
         data class ShowTeamStats(val teamId: Int) : Intent()
         data class ShowGameStats(val gameType: String) : Intent()
-        data class RefreshGame(val category: String) : Intent()
+        data class RefreshGame(val season: Int, val category: String) : Intent()
         data class SelectNBATournamentRound(val gameList: List<NBAGame>) : Intent()
+        data class SearchById(val id: String, val season: Int, val category: String, val dataType: String, val leagueId: Int) : Intent()
 
         data class UpdateLastViewStack(val data: SportDecodableModel) : Intent()
+
+        data class TestSearch(val viewForTest: SportDisplayType) : Intent()
     }
 
     enum class SearchType {
@@ -208,17 +216,19 @@ class SearchViewModel @Inject constructor(
                 is Intent.ToggleAutoCompleteListVisibleState -> toggleAutoCompleteListVisibleState()
                 is Intent.UpdateTextField -> updateTextField(intent.newValue, intent.updateAutoCompleteList)
                 is Intent.ToggleSearchBar -> toggleSearchBar()
-                is Intent.SelectFBGame -> selectFBGame(intent.game, intent.leagueId)
-                is Intent.SelectNBAGame -> selectNBAGame(intent.game)
-                is Intent.SelectKBOGame -> selectKBOGame(intent.game)
-                is Intent.SelectMLBGame -> selectMLBGame(intent.game)
+                is Intent.SelectFBGame -> selectFBGame(intent.game, intent.season, intent.leagueId)
+                is Intent.SelectNBAGame -> selectNBAGame(intent.game, intent.season)
+                is Intent.SelectKBOGame -> selectKBOGame(intent.game, intent.season)
+                is Intent.SelectMLBGame -> selectMLBGame(intent.game, intent.season)
                 is Intent.GoBack -> goBack(intent.activity)
-                is Intent.ShowPlayerStats -> showPlayerStats(intent.category, intent.playerId)
+                is Intent.ShowPlayerStats -> showPlayerStats(intent.season, intent.category, intent.playerId)
                 is Intent.ShowTeamStats -> showTeamStats(intent.teamId)
                 is Intent.ShowGameStats -> showGameStats(intent.gameType)
-                is Intent.RefreshGame -> refreshGame(intent.category)
+                is Intent.RefreshGame -> refreshGame(intent.season, intent.category)
                 is Intent.SelectNBATournamentRound -> selectNBATournamentRound(intent.gameList)
+                is Intent.SearchById -> searchById(intent.id, intent.season, intent.category, intent.dataType, intent.leagueId)
                 is Intent.UpdateLastViewStack -> updateLastViewStack(intent.data)
+                is Intent.TestSearch -> testSearch(intent.viewForTest)
             }
         }
     }
@@ -287,7 +297,6 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = data.displayModel }
                 is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = data.displayModel }
                 is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = data.displayModel }
-                is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.FBLeagueSchedule -> {
                     newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = data.displayModel
                     initialFBLeagueScheduleData = data.displayModel
@@ -300,7 +309,6 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
                 is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
                 is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
-                is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.NBALeagueSchedule -> {
                     newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel
                     initialNBALeagueScheduleData = data.displayModel
@@ -314,7 +322,6 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.KBOTeamInfo -> { newDisplayModels[SportDisplayType.KBO_TEAM_INFO] = data.displayModel }
                 is SportDecodableModel.KBOTeamStats -> { newDisplayModels[SportDisplayType.KBO_TEAM_STATS] = data.displayModel }
                 is SportDecodableModel.KBOTeamStandings -> { newDisplayModels[SportDisplayType.KBO_TEAM_STANDINGS] = data.displayModel }
-                is SportDecodableModel.KBOTeamSchedule -> { newDisplayModels[SportDisplayType.KBO_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.KBOLeagueSchedule -> {
                     newDisplayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE] = data.displayModel
                     initialKBOLeagueScheduleData = data.displayModel
@@ -327,7 +334,6 @@ class SearchViewModel @Inject constructor(
                 is SportDecodableModel.MLBTeamInfo -> { newDisplayModels[SportDisplayType.MLB_TEAM_INFO] = data.displayModel }
                 is SportDecodableModel.MLBTeamStats -> { newDisplayModels[SportDisplayType.MLB_TEAM_STATS] = data.displayModel }
                 is SportDecodableModel.MLBTeamStandings -> { newDisplayModels[SportDisplayType.MLB_TEAM_STANDINGS] = data.displayModel }
-                is SportDecodableModel.MLBTeamSchedule -> { newDisplayModels[SportDisplayType.MLB_TEAM_SCHEDULE] = data.displayModel }
                 is SportDecodableModel.MLBLeagueSchedule -> {
                     newDisplayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE] = data.displayModel
                     initialMLBLeagueScheduleData = data.displayModel
@@ -410,8 +416,9 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun selectFBGame(game: FBGameForSchedule, leagueId: Int) {
+    private suspend fun selectFBGame(game: FBGameForSchedule, season: Int, leagueId: Int) {
         val result = searchClient.fetchById(
+            season = season,
             category = "football",
             date = game.date,
             dataType = "football_game_stats",
@@ -424,8 +431,9 @@ class SearchViewModel @Inject constructor(
         updateMainDisplayModel(result.data, false)
     }
 
-    private suspend fun selectNBAGame(game: NBAGameForSchedule) {
+    private suspend fun selectNBAGame(game: NBAGameForSchedule, season: Int) {
         val result = searchClient.fetchById(
+            season = season,
             category = "basketball",
             date = game.date,
             dataType = "basketball_game_stats",
@@ -437,30 +445,60 @@ class SearchViewModel @Inject constructor(
         updateMainDisplayModel(result.data)
     }
 
-    private suspend fun selectKBOGame(game: KBOGameForSchedule) {
-        val result = searchClient.fetchById(
-            category = "baseball",
-            date = game.date,
-            dataType = "baseball_game_stats",
-            leagueId = Constants.Ids.KBO,
-            id = game.gameId
-        )
+    private suspend fun selectKBOGame(game: KBOGameForSchedule, season: Int) {
+        val modelConverter = ModelConverter()
 
-        addViewStack(result.data)
-        updateMainDisplayModel(result.data)
+        val dataModel: SportDecodableModel
+
+        // 취소된 경기는 DB에 데이터 없어서 KBOGameForSchedule을 사용해 KBOGameStatsView를 보여준다.
+        if (game.gameStatus.toIntOrNull() == StringConstants.KBO.GAME_CANCELED) {
+            val game = modelConverter.kboGameScheduleToGameConverter(game = game)
+
+            val responseModel = KBOGameStatsResponseModel(game = game)
+            dataModel = SportDecodableModel.KBOGameStats(responseModel, modelConverter.kboGameStatsConverter(responseModel))
+        } else {
+            val result = searchClient.fetchById(
+                season = season,
+                category = "baseball",
+                date = game.date,
+                dataType = "baseball_game_stats",
+                leagueId = Constants.Ids.KBO,
+                id = game.gameId
+            )
+
+            dataModel = result.data
+        }
+
+        addViewStack(dataModel)
+        updateMainDisplayModel(dataModel)
     }
 
-    private suspend fun selectMLBGame(game: MLBGameForSchedule) {
-        val result = searchClient.fetchById(
-            category = "baseball",
-            date = game.date,
-            dataType = "baseball_game_stats",
-            leagueId = Constants.Ids.MLB,
-            id = game.gameId
-        )
+    private suspend fun selectMLBGame(game: MLBGameForSchedule, season: Int) {
+        val modelConverter = ModelConverter()
 
-        addViewStack(result.data)
-        updateMainDisplayModel(result.data)
+        val dataModel: SportDecodableModel
+
+        // Postponed된 경기는 DB에 데이터 없어서 MLBGameForSchedule을 사용해 MLBGameStatsView를 보여준다.
+        if (game.gameStatus == StringConstants.MLB.GAME_POSTPONED) {
+            val game = modelConverter.mlbGameScheduleToGameConverter(game = game)
+
+            val responseModel = MLBGameStatsResponseModel(game = game)
+            dataModel = SportDecodableModel.MLBGameStats(responseModel, modelConverter.mlbGameStatsConverter(responseModel))
+        } else {
+            val result = searchClient.fetchById(
+                season = season,
+                category = "baseball",
+                date = game.date,
+                dataType = "baseball_game_stats",
+                leagueId = Constants.Ids.MLB,
+                id = game.gameId
+            )
+
+            dataModel = result.data
+        }
+
+        addViewStack(dataModel)
+        updateMainDisplayModel(dataModel)
     }
 
     private suspend fun goBack(activity: Activity?) {
@@ -505,7 +543,6 @@ class SearchViewModel @Inject constructor(
                         is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = viewToShow.displayModel }
                         is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = viewToShow.displayModel }
                         is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = viewToShow.displayModel }
-                        is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.FBLeagueSchedule -> {
                             if (lastView is SportDecodableModel.FBGameStats) {
                                 newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = initialFBLeagueScheduleData
@@ -521,7 +558,6 @@ class SearchViewModel @Inject constructor(
                         is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = viewToShow.displayModel }
                         is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = viewToShow.displayModel }
                         is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = viewToShow.displayModel }
-                        is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.NBALeagueSchedule -> {
                             if (lastView is SportDecodableModel.NBAGameStats) {
                                 newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = initialNBALeagueScheduleData
@@ -538,7 +574,6 @@ class SearchViewModel @Inject constructor(
                         is SportDecodableModel.KBOTeamInfo -> { newDisplayModels[SportDisplayType.KBO_TEAM_INFO] = viewToShow.displayModel }
                         is SportDecodableModel.KBOTeamStats -> { newDisplayModels[SportDisplayType.KBO_TEAM_STATS] = viewToShow.displayModel }
                         is SportDecodableModel.KBOTeamStandings -> { newDisplayModels[SportDisplayType.KBO_TEAM_STANDINGS] = viewToShow.displayModel }
-                        is SportDecodableModel.KBOTeamSchedule -> { newDisplayModels[SportDisplayType.KBO_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.KBOLeagueSchedule -> {
                             if (lastView is SportDecodableModel.KBOGameStats) {
                                 newDisplayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE] = initialKBOLeagueScheduleData
@@ -554,7 +589,6 @@ class SearchViewModel @Inject constructor(
                         is SportDecodableModel.MLBTeamInfo -> { newDisplayModels[SportDisplayType.MLB_TEAM_INFO] = viewToShow.displayModel }
                         is SportDecodableModel.MLBTeamStats -> { newDisplayModels[SportDisplayType.MLB_TEAM_STATS] = viewToShow.displayModel }
                         is SportDecodableModel.MLBTeamStandings -> { newDisplayModels[SportDisplayType.MLB_TEAM_STANDINGS] = viewToShow.displayModel }
-                        is SportDecodableModel.MLBTeamSchedule -> { newDisplayModels[SportDisplayType.MLB_TEAM_SCHEDULE] = viewToShow.displayModel }
                         is SportDecodableModel.MLBLeagueSchedule -> {
                             if (lastView is SportDecodableModel.MLBGameStats) {
                                 newDisplayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE] = initialMLBLeagueScheduleData
@@ -576,7 +610,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun showPlayerStats(category: String?, playerId: Int) {
+    private suspend fun showPlayerStats(season: Int?, category: String?, playerId: Int) {
         val modelConverter = ModelConverter()
 
         val dataModel: SportDecodableModel
@@ -598,6 +632,7 @@ class SearchViewModel @Inject constructor(
 
                     // TODO: Has to add loading
                     val result = searchClient.fetchById(
+                        season = season,
                         category = category,
                         dataType = "${category}_player_stats",
                         leagueId = leagueId,
@@ -708,10 +743,33 @@ class SearchViewModel @Inject constructor(
                 )
             }
 
+            is SportDecodableModel.KBOTeamStandings -> {
+                val team = lastView.responseModel.standings.find { team ->
+                    team.team.id == teamId
+                }
+
+                val responseModel = KBOTeamInfoResponseModel(info = team)
+                dataModel = SportDecodableModel.KBOTeamStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.kboTeamStatsConverter(responseModel)
+                )
+            }
             is SportDecodableModel.KBOTeamInfo -> {
                 dataModel = SportDecodableModel.KBOTeamStats(
                     responseModel = lastView.responseModel,
                     displayModel = modelConverter.kboTeamStatsConverter(lastView.responseModel)
+                )
+            }
+
+            is SportDecodableModel.MLBTeamStandings -> {
+                val team = lastView.responseModel.standings.find { team ->
+                    team.team.id == teamId
+                }
+
+                val responseModel = MLBTeamInfoResponseModel(info = team)
+                dataModel = SportDecodableModel.MLBTeamStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.mlbTeamStatsConverter(responseModel)
                 )
             }
             is SportDecodableModel.MLBTeamInfo -> {
@@ -835,7 +893,7 @@ class SearchViewModel @Inject constructor(
         _resultVisibleState.emit(true)
     }
 
-    private suspend fun refreshGame(category: String) {
+    private suspend fun refreshGame(season: Int, category: String) {
         try {
             when (val lastView = viewStack.value.lastOrNull()) {
                 is SportDecodableModel.FBGameStats -> {
@@ -843,6 +901,7 @@ class SearchViewModel @Inject constructor(
                     game?.let {
                         // TODO: Has to add loading
                         val result = searchClient.fetchById(
+                            season = season,
                             category = category,
                             date = it.fixture.date,
                             dataType = "${category}_game_stats",
@@ -868,10 +927,11 @@ class SearchViewModel @Inject constructor(
                         boxScoreTraditional?.let { boxScoreTraditional->
                             // TODO: Has to add loading
                             val result = searchClient.fetchById(
+                                season = season,
                                 category = category,
                                 date = gameSummary.date,
                                 dataType = "${category}_game_stats",
-                                leagueId = 90001,
+                                leagueId = Constants.Ids.NBA,
                                 id = boxScoreTraditional.gameId
                             )
 
@@ -881,6 +941,51 @@ class SearchViewModel @Inject constructor(
 
                                 updateLastViewStack(data)
                             }
+                        }
+                    }
+                }
+
+                is SportDecodableModel.KBOGameStats -> {
+                    val game = (displayModels.value[SportDisplayType.KBO_GAME_STATS] as? KBOGameStatsDisplayModel)?.game
+                    val gameInfo = game?.gameInfo
+                    gameInfo?.let {
+                        // TODO: Has to add loading
+                        val result = searchClient.fetchById(
+                            season = season,
+                            category = category,
+                            date = gameInfo.date,
+                            dataType = "${category}_game_stats",
+                            leagueId = Constants.Ids.KBO,
+                            id = gameInfo.gameId
+                        )
+
+                        if (result.data is SportDecodableModel.KBOGameStats) {
+                            val data = result.data
+                            updateMainDisplayModel(data = data, shouldReset = false)
+
+                            updateLastViewStack(data)
+                        }
+                    }
+                }
+
+                is SportDecodableModel.MLBGameStats -> {
+                    val game = (displayModels.value[SportDisplayType.MLB_GAME_STATS] as? MLBGameStatsDisplayModel)?.game
+                    game?.let {
+                        // TODO: Has to add loading
+                        val result = searchClient.fetchById(
+                            season = season,
+                            category = category,
+                            date = game.gameInfo.gameDate,
+                            dataType = "${category}_game_stats",
+                            leagueId = Constants.Ids.MLB,
+                            id = game.game.pk.toString()
+                        )
+
+                        if (result.data is SportDecodableModel.MLBGameStats) {
+                            val data = result.data
+                            updateMainDisplayModel(data = data, shouldReset = false)
+
+                            updateLastViewStack(data)
                         }
                     }
                 }
@@ -899,10 +1004,14 @@ class SearchViewModel @Inject constructor(
 
         when (val lastView = viewStack.value.lastOrNull()) {
             is SportDecodableModel.NBALeagueTournament-> {
-                val responseModel = NBAGameScheduleResponseModel(scheduledMonths = emptyList(), schedule = modelConverter.nbaGameListToGameScheduleListConverter(gameList))
-                dataModel = SportDecodableModel.NBATeamSchedule(
+                val responseModel = NBAGameScheduleResponseModel(
+                    scheduleType = ScheduleType.TEAM_FLAT,
+                    scheduledMonths = emptyList(),
+                    schedule = modelConverter.nbaGameListToGameScheduleListConverter(gameList)
+                )
+                dataModel = SportDecodableModel.NBALeagueSchedule(
                     responseModel = responseModel,
-                    displayModel = modelConverter.nbaTeamScheduleConverter(responseModel)
+                    displayModel = modelConverter.nbaLeagueScheduleConverter(responseModel)
                 )
             }
 
@@ -920,6 +1029,25 @@ class SearchViewModel @Inject constructor(
         _poppedView.emit(null)
 
         _resultVisibleState.emit(true)
+    }
+
+    private suspend fun searchById(
+        id: String,
+        season: Int,
+        category: String,
+        dataType: String, // TODO: Should make constants
+        leagueId: Int
+    ) {
+        val result = searchClient.fetchById(
+            season = season,
+            category = category,
+            dataType = dataType,
+            leagueId = leagueId,
+            id = id
+        )
+
+        addViewStack(result.data)
+        updateMainDisplayModel(result.data)
     }
 
     private suspend fun updateLastViewStack(data: SportDecodableModel) {
@@ -942,7 +1070,6 @@ class SearchViewModel @Inject constructor(
             is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = data.displayModel }
             is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = data.displayModel }
             is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = data.displayModel }
-            is SportDecodableModel.FBTeamSchedule -> { newDisplayModels[SportDisplayType.FB_TEAM_SCHEDULE] = data.displayModel }
             is SportDecodableModel.FBLeagueSchedule -> { newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = data.displayModel }
             is SportDecodableModel.FBGameStats -> { newDisplayModels[SportDisplayType.FB_GAME_STATS] = data.displayModel }
             // nba
@@ -952,7 +1079,6 @@ class SearchViewModel @Inject constructor(
             is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
             is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
             is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
-            is SportDecodableModel.NBATeamSchedule -> { newDisplayModels[SportDisplayType.NBA_TEAM_SCHEDULE] = data.displayModel }
             is SportDecodableModel.NBALeagueSchedule -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel }
             is SportDecodableModel.NBAGameStats -> { newDisplayModels[SportDisplayType.NBA_GAME_STATS] = data.displayModel }
             is SportDecodableModel.NBALeagueTournament -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT] = data.displayModel }
@@ -963,7 +1089,6 @@ class SearchViewModel @Inject constructor(
             is SportDecodableModel.KBOTeamInfo -> { newDisplayModels[SportDisplayType.KBO_TEAM_INFO] = data.displayModel }
             is SportDecodableModel.KBOTeamStats -> { newDisplayModels[SportDisplayType.KBO_TEAM_STATS] = data.displayModel }
             is SportDecodableModel.KBOTeamStandings -> { newDisplayModels[SportDisplayType.KBO_TEAM_STANDINGS] = data.displayModel }
-            is SportDecodableModel.KBOTeamSchedule -> { newDisplayModels[SportDisplayType.KBO_TEAM_SCHEDULE] = data.displayModel }
             is SportDecodableModel.KBOLeagueSchedule -> { newDisplayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE] = data.displayModel }
             is SportDecodableModel.KBOGameStats -> { newDisplayModels[SportDisplayType.KBO_GAME_STATS] = data.displayModel }
             // mlb
@@ -973,7 +1098,6 @@ class SearchViewModel @Inject constructor(
             is SportDecodableModel.MLBTeamInfo -> { newDisplayModels[SportDisplayType.MLB_TEAM_INFO] = data.displayModel }
             is SportDecodableModel.MLBTeamStats -> { newDisplayModels[SportDisplayType.MLB_TEAM_STATS] = data.displayModel }
             is SportDecodableModel.MLBTeamStandings -> { newDisplayModels[SportDisplayType.MLB_TEAM_STANDINGS] = data.displayModel }
-            is SportDecodableModel.MLBTeamSchedule -> { newDisplayModels[SportDisplayType.MLB_TEAM_SCHEDULE] = data.displayModel }
             is SportDecodableModel.MLBLeagueSchedule -> { newDisplayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE] = data.displayModel }
             is SportDecodableModel.MLBGameStats -> { newDisplayModels[SportDisplayType.MLB_GAME_STATS] = data.displayModel }
 
@@ -987,6 +1111,88 @@ class SearchViewModel @Inject constructor(
         stack.add(data)
         _viewStack.value = stack
         _poppedView.value = null
+    }
+
+    // test code
+    private suspend fun testSearch(viewForTest: SportDisplayType) {
+        try {
+            _searchState.emit(true)
+            toggleFocusState(false)
+
+            val result = searchClient.fetchFromJson(context, viewForTest)
+
+            // TODO: updateMainDisplayModel로 정리해야함
+            _displayModels.value = initialMap
+
+            val newDisplayModels = displayModels.value.toMutableMap()
+            when (val data = result.data) {
+                // football
+                is SportDecodableModel.FBPlayerInfo -> { newDisplayModels[SportDisplayType.FB_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.FBPlayerStats -> { newDisplayModels[SportDisplayType.FB_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.FBPlayerStandings -> { newDisplayModels[SportDisplayType.FB_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.FBTeamInfo -> { newDisplayModels[SportDisplayType.FB_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.FBTeamStats -> { newDisplayModels[SportDisplayType.FB_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.FBTeamStandings -> { newDisplayModels[SportDisplayType.FB_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.FBLeagueSchedule -> {
+                    newDisplayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] = data.displayModel
+                    initialFBLeagueScheduleData = data.displayModel
+                }
+                is SportDecodableModel.FBGameStats -> { newDisplayModels[SportDisplayType.FB_GAME_STATS] = data.displayModel }
+                // nba
+                is SportDecodableModel.NBAPlayerInfo -> { newDisplayModels[SportDisplayType.NBA_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.NBAPlayerStats -> { newDisplayModels[SportDisplayType.NBA_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.NBAPlayerStandings -> { newDisplayModels[SportDisplayType.NBA_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.NBATeamInfo -> { newDisplayModels[SportDisplayType.NBA_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.NBATeamStats -> { newDisplayModels[SportDisplayType.NBA_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.NBATeamStandings -> { newDisplayModels[SportDisplayType.NBA_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.NBALeagueSchedule -> {
+                    newDisplayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE] = data.displayModel
+                    initialNBALeagueScheduleData = data.displayModel
+                }
+                is SportDecodableModel.NBAGameStats -> { newDisplayModels[SportDisplayType.NBA_GAME_STATS] = data.displayModel }
+                is SportDecodableModel.NBALeagueTournament -> { newDisplayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT] = data.displayModel }
+                // kbo
+                is SportDecodableModel.KBOPlayerInfo -> { newDisplayModels[SportDisplayType.KBO_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.KBOPlayerStats -> { newDisplayModels[SportDisplayType.KBO_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.KBOPlayerStandings -> { newDisplayModels[SportDisplayType.KBO_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.KBOTeamInfo -> { newDisplayModels[SportDisplayType.KBO_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.KBOTeamStats -> { newDisplayModels[SportDisplayType.KBO_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.KBOTeamStandings -> { newDisplayModels[SportDisplayType.KBO_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.KBOLeagueSchedule -> {
+                    newDisplayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE] = data.displayModel
+                    initialKBOLeagueScheduleData = data.displayModel
+                }
+                is SportDecodableModel.KBOGameStats -> { newDisplayModels[SportDisplayType.KBO_GAME_STATS] = data.displayModel }
+                // mlb
+                is SportDecodableModel.MLBPlayerInfo -> { newDisplayModels[SportDisplayType.MLB_PLAYER_INFO] = data.displayModel }
+                is SportDecodableModel.MLBPlayerStats -> { newDisplayModels[SportDisplayType.MLB_PLAYER_STATS] = data.displayModel }
+                is SportDecodableModel.MLBPlayerStandings -> { newDisplayModels[SportDisplayType.MLB_PLAYER_STANDINGS] = data.displayModel }
+                is SportDecodableModel.MLBTeamInfo -> { newDisplayModels[SportDisplayType.MLB_TEAM_INFO] = data.displayModel }
+                is SportDecodableModel.MLBTeamStats -> { newDisplayModels[SportDisplayType.MLB_TEAM_STATS] = data.displayModel }
+                is SportDecodableModel.MLBTeamStandings -> { newDisplayModels[SportDisplayType.MLB_TEAM_STANDINGS] = data.displayModel }
+                is SportDecodableModel.MLBLeagueSchedule -> {
+                    newDisplayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE] = data.displayModel
+                    initialMLBLeagueScheduleData = data.displayModel
+                }
+                is SportDecodableModel.MLBGameStats -> { newDisplayModels[SportDisplayType.MLB_GAME_STATS] = data.displayModel }
+
+                else -> {
+                    throw IllegalArgumentException("Unknown data type")
+                }
+            }
+            _displayModels.value = newDisplayModels
+
+            // add viewStack
+            val stack = viewStack.value.toMutableList()
+            stack.add(result.data)
+            _viewStack.emit(stack)
+            _poppedView.emit(null)
+
+            _resultVisibleState.emit(true)
+        } catch (e: Exception) {
+            _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
+            Log.e("dsdf", e.localizedMessage ?: "data type error")
+        }
     }
 }
 
