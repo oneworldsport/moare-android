@@ -194,6 +194,7 @@ fun NBAGameStatsView(
     GameStatsViewContainer(
         state = GameStatsContainerState(
             shouldShowStats = displayModel?.game?.gameSummary?.gameStatusId != Constants.NBAGameStatus.NOT_STARTED,
+            shouldShowRefreshButton = displayModel?.game?.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE,
             teamCategories = teamCategories,
             secondCategories = StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,

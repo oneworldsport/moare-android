@@ -1,5 +1,7 @@
 package com.moare.android.features.search.display.common.container.component
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -77,7 +79,7 @@ fun StandingsRankItem(
 
             // TODO: goals, cards, number, captain
             Column(
-//                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .width(if (extraInfo != null || extraSubInfo != null) (width - 102.dp) else 0.dp)
                     .padding(start = 2.dp)

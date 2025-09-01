@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.R
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.dropFirstWord
 import com.moare.android.features.search.display.common.container.component.StandingsFirstCategoryItem
 import com.moare.android.features.search.display.common.container.component.StandingsRankItem
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -247,26 +248,28 @@ fun GameStatsViewContainer(
 //                                }
 
                                 // refresh button
-                                // TODO: Make it component
-                                Box(
-                                    Modifier
+                                if (state.shouldShowRefreshButton) {
+                                    // TODO: Make it component
+                                    Box(
+                                        Modifier
 //                                .padding(end = UIConstants.Padding.DEFAULT_H_PADDING)
-                                        .alpha(0.6f)
-                                        .border(
-                                            BorderStroke(1.dp, Color.Gray),
-                                            RoundedCornerShape(10.dp)
+                                            .alpha(0.6f)
+                                            .border(
+                                                BorderStroke(1.dp, Color.Gray),
+                                                RoundedCornerShape(10.dp)
+                                            )
+                                            .padding(2.dp)
+                                            .clickable {
+                                                actions.refreshButtonAction()
+                                            }
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_round_refresh_24),
+                                            contentDescription = null,
+                                            tint = Color.Gray,
+                                            modifier = Modifier.size(22.dp)
                                         )
-                                        .padding(2.dp)
-                                        .clickable {
-                                            actions.refreshButtonAction()
-                                        }
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_round_refresh_24),
-                                        contentDescription = null,
-                                        tint = Color.Gray,
-                                        modifier = Modifier.size(22.dp)
-                                    )
+                                    }
                                 }
                             }
                         }
@@ -379,7 +382,7 @@ fun GameStatsViewContainer(
                                         rank = item.numInfo ?: 0,
                                         imageUrl = item.imageUrl,
                                         isSvgLogo = item.isSvgLogo,
-                                        name = item.name,
+                                        name = item.name.dropFirstWord(),
                                         subName = item.subName,
                                         extraInfo = item.extraInfo,
                                         extraSubInfo = item.extraSubInfo,

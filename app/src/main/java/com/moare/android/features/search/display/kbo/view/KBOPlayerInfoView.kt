@@ -768,28 +768,28 @@ fun KBOPlayerInfoSeventhItem(
                             StatsDivider()
                             FBStatDataItem(
                                 category = "타수",
-                                data = lastGamePlayerHitterStats.ab,
+                                data = lastGamePlayerHitterStats.ab.toString(),
                                 customCategoryFontSize = 12,
                                 modifier = Modifier.weight(1f)
                             )
                             StatsDivider()
                             FBStatDataItem(
                                 category = "안타",
-                                data = lastGamePlayerHitterStats.h,
+                                data = lastGamePlayerHitterStats.h.toString(),
                                 customCategoryFontSize = 12,
                                 modifier = Modifier.weight(1f)
                             )
                             StatsDivider()
                             FBStatDataItem(
                                 category = "득점",
-                                data = lastGamePlayerHitterStats.r,
+                                data = lastGamePlayerHitterStats.r.toString(),
                                 customCategoryFontSize = 12,
                                 modifier = Modifier.weight(1f)
                             )
                             StatsDivider()
                             FBStatDataItem(
                                 category = "타점",
-                                data = lastGamePlayerHitterStats.rbi,
+                                data = lastGamePlayerHitterStats.rbi.toString(),
                                 customCategoryFontSize = 12,
                                 modifier = Modifier.weight(1f)
                             )

@@ -165,6 +165,22 @@ class MyApplication : Application() {
                         eTagKey = stringPreferencesKey("serieaTeamNameDictionaryETag")
                     )
                 }
+                launch {
+                    AWSUtils.checkNameDictionary(
+                        context = this@MyApplication,
+                        category = Constants.Keys.MLS_PLAYER_DIC,
+                        s3Key = "name_dictionary/mls_player_name_dictionary.json",
+                        eTagKey = stringPreferencesKey("mlsPlayerNameDictionaryETag")
+                    )
+                }
+                launch {
+                    AWSUtils.checkNameDictionary(
+                        context = this@MyApplication,
+                        category = Constants.Keys.MLS_TEAM_DIC,
+                        s3Key = "name_dictionary/mls_team_name_dictionary.json",
+                        eTagKey = stringPreferencesKey("mlsTeamNameDictionaryETag")
+                    )
+                }
             }
         } else {
             CoroutineScope(Dispatchers.IO).launch {
@@ -312,6 +328,22 @@ class MyApplication : Application() {
                         category = Constants.Keys.SERIEA_TEAM_DIC,
                         s3Key = "name_dictionary/seriea_team_name_dictionary.json",
                         eTagKey = stringPreferencesKey("serieaTeamNameDictionaryETag")
+                    )
+                }
+                launch {
+                    AWSUtils.checkNameDictionary(
+                        context = this@MyApplication,
+                        category = Constants.Keys.MLS_PLAYER_DIC,
+                        s3Key = "name_dictionary/mls_player_name_dictionary.json",
+                        eTagKey = stringPreferencesKey("mlsPlayerNameDictionaryETag")
+                    )
+                }
+                launch {
+                    AWSUtils.checkNameDictionary(
+                        context = this@MyApplication,
+                        category = Constants.Keys.MLS_TEAM_DIC,
+                        s3Key = "name_dictionary/mls_team_name_dictionary.json",
+                        eTagKey = stringPreferencesKey("mlsTeamNameDictionaryETag")
                     )
                 }
             }

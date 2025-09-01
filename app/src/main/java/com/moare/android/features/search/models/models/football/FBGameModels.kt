@@ -94,10 +94,13 @@ data class FBGameScore(
 data class FBGameLineups(
     val team: FBTeamInfo,
     val coach: FBPerson,
-    private val formation: String,
+    @SerialName("formation") private val _formation: String?,
     val startXI: List<FBGameStartXI> = emptyList(),
     val substitutes: List<FBGameStartXI> = emptyList()
-)
+) {
+    val formation: String
+        get() = _formation ?: ""
+}
 
 @Serializable
 data class FBGameColors(

@@ -218,28 +218,21 @@ fun FBTeamStatsList(
     measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by fbTeamStatsViewModel.displayModel.collectAsState()
+    val statsList by fbTeamStatsViewModel.statsList.collectAsState()
 
-    displayModel?.let {
-        val statsList = it.stats
-
-        /* ---------------------
-           ui
-           --------------------- */
-        for ((index, value) in statsList.withIndex()) {
-            FBTeamStatsListItem(
-                index = index,
-                data = value,
-                isAniItem = isAniItem,
-                itemSizes = itemSizes,
-                itemPositions = itemPositions,
-                aniPosition = aniPosition,
-                contentsAlpha = contentsAlpha,
-                containerModifier = containerModifier,
-                updateItemPosition = updateItemPosition,
-                measureContentAlpha = measureContentAlpha
-            )
-        }
+    for ((index, value) in statsList.withIndex()) {
+        FBTeamStatsListItem(
+            index = index,
+            data = value,
+            isAniItem = isAniItem,
+            itemSizes = itemSizes,
+            itemPositions = itemPositions,
+            aniPosition = aniPosition,
+            contentsAlpha = contentsAlpha,
+            containerModifier = containerModifier,
+            updateItemPosition = updateItemPosition,
+            measureContentAlpha = measureContentAlpha
+        )
     }
 }
 

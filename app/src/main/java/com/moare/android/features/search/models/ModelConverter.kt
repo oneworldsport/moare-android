@@ -51,11 +51,17 @@ import com.moare.android.features.search.models.models.football.FBLeague
 import com.moare.android.features.search.models.models.kbo.KBOGame
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
+import com.moare.android.features.search.models.models.kbo.KBOGameInfo
 import com.moare.android.features.search.models.models.kbo.KBOGameInfoForSchedule
 import com.moare.android.features.search.models.models.kbo.KBOGamePitcherStats
 import com.moare.android.features.search.models.models.mlb.MLBGame
+import com.moare.android.features.search.models.models.mlb.MLBGameData
 import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
+import com.moare.android.features.search.models.models.mlb.MLBGameInfo
 import com.moare.android.features.search.models.models.mlb.MLBGameInfoForSchedule
+import com.moare.android.features.search.models.models.mlb.MLBGameStatus
+import com.moare.android.features.search.models.models.mlb.MLBGameTeamDetail
+import com.moare.android.features.search.models.models.mlb.MLBGameTeams
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
@@ -801,9 +807,9 @@ class ModelConverter(
         val date = game.gameInfo.gameDate.split("+").firstOrNull()
         val homeTeamId = game.teams.home.id
         val awayTeamId = game.teams.away.id
-        val homeTeamScore = game.linescore.teams.home.runs
-        val awayTeamScore = game.linescore.teams.away.runs
-        val gameInfo = MLBGameInfoForSchedule(_currentInning = "${game.linescore.currentInning}회${if (game.linescore.isTopInning) "초" else "말"}")
+        val homeTeamScore = game.linescore?.teams?.home?.runs
+        val awayTeamScore = game.linescore?.teams?.away?.runs
+        val gameInfo = MLBGameInfoForSchedule(_currentInning = "${game.linescore?.currentInning ?: 1}회${if (game.linescore?.isTopInning ?: true) "초" else "말"}")
 
         return MLBGameForSchedule(
             _itemKey = if (date != null) "${date}#${game.game.id}" else "",
@@ -813,6 +819,20 @@ class ModelConverter(
             _awayTeamScore = awayTeamScore,
             _gameStatus = game.status.detailedState,
             gameInfo = gameInfo
+        )
+    }
+
+    fun mlbGameScheduleToGameConverter(game: MLBGameForSchedule): MLBGame {
+        val gameData = MLBGameData(_id = game.gameId)
+        val gameInfo = MLBGameInfo(_gameDate = game.date)
+        val status = MLBGameStatus(_detailedState = game.gameStatus)
+        val teams = MLBGameTeams(away = MLBGameTeamDetail(_id = game.awayTeamId), home = MLBGameTeamDetail(_id = game.homeTeamId))
+
+        return MLBGame(
+            game = gameData,
+            gameInfo = gameInfo,
+            status = status,
+            teams = teams
         )
     }
 
@@ -832,6 +852,20 @@ class ModelConverter(
             _awayTeamScore = awayTeamScore.toIntOrNull(),
             _gameStatus = game.gameInfo?.gameStatus,
             gameInfo = gameInfo
+        )
+    }
+
+    fun kboGameScheduleToGameConverter(game: KBOGameForSchedule): KBOGame {
+        return KBOGame(
+            gameInfo = KBOGameInfo(
+                _awayTeamId = game.awayTeamId,
+                _date = game.date,
+                _gameId = game.gameId,
+                _homeTeamId = game.homeTeamId,
+                _gameStatus = game.gameStatus
+            ),
+            lineScore = null,
+            lineup = null
         )
     }
 }

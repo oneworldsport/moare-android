@@ -674,8 +674,8 @@ fun MLBPlayerInfoSeventhItem(
             )
 
             lastGame?.let {
-                val homeTeamScore = it.linescore.teams.home.runs
-                val awayTeamScore = it.linescore.teams.away.runs
+                val homeTeamScore = it.linescore?.teams?.home?.runs ?: 0
+                val awayTeamScore = it.linescore?.teams?.away?.runs ?: 0
 
                 CenterRow(
                     modifier = Modifier
