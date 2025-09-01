@@ -19,6 +19,7 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsIntent
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsViewModel
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsIntent
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
@@ -30,6 +31,8 @@ fun FBTeamStandingsView(
     fbTeamStandingsViewModel: FBTeamStandingsViewModel = hiltViewModel(),
     data: FBTeamStandingsDisplayModel
 ) {
+    val headerCategories = listOf("서부 컨퍼런스", "동부 컨퍼런스")
+
     /* ---------------------
        ui state
        --------------------- */
@@ -39,6 +42,8 @@ fun FBTeamStandingsView(
        viewmodel state
        --------------------- */
     val displayModel by fbTeamStandingsViewModel.displayModel.collectAsState()
+    val isMLS by fbTeamStandingsViewModel.isMLS.collectAsState()
+    val selectedConferenceIndex by fbTeamStandingsViewModel.selectedConferenceIndex.collectAsState()
     val selectedCategoryIndex by fbTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
     val standings by fbTeamStandingsViewModel.standings.collectAsState()
     val teamNameDic = fbTeamStandingsViewModel.teamNameDictionary
@@ -79,12 +84,17 @@ fun FBTeamStandingsView(
 
     StandingsViewContainer(
         state = NewStandingsContainerState(
+            headerCategories = if (isMLS) headerCategories else null,
             secondCategories = StringConstants.Football.TEAM_STANDINGS_CATEGORIES,
             standings = teamStandings,
+            headerCategorySelectedIndex = selectedConferenceIndex,
             secondCategorySelectedIndex = selectedCategoryIndex,
             columnWidthList = columnWidthList
         ),
         actions = StandingsContainerActions(
+            headerCategoryButtonAction = { index ->
+                fbTeamStandingsViewModel.send(FBTeamStandingsIntent.SelectConference(index))
+            },
             secondCategoryButtonAction = { index, _ ->
                 fbTeamStandingsViewModel.send(FBTeamStandingsIntent.SelectCategory(index))
             },
