@@ -18,6 +18,18 @@ fun Int.percentageOf(total: Int, decimalPlaces: Int): Double {
 fun Int.toKg(decimalPlaces: Int = 0): Double = (this * 0.453592).rounded(decimalPlaces)
 fun Double.toKg(decimalPlaces: Int = 0): Double = (this * 0.453592).rounded(decimalPlaces)
 
+/**
+ * Use when only (possible)last name need
+ */
+fun String.dropFirstWord(): String {
+    val components = this.split(" ")
+    return if (components.size > 1) {
+        components.drop(1).joinToString(" ")
+    } else {
+        this
+    }
+}
+
 // TODO: 함수 다른곳에서 다시 정리 필요
 fun toCm(feet: Int, inches: Int, decimalPlaces: Int = 0): Double {
     val totalInches = feet * 12 + inches

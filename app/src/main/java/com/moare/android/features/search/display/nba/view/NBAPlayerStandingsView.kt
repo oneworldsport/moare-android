@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.core.util.dropFirstWord
 import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
@@ -97,7 +98,7 @@ fun NBAPlayerStandingsView(
         StandingsItemState(
             id = id,
             imageUrl = NBAUtil.playerPhotoUrl(id),
-            name = playerNameDic["${id}"] ?: it.player.displayFirstLast,
+            name = playerNameDic["${id}"]?.dropFirstWord() ?: it.player.displayFirstLast.dropFirstWord(),
             subName = teamNameDic["short_${it.player.teamId}"] ?: it.player.teamCity,
             dataList = listOf(
                 stats.ptsPG.toString(),

@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.R
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.dropFirstWord
 import com.moare.android.features.search.display.common.container.component.StandingsFirstCategoryItem
 import com.moare.android.features.search.display.common.container.component.StandingsRankItem
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -381,7 +382,7 @@ fun GameStatsViewContainer(
                                         rank = item.numInfo ?: 0,
                                         imageUrl = item.imageUrl,
                                         isSvgLogo = item.isSvgLogo,
-                                        name = item.name,
+                                        name = item.name.dropFirstWord(),
                                         subName = item.subName,
                                         extraInfo = item.extraInfo,
                                         extraSubInfo = item.extraSubInfo,
