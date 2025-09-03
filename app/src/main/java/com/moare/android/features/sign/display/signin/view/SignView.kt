@@ -164,13 +164,6 @@ fun SignView(
         }
     }
 
-    LaunchedEffect(text) {
-        if (currentFlow == SignFlow.SIGN_UP_NICKNAME) {
-            delay(2000)
-            signViewModel.send(SignIntent.CheckNickname)
-        }
-    }
-
     CenterColumn(
         modifier = Modifier
             .fillMaxSize()

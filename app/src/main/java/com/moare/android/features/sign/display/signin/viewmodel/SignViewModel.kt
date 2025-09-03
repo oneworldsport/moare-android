@@ -107,7 +107,7 @@ class SignViewModel @Inject constructor(
         }
     }
 
-    private fun selectIdType(index: Int) {
+    private suspend fun selectIdType(index: Int) {
         _idTypeSelectedIndex.value = index
 
         if (index == 0) {
@@ -122,12 +122,12 @@ class SignViewModel @Inject constructor(
         checkValidation()
     }
 
-    private fun updateText(text: String) {
+    private suspend fun updateText(text: String) {
         _text.value = text
         checkValidation()
     }
 
-    private fun checkValidation() {
+    private suspend fun checkValidation() {
         when (currentFlow.value) {
             SignFlow.LOGIN_ID, SignFlow.SIGN_UP_ID -> {
                 if (idType.value == AuthMethod.EMAIL) {
@@ -149,6 +149,8 @@ class SignViewModel @Inject constructor(
 
             }
             SignFlow.SIGN_UP_NICKNAME -> {
+                delay(2000)
+                checkNickname()
             }
             SignFlow.SIGN_UP_SPORTS_INTERESTS -> {
 
