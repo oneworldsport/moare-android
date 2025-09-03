@@ -94,10 +94,13 @@ data class FBGameScore(
 data class FBGameLineups(
     val team: FBTeamInfo,
     val coach: FBPerson,
-    private val formation: String,
+    @SerialName("formation") private val _formation: String?,
     val startXI: List<FBGameStartXI> = emptyList(),
     val substitutes: List<FBGameStartXI> = emptyList()
-)
+) {
+    val formation: String
+        get() = _formation ?: ""
+}
 
 @Serializable
 data class FBGameColors(
@@ -226,10 +229,9 @@ data class FBGamePlayerStatsGames(
 @Serializable
 data class FBGameInfoForSchedule(
     @SerialName("round") private val _round: String? = null,
-    @SerialName("elapsed") private val _elapsed: Int? = null
+    val status: FBGameStatus
 ) {
     val round: String get() = _round ?: ""
-    val elapsed: Int get() = _elapsed ?: 0
 }
 
 typealias FBGameForSchedule = GameForSchedule<FBGameInfoForSchedule>

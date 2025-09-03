@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.models.mlb
 
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -10,13 +11,13 @@ data class MLBGame(
     val decisions: MLBGameDecisions? = null,
     val game: MLBGameData,
     val gameInfo: MLBGameInfo,
-    val linescore: MLBGameLineScore,
-    val moundVisits: MLBGameMoundVisits,
-    val probablePitchers: MLBGameProbablePitchers,
-    val review: MLBGameReview,
+    val linescore: MLBGameLineScore? = null,
+    val moundVisits: MLBGameMoundVisits? = null,
+    val probablePitchers: MLBGameProbablePitchers? = null,
+    val review: MLBGameReview? = null,
     val status: MLBGameStatus,
     val teams: MLBGameTeams,
-    val weather: MLBGameWeather
+    val weather: MLBGameWeather? = null
 )
 
 @Serializable
@@ -187,11 +188,11 @@ data class MLBGameLineScore(
     val teams: MLBGameLineScoreTeams
 ) {
     val balls: Int get() = _balls ?: 0
-    val currentInning: Int get() = _currentInning ?: 0
+    val currentInning: Int get() = _currentInning ?: 1
     val currentInningOrdinal: String get() = _currentInningOrdinal ?: ""
     val inningHalf: String get() = _inningHalf ?: ""
     val inningState: String get() = _inningState ?: ""
-    val isTopInning: Boolean get() = _isTopInning ?: false
+    val isTopInning: Boolean get() = _isTopInning ?: true
     val outs: Int get() = _outs ?: 0
     val scheduledInnings: Int get() = _scheduledInnings ?: 0
     val strikes: Int get() = _strikes ?: 0
@@ -305,10 +306,10 @@ data class MLBGameTeamDetail(
     @SerialName("abbreviation") private val _abbreviation: String? = null,
     @SerialName("allStarStatus") private val _allStarStatus: String? = null,
     @SerialName("clubName") private val _clubName: String? = null,
-    val division: MLBNameObj,
+    val division: MLBNameObj? = null,
     @SerialName("franchiseName") private val _franchiseName: String? = null,
     @SerialName("id") private val _id: Int? = null,
-    val league: MLBNameObj,
+    val league: MLBNameObj? = null,
     @SerialName("locationName") private val _locationName: String? = null,
     @SerialName("name") private val _name: String? = null,
     val record: MLBGameTeamRecord? = null,
@@ -386,9 +387,9 @@ data class MLBGameWeather(
 
 @Serializable
 data class MLBGameInfoForSchedule(
-    @SerialName("currentInning") private val _currentInning: Int? = null
+    @SerialName("currentInning") private val _currentInning: String? = null
 ) {
-    val currentInning: Int get() = _currentInning ?: 0
+    val currentInning: String get() = _currentInning ?: StringConstants.GAME_LIVE_STR
 }
 
 typealias MLBGameForSchedule = GameForSchedule<MLBGameInfoForSchedule>

@@ -1,19 +1,13 @@
 package com.moare.android.features.search.display.mlb.view
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -24,23 +18,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.KBOUtil
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.features.search.display.common.container.component.StandingsRankItem
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
-import com.moare.android.features.search.display.common.container.state.StandingsContainerState
-import com.moare.android.features.search.display.common.container.view.NewStandingsViewContainer
+import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -49,13 +38,8 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandin
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.URLImage
-import com.moare.android.ui.common.components.VCapsuleBar
-import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterBox
 import com.moare.android.ui.util.CenterColumn
-import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
-import com.moare.android.ui.util.screenWidthDp
 
 @Composable
 fun MLBTeamStandingsView(
@@ -73,7 +57,6 @@ fun MLBTeamStandingsView(
        --------------------- */
     val displayModel by mlbTeamStandingsViewModel.displayModel.collectAsState()
     val selectedCategoryIndex by mlbTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
-    val isKeyword by mlbTeamStandingsViewModel.isKeyword.collectAsState()
     val headerCategorySelectedIndex by mlbTeamStandingsViewModel.headerCategorySelectedIndex.collectAsState()
     val westStandings by mlbTeamStandingsViewModel.westStandings.collectAsState()
     val eastStandings by mlbTeamStandingsViewModel.eastStandings.collectAsState()
@@ -84,14 +67,6 @@ fun MLBTeamStandingsView(
     val poppedView by searchViewModel.poppedView.collectAsState()
 
     /* ---------------------
-       etc
-       --------------------- */
-    val selectedCategoryPosition = with(LocalDensity.current) {
-        val position = mlbTeamStandingsViewModel.dataItemWidth * selectedCategoryIndex
-        position.toPx()
-    }.toInt()
-
-    /* ---------------------
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
@@ -100,20 +75,7 @@ fun MLBTeamStandingsView(
         }
     }
 
-    // scroll to category that matches with the keyword
-    LaunchedEffect(isKeyword) {
-        if (isKeyword) {
-            horizontalScrollState.animateScrollTo(
-                value = selectedCategoryPosition,
-                animationSpec = tween(
-                    durationMillis = 500,
-                    easing = LinearOutSlowInEasing
-                )
-            )
-        }
-    }
-
-    NewStandingsViewContainer(
+    StandingsViewContainer(
         state = NewStandingsContainerState(
             headerCategories = StringConstants.MLB.CONFERENCE_CATEGORY,
             secondCategories = StringConstants.MLB.TEAM_STANDINGS_CATEGORIES,
@@ -136,7 +98,7 @@ fun MLBTeamStandingsView(
             BaseballLeagueTitle(
                 url = MLBUtil.mlbLogoUrl,
                 leagueName = "MLB",
-                leagueSeason = season ?: 2025
+                leagueSeason = season
             )
         },
         customListContent = { hScrollState ->

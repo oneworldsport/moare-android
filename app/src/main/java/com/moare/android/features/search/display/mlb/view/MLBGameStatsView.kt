@@ -1,12 +1,6 @@
 package com.moare.android.features.search.display.mlb.view
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,16 +8,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -40,29 +30,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.moare.android.R
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.KBOUtil
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
-import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
-import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.common.container.view.NewStandingsViewContainer
-import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsIntent
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
@@ -72,15 +54,12 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDi
 import com.moare.android.features.search.models.models.mlb.MLBGameLineScoreInning
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.CapsuleButton
-import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.HCapsuleBarSize
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterColumn
-import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 
 @Composable
 fun MLBGameStatsView(
@@ -106,7 +85,7 @@ fun MLBGameStatsView(
     val teamNameDic = mlbGameStatsViewModel.teamNameDictionary
 
     val game = displayModel?.game
-    val season = game?.game?.season?.toIntOrNull() ?: 2025
+    val season = game?.game?.season?.toIntOrNull()
 
     val poppedView by searchViewModel.poppedView.collectAsState()
 
@@ -188,6 +167,7 @@ fun MLBGameStatsView(
     GameStatsViewContainer(
         state = GameStatsContainerState(
             shouldShowStats = game?.status?.detailedState != StringConstants.MLB.GAME_SCHEDULED,
+            shouldShowRefreshButton = game?.status?.detailedState == StringConstants.MLB.GAME_LIVE,
             teamCategories = teamCategories,
             secondCategories = StringConstants.MLB.GAME_STATS_HITTING_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,
@@ -268,7 +248,7 @@ fun MLBGameStatsScoreInfoItem(
        --------------------- */
     val gameStatusText = when (gameStatus) {
         StringConstants.MLB.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.MLB.GAME_LIVE -> "${game.linescore.currentInning}회${if (game.linescore.isTopInning) "초" else "말"}"
+        StringConstants.MLB.GAME_LIVE -> "${game.linescore?.currentInning ?: 1}회${if (game.linescore?.isTopInning ?: true) "초" else "말"}"
         StringConstants.MLB.GAME_POSTPONED -> StringConstants.GAME_POSTPONED_STR
         in StringConstants.MLB.GAME_FINISHED_LIST -> StringConstants.GAME_FINISHED_STR
         else -> ""
@@ -371,8 +351,8 @@ fun RowScope.MLBGameStatsLineScoreContainer(
         val game = it.game
         val isGameScheduled = game.status.detailedState == StringConstants.MLB.GAME_SCHEDULED
         val lineScore = game.linescore
-        val homeTeamLineScore = lineScore.teams.home.runs
-        val awayTeamLineScore = lineScore.teams.away.runs
+        val homeTeamLineScore = lineScore?.teams?.home?.runs ?: 0
+        val awayTeamLineScore = lineScore?.teams?.away?.runs ?: 0
 
         Row(
             modifier = Modifier
@@ -444,7 +424,7 @@ fun RowScope.MLBGameStatsLineScoreContainer(
             Column(
                 Modifier.weight(1f)
             ) {
-                MLBGameStatsLineScoreTitle(lineScore.innings)
+                MLBGameStatsLineScoreTitle(lineScore?.innings ?: emptyList())
 
                 Box(
                     Modifier
@@ -455,7 +435,7 @@ fun RowScope.MLBGameStatsLineScoreContainer(
                         .alpha(0.5f)
                 )
 
-                MLBGameStatsLineScoreItem(isHome = false, lineScoreInnings = lineScore.innings)
+                MLBGameStatsLineScoreItem(isHome = false, lineScoreInnings = lineScore?.innings ?: emptyList())
 
                 Box(
                     Modifier
@@ -466,7 +446,7 @@ fun RowScope.MLBGameStatsLineScoreContainer(
                         .alpha(0.5f)
                 )
 
-                MLBGameStatsLineScoreItem(isHome = true, lineScoreInnings = lineScore.innings)
+                MLBGameStatsLineScoreItem(isHome = true, lineScoreInnings = lineScore?.innings ?: emptyList())
             }
         }
     }

@@ -194,6 +194,7 @@ fun NBAGameStatsView(
     GameStatsViewContainer(
         state = GameStatsContainerState(
             shouldShowStats = displayModel?.game?.gameSummary?.gameStatusId != Constants.NBAGameStatus.NOT_STARTED,
+            shouldShowRefreshButton = displayModel?.game?.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE,
             teamCategories = teamCategories,
             secondCategories = StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,
@@ -226,7 +227,7 @@ fun NBAGameStatsView(
             ) {
                 NBATitle(
                     leagueName = "NBA",
-                    leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: 2024
+                    leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: CalendarUtil.currentYear
                 )
 
                 Text(
@@ -491,34 +492,15 @@ fun NBAGameStatsLineScoreTitle(
             .fillMaxWidth()
             .height(25.dp)
     ) {
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-        Text(
-            text = "1",
-            textAlign = TextAlign.Center,
-            fontSize = 15.sp,
-            modifier = Modifier.weight(1f)
-        )
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-        Text(
-            text = "2",
-            textAlign = TextAlign.Center,
-            fontSize = 15.sp,
-            modifier = Modifier.weight(1f)
-        )
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-        Text(
-            text = "3",
-            textAlign = TextAlign.Center,
-            fontSize = 15.sp,
-            modifier = Modifier.weight(1f)
-        )
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-        Text(
-            text = "4",
-            textAlign = TextAlign.Center,
-            fontSize = 15.sp,
-            modifier = Modifier.weight(1f)
-        )
+        for (index in 1 until 5) {
+            VCapsuleBar(modifier = Modifier.alpha(0.5f))
+            Text(
+                text = "$index",
+                textAlign = TextAlign.Center,
+                fontSize = 15.sp,
+                modifier = Modifier.weight(1f)
+            )
+        }
 
         if (lineScore.ptsOt1 != null && lineScore.ptsOt1 != 0) {
             VCapsuleBar(modifier = Modifier.alpha(0.5f))

@@ -2,11 +2,13 @@ package com.moare.android.features.search.display.search.viewmodel
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.ColorSpace.Model
 import android.util.Log
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.Constants
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.Trie
 import com.moare.android.core.util.getChosung
@@ -40,7 +42,9 @@ import com.moare.android.features.search.models.responsemodels.football.FBPlayer
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
@@ -442,31 +446,59 @@ class SearchViewModel @Inject constructor(
     }
 
     private suspend fun selectKBOGame(game: KBOGameForSchedule, season: Int) {
-        val result = searchClient.fetchById(
-            season = season,
-            category = "baseball",
-            date = game.date,
-            dataType = "baseball_game_stats",
-            leagueId = Constants.Ids.KBO,
-            id = game.gameId
-        )
+        val modelConverter = ModelConverter()
 
-        addViewStack(result.data)
-        updateMainDisplayModel(result.data)
+        val dataModel: SportDecodableModel
+
+        // 취소된 경기는 DB에 데이터 없어서 KBOGameForSchedule을 사용해 KBOGameStatsView를 보여준다.
+        if (game.gameStatus.toIntOrNull() == StringConstants.KBO.GAME_CANCELED) {
+            val game = modelConverter.kboGameScheduleToGameConverter(game = game)
+
+            val responseModel = KBOGameStatsResponseModel(game = game)
+            dataModel = SportDecodableModel.KBOGameStats(responseModel, modelConverter.kboGameStatsConverter(responseModel))
+        } else {
+            val result = searchClient.fetchById(
+                season = season,
+                category = "baseball",
+                date = game.date,
+                dataType = "baseball_game_stats",
+                leagueId = Constants.Ids.KBO,
+                id = game.gameId
+            )
+
+            dataModel = result.data
+        }
+
+        addViewStack(dataModel)
+        updateMainDisplayModel(dataModel)
     }
 
     private suspend fun selectMLBGame(game: MLBGameForSchedule, season: Int) {
-        val result = searchClient.fetchById(
-            season = season,
-            category = "baseball",
-            date = game.date,
-            dataType = "baseball_game_stats",
-            leagueId = Constants.Ids.MLB,
-            id = game.gameId
-        )
+        val modelConverter = ModelConverter()
 
-        addViewStack(result.data)
-        updateMainDisplayModel(result.data)
+        val dataModel: SportDecodableModel
+
+        // Postponed된 경기는 DB에 데이터 없어서 MLBGameForSchedule을 사용해 MLBGameStatsView를 보여준다.
+        if (game.gameStatus == StringConstants.MLB.GAME_POSTPONED) {
+            val game = modelConverter.mlbGameScheduleToGameConverter(game = game)
+
+            val responseModel = MLBGameStatsResponseModel(game = game)
+            dataModel = SportDecodableModel.MLBGameStats(responseModel, modelConverter.mlbGameStatsConverter(responseModel))
+        } else {
+            val result = searchClient.fetchById(
+                season = season,
+                category = "baseball",
+                date = game.date,
+                dataType = "baseball_game_stats",
+                leagueId = Constants.Ids.MLB,
+                id = game.gameId
+            )
+
+            dataModel = result.data
+        }
+
+        addViewStack(dataModel)
+        updateMainDisplayModel(dataModel)
     }
 
     private suspend fun goBack(activity: Activity?) {
@@ -711,10 +743,33 @@ class SearchViewModel @Inject constructor(
                 )
             }
 
+            is SportDecodableModel.KBOTeamStandings -> {
+                val team = lastView.responseModel.standings.find { team ->
+                    team.team.id == teamId
+                }
+
+                val responseModel = KBOTeamInfoResponseModel(info = team)
+                dataModel = SportDecodableModel.KBOTeamStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.kboTeamStatsConverter(responseModel)
+                )
+            }
             is SportDecodableModel.KBOTeamInfo -> {
                 dataModel = SportDecodableModel.KBOTeamStats(
                     responseModel = lastView.responseModel,
                     displayModel = modelConverter.kboTeamStatsConverter(lastView.responseModel)
+                )
+            }
+
+            is SportDecodableModel.MLBTeamStandings -> {
+                val team = lastView.responseModel.standings.find { team ->
+                    team.team.id == teamId
+                }
+
+                val responseModel = MLBTeamInfoResponseModel(info = team)
+                dataModel = SportDecodableModel.MLBTeamStats(
+                    responseModel = responseModel,
+                    displayModel = modelConverter.mlbTeamStatsConverter(responseModel)
                 )
             }
             is SportDecodableModel.MLBTeamInfo -> {

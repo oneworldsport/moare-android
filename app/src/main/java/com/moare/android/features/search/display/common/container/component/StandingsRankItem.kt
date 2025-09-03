@@ -1,5 +1,7 @@
 package com.moare.android.features.search.display.common.container.component
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -36,10 +38,12 @@ fun StandingsRankItem(
     isLastItem: Boolean = false,
     action: (id: Int) -> Unit
 ) {
+    val width = width ?: 132.dp
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .width(width ?: 132.dp)
+            .width(width)
             .padding(start = 10.dp)
             .height(40.dp)
             .nullableOptionalClickable(apply = id != 0) {
@@ -75,9 +79,9 @@ fun StandingsRankItem(
 
             // TODO: goals, cards, number, captain
             Column(
-//                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .width((width ?: 132.dp) - 102.dp)
+                    .width(if (extraInfo != null || extraSubInfo != null) (width - 102.dp) else 0.dp)
                     .padding(start = 2.dp)
             ) {
                 extraInfo?.let {

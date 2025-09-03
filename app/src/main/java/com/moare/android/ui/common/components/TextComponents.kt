@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.R
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
@@ -60,9 +61,11 @@ fun LeagueTitle(
 @Composable
 fun NBATitle(
     leagueName: String,
-    leagueSeason: Int,
+    leagueSeason: Int?,
     modifier: Modifier = Modifier
 ) {
+    val season = leagueSeason ?: CalendarUtil.currentYear
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -75,7 +78,7 @@ fun NBATitle(
         )
 
         Text(
-            text = "${leagueName} ${leagueSeason}-${(leagueSeason + 1).toString().takeLast(2)}",
+            text = "${leagueName} ${season}-${(season + 1).toString().takeLast(2)}",
             fontWeight = FontWeight.Medium
         )
     }
@@ -85,9 +88,11 @@ fun NBATitle(
 fun BaseballLeagueTitle(
     url: String,
     leagueName: String,
-    leagueSeason: Int,
+    leagueSeason: Int?,
     modifier: Modifier = Modifier
 ) {
+    val season = leagueSeason ?: CalendarUtil.currentYear
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -100,7 +105,7 @@ fun BaseballLeagueTitle(
         )
 
         Text(
-            text = "${leagueName} $leagueSeason",
+            text = "${leagueName} $season",
             fontWeight = FontWeight.Medium
         )
     }

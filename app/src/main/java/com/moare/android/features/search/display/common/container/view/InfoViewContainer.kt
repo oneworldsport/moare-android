@@ -118,7 +118,10 @@ fun InfoViewContainer(
         contentAlignment = Alignment.Center,
         modifier = modifier
     ) {
-        scope.displayContent()
+        // measureContent를 사용해야하는 경우 measureContentAlpha가 1f가 되면 안보이게
+        if (!shouldShowMeasureContent || measureContentAlpha != 1f) {
+            scope.displayContent()
+        }
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
