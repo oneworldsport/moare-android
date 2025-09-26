@@ -32,10 +32,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.moare.android.features.moat.display.timeline.view.MoatTimelineView
+import com.moare.android.features.moat.display.moat.view.MoatTimelineView
 import com.moare.android.features.search.display.search.SearchView
 import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.sign.display.signin.view.SignView
+import com.moare.android.features.userprofile.display.view.UserProfileView
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -105,12 +105,7 @@ class MainActivity : ComponentActivity() {
                                     MoatTimelineView()
                                 }
                                 composable(Screen.Profile.route) {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier.fillMaxSize()
-                                    ) {
-                                        Text("profile")
-                                    }
+                                    UserProfileView()
                                 }
                             }
                         }
