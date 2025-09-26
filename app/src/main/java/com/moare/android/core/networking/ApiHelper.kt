@@ -5,12 +5,15 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.moare.android.core.networking.apiendpoint.AuthApi
 import com.moare.android.core.networking.apiendpoint.KeywordsApi
 import com.moare.android.core.networking.apiendpoint.SearchApi
+import com.moare.android.features.moat.networking.MoatApi
 import com.moare.android.features.search.models.DataModel
+import com.moare.android.features.userprofile.networking.UserProfileApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 //import com.moare.android.features.search.models.DataModelDeserializer
 import retrofit2.Retrofit
+import retrofit2.create
 import java.util.concurrent.TimeUnit
 
 class ApiHelper {
@@ -44,4 +47,6 @@ class ApiHelper {
     val searchApi: SearchApi = searchRetrofit.create(SearchApi::class.java)
     val keywordsApi: KeywordsApi = searchRetrofit.create(KeywordsApi::class.java)
     val authApi: AuthApi = searchRetrofit.create(AuthApi::class.java)
+    val moatApi: MoatApi = searchRetrofit.create(MoatApi::class.java)
+    val userProfileApi: UserProfileApi = searchRetrofit.create(UserProfileApi::class.java)
 }

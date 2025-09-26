@@ -4,7 +4,9 @@ import android.util.Log
 import java.sql.Time
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.Period
 import java.time.YearMonth
@@ -214,6 +216,29 @@ object CalendarUtil {
         val gameDate = OffsetDateTime.parse(date).toLocalDate()
         val today = LocalDate.now()
         return !gameDate.isBefore(today) // 오늘이거나 미래 날짜면 true
+    }
+
+    fun timeAgoString(dateString: String): String {
+        val formatter = DateTimeFormatter.ofPattern(
+            "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
+            Locale("ko", "KR")
+        )
+
+        val date = LocalDateTime.parse(dateString, formatter).atZone(ZoneId.of("Asia/Seoul"))
+
+        val now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+
+        val diff = Duration.between(date, now).seconds
+
+        return when {
+            diff < 60 -> "방금 전"
+            diff < 3600 -> "${diff / 60}분 전"
+            diff < 86400 -> "${diff / 3600}시간 전"
+            diff < 604800 -> "${diff / 86400}일 전"
+            diff < 2419200 -> "${diff / 604800}주 전"
+            diff < 31536000 -> "${diff / 2419200}개월 전"
+            else -> "${diff / 31536000}년 전"
+        }
     }
 }
 
