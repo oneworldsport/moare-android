@@ -46,19 +46,27 @@ class MyApplication : Application() {
 
                 // dictionary
                 launch {
-                    AWSUtils.checkNameDictionary(
+                    AWSUtils.checkTournamentTeams(
                         context = this@MyApplication,
-                        category = Constants.Keys.EPL_PLAYER_DIC,
-                        s3Key = "name_dictionary/epl_player_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("eplPlayerNameDictionaryETag")
+                        category = Constants.Keys.TOURNAMENT_TEAMS,
+                        s3Key = "tournament/tournament_teams.json",
+                        eTagKey = stringPreferencesKey("tournamentTeamsETag")
                     )
                 }
                 launch {
                     AWSUtils.checkNameDictionary(
                         context = this@MyApplication,
-                        category = Constants.Keys.EPL_TEAM_DIC,
-                        s3Key = "name_dictionary/epl_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("eplTeamNameDictionaryETag")
+                        category = Constants.Keys.FOOTBALL_TEAM_DIC,
+                        s3Key = "name_dictionary/football_team_name_dictionary.json",
+                        eTagKey = stringPreferencesKey("footballTeamNameDictionaryETag")
+                    )
+                }
+                launch {
+                    AWSUtils.checkNameDictionary(
+                        context = this@MyApplication,
+                        category = Constants.Keys.EPL_PLAYER_DIC,
+                        s3Key = "name_dictionary/epl_player_name_dictionary.json",
+                        eTagKey = stringPreferencesKey("eplPlayerNameDictionaryETag")
                     )
                 }
                 launch {
@@ -112,25 +120,9 @@ class MyApplication : Application() {
                 launch {
                     AWSUtils.checkNameDictionary(
                         context = this@MyApplication,
-                        category = Constants.Keys.LALIGA_TEAM_DIC,
-                        s3Key = "name_dictionary/laliga_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("laligaTeamNameDictionaryETag")
-                    )
-                }
-                launch {
-                    AWSUtils.checkNameDictionary(
-                        context = this@MyApplication,
                         category = Constants.Keys.BUNDESLIGA_PLAYER_DIC,
                         s3Key = "name_dictionary/bundesliga_player_name_dictionary.json",
                         eTagKey = stringPreferencesKey("bundesligaPlayerNameDictionaryETag")
-                    )
-                }
-                launch {
-                    AWSUtils.checkNameDictionary(
-                        context = this@MyApplication,
-                        category = Constants.Keys.BUNDESLIGA_TEAM_DIC,
-                        s3Key = "name_dictionary/bundesliga_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("bundesligaTeamNameDictionaryETag")
                     )
                 }
                 launch {
@@ -144,14 +136,6 @@ class MyApplication : Application() {
                 launch {
                     AWSUtils.checkNameDictionary(
                         context = this@MyApplication,
-                        category = Constants.Keys.LIGUE1_TEAM_DIC,
-                        s3Key = "name_dictionary/ligue1_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("ligue1TeamNameDictionaryETag")
-                    )
-                }
-                launch {
-                    AWSUtils.checkNameDictionary(
-                        context = this@MyApplication,
                         category = Constants.Keys.SERIEA_PLAYER_DIC,
                         s3Key = "name_dictionary/seriea_player_name_dictionary.json",
                         eTagKey = stringPreferencesKey("serieaPlayerNameDictionaryETag")
@@ -160,25 +144,9 @@ class MyApplication : Application() {
                 launch {
                     AWSUtils.checkNameDictionary(
                         context = this@MyApplication,
-                        category = Constants.Keys.SERIEA_TEAM_DIC,
-                        s3Key = "name_dictionary/seriea_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("serieaTeamNameDictionaryETag")
-                    )
-                }
-                launch {
-                    AWSUtils.checkNameDictionary(
-                        context = this@MyApplication,
                         category = Constants.Keys.MLS_PLAYER_DIC,
                         s3Key = "name_dictionary/mls_player_name_dictionary.json",
                         eTagKey = stringPreferencesKey("mlsPlayerNameDictionaryETag")
-                    )
-                }
-                launch {
-                    AWSUtils.checkNameDictionary(
-                        context = this@MyApplication,
-                        category = Constants.Keys.MLS_TEAM_DIC,
-                        s3Key = "name_dictionary/mls_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("mlsTeamNameDictionaryETag")
                     )
                 }
             }
@@ -211,19 +179,27 @@ class MyApplication : Application() {
 
                 // dictionary
                 launch {
-                    AWSUtils.checkNameDictionary(
+                    AWSUtils.checkTournamentTeams(
                         context = this@MyApplication,
-                        category = Constants.Keys.EPL_PLAYER_DIC,
-                        s3Key = "name_dictionary/epl_player_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("eplPlayerNameDictionaryETag")
+                        category = Constants.Keys.TOURNAMENT_TEAMS,
+                        s3Key = "tournament/tournament_teams.json",
+                        eTagKey = stringPreferencesKey("tournamentTeamsETag")
                     )
                 }
                 launch {
                     AWSUtils.checkNameDictionary(
                         context = this@MyApplication,
-                        category = Constants.Keys.EPL_TEAM_DIC,
-                        s3Key = "name_dictionary/epl_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("eplTeamNameDictionaryETag")
+                        category = Constants.Keys.FOOTBALL_TEAM_DIC,
+                        s3Key = "name_dictionary/football_team_name_dictionary.json",
+                        eTagKey = stringPreferencesKey("footballTeamNameDictionaryETag")
+                    )
+                }
+                launch {
+                    AWSUtils.checkNameDictionary(
+                        context = this@MyApplication,
+                        category = Constants.Keys.EPL_PLAYER_DIC,
+                        s3Key = "name_dictionary/epl_player_name_dictionary.json",
+                        eTagKey = stringPreferencesKey("eplPlayerNameDictionaryETag")
                     )
                 }
                 launch {
@@ -277,25 +253,9 @@ class MyApplication : Application() {
                 launch {
                     AWSUtils.checkNameDictionary(
                         context = this@MyApplication,
-                        category = Constants.Keys.LALIGA_TEAM_DIC,
-                        s3Key = "name_dictionary/laliga_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("laligaTeamNameDictionaryETag")
-                    )
-                }
-                launch {
-                    AWSUtils.checkNameDictionary(
-                        context = this@MyApplication,
                         category = Constants.Keys.BUNDESLIGA_PLAYER_DIC,
                         s3Key = "name_dictionary/bundesliga_player_name_dictionary.json",
                         eTagKey = stringPreferencesKey("bundesligaPlayerNameDictionaryETag")
-                    )
-                }
-                launch {
-                    AWSUtils.checkNameDictionary(
-                        context = this@MyApplication,
-                        category = Constants.Keys.BUNDESLIGA_TEAM_DIC,
-                        s3Key = "name_dictionary/bundesliga_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("bundesligaTeamNameDictionaryETag")
                     )
                 }
                 launch {
@@ -309,14 +269,6 @@ class MyApplication : Application() {
                 launch {
                     AWSUtils.checkNameDictionary(
                         context = this@MyApplication,
-                        category = Constants.Keys.LIGUE1_TEAM_DIC,
-                        s3Key = "name_dictionary/ligue1_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("ligue1TeamNameDictionaryETag")
-                    )
-                }
-                launch {
-                    AWSUtils.checkNameDictionary(
-                        context = this@MyApplication,
                         category = Constants.Keys.SERIEA_PLAYER_DIC,
                         s3Key = "name_dictionary/seriea_player_name_dictionary.json",
                         eTagKey = stringPreferencesKey("serieaPlayerNameDictionaryETag")
@@ -325,25 +277,9 @@ class MyApplication : Application() {
                 launch {
                     AWSUtils.checkNameDictionary(
                         context = this@MyApplication,
-                        category = Constants.Keys.SERIEA_TEAM_DIC,
-                        s3Key = "name_dictionary/seriea_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("serieaTeamNameDictionaryETag")
-                    )
-                }
-                launch {
-                    AWSUtils.checkNameDictionary(
-                        context = this@MyApplication,
                         category = Constants.Keys.MLS_PLAYER_DIC,
                         s3Key = "name_dictionary/mls_player_name_dictionary.json",
                         eTagKey = stringPreferencesKey("mlsPlayerNameDictionaryETag")
-                    )
-                }
-                launch {
-                    AWSUtils.checkNameDictionary(
-                        context = this@MyApplication,
-                        category = Constants.Keys.MLS_TEAM_DIC,
-                        s3Key = "name_dictionary/mls_team_name_dictionary.json",
-                        eTagKey = stringPreferencesKey("mlsTeamNameDictionaryETag")
                     )
                 }
             }

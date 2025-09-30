@@ -81,23 +81,8 @@ abstract class BaseScheduleViewModel<I, T>(
 
     private fun loadDictionaries(leagueId: Int) {
         when (leagueId) {
-            Constants.Ids.EPL -> {
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_TEAM_DIC)
-            }
-            Constants.Ids.LALIGA -> {
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_TEAM_DIC)
-            }
-            Constants.Ids.BUNDESLIGA -> {
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_TEAM_DIC)
-            }
-            Constants.Ids.LIGUE1 -> {
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
-            }
-            Constants.Ids.SERIEA -> {
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_TEAM_DIC)
-            }
-            Constants.Ids.MLS -> {
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.MLS_TEAM_DIC)
+            in Constants.Ids.FOOTBALL_LEAGUES -> {
+                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.FOOTBALL_TEAM_DIC)
             }
             Constants.Ids.NBA -> {
                 teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)

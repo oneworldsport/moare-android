@@ -3,23 +3,20 @@ package com.moare.android.core.constants
 object Constants {
     object Keys {
         const val EPL_PLAYER_DIC = "epl_player"
-        const val EPL_TEAM_DIC = "epl_team"
         const val LALIGA_PLAYER_DIC = "laliga_player"
-        const val LALIGA_TEAM_DIC = "laliga_team"
         const val BUNDESLIGA_PLAYER_DIC = "bundesliga_player"
-        const val BUNDESLIGA_TEAM_DIC = "bundesliga_team"
         const val LIGUE1_PLAYER_DIC = "ligue1_player"
-        const val LIGUE1_TEAM_DIC = "ligue1_team"
         const val SERIEA_PLAYER_DIC = "seriea_player"
-        const val SERIEA_TEAM_DIC = "seriea_team"
         const val MLS_PLAYER_DIC = "mls_player"
-        const val MLS_TEAM_DIC = "mls_team"
         const val NBA_PLAYER_DIC = "nba_player"
         const val NBA_TEAM_DIC = "nba_team"
         const val KBO_PLAYER_DIC = "kbo_player"
         const val KBO_TEAM_DIC = "kbo_team"
         const val MLB_PLAYER_DIC = "mlb_player"
         const val MLB_TEAM_DIC = "mlb_team"
+        const val FOOTBALL_TEAM_DIC = "football_team"
+
+        const val TOURNAMENT_TEAMS = "tournament_teams"
     }
 
     object Ids {
@@ -34,6 +31,16 @@ object Constants {
         const val KBO = 90101
         const val MLB = 90102
         val FOOTBALL_LEAGUES = listOf(EPL, LALIGA, BUNDESLIGA, LIGUE1, SERIEA, MLS)
+        const val CHAMPIONS_LEAGUE = 2
+        const val EUROPA_LEAGUE = 3
+        const val CONFERENCE_LEAGUE = 848
+        const val FA_CUP = 45
+        const val EFL_CUP = 48
+        const val DFB_POKAL = 81
+        const val COUPE_DE_FRANCE = 66
+        const val COPA_DEL_REY = 143
+        const val COPPA_ITALIA = 137
+        val FOOTBALL_TOURNAMENT_LEAGUES = listOf(CHAMPIONS_LEAGUE, EUROPA_LEAGUE, CONFERENCE_LEAGUE, FA_CUP, EFL_CUP, DFB_POKAL, COUPE_DE_FRANCE, COPA_DEL_REY, COPPA_ITALIA)
 
         // nba team
         // TODO: Move to object NBATeam

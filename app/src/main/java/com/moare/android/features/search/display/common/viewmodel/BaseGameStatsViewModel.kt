@@ -58,30 +58,26 @@ abstract class BaseGameStatsViewModel<I, T>(
     }
 
     private fun loadDictionaries(leagueId: Int) {
+        teamNameDictionary = nameProvider.getDictionary(Constants.Keys.FOOTBALL_TEAM_DIC)
+
         when (leagueId) {
             Constants.Ids.EPL -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_PLAYER_DIC)
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.EPL_TEAM_DIC)
             }
             Constants.Ids.LALIGA -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_PLAYER_DIC)
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LALIGA_TEAM_DIC)
             }
             Constants.Ids.BUNDESLIGA -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_PLAYER_DIC)
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_TEAM_DIC)
             }
             Constants.Ids.LIGUE1 -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_PLAYER_DIC)
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.LIGUE1_TEAM_DIC)
             }
             Constants.Ids.SERIEA -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_PLAYER_DIC)
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.SERIEA_TEAM_DIC)
             }
             Constants.Ids.MLS -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.MLS_PLAYER_DIC)
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.MLS_TEAM_DIC)
             }
             Constants.Ids.NBA -> {
                 playerNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_PLAYER_DIC)

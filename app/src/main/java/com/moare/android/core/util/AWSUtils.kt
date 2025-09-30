@@ -300,6 +300,73 @@ object AWSUtils {
             Log.d("awsS3", e.localizedMessage ?: "aws s3 error")
         }
     }
+
+    suspend fun checkTournamentTeams(
+        context: Context,
+        category: String,
+        s3Key: String,
+        eTagKey: Preferences.Key<String>
+    ) {
+        try {
+            val entryPoint = EntryPointAccessors.fromApplication(context, EntryPoint::class.java)
+            val s3Client = entryPoint.getS3Client()
+            val transferUtility = entryPoint.getTransferUtility()
+            val dataStore = entryPoint.getDataStore()
+            val translatedNameProvider = entryPoint.getTranslatedNameProvider()
+
+            val bucket = "sport-search-engine"
+            val objectMetadata: ObjectMetadata = withContext(Dispatchers.IO) {
+                s3Client.getObjectMetadata(bucket, s3Key)
+            }
+            val newETag = objectMetadata.eTag
+
+            val currentETag = dataStore.data
+                .map { preferences -> preferences[eTagKey] ?: "" }
+                .first()
+
+            if (newETag == currentETag) {
+                val jsonString = withContext(Dispatchers.IO) {
+                    File(context.filesDir, s3Key.substringAfter("/")).readText()
+                }
+                val jsonElement = Json.parseToJsonElement(jsonString)
+                val map: Map<String, List<Int?>> = Json.decodeFromJsonElement(jsonElement)
+                translatedNameProvider.setTournamentDictionary(category, map)
+
+                return
+            }
+
+            val downloadFile = File(context.filesDir, s3Key.substringAfter("/"))
+            if (downloadFile.exists()) downloadFile.delete()
+
+            withContext(Dispatchers.IO) {
+                val observer = transferUtility.download(bucket, s3Key, downloadFile)
+                observer.setTransferListener(object : TransferListener {
+                    override fun onStateChanged(id: Int, state: TransferState?) {
+                        if (state == TransferState.COMPLETED) {
+                            runBlocking {
+                                dataStore.edit { it[eTagKey] = newETag }
+
+                                val jsonString = withContext(Dispatchers.IO) {
+                                    downloadFile.readText()
+                                }
+                                val jsonElement = Json.parseToJsonElement(jsonString)
+                                val map: Map<String, List<Int?>> = Json.decodeFromJsonElement(jsonElement)
+                                translatedNameProvider.setTournamentDictionary(category, map)
+                            }
+                        }
+                    }
+
+                    override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {}
+
+                    override fun onError(id: Int, ex: Exception?) {
+                        ex?.printStackTrace()
+                    }
+                })
+            }
+        } catch (e: Exception) {
+            Log.d("awsS3_team", e.localizedMessage ?: "aws s3 error")
+        }
+    }
 }
 
 
