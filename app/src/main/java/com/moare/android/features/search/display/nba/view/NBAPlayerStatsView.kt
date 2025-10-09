@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +45,6 @@ import com.moare.android.features.search.display.search.viewmodel.SearchViewMode
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStatsDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAPlayerStats
-import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HDivider
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.StatsDivider
@@ -78,7 +76,7 @@ fun NBAPlayerStatsView(
     }
 
     InfoViewContainer(
-        searchViewModel = searchViewModel,
+        searchStore = searchViewModel,
         itemCount = (statsList?.size ?: 0) + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier,

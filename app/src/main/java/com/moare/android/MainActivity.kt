@@ -42,31 +42,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            var isSplashFinished by remember { mutableStateOf(false) }
-
-//            val viewForTest: SportDisplayType? = SportDisplayType.KBO_GAME_STATS
-            val viewForTest: SportDisplayType? = null
-
             MoareAndroidTheme {
                 AppRoot()
-//                Surface(
-//                    modifier = Modifier
-//                        .systemBarsPadding()
-//                        .fillMaxSize(),
-//                    color = MaterialTheme.colors.background
-//                ) {
-//                    if (viewForTest != null) {
-//                        SearchView(viewForTest = viewForTest)
-//                    } else {
-//                        SearchView()
-//
-//                        if (!isSplashFinished) {
-//                            SplashView {
-//                                isSplashFinished = true
-//                            }
-//                        }
-//                    }
-//                }
             }
         }
     }
@@ -74,24 +51,35 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppRoot(viewModel: AppViewModel = hiltViewModel()) {
+    var isSplashFinished by remember { mutableStateOf(false) }
+
+//    val viewForTest: SportDisplayType? = SportDisplayType.KBO_GAME_STATS
+    val viewForTest: SportDisplayType? = null
+
     Surface(
         modifier = Modifier
             .systemBarsPadding()
             .fillMaxSize(),
         color = MaterialTheme.colors.background
     ) {
-//        if (viewForTest != null) {
-//            SearchView(viewForTest = viewForTest)
-//        } else {
-//            SearchView(vm.searchProvider.get())
-        SearchView(viewModel, viewModel.searchStore)
+        if (viewForTest != null) {
+            SearchView(
+                viewModel = viewModel,
+                searchStore = viewModel.searchStore,
+                viewForTest = viewForTest
+            )
+        } else {
+            SearchView(
+                viewModel = viewModel,
+                searchStore = viewModel.searchStore
+            )
 
-//            if (!isSplashFinished) {
-//                SplashView {
-//                    isSplashFinished = true
-//                }
-//            }
-//        }
+            if (!isSplashFinished) {
+                SplashView {
+                    isSplashFinished = true
+                }
+            }
+        }
     }
 }
 

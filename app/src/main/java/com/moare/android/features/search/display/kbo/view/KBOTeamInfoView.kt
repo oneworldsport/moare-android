@@ -1,14 +1,12 @@
 package com.moare.android.features.search.display.kbo.view
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,51 +24,27 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.KBOUtil
-import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoIntent
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoViewModel
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoIntent
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoViewModel
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoStore
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDisplayModel
 import com.moare.android.ui.common.components.BaseballLeagueTitle
-import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun KBOTeamInfoView(
-    searchViewModel: SearchViewModel,
-    kboTeamInfoViewModel: KBOTeamInfoViewModel = hiltViewModel(),
-    data: KBOTeamInfoDisplayModel
+    searchStore: SearchViewModel,
+    store: KBOTeamInfoStore
 ) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.KBOTeamInfo) {
-            kboTeamInfoViewModel.send(KBOTeamInfoIntent.InitData(data))
-        }
-    }
-
     InfoViewContainer(
-        searchViewModel = searchViewModel,
+        searchStore = searchStore,
         itemCount = 6,
         measureContent = {
             Row(
@@ -78,25 +52,28 @@ fun KBOTeamInfoView(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 KBOTeamInfoFirstItem(
+                    store = store,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
                 }
 
                 KBOTeamInfoSecondItem(
+                    store = store,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
                 }
 
                 KBOTeamInfoThirdItem(
+                    store = store,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
                 }
             }
 
-            KBOTeamInfoFourthItem(searchViewModel) { index, coordinates ->
+            KBOTeamInfoFourthItem(searchStore, store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
@@ -107,14 +84,16 @@ fun KBOTeamInfoView(
                     .fillMaxWidth()
             ) {
                 KBOTeamInfoFifthItem(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
+                    store = store,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
                 }
 
                 KBOTeamInfoSixthItem(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
+                    store = store,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
@@ -123,6 +102,7 @@ fun KBOTeamInfoView(
         },
         displayContent = {
             KBOTeamInfoFirstItem(
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
@@ -131,6 +111,7 @@ fun KBOTeamInfoView(
             )
 
             KBOTeamInfoSecondItem(
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[1],
                 itemPosition = itemPositions[1],
@@ -139,6 +120,7 @@ fun KBOTeamInfoView(
             )
 
             KBOTeamInfoThirdItem(
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[2],
                 itemPosition = itemPositions[2],
@@ -147,7 +129,8 @@ fun KBOTeamInfoView(
             )
 
             KBOTeamInfoFourthItem(
-                searchViewModel = searchViewModel,
+                searchStore = searchStore,
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[3],
                 itemPosition = itemPositions[3],
@@ -156,7 +139,8 @@ fun KBOTeamInfoView(
             )
 
             KBOTeamInfoFifthItem(
-                searchViewModel = searchViewModel,
+                searchStore = searchStore,
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[4],
                 itemPosition = itemPositions[4],
@@ -165,7 +149,8 @@ fun KBOTeamInfoView(
             )
 
             KBOTeamInfoSixthItem(
-                searchViewModel = searchViewModel,
+                searchStore = searchStore,
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[5],
                 itemPosition = itemPositions[5],
@@ -179,7 +164,7 @@ fun KBOTeamInfoView(
 // logo, team, name
 @Composable
 fun KBOTeamInfoFirstItem(
-    kboTeamInfoViewModel: KBOTeamInfoViewModel = hiltViewModel(),
+    store: KBOTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -188,41 +173,40 @@ fun KBOTeamInfoFirstItem(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by kboTeamInfoViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    displayModel?.let {
-        val team = it.team
+    val team = displayModel.team
 
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(0, coordinates) }
-            },
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = containerModifier
-        ) {
-            URLImage(
-                url = KBOUtil.teamLogoUrl(team.id),
-                modifier = Modifier.alpha(contentsAlpha),
-                isSvg = true
-            )
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(0, coordinates) }
+        },
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = containerModifier
+    ) {
+        URLImage(
+            url = KBOUtil.teamLogoUrl(team.id),
+            modifier = Modifier.alpha(contentsAlpha),
+            isSvg = true
+        )
 
-            Text(
-                text = kboTeamInfoViewModel.teamNameDictionary["full_${team.id}"] ?: team.teamName,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.alpha(contentsAlpha)
-            )
-        }
+        Text(
+            text = teamNameDic["full_${team.id}"] ?: team.teamName,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.alpha(contentsAlpha)
+        )
     }
 }
 
 // founded, city, coach
 @Composable
 fun KBOTeamInfoSecondItem(
-    kboTeamInfoViewModel: KBOTeamInfoViewModel = hiltViewModel(),
+    store: KBOTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -231,67 +215,65 @@ fun KBOTeamInfoSecondItem(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by kboTeamInfoViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
 
-    displayModel?.let {
-        val team = it.team
+    val team = displayModel.team
 
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(1, coordinates) }
-            },
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.Start,
-            modifier = containerModifier
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(1, coordinates) }
+        },
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.Start,
+        modifier = containerModifier
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.alpha(contentsAlpha)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "창단연도: ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = team.yearFounded.toString(),
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
             Text(
-                text = buildAnnotatedString {
-                    append("연고지: ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
-                        append(team.city)
-                    }
-                },
-                fontSize = 15.sp,
-                modifier = Modifier.alpha(contentsAlpha)
+                text = "창단연도: ",
+                fontSize = 15.sp
             )
 
             Text(
-                text = buildAnnotatedString {
-                    append("감독: ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
-                        append(team.coach)
-                    }
-                },
-                fontSize = 15.sp,
-                modifier = Modifier.alpha(contentsAlpha)
+                text = team.yearFounded.toString(),
+                fontWeight = FontWeight.Medium
             )
         }
+
+        Text(
+            text = buildAnnotatedString {
+                append("연고지: ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                    append(team.city)
+                }
+            },
+            fontSize = 15.sp,
+            modifier = Modifier.alpha(contentsAlpha)
+        )
+
+        Text(
+            text = buildAnnotatedString {
+                append("감독: ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                    append(team.coach)
+                }
+            },
+            fontSize = 15.sp,
+            modifier = Modifier.alpha(contentsAlpha)
+        )
     }
 }
 
 // venue
 @Composable
 fun KBOTeamInfoThirdItem(
-    kboTeamInfoViewModel: KBOTeamInfoViewModel = hiltViewModel(),
+    store: KBOTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -300,64 +282,63 @@ fun KBOTeamInfoThirdItem(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by kboTeamInfoViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    displayModel?.let {
-        val team = it.team
-        val venue = it.venue
+    val team = displayModel.team
+    val venue = displayModel.venue
 
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(2, coordinates) }
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(2, coordinates) }
+        },
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.Start,
+        modifier = containerModifier
+    ) {
+        Text(
+            text = buildAnnotatedString {
+                append("홈구장: ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
+                    append(teamNameDic["venue_${team.id}"] ?: venue.name)
+                }
             },
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.Start,
-            modifier = containerModifier
+            fontSize = 15.sp,
+            modifier = Modifier.alpha(contentsAlpha)
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.alpha(contentsAlpha)
         ) {
             Text(
-                text = buildAnnotatedString {
-                    append("홈구장: ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Medium)) {
-                        append(kboTeamInfoViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name)
-                    }
-                },
-                fontSize = 15.sp,
-                modifier = Modifier.alpha(contentsAlpha)
+                text = "좌석수: ",
+                fontSize = 15.sp
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "좌석수: ",
-                    fontSize = 15.sp
-                )
+            Text(
+                text = venue.capacity.toString(),
+                fontWeight = FontWeight.Medium
+            )
+        }
 
-                Text(
-                    text = venue.capacity.toString(),
-                    fontWeight = FontWeight.Medium
-                )
-            }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.alpha(contentsAlpha)
+        ) {
+            Text(
+                text = "개장: ",
+                fontSize = 15.sp
+            )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.alpha(contentsAlpha)
-            ) {
-                Text(
-                    text = "개장: ",
-                    fontSize = 15.sp
-                )
-
-                Text(
-                    text = venue.opened.toString(),
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            Text(
+                text = venue.opened.toString(),
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
@@ -365,8 +346,8 @@ fun KBOTeamInfoThirdItem(
 // league stats
 @Composable
 fun KBOTeamInfoFourthItem(
-    searchViewModel: SearchViewModel,
-    kboTeamInfoViewModel: KBOTeamInfoViewModel = hiltViewModel(),
+    searchStore: SearchViewModel,
+    store: KBOTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -375,70 +356,68 @@ fun KBOTeamInfoFourthItem(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by kboTeamInfoViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
 
-    displayModel?.let {
-        val team = it.team
-        val stats = it.stats
+    val team = displayModel.team
+    val stats = displayModel.stats
 
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(3, coordinates) }
-            },
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier
-                .padding(top = if (isAniItem) 0.dp else 12.dp),
-            onClick = {
-                searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = it.team.id))
-            }
-        ) {
-            BaseballLeagueTitle(
-                url = KBOUtil.kboLogoUrl,
-                leagueName = "KBO",
-                leagueSeason = stats?.season ?: 2025,
-                modifier = Modifier.alpha(contentsAlpha)
-            )
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(3, coordinates) }
+        },
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .padding(top = if (isAniItem) 0.dp else 12.dp),
+        onClick = {
+            searchStore.send(SearchViewModel.Intent.ShowTeamStats(teamId = displayModel.team.id))
+        }
+    ) {
+        BaseballLeagueTitle(
+            url = KBOUtil.kboLogoUrl,
+            leagueName = "KBO",
+            leagueSeason = stats?.season ?: 2025,
+            modifier = Modifier.alpha(contentsAlpha)
+        )
 
-            stats?.let {
-                CenterRow(
-                    modifier = Modifier
-                        .alpha(contentsAlpha)
-                ) {
-                    FBStatDataItem(
-                        category = "순위",
-                        data = it.rankData.rank,
-                        customCategoryFontSize = 13,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatsDivider()
-                    FBStatDataItem(
-                        category = "승",
-                        data = it.rankData.wins,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatsDivider()
-                    FBStatDataItem(
-                        category = "패",
-                        data = it.rankData.losses,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatsDivider()
-                    FBStatDataItem(
-                        category = "무",
-                        data = it.rankData.draws,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StatsDivider()
-                    FBStatDataItem(
-                        category = "타율",
-                        data = it.hitterData.avg,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+        stats?.let {
+            CenterRow(
+                modifier = Modifier
+                    .alpha(contentsAlpha)
+            ) {
+                FBStatDataItem(
+                    category = "순위",
+                    data = it.rankData.rank,
+                    customCategoryFontSize = 13,
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "승",
+                    data = it.rankData.wins,
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "패",
+                    data = it.rankData.losses,
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "무",
+                    data = it.rankData.draws,
+                    modifier = Modifier.weight(1f)
+                )
+                StatsDivider()
+                FBStatDataItem(
+                    category = "타율",
+                    data = it.hitterData.avg,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -447,8 +426,8 @@ fun KBOTeamInfoFourthItem(
 // last game stats
 @Composable
 fun KBOTeamInfoFifthItem(
-    searchViewModel: SearchViewModel,
-    kboTeamInfoViewModel: KBOTeamInfoViewModel = hiltViewModel(),
+    searchStore: SearchViewModel,
+    store: KBOTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -457,94 +436,93 @@ fun KBOTeamInfoFifthItem(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by kboTeamInfoViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    displayModel?.let {
-        val lastGame = it.lastGame
+    val lastGame = displayModel.lastGame
 
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(4, coordinates) }
-            },
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = containerModifier,
-            onClick = {
-                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
-            }
-        ) {
-            Text(
-                text = "최근경기",
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.alpha(contentsAlpha)
-            )
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(4, coordinates) }
+        },
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = containerModifier,
+        onClick = {
+            searchStore.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
+        }
+    ) {
+        Text(
+            text = "최근경기",
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.alpha(contentsAlpha)
+        )
 
-            lastGame?.let {
-                val homeTeamScore = it.lineScore?.home?.r?.toIntOrNull() ?: 0
-                val awayTeamScore = it.lineScore?.away?.r?.toIntOrNull() ?: 0
+        lastGame?.let {
+            val homeTeamScore = it.lineScore?.home?.r?.toIntOrNull() ?: 0
+            val awayTeamScore = it.lineScore?.away?.r?.toIntOrNull() ?: 0
 
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .alpha(contentsAlpha)
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .alpha(contentsAlpha)
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = kboTeamInfoViewModel.teamNameDictionary["short_${it.gameInfo?.homeTeamId}"] ?: "",
-                            fontSize = 15.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        Text(
-                            text = " $homeTeamScore",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
-                        )
-                    }
-
                     Text(
-                        text = " - ",
+                        text = teamNameDic["short_${it.gameInfo?.homeTeamId}"] ?: "",
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "$awayTeamScore ",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
-                        )
-
-                        Text(
-                            text = kboTeamInfoViewModel.teamNameDictionary["short_${it.gameInfo?.awayTeamId}"] ?: "",
-                            fontSize = 15.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    Text(
+                        text = " $homeTeamScore",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if ((homeTeamScore) >= (awayTeamScore)) MaterialTheme.colors.primary else Color.Black
+                    )
                 }
 
                 Text(
-                    text = CalendarUtil.formatDate(it.gameInfo?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                    text = " - ",
                     fontSize = 15.sp,
-                    modifier = Modifier.alpha(contentsAlpha)
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
                 )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "$awayTeamScore ",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if ((awayTeamScore) >= (homeTeamScore)) MaterialTheme.colors.primary else Color.Black
+                    )
+
+                    Text(
+                        text = teamNameDic["short_${it.gameInfo?.awayTeamId}"] ?: "",
+                        fontSize = 15.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
+
+            Text(
+                text = CalendarUtil.formatDate(it.gameInfo?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                fontSize = 15.sp,
+                modifier = Modifier.alpha(contentsAlpha)
+            )
         }
     }
 }
@@ -552,8 +530,8 @@ fun KBOTeamInfoFifthItem(
 // next game stats
 @Composable
 fun KBOTeamInfoSixthItem(
-    searchViewModel: SearchViewModel,
-    kboTeamInfoViewModel: KBOTeamInfoViewModel = hiltViewModel(),
+    searchStore: SearchViewModel,
+    store: KBOTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -562,76 +540,75 @@ fun KBOTeamInfoSixthItem(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by kboTeamInfoViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    displayModel?.let {
-        val nextGame = it.nextGame
+    val nextGame = displayModel.nextGame
 
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(5, coordinates) }
-            },
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = containerModifier,
-            onClick = {
-                searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(5, coordinates) }
+        },
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = containerModifier,
+        onClick = {
+            searchStore.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
+        }
+    ) {
+        Text(
+            text = "다음경기",
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.alpha(contentsAlpha)
+        )
+
+        if (nextGame != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .alpha(contentsAlpha)
+            ) {
+                Text(
+                    text = teamNameDic["short_${nextGame.gameInfo?.homeTeamId}"] ?: "",
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.End,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Text(
+                    text = "  vs  ",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = teamNameDic["short_${nextGame.gameInfo?.awayTeamId}"] ?: "",
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Start,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
             }
-        ) {
+
             Text(
-                text = "다음경기",
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Medium,
+                text = CalendarUtil.formatDate(nextGame.gameInfo?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )
-
-            if (nextGame != null) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .alpha(contentsAlpha)
-                ) {
-                    Text(
-                        text = kboTeamInfoViewModel.teamNameDictionary["short_${nextGame.gameInfo?.homeTeamId}"] ?: "",
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.End,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Text(
-                        text = "  vs  ",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Text(
-                        text = kboTeamInfoViewModel.teamNameDictionary["short_${nextGame.gameInfo?.awayTeamId}"] ?: "",
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Start,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Text(
-                    text = CalendarUtil.formatDate(nextGame.gameInfo?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
-                    fontSize = 15.sp,
-                    modifier = Modifier.alpha(contentsAlpha)
-                )
-            } else {
-                Text(
-                    text = "예정된 경기가 없습니다.",
-                    fontSize = 15.sp,
-                    modifier = Modifier.alpha(contentsAlpha)
-                )
-            }
+        } else {
+            Text(
+                text = "예정된 경기가 없습니다.",
+                fontSize = 15.sp,
+                modifier = Modifier.alpha(contentsAlpha)
+            )
         }
     }
 }

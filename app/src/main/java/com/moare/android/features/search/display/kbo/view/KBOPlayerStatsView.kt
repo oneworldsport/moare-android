@@ -24,25 +24,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.KBOUtil
-import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.components.EmptyStatDataItem
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerStatsIntent
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerStatsViewModel
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsIntent
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsViewModel
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStatsDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOPlayerStats
-import com.moare.android.features.search.models.models.nba.NBAPlayerStats
 import com.moare.android.ui.common.components.BaseballLeagueTitle
-import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HDivider
-import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.util.CenterColumn
@@ -72,7 +65,7 @@ fun KBOPlayerStatsView(
     }
 
     InfoViewContainer(
-        searchViewModel = searchViewModel,
+        searchStore = searchViewModel,
         itemCount = (statsList?.size ?: 0) + 1,
 //        shouldShowMeasureContent = true,
         modifier = Modifier

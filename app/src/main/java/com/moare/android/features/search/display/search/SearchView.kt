@@ -19,12 +19,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -45,90 +42,32 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
-import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.mvi.AppViewModel
 import com.moare.android.core.mvi.StackItem
-import com.moare.android.features.search.display.football.view.FBLeagueScheduleView
-import com.moare.android.features.search.display.football.view.FBGameStatsView
 import com.moare.android.features.search.display.football.view.FBPlayerInfoView
-import com.moare.android.features.search.display.football.view.FBPlayerStandingsView
 import com.moare.android.features.search.display.football.view.FBPlayerStatsView
 import com.moare.android.features.search.display.football.view.FBTeamInfoView
-import com.moare.android.features.search.display.football.view.FBTeamStandingsView
-import com.moare.android.features.search.display.football.view.FBTeamStatsView
-import com.moare.android.features.search.display.kbo.view.KBOGameStatsView
-import com.moare.android.features.search.display.kbo.view.KBOLeagueScheduleView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerInfoView
-import com.moare.android.features.search.display.kbo.view.KBOPlayerStatsView
 import com.moare.android.features.search.display.kbo.view.KBOTeamInfoView
-import com.moare.android.features.search.display.kbo.view.KBOTeamStandingsView
-import com.moare.android.features.search.display.kbo.view.KBOTeamStatsView
-import com.moare.android.features.search.display.mlb.view.MLBGameStatsView
-import com.moare.android.features.search.display.mlb.view.MLBLeagueScheduleView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerInfoView
-import com.moare.android.features.search.display.mlb.view.MLBPlayerStatsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamInfoView
-import com.moare.android.features.search.display.mlb.view.MLBTeamStandingsView
-import com.moare.android.features.search.display.mlb.view.MLBTeamStatsView
-import com.moare.android.features.search.display.nba.view.NBAGameStatsView
-import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
-import com.moare.android.features.search.display.nba.view.NBALeagueTournamentView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
-import com.moare.android.features.search.display.nba.view.NBAPlayerStandingsView
-import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
 import com.moare.android.features.search.display.nba.view.NBATeamInfoView
-import com.moare.android.features.search.display.nba.view.NBATeamStandingsView
-import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATournamentDisplayModel
 import com.moare.android.ui.common.components.ProgressIndicator
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
-import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.rememberKeyboardVisibility
 import kotlinx.coroutines.delay
-import java.util.Stack
 
 @Composable
 fun SearchView(
-    appViewModel: AppViewModel,
-    searchViewModel: SearchViewModel,
+    viewModel: AppViewModel,
+    searchStore: SearchViewModel,
     viewForTest: SportDisplayType? = null
 ) {
     /* ---------------------
@@ -146,19 +85,19 @@ fun SearchView(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val stack by appViewModel.stack.collectAsState()
+    val stack by viewModel.stack.collectAsState()
 
-    val displayModels by searchViewModel.displayModels.collectAsState()
-    val searchDataState by searchViewModel.searchDataState.collectAsState()
-    val showResult by searchViewModel.resultVisibleState.collectAsState()
-    val searchState by searchViewModel.searchState.collectAsState()
-    val barFirstOpened by searchViewModel.barFirstOpened.collectAsState()
-    val focusState by searchViewModel.focusState.collectAsState()
-    val notice by searchViewModel.noticeData.collectAsState()
+    val displayModels by searchStore.displayModels.collectAsState()
+    val searchDataState by searchStore.searchDataState.collectAsState()
+    val showResult by searchStore.resultVisibleState.collectAsState()
+    val searchState by searchStore.searchState.collectAsState()
+    val barFirstOpened by searchStore.barFirstOpened.collectAsState()
+    val focusState by searchStore.focusState.collectAsState()
+    val notice by searchStore.noticeData.collectAsState()
 
-    val query by searchViewModel.query.collectAsState()
-    val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
-    val autoCompleteListVisibleState by searchViewModel.autoCompleteListVisibleState.collectAsState()
+    val query by searchStore.query.collectAsState()
+    val autoCompleteList by searchStore.autoCompleteList.collectAsState()
+    val autoCompleteListVisibleState by searchStore.autoCompleteListVisibleState.collectAsState()
 
     /* ---------------------
        animation
@@ -184,7 +123,7 @@ fun SearchView(
        --------------------- */
     LaunchedEffect(viewForTest) {
         viewForTest?.let {
-            searchViewModel.send(SearchViewModel.Intent.TestSearch(viewForTest))
+            searchStore.send(SearchViewModel.Intent.TestSearch(viewForTest))
         }
     }
 
@@ -217,13 +156,13 @@ fun SearchView(
     LaunchedEffect(keyboardVisibleState) {
         // NOTE: barFirstOpened prevents executing at first launch
         if (barFirstOpened && !keyboardVisibleState && focusState) {
-            searchViewModel.send(SearchViewModel.Intent.ToggleFocusState(false))
+            searchStore.send(SearchViewModel.Intent.ToggleFocusState(false))
         }
     }
 
     BackHandler {
 //        searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
-        appViewModel.pop()
+        viewModel.pop()
     }
 
     /* ---------------------
@@ -250,7 +189,7 @@ fun SearchView(
                         modifier = Modifier
                             .clickable {
 //                                searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
-                                appViewModel.pop()
+                                viewModel.pop()
                             }
                     )
                 }
@@ -310,7 +249,7 @@ fun SearchView(
                         if (isNoticeOpened) {
                             isNoticeOpened = false
                         } else {
-                            searchViewModel.send(SearchViewModel.Intent.ToggleFocusState(false))
+                            searchStore.send(SearchViewModel.Intent.ToggleFocusState(false))
                         }
                     }
                 )
@@ -319,7 +258,7 @@ fun SearchView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatingSearchBar(
-                searchViewModel = searchViewModel,
+                searchViewModel = searchStore,
                 modifier = Modifier
 //                    .padding(top = 10.dp)
             )
@@ -337,9 +276,9 @@ fun SearchView(
                 },
                 exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
             ) {
-                TrendingKeywords(searchViewModel = searchViewModel) { keyword ->
-                    searchViewModel.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(keyword), false))
-                    searchViewModel.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.TRENDING_KEYWORD, aniDuration = 1000))
+                TrendingKeywords(searchViewModel = searchStore) { keyword ->
+                    searchStore.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(keyword), false))
+                    searchStore.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.TRENDING_KEYWORD, aniDuration = 1000))
                 }
             }
 
@@ -353,10 +292,10 @@ fun SearchView(
 //            key(System.currentTimeMillis()) {
                 key(autoCompleteList) { // redraw the composable with its initial state
                     AutoCompleteList(
-                        searchViewModel = searchViewModel,
+                        searchViewModel = searchStore,
                         onItemSelected = { query ->
-                            searchViewModel.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(query), false))
-                            searchViewModel.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.AUTO_COMPLETE, aniDuration = 2000))
+                            searchStore.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(query), false))
+                            searchStore.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.AUTO_COMPLETE, aniDuration = 2000))
                         }
                     )
                 }
@@ -382,8 +321,18 @@ fun SearchView(
                     modifier = Modifier.padding(top = 10.dp)
                 ) {
                     when (val top = stack.lastOrNull()) {
-                        is StackItem.FBPlayerInfo -> FBPlayerInfoView(searchViewModel, top.store, top.displayModel)
-                        is StackItem.FBPlayerStats -> FBPlayerStatsView(searchViewModel, top.store, top.displayModel)
+                        is StackItem.FBPlayerInfo -> FBPlayerInfoView(searchStore, top.store)
+                        is StackItem.FBPlayerStats -> FBPlayerStatsView(searchStore, top.store, top.displayModel)
+                        is StackItem.FBTeamInfo -> FBTeamInfoView(searchStore, top.store)
+
+                        is StackItem.NBAPlayerInfo -> NBAPlayerInfoView(searchStore, top.store)
+                        is StackItem.NBATeamInfo -> NBATeamInfoView(searchStore, top.store)
+
+                        is StackItem.MLBPlayerInfo -> MLBPlayerInfoView(searchStore, top.store)
+                        is StackItem.MLBTeamInfo -> MLBTeamInfoView(searchStore, top.store)
+
+                        is StackItem.KBOPlayerInfo -> KBOPlayerInfoView(searchStore, top.store)
+                        is StackItem.KBOTeamInfo -> KBOTeamInfoView(searchStore, top.store)
                         else -> Unit
                     }
                     // football

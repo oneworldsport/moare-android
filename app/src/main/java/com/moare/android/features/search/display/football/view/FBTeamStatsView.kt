@@ -44,7 +44,6 @@ import com.moare.android.features.search.display.search.viewmodel.SearchViewMode
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBTeamStats
-import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
@@ -75,7 +74,7 @@ fun FBTeamStatsView(
     }
 
     InfoViewContainer(
-        searchViewModel = searchViewModel,
+        searchStore = searchViewModel,
         itemCount = (statsList?.size ?: 0) + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier

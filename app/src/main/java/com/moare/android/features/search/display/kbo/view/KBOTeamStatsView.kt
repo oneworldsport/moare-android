@@ -45,7 +45,6 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOTeamStats
 import com.moare.android.ui.common.components.BaseballLeagueTitle
-import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HDivider
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
@@ -76,7 +75,7 @@ fun KBOTeamStatsView(
     }
 
     InfoViewContainer(
-        searchViewModel = searchViewModel,
+        searchStore = searchViewModel,
         itemCount = (statsList?.size ?: 0) + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier,

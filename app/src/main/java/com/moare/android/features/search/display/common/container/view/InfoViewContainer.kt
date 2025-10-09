@@ -6,8 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,10 +24,8 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.features.search.display.common.scope.InfoViewScope
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.screenHeightPx
 import kotlinx.coroutines.delay
 
@@ -41,7 +37,7 @@ import kotlinx.coroutines.delay
  */
 @Composable
 fun InfoViewContainer(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchViewModel,
     itemCount: Int,
     shouldShowMeasureContent: Boolean = false, // NOTE: StatsView가 아코디언 UI로 바뀌면서 measureContent를 사용해야하는 경우가 있어 추가.
     modifier: Modifier = Modifier,
@@ -73,7 +69,7 @@ fun InfoViewContainer(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val poppedView by searchViewModel.poppedView.collectAsState()
+    val poppedView by searchStore.poppedView.collectAsState()
 
     val scope = InfoViewScope(
         density = density,
