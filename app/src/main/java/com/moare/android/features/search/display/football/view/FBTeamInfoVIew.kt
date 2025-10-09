@@ -49,7 +49,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBTeamInfoView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     fbTeamInfoViewModel: FBTeamInfoViewModel = hiltViewModel(),
     data: FBTeamInfoDisplayModel
 ) {
@@ -67,7 +67,7 @@ fun FBTeamInfoView(
         }
     }
 
-    InfoViewContainer(itemCount = 6, measureContent = {
+    InfoViewContainer(searchViewModel = searchViewModel, itemCount = 6, measureContent = {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxWidth()
@@ -91,7 +91,7 @@ fun FBTeamInfoView(
             }
         }
 
-        FBTeamInfoFourthItem { index, coordinates ->
+        FBTeamInfoFourthItem(searchViewModel) { index, coordinates ->
             updateItemPosition(index, coordinates)
         }
 
@@ -101,12 +101,14 @@ fun FBTeamInfoView(
                 .padding(top = 12.dp)
         ) {
             FBTeamInfoFifthItem(
+                searchViewModel = searchViewModel,
                 containerModifier = Modifier.weight(1f)
             ) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
             FBTeamInfoSixthItem(
+                searchViewModel = searchViewModel,
                 containerModifier = Modifier.weight(1f)
             ) { index, coordinates ->
                 updateItemPosition(index, coordinates)
@@ -138,6 +140,7 @@ fun FBTeamInfoView(
         )
 
         FBTeamInfoFourthItem(
+            searchViewModel = searchViewModel,
             isAniItem = true,
             itemSize = itemSizes[3],
             itemPosition = itemPositions[3],
@@ -146,6 +149,7 @@ fun FBTeamInfoView(
         )
 
         FBTeamInfoFifthItem(
+            searchViewModel = searchViewModel,
             isAniItem = true,
             itemSize = itemSizes[4],
             itemPosition = itemPositions[4],
@@ -154,6 +158,7 @@ fun FBTeamInfoView(
         )
 
         FBTeamInfoSixthItem(
+            searchViewModel = searchViewModel,
             isAniItem = true,
             itemSize = itemSizes[5],
             itemPosition = itemPositions[5],
@@ -358,7 +363,7 @@ fun FBTeamInfoThirdItem(
 // league stats
 @Composable
 fun FBTeamInfoFourthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     fbTeamInfoViewModel: FBTeamInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -441,7 +446,7 @@ fun FBTeamInfoFourthItem(
 // last game stats
 @Composable
 fun FBTeamInfoFifthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     fbTeamInfoViewModel: FBTeamInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -543,7 +548,7 @@ fun FBTeamInfoFifthItem(
 // next game stats
 @Composable
 fun FBTeamInfoSixthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     fbTeamInfoViewModel: FBTeamInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,

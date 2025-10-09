@@ -74,7 +74,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun NBATeamStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaTeamStatsViewModel: NBATeamStatsViewModel = hiltViewModel(),
     data: NBATeamStatsDisplayModel
 ) {
@@ -96,6 +96,7 @@ fun NBATeamStatsView(
     }
 
     InfoViewContainer(
+        searchViewModel = searchViewModel,
         itemCount = (statsList?.size ?: 0) + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier,

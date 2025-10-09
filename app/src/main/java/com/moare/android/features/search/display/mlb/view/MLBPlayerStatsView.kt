@@ -54,7 +54,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun MLBPlayerStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     mlbPlayerStatsViewModel: MLBPlayerStatsViewModel = hiltViewModel(),
     data: MLBPlayerStatsDisplayModel
 ) {
@@ -76,6 +76,7 @@ fun MLBPlayerStatsView(
     }
 
     InfoViewContainer(
+        searchViewModel = searchViewModel,
         itemCount = (statsList?.size ?: 0) + 1,
 //        shouldShowMeasureContent = true,
         modifier = Modifier

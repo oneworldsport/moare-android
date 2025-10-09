@@ -34,7 +34,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun NBAPlayerStandingsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaPlayerStandingsViewModel: NBAPlayerStandingsViewModel = hiltViewModel(),
     data: NBAPlayerStandingsDisplayModel
 ) {

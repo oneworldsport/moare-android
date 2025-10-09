@@ -26,7 +26,7 @@ import com.moare.android.ui.common.components.NBATitle
 
 @Composable
 fun NBATeamStandingsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaTeamStandingsViewModel: NBATeamStandingsViewModel = hiltViewModel(),
     data: NBATeamStandingsDisplayModel
 ) {

@@ -53,7 +53,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBTeamStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     fbTeamStatsViewModel: FBTeamStatsViewModel = hiltViewModel(),
     data: FBTeamStatsDisplayModel
 ) {
@@ -75,6 +75,7 @@ fun FBTeamStatsView(
     }
 
     InfoViewContainer(
+        searchViewModel = searchViewModel,
         itemCount = (statsList?.size ?: 0) + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier

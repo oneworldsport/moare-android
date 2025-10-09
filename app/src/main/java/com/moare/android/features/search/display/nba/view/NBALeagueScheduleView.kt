@@ -78,7 +78,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBALeagueScheduleView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel(),
     data: NBALeagueScheduleDisplayModel
 ) {
@@ -160,14 +160,14 @@ fun NBALeagueScheduleView(
         ),
         titleContent = {},
         gameListContent = {
-            NBALeagueScheduleList()
+            NBALeagueScheduleList(searchViewModel = searchViewModel)
         }
     )
 }
 
 @Composable
 fun NBALeagueScheduleList(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel()
 ) {
     /* ---------------------
@@ -181,14 +181,14 @@ fun NBALeagueScheduleList(
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            NBALeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
+            NBALeagueScheduleListItem(searchViewModel = searchViewModel, data = item, teamNameDic = teamNameDic)
         }
     }
 }
 
 @Composable
 fun NBALeagueScheduleListItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel(),
     teamNameDic: Map<String, String>,
     data: NBAGameForSchedule,

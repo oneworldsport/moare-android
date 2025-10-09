@@ -25,7 +25,7 @@ import com.moare.android.ui.common.components.BaseballLeagueTitle
 
 @Composable
 fun KBOTeamStandingsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboTeamStandingsViewModel: KBOTeamStandingsViewModel = hiltViewModel(),
     data: KBOTeamStandingsDisplayModel
 ) {

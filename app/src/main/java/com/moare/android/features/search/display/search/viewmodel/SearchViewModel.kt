@@ -12,6 +12,7 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.Trie
 import com.moare.android.core.util.getChosung
+import com.moare.android.features.search.display.search.viewmodel.SearchViewModel.Intent
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
@@ -51,6 +52,9 @@ import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfo
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
 import com.moare.android.features.search.networking.KeywordsClient
 import com.moare.android.features.search.networking.SearchClient
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
@@ -62,14 +66,19 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
-@HiltViewModel
-class SearchViewModel @Inject constructor(
+sealed interface SearchDelegate {
+//    data class PerformSearch(val searchType: SearchReducer.SearchType = SearchReducer.SearchType.QUERY, val aniDuration: Long = 0) : SearchAction
+    data class Push(val model: SportDecodableModel) : SearchDelegate
+}
+
+class SearchViewModel @AssistedInject constructor(
     @ApplicationContext private val context: Context,
     private val searchClient: SearchClient,
     private val keywordsClient: KeywordsClient,
     private val trieDeferred: CompletableDeferred<Pair<Trie, List<KeywordInfo>>>,
     private val noticeDeferred: CompletableDeferred<List<NoticeModel>>,
     private val trendingKeywordsDeferred: CompletableDeferred<TrendingKeywords>,
+    @Assisted val emitToParent: (SearchDelegate) -> Unit
 ) : MVIViewModel<SearchViewModel.Intent, Nothing>() {
     /* ---------------------
        data state
@@ -161,6 +170,13 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            emitToParent: (SearchDelegate) -> Unit
+        ): SearchViewModel
+    }
+
     /* ---------------------
        intent
        --------------------- */
@@ -190,6 +206,8 @@ class SearchViewModel @Inject constructor(
         data class UpdateLastViewStack(val data: SportDecodableModel) : Intent()
 
         data class TestSearch(val viewForTest: SportDisplayType) : Intent()
+
+
     }
 
     enum class SearchType {
@@ -353,6 +371,8 @@ class SearchViewModel @Inject constructor(
             _poppedView.emit(null)
 
             _resultVisibleState.emit(true)
+
+            emitToParent(SearchDelegate.Push(model = data.data))
         } catch (e: Exception) {
             _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
             Log.e("dsdf", e.localizedMessage ?: "data type error")

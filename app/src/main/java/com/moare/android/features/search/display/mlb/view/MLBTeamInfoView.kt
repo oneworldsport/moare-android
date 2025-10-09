@@ -46,7 +46,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun MLBTeamInfoView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     mlbTeamInfoViewModel: MLBTeamInfoViewModel = hiltViewModel(),
     data: MLBTeamInfoDisplayModel
 ) {
@@ -65,6 +65,7 @@ fun MLBTeamInfoView(
     }
 
     InfoViewContainer(
+        searchViewModel = searchViewModel,
         itemCount = 6,
         measureContent = {
             Row(
@@ -90,7 +91,7 @@ fun MLBTeamInfoView(
                 }
             }
 
-            MLBTeamInfoFourthItem { index, coordinates ->
+            MLBTeamInfoFourthItem(searchViewModel) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
@@ -101,12 +102,14 @@ fun MLBTeamInfoView(
                     .fillMaxWidth()
             ) {
                 MLBTeamInfoFifthItem(
+                    searchViewModel = searchViewModel,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
                 }
 
                 MLBTeamInfoSixthItem(
+                    searchViewModel = searchViewModel,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
@@ -139,6 +142,7 @@ fun MLBTeamInfoView(
             )
 
             MLBTeamInfoFourthItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[3],
                 itemPosition = itemPositions[3],
@@ -147,6 +151,7 @@ fun MLBTeamInfoView(
             )
 
             MLBTeamInfoFifthItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[4],
                 itemPosition = itemPositions[4],
@@ -155,6 +160,7 @@ fun MLBTeamInfoView(
             )
 
             MLBTeamInfoSixthItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[5],
                 itemPosition = itemPositions[5],
@@ -366,7 +372,7 @@ fun MLBTeamInfoThirdItem(
 // league stats
 @Composable
 fun MLBTeamInfoFourthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     mlbTeamInfoViewModel: MLBTeamInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -450,7 +456,7 @@ fun MLBTeamInfoFourthItem(
 // last game stats
 @Composable
 fun MLBTeamInfoFifthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     mlbTeamInfoViewModel: MLBTeamInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -555,7 +561,7 @@ fun MLBTeamInfoFifthItem(
 // next game stats
 @Composable
 fun MLBTeamInfoSixthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     mlbTeamInfoViewModel: MLBTeamInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,

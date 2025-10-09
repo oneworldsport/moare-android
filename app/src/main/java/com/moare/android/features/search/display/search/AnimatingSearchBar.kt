@@ -57,7 +57,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun AnimatingSearchBar(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     modifier: Modifier
 ) {
     /* ---------------------

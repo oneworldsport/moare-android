@@ -63,7 +63,7 @@ import com.moare.android.ui.util.CenterColumn
 
 @Composable
 fun KBOGameStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboGameStatsViewModel: KBOGameStatsViewModel = hiltViewModel(),
     data: KBOGameStatsDisplayModel
 ) {
@@ -202,6 +202,7 @@ fun KBOGameStatsView(
                 game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_CANCELED
             ) {
                 KBOLeagueScheduleListItem(
+                    searchViewModel = searchViewModel,
                     data = ModelConverter().kboGameToGameScheduleConverter(game),
                     teamNameDic = teamNameDic
                 )

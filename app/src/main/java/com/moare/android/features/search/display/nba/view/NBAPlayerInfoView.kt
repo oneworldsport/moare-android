@@ -70,7 +70,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun NBAPlayerInfoView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaPlayerInfoViewModel: NBAPlayerInfoViewModel = hiltViewModel(),
     data: NBAPlayerInfoDisplayModel
 ) {
@@ -89,6 +89,7 @@ fun NBAPlayerInfoView(
     }
 
     InfoViewContainer(
+        searchViewModel = searchViewModel,
         itemCount = 9,
         measureContent = {
             Row(
@@ -102,6 +103,7 @@ fun NBAPlayerInfoView(
                 }
 
                 NBAPlayerInfoSecondItem(
+                    searchViewModel = searchViewModel,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
@@ -139,15 +141,15 @@ fun NBAPlayerInfoView(
                 }
             }
 
-            NBAPlayerInfoSeventhItem { index, coordinates ->
+            NBAPlayerInfoSeventhItem(searchViewModel) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            NBAPlayerInfoEighthItem { index, coordinates ->
+            NBAPlayerInfoEighthItem(searchViewModel) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            NBAPlayerInfoNinthItem { index, coordinates ->
+            NBAPlayerInfoNinthItem(searchViewModel) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
         },
@@ -161,6 +163,7 @@ fun NBAPlayerInfoView(
             )
 
             NBAPlayerInfoSecondItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[1],
                 itemPosition = itemPositions[1],
@@ -201,6 +204,7 @@ fun NBAPlayerInfoView(
             )
 
             NBAPlayerInfoSeventhItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[6],
                 itemPosition = itemPositions[6],
@@ -209,6 +213,7 @@ fun NBAPlayerInfoView(
             )
 
             NBAPlayerInfoEighthItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[7],
                 itemPosition = itemPositions[7],
@@ -217,6 +222,7 @@ fun NBAPlayerInfoView(
             )
 
             NBAPlayerInfoNinthItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[8],
                 itemPosition = itemPositions[8],
@@ -280,7 +286,7 @@ fun NBAPlayerInfoFirstItem(
 // logo, team, name
 @Composable
 fun NBAPlayerInfoSecondItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaPlayerInfoViewModel: NBAPlayerInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -610,7 +616,7 @@ fun NBAPlayerInfoSixthItem(
 // league stats
 @Composable
 fun NBAPlayerInfoSeventhItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaPlayerInfoViewModel: NBAPlayerInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -695,7 +701,7 @@ fun NBAPlayerInfoSeventhItem(
 // last game
 @Composable
 fun NBAPlayerInfoEighthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaPlayerInfoViewModel: NBAPlayerInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -861,7 +867,7 @@ fun NBAPlayerInfoEighthItem(
 // next game
 @Composable
 fun NBAPlayerInfoNinthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaPlayerInfoViewModel: NBAPlayerInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,

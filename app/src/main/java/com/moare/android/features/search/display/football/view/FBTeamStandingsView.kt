@@ -27,7 +27,7 @@ import com.moare.android.ui.common.components.LeagueTitle
 
 @Composable
 fun FBTeamStandingsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     fbTeamStandingsViewModel: FBTeamStandingsViewModel = hiltViewModel(),
     data: FBTeamStandingsDisplayModel
 ) {

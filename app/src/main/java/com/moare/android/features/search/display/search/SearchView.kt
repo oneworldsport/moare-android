@@ -49,6 +49,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
+import com.moare.android.core.mvi.AppViewModel
+import com.moare.android.core.mvi.StackItem
 import com.moare.android.features.search.display.football.view.FBLeagueScheduleView
 import com.moare.android.features.search.display.football.view.FBGameStatsView
 import com.moare.android.features.search.display.football.view.FBPlayerInfoView
@@ -121,10 +123,12 @@ import com.moare.android.ui.theme.MoareAndroidTheme
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.rememberKeyboardVisibility
 import kotlinx.coroutines.delay
+import java.util.Stack
 
 @Composable
 fun SearchView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    appViewModel: AppViewModel,
+    searchViewModel: SearchViewModel,
     viewForTest: SportDisplayType? = null
 ) {
     /* ---------------------
@@ -142,6 +146,8 @@ fun SearchView(
     /* ---------------------
        viewmodel state
        --------------------- */
+    val stack by appViewModel.stack.collectAsState()
+
     val displayModels by searchViewModel.displayModels.collectAsState()
     val searchDataState by searchViewModel.searchDataState.collectAsState()
     val showResult by searchViewModel.resultVisibleState.collectAsState()
@@ -216,7 +222,8 @@ fun SearchView(
     }
 
     BackHandler {
-        searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
+//        searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
+        appViewModel.pop()
     }
 
     /* ---------------------
@@ -242,7 +249,8 @@ fun SearchView(
                         tint = Moare,
                         modifier = Modifier
                             .clickable {
-                                searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
+//                                searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
+                                appViewModel.pop()
                             }
                     )
                 }
@@ -311,6 +319,7 @@ fun SearchView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatingSearchBar(
+                searchViewModel = searchViewModel,
                 modifier = Modifier
 //                    .padding(top = 10.dp)
             )
@@ -328,7 +337,7 @@ fun SearchView(
                 },
                 exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
             ) {
-                TrendingKeywords { keyword ->
+                TrendingKeywords(searchViewModel = searchViewModel) { keyword ->
                     searchViewModel.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(keyword), false))
                     searchViewModel.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.TRENDING_KEYWORD, aniDuration = 1000))
                 }
@@ -344,6 +353,7 @@ fun SearchView(
 //            key(System.currentTimeMillis()) {
                 key(autoCompleteList) { // redraw the composable with its initial state
                     AutoCompleteList(
+                        searchViewModel = searchViewModel,
                         onItemSelected = { query ->
                             searchViewModel.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(query), false))
                             searchViewModel.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.AUTO_COMPLETE, aniDuration = 2000))
@@ -371,115 +381,120 @@ fun SearchView(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(top = 10.dp)
                 ) {
+                    when (val top = stack.lastOrNull()) {
+                        is StackItem.FBPlayerInfo -> FBPlayerInfoView(searchViewModel, top.store, top.displayModel)
+                        is StackItem.FBPlayerStats -> FBPlayerStatsView(searchViewModel, top.store, top.displayModel)
+                        else -> Unit
+                    }
                     // football
-                    displayModels[SportDisplayType.FB_PLAYER_INFO]?.let {
-                        FBPlayerInfoView(data = it as FBPlayerInfoDisplayModel)
-                    }
-                    displayModels[SportDisplayType.FB_PLAYER_STATS]?.let {
-                        FBPlayerStatsView(data = it as FBPlayerStatsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.FB_PLAYER_STANDINGS]?.let {
-                        FBPlayerStandingsView(data = it as FBPlayerStandingsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.FB_TEAM_INFO]?.let {
-                        FBTeamInfoView(data = it as FBTeamInfoDisplayModel)
-                    }
-                    displayModels[SportDisplayType.FB_TEAM_STATS]?.let {
-                        FBTeamStatsView(data = it as FBTeamStatsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.FB_TEAM_STANDINGS]?.let {
-                        FBTeamStandingsView(data = it as FBTeamStandingsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE]?.let {
-                        FBLeagueScheduleView(data = it as FBLeagueScheduleDisplayModel)
-                    }
-                    displayModels[SportDisplayType.FB_GAME_STATS]?.let {
-                        FBGameStatsView(data = it as FBGameStatsDisplayModel)
-                    }
-                    // nba
-                    displayModels[SportDisplayType.NBA_PLAYER_INFO]?.let {
-                        NBAPlayerInfoView(data = it as NBAPlayerInfoDisplayModel)
-                    }
-                    displayModels[SportDisplayType.NBA_PLAYER_STATS]?.let {
-                        NBAPlayerStatsView(data = it as NBAPlayerStatsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.NBA_PLAYER_STANDINGS]?.let {
-                        NBAPlayerStandingsView(data = it as NBAPlayerStandingsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.NBA_TEAM_INFO]?.let {
-                        NBATeamInfoView(data = it as NBATeamInfoDisplayModel)
-                    }
-                    displayModels[SportDisplayType.NBA_TEAM_STATS]?.let {
-                        NBATeamStatsView(data = it as NBATeamStatsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.NBA_TEAM_STANDINGS]?.let {
-                        NBATeamStandingsView(data = it as NBATeamStandingsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE]?.let {
-                        NBALeagueScheduleView(data = it as NBALeagueScheduleDisplayModel)
-                    }
-                    displayModels[SportDisplayType.NBA_GAME_STATS]?.let {
-                        NBAGameStatsView(data = it as NBAGameStatsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT]?.let {
-                        NBALeagueTournamentView(data = it as NBATournamentDisplayModel)
-                    }
-                    // kbo
-                    displayModels[SportDisplayType.KBO_PLAYER_INFO]?.let {
-                        KBOPlayerInfoView(data = it as KBOPlayerInfoDisplayModel)
-                    }
-                    displayModels[SportDisplayType.KBO_PLAYER_STATS]?.let {
-                        KBOPlayerStatsView(data = it as KBOPlayerStatsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.KBO_PLAYER_STANDINGS]?.let {
-//                        KBOPlayerStandingsView(data = it)
-                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-                            Text(StringConstants.viewPreparingAdviseText("'KBO 선수 순위'"))
-                        }
-                    }
-                    displayModels[SportDisplayType.KBO_TEAM_INFO]?.let {
-                        KBOTeamInfoView(data = it as KBOTeamInfoDisplayModel)
-                    }
-                    displayModels[SportDisplayType.KBO_TEAM_STATS]?.let {
-                        KBOTeamStatsView(data = it as KBOTeamStatsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.KBO_TEAM_STANDINGS]?.let {
-                        KBOTeamStandingsView(data = it as KBOTeamStandingsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE]?.let {
-                        KBOLeagueScheduleView(data = it as KBOLeagueScheduleDisplayModel)
-                    }
-                    displayModels[SportDisplayType.KBO_GAME_STATS]?.let {
-                        KBOGameStatsView(data = it as KBOGameStatsDisplayModel)
-                    }
-                    // mlb
-                    displayModels[SportDisplayType.MLB_PLAYER_INFO]?.let {
-                        MLBPlayerInfoView(data = it as MLBPlayerInfoDisplayModel)
-                    }
-                    displayModels[SportDisplayType.MLB_PLAYER_STATS]?.let {
-                        MLBPlayerStatsView(data = it as MLBPlayerStatsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.MLB_PLAYER_STANDINGS]?.let {
-//                        MLBPlayerStandingsView(data = it)
-                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-                            Text(StringConstants.viewPreparingAdviseText("'MLB 선수 순위'"))
-                        }
-                    }
-                    displayModels[SportDisplayType.MLB_TEAM_INFO]?.let {
-                        MLBTeamInfoView(data = it as MLBTeamInfoDisplayModel)
-                    }
-                    displayModels[SportDisplayType.MLB_TEAM_STATS]?.let {
-                        MLBTeamStatsView(data = it as MLBTeamStatsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.MLB_TEAM_STANDINGS]?.let {
-                        MLBTeamStandingsView(data = it as MLBTeamStandingsDisplayModel)
-                    }
-                    displayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE]?.let {
-                        MLBLeagueScheduleView(data = it as MLBLeagueScheduleDisplayModel)
-                    }
-                    displayModels[SportDisplayType.MLB_GAME_STATS]?.let {
-                        MLBGameStatsView(data = it as MLBGameStatsDisplayModel)
-                    }
+//                    displayModels[SportDisplayType.FB_PLAYER_INFO]?.let {
+//                        FBPlayerInfoView(searchViewModel = searchViewModel, data = it as FBPlayerInfoDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.FB_PLAYER_STATS]?.let {
+//                        FBPlayerStatsView(searchViewModel = searchViewModel,data = it as FBPlayerStatsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.FB_PLAYER_STANDINGS]?.let {
+//                        FBPlayerStandingsView(searchViewModel = searchViewModel,data = it as FBPlayerStandingsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.FB_TEAM_INFO]?.let {
+//                        FBTeamInfoView(searchViewModel = searchViewModel,data = it as FBTeamInfoDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.FB_TEAM_STATS]?.let {
+//                        FBTeamStatsView(searchViewModel = searchViewModel,data = it as FBTeamStatsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.FB_TEAM_STANDINGS]?.let {
+//                        FBTeamStandingsView(searchViewModel = searchViewModel,data = it as FBTeamStandingsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE]?.let {
+//                        FBLeagueScheduleView(searchViewModel = searchViewModel,data = it as FBLeagueScheduleDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.FB_GAME_STATS]?.let {
+//                        FBGameStatsView(searchViewModel = searchViewModel,data = it as FBGameStatsDisplayModel)
+//                    }
+//                    // nba
+//                    displayModels[SportDisplayType.NBA_PLAYER_INFO]?.let {
+//                        NBAPlayerInfoView(searchViewModel = searchViewModel,data = it as NBAPlayerInfoDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.NBA_PLAYER_STATS]?.let {
+//                        NBAPlayerStatsView(searchViewModel = searchViewModel,data = it as NBAPlayerStatsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.NBA_PLAYER_STANDINGS]?.let {
+//                        NBAPlayerStandingsView(searchViewModel = searchViewModel,data = it as NBAPlayerStandingsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.NBA_TEAM_INFO]?.let {
+//                        NBATeamInfoView(searchViewModel = searchViewModel,data = it as NBATeamInfoDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.NBA_TEAM_STATS]?.let {
+//                        NBATeamStatsView(searchViewModel = searchViewModel,data = it as NBATeamStatsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.NBA_TEAM_STANDINGS]?.let {
+//                        NBATeamStandingsView(searchViewModel = searchViewModel,data = it as NBATeamStandingsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.NBA_LEAGUE_SCHEDULE]?.let {
+//                        NBALeagueScheduleView(searchViewModel = searchViewModel,data = it as NBALeagueScheduleDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.NBA_GAME_STATS]?.let {
+//                        NBAGameStatsView(searchViewModel = searchViewModel,data = it as NBAGameStatsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT]?.let {
+//                        NBALeagueTournamentView(searchViewModel = searchViewModel,data = it as NBATournamentDisplayModel)
+//                    }
+//                    // kbo
+//                    displayModels[SportDisplayType.KBO_PLAYER_INFO]?.let {
+//                        KBOPlayerInfoView(searchViewModel = searchViewModel,data = it as KBOPlayerInfoDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.KBO_PLAYER_STATS]?.let {
+//                        KBOPlayerStatsView(searchViewModel = searchViewModel,data = it as KBOPlayerStatsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.KBO_PLAYER_STANDINGS]?.let {
+////                        KBOPlayerStandingsView(data = it)
+//                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+//                            Text(StringConstants.viewPreparingAdviseText("'KBO 선수 순위'"))
+//                        }
+//                    }
+//                    displayModels[SportDisplayType.KBO_TEAM_INFO]?.let {
+//                        KBOTeamInfoView(searchViewModel = searchViewModel,data = it as KBOTeamInfoDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.KBO_TEAM_STATS]?.let {
+//                        KBOTeamStatsView(searchViewModel = searchViewModel,data = it as KBOTeamStatsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.KBO_TEAM_STANDINGS]?.let {
+//                        KBOTeamStandingsView(searchViewModel = searchViewModel,data = it as KBOTeamStandingsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.KBO_LEAGUE_SCHEDULE]?.let {
+//                        KBOLeagueScheduleView(searchViewModel = searchViewModel,data = it as KBOLeagueScheduleDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.KBO_GAME_STATS]?.let {
+//                        KBOGameStatsView(searchViewModel = searchViewModel,data = it as KBOGameStatsDisplayModel)
+//                    }
+//                    // mlb
+//                    displayModels[SportDisplayType.MLB_PLAYER_INFO]?.let {
+//                        MLBPlayerInfoView(searchViewModel = searchViewModel,data = it as MLBPlayerInfoDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.MLB_PLAYER_STATS]?.let {
+//                        MLBPlayerStatsView(searchViewModel = searchViewModel,data = it as MLBPlayerStatsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.MLB_PLAYER_STANDINGS]?.let {
+////                        MLBPlayerStandingsView(data = it)
+//                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+//                            Text(StringConstants.viewPreparingAdviseText("'MLB 선수 순위'"))
+//                        }
+//                    }
+//                    displayModels[SportDisplayType.MLB_TEAM_INFO]?.let {
+//                        MLBTeamInfoView(searchViewModel = searchViewModel,data = it as MLBTeamInfoDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.MLB_TEAM_STATS]?.let {
+//                        MLBTeamStatsView(searchViewModel = searchViewModel,data = it as MLBTeamStatsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.MLB_TEAM_STANDINGS]?.let {
+//                        MLBTeamStandingsView(searchViewModel = searchViewModel,data = it as MLBTeamStandingsDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.MLB_LEAGUE_SCHEDULE]?.let {
+//                        MLBLeagueScheduleView(searchViewModel = searchViewModel,data = it as MLBLeagueScheduleDisplayModel)
+//                    }
+//                    displayModels[SportDisplayType.MLB_GAME_STATS]?.let {
+//                        MLBGameStatsView(searchViewModel = searchViewModel,data = it as MLBGameStatsDisplayModel)
+//                    }
                 }
             }
 

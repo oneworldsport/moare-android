@@ -43,7 +43,7 @@ import com.moare.android.ui.util.CenterColumn
 
 @Composable
 fun MLBTeamStandingsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel(),
     data: MLBTeamStandingsDisplayModel
 ) {
@@ -105,6 +105,7 @@ fun MLBTeamStandingsView(
             CenterColumn {
                 // west
                 MLBTeamStandingsDataList(
+                    searchViewModel = searchViewModel,
                     divisionTitle = "서부",
                     standings = westStandings,
                     hScrollState = hScrollState
@@ -112,6 +113,7 @@ fun MLBTeamStandingsView(
 
                 // east
                 MLBTeamStandingsDataList(
+                    searchViewModel = searchViewModel,
                     divisionTitle = "동부",
                     standings = eastStandings,
                     hScrollState = hScrollState
@@ -119,6 +121,7 @@ fun MLBTeamStandingsView(
 
                 // central
                 MLBTeamStandingsDataList(
+                    searchViewModel = searchViewModel,
                     divisionTitle = "중부",
                     standings = centralStandings,
                     hScrollState = hScrollState
@@ -130,7 +133,7 @@ fun MLBTeamStandingsView(
 
 @Composable
 fun MLBTeamStandingsDataList(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel(),
     divisionTitle: String,
     standings: List<MLBTeamStandingsDisplay>,

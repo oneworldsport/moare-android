@@ -78,7 +78,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun MLBLeagueScheduleView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     mlbLeagueScheduleViewModel: MLBLeagueScheduleViewModel = hiltViewModel(),
     data: MLBLeagueScheduleDisplayModel
 ) {
@@ -155,14 +155,14 @@ fun MLBLeagueScheduleView(
         ),
         titleContent = {},
         gameListContent = {
-            MLBLeagueScheduleList()
+            MLBLeagueScheduleList(searchViewModel = searchViewModel)
         }
     )
 }
 
 @Composable
 fun MLBLeagueScheduleList(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     mlbLeagueScheduleViewModel: MLBLeagueScheduleViewModel = hiltViewModel()
 ) {
     /* ---------------------
@@ -176,7 +176,7 @@ fun MLBLeagueScheduleList(
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            MLBLeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
+            MLBLeagueScheduleListItem(searchViewModel = searchViewModel, data = item, teamNameDic = teamNameDic)
         }
     }
 }
@@ -186,7 +186,7 @@ fun MLBLeagueScheduleList(
 // 계속 MLBGameStatsScoreInfoItem를 사용할거는 아니기때문에(축구처럼 애니메이션 적용을 위해) 나중에 바뀔 여지 있음.
 @Composable
 fun MLBLeagueScheduleListItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     mlbLeagueScheduleViewModel: MLBLeagueScheduleViewModel = hiltViewModel(),
     teamNameDic: Map<String, String>,
     data: MLBGameForSchedule,

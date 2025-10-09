@@ -41,7 +41,7 @@ import kotlinx.coroutines.delay
  */
 @Composable
 fun InfoViewContainer(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     itemCount: Int,
     shouldShowMeasureContent: Boolean = false, // NOTE: StatsView가 아코디언 UI로 바뀌면서 measureContent를 사용해야하는 경우가 있어 추가.
     modifier: Modifier = Modifier,

@@ -32,7 +32,7 @@ import com.moare.android.ui.util.clickableCapsuleRippleEffect
 
 @Composable
 fun TrendingKeywords(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     onItemSelected: (String) -> Unit
 ) {
     val trendingKeywordList by searchViewModel.trendingKeywordList.collectAsState()

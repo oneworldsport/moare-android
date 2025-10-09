@@ -46,7 +46,7 @@ import com.moare.android.ui.common.components.LeagueTitle
 
 @Composable
 fun FBLeagueScheduleView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     fbLeagueScheduleViewModel: FBLeagueScheduleViewModel = hiltViewModel(),
     data: FBLeagueScheduleDisplayModel,
 ) {
@@ -164,14 +164,14 @@ fun FBLeagueScheduleView(
             }
         },
         gameListContent = {
-            FBLeagueScheduleList()
+            FBLeagueScheduleList(searchViewModel = searchViewModel)
         }
     )
 }
 
 @Composable
 fun FBLeagueScheduleList(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     fbLeagueScheduleViewModel: FBLeagueScheduleViewModel = hiltViewModel()
 ) {
     /* ---------------------
@@ -188,7 +188,7 @@ fun FBLeagueScheduleList(
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            FBLeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
+            FBLeagueScheduleListItem(searchViewModel = searchViewModel, data = item, teamNameDic = teamNameDic)
         }
 //        for (value in gameListToDisplay) {
 //            FBLeagueScheduleItem(data = value)
@@ -198,7 +198,7 @@ fun FBLeagueScheduleList(
 
 @Composable
 fun FBLeagueScheduleListItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     fbLeagueScheduleViewModel: FBLeagueScheduleViewModel = hiltViewModel(),
     // FBLeagueScheduleViewModel이 한번도 초기화 된적 없이 FBGameStatsView에서 함수가 호출될때 teamNameDictionary를 fbLeagueScheduleViewModel에서 가져올수가 없어 추가.
     // TODO: 그러면 결국 fbLeagueScheduleViewModel는 nullable이어도 된다는건데..?

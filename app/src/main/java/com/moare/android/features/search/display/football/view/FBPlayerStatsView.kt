@@ -58,8 +58,8 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBPlayerStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
+    fbPlayerStatsViewModel: FBPlayerStatsViewModel,
     data: FBPlayerStatsDisplayModel
 ) {
     /* ---------------------
@@ -80,20 +80,22 @@ fun FBPlayerStatsView(
     }
 
     InfoViewContainer(
+        searchViewModel = searchViewModel,
         itemCount = (statsList?.size ?: 0) + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier
             .verticalScroll(rememberScrollState()),
         measureContent = {
-            FBPlayerStatsPlayerInfoItem { index, coordinates ->
+            FBPlayerStatsPlayerInfoItem(fbPlayerStatsViewModel) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            FBPlayerStatsList { index, coordinates ->
+            FBPlayerStatsList(fbPlayerStatsViewModel) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
         }, displayContent = {
             FBPlayerStatsPlayerInfoItem(
+                fbPlayerStatsViewModel = fbPlayerStatsViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
@@ -103,6 +105,7 @@ fun FBPlayerStatsView(
             )
 
             FBPlayerStatsList(
+                fbPlayerStatsViewModel = fbPlayerStatsViewModel,
                 isAniItem = true,
                 itemSizes = itemSizes,
                 itemPositions = itemPositions,
@@ -117,7 +120,7 @@ fun FBPlayerStatsView(
 // player info
 @Composable
 fun FBPlayerStatsPlayerInfoItem(
-    fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
+    fbPlayerStatsViewModel: FBPlayerStatsViewModel,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -226,7 +229,7 @@ fun FBPlayerStatsPlayerInfoItem(
 // stats list
 @Composable
 fun FBPlayerStatsList(
-    fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
+    fbPlayerStatsViewModel: FBPlayerStatsViewModel,
     isAniItem: Boolean = false,
     itemSizes: Map<Int, DpSize>? = null,
     itemPositions: Map<Int, Offset>? = null,
@@ -240,6 +243,7 @@ fun FBPlayerStatsList(
 
     for ((index, value) in statsList.withIndex()) {
         FBPlayerStatsListItem(
+            fbPlayerStatsViewModel = fbPlayerStatsViewModel,
             index = index,
             data = value,
             isAniItem = isAniItem,
@@ -256,6 +260,7 @@ fun FBPlayerStatsList(
 
 @Composable
 fun FBPlayerStatsListItem(
+    fbPlayerStatsViewModel: FBPlayerStatsViewModel,
     index: Int,
     data: FBPlayerStats,
     isAniItem: Boolean,
@@ -283,6 +288,7 @@ fun FBPlayerStatsListItem(
             .fillMaxWidth()
     ) {
         FBPlayerStatsItem(
+            fbPlayerStatsViewModel = fbPlayerStatsViewModel,
             data = data,
             contentsAlpha = contentsAlpha
         )
@@ -291,7 +297,7 @@ fun FBPlayerStatsListItem(
 
 @Composable
 fun FBPlayerStatsItem(
-    fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
+    fbPlayerStatsViewModel: FBPlayerStatsViewModel,
     data: FBPlayerStats,
     contentsAlpha: Float
 ) {

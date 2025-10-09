@@ -63,7 +63,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBALeagueTournamentView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaLeagueTournamentViewModel: NBALeagueTournamentViewModel = hiltViewModel(),
     data: NBATournamentDisplayModel
 ) {
@@ -90,12 +90,13 @@ fun NBALeagueTournamentView(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 10.dp)
     ) {
-        NBALeagueTournamentMainContainer()
+        NBALeagueTournamentMainContainer(searchViewModel)
     }
 }
 
 @Composable
 fun NBALeagueTournamentMainContainer(
+    searchViewModel: SearchViewModel,
     nbaLeagueTournamentViewModel: NBALeagueTournamentViewModel = hiltViewModel()
 ) {
     /* ---------------------
@@ -153,6 +154,7 @@ fun NBALeagueTournamentMainContainer(
             // western 1 round - first game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = westFirstRoundFirstGameList,
                     firstTeamId = westFirstRoundFirstGameFirstTeamId,
                     secondTeamId = westFirstRoundFirstGameSecondTeamId
@@ -164,6 +166,7 @@ fun NBALeagueTournamentMainContainer(
                 Spacer(Modifier.width(nbaLeagueTournamentViewModel.secondRoundContainerSpace))
 
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = westSecondRoundFirstGameList,
                     firstTeamId = westSecondRoundFirstGameFirstTeamId,
                     secondTeamId = westSecondRoundFirstGameSecondTeamId
@@ -173,6 +176,7 @@ fun NBALeagueTournamentMainContainer(
             // western 1 round - second game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = westFirstRoundSecondGameList,
                     firstTeamId = westFirstRoundSecondGameFirstTeamId,
                     secondTeamId = westFirstRoundSecondGameSecondTeamId,
@@ -185,6 +189,7 @@ fun NBALeagueTournamentMainContainer(
                 Spacer(Modifier.width(nbaLeagueTournamentViewModel.finalRoundContainerSpace))
 
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = westFinalRoundGameList,
                     firstTeamId = westFinalRoundGameFirstTeamId,
                     secondTeamId = westFinalRoundGameSecondTeamId,
@@ -196,6 +201,7 @@ fun NBALeagueTournamentMainContainer(
             // western 1 round - third game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = westFirstRoundThirdGameList,
                     firstTeamId = westFirstRoundThirdGameFirstTeamId,
                     secondTeamId = westFirstRoundThirdGameSecondTeamId,
@@ -207,6 +213,7 @@ fun NBALeagueTournamentMainContainer(
                 Spacer(Modifier.width(nbaLeagueTournamentViewModel.secondRoundContainerSpace))
 
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = westSecondRoundSecondGameList,
                     firstTeamId = westSecondRoundSecondGameFirstTeamId,
                     secondTeamId = westSecondRoundSecondGameSecondTeamId,
@@ -217,6 +224,7 @@ fun NBALeagueTournamentMainContainer(
             // western 1 round - fourth game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = westFirstRoundFourthGameList,
                     firstTeamId = westFirstRoundFourthGameFirstTeamId,
                     secondTeamId = westFirstRoundFourthGameSecondTeamId,
@@ -239,6 +247,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 1 round - first game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = eastFirstRoundFirstGameList,
                     firstTeamId = eastFirstRoundFirstGameFirstTeamId,
                     secondTeamId = eastFirstRoundFirstGameSecondTeamId,
@@ -249,6 +258,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 2 round - first game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = eastSecondRoundFirstGameList,
                     firstTeamId = eastSecondRoundFirstGameFirstTeamId,
                     secondTeamId = eastSecondRoundFirstGameSecondTeamId,
@@ -261,6 +271,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 1 round - second game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = eastFirstRoundSecondGameList,
                     firstTeamId = eastFirstRoundSecondGameFirstTeamId,
                     secondTeamId = eastFirstRoundSecondGameSecondTeamId,
@@ -272,6 +283,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern final round
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = eastFinalRoundGameList,
                     firstTeamId = eastFinalRoundGameFirstTeamId,
                     secondTeamId = eastFinalRoundGameSecondTeamId,
@@ -286,6 +298,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 1 round - third game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = eastFirstRoundThirdGameList,
                     firstTeamId = eastFirstRoundThirdGameFirstTeamId,
                     secondTeamId = eastFirstRoundThirdGameSecondTeamId,
@@ -296,6 +309,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 2 round - second game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = eastSecondRoundSecondGameList,
                     firstTeamId = eastSecondRoundSecondGameFirstTeamId,
                     secondTeamId = eastSecondRoundSecondGameSecondTeamId,
@@ -309,6 +323,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 1 round - fourth game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
+                    searchViewModel = searchViewModel,
                     gameList = eastFirstRoundFourthGameList,
                     firstTeamId = eastFirstRoundFourthGameFirstTeamId,
                     secondTeamId = eastFirstRoundFourthGameSecondTeamId,
@@ -322,7 +337,7 @@ fun NBALeagueTournamentMainContainer(
 
 @Composable
 fun NBALeagueTournamentRoundContainer(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaLeagueTournamentViewModel: NBALeagueTournamentViewModel = hiltViewModel(),
     gameList: List<NBAGame>?,
     firstTeamId: Int?,

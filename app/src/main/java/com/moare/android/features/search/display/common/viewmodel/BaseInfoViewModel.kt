@@ -7,6 +7,12 @@ import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+data class BaseInfoState<T>(
+    val displayModel: T,
+    val playerNameDic: Map<String, String> = emptyMap(),
+    val teamNameDic: Map<String, String> = emptyMap()
+)
+
 abstract class BaseInfoViewModel<I, T>(
     private val nameProvider: TranslatedNameProvider
 ) : MVIViewModel<I, T>() {

@@ -36,7 +36,7 @@ import com.moare.android.ui.common.components.LeagueTitle
 
 @Composable
 fun FBGameStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     fbGameStatsViewModel: FBGameStatsViewModel = hiltViewModel(),
     data: FBGameStatsDisplayModel
 ) {
@@ -262,6 +262,7 @@ fun FBGameStatsView(
         gameContent = {
             displayModel?.game?.let { game ->
                 FBLeagueScheduleListItem(
+                    searchViewModel = searchViewModel,
                     data = ModelConverter().fbGameToGameScheduleConverter(game),
                     teamNameDic = teamNameDic
                 )

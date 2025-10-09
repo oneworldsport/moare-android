@@ -46,7 +46,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun AutoCompleteList(
     modifier: Modifier = Modifier,
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     onItemSelected: (String) -> Unit
 ) {
     var selectedQuery by remember { mutableStateOf("") }

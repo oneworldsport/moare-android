@@ -70,7 +70,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBAGameStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel(),
     data: NBAGameStatsDisplayModel
 ) {
@@ -248,6 +248,7 @@ fun NBAGameStatsView(
         gameContent = {
             if (displayModel?.game?.gameSummary?.gameStatusId == StringConstants.NBA.GAME_SCHEDULED) {
                 NBALeagueScheduleListItem(
+                    searchViewModel = searchViewModel,
                     data = ModelConverter().nbaGameToGameScheduleConverter(displayModel!!.game),
                     teamNameDic = teamNameDic
                 )

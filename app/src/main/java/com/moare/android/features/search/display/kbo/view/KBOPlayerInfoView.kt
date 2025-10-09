@@ -63,7 +63,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun KBOPlayerInfoView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboPlayerInfoViewModel: KBOPlayerInfoViewModel = hiltViewModel(),
     data: KBOPlayerInfoDisplayModel
 ) {
@@ -82,6 +82,7 @@ fun KBOPlayerInfoView(
     }
 
     InfoViewContainer(
+        searchViewModel = searchViewModel,
         itemCount = 8,
         measureContent = {
             Row(
@@ -95,6 +96,7 @@ fun KBOPlayerInfoView(
                 }
 
                 KBOPlayerInfoSecondItem(
+                    searchViewModel,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
@@ -126,15 +128,15 @@ fun KBOPlayerInfoView(
                 }
             }
 
-            KBOPlayerInfoSixthItem { index, coordinates ->
+            KBOPlayerInfoSixthItem(searchViewModel) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            KBOPlayerInfoSeventhItem { index, coordinates ->
+            KBOPlayerInfoSeventhItem(searchViewModel) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            KBOPlayerInfoEighthItem { index, coordinates ->
+            KBOPlayerInfoEighthItem(searchViewModel) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
         },
@@ -148,6 +150,7 @@ fun KBOPlayerInfoView(
             )
 
             KBOPlayerInfoSecondItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[1],
                 itemPosition = itemPositions[1],
@@ -180,6 +183,7 @@ fun KBOPlayerInfoView(
             )
 
             KBOPlayerInfoSixthItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[5],
                 itemPosition = itemPositions[5],
@@ -188,6 +192,7 @@ fun KBOPlayerInfoView(
             )
 
             KBOPlayerInfoSeventhItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[6],
                 itemPosition = itemPositions[6],
@@ -196,6 +201,7 @@ fun KBOPlayerInfoView(
             )
 
             KBOPlayerInfoEighthItem(
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[7],
                 itemPosition = itemPositions[7],
@@ -251,7 +257,7 @@ fun KBOPlayerInfoFirstItem(
 // logo, team, name
 @Composable
 fun KBOPlayerInfoSecondItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboPlayerInfoViewModel: KBOPlayerInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -521,7 +527,7 @@ fun KBOPlayerInfoFifthItem(
 // league stats
 @Composable
 fun KBOPlayerInfoSixthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboPlayerInfoViewModel: KBOPlayerInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -648,7 +654,7 @@ fun KBOPlayerInfoSixthItem(
 // last game
 @Composable
 fun KBOPlayerInfoSeventhItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboPlayerInfoViewModel: KBOPlayerInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -844,7 +850,7 @@ fun KBOPlayerInfoSeventhItem(
 // next game
 @Composable
 fun KBOPlayerInfoEighthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboPlayerInfoViewModel: KBOPlayerInfoViewModel = hiltViewModel(),
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,

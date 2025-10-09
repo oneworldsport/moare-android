@@ -34,7 +34,7 @@ import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 
 @Composable
 fun KBOLeagueScheduleView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboLeagueScheduleViewModel: KBOLeagueScheduleViewModel = hiltViewModel(),
     data: KBOLeagueScheduleDisplayModel
 ) {
@@ -111,14 +111,14 @@ fun KBOLeagueScheduleView(
         ),
         titleContent = {},
         gameListContent = {
-            KBOLeagueScheduleList()
+            KBOLeagueScheduleList(searchViewModel = searchViewModel)
         }
     )
 }
 
 @Composable
 fun KBOLeagueScheduleList(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboLeagueScheduleViewModel: KBOLeagueScheduleViewModel = hiltViewModel()
 ) {
     /* ---------------------
@@ -132,14 +132,14 @@ fun KBOLeagueScheduleList(
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            KBOLeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
+            KBOLeagueScheduleListItem(searchViewModel = searchViewModel, data = item, teamNameDic = teamNameDic)
         }
     }
 }
 
 @Composable
 fun KBOLeagueScheduleListItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboLeagueScheduleViewModel: KBOLeagueScheduleViewModel = hiltViewModel(),
     teamNameDic: Map<String, String>,
     data: KBOGameForSchedule,

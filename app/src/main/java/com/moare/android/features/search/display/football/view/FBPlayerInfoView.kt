@@ -51,8 +51,8 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBPlayerInfoView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    fbPlayerInfoViewModel: FBPlayerInfoViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
+    fbPlayerInfoViewModel: FBPlayerInfoViewModel,
     data: FBPlayerInfoDisplayModel
 ) {
     /* ---------------------
@@ -64,12 +64,13 @@ fun FBPlayerInfoView(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.FBPlayerInfo) {
+//        if (poppedView == null || poppedView is SportDecodableModel.FBPlayerInfo) {
             fbPlayerInfoViewModel.send(FBPlayerInfoIntent.InitData(data))
-        }
+//        }
     }
 
     InfoViewContainer(
+        searchViewModel = searchViewModel,
         itemCount = 6,
         measureContent = {
             Row(
@@ -77,38 +78,42 @@ fun FBPlayerInfoView(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 FBPlayerInfoFirstItem(
+                    fbPlayerInfoViewModel = fbPlayerInfoViewModel,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
                 }
 
                 FBPlayerInfoSecondItem(
+                    fbPlayerInfoViewModel = fbPlayerInfoViewModel,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
                 }
 
                 FBPlayerInfoThirdItem(
+                    fbPlayerInfoViewModel = fbPlayerInfoViewModel,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
                 }
             }
 
-            FBPlayerInfoFourthItem { index, coordinates ->
+            FBPlayerInfoFourthItem(searchViewModel, fbPlayerInfoViewModel,) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            FBPlayerInfoFifthItem { index, coordinates ->
+            FBPlayerInfoFifthItem(searchViewModel, fbPlayerInfoViewModel,) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            FBPlayerInfoSixthItem { index, coordinates ->
+            FBPlayerInfoSixthItem(searchViewModel, fbPlayerInfoViewModel,) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
         },
         displayContent = {
             FBPlayerInfoFirstItem(
+                fbPlayerInfoViewModel = fbPlayerInfoViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
@@ -117,6 +122,7 @@ fun FBPlayerInfoView(
             )
 
             FBPlayerInfoSecondItem(
+                fbPlayerInfoViewModel = fbPlayerInfoViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[1],
                 itemPosition = itemPositions[1],
@@ -125,6 +131,7 @@ fun FBPlayerInfoView(
             )
 
             FBPlayerInfoThirdItem(
+                fbPlayerInfoViewModel = fbPlayerInfoViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[2],
                 itemPosition = itemPositions[2],
@@ -133,6 +140,8 @@ fun FBPlayerInfoView(
             )
 
             FBPlayerInfoFourthItem(
+                fbPlayerInfoViewModel = fbPlayerInfoViewModel,
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[3],
                 itemPosition = itemPositions[3],
@@ -141,6 +150,8 @@ fun FBPlayerInfoView(
             )
 
             FBPlayerInfoFifthItem(
+                fbPlayerInfoViewModel = fbPlayerInfoViewModel,
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[4],
                 itemPosition = itemPositions[4],
@@ -149,6 +160,8 @@ fun FBPlayerInfoView(
             )
 
             FBPlayerInfoSixthItem(
+                fbPlayerInfoViewModel = fbPlayerInfoViewModel,
+                searchViewModel = searchViewModel,
                 isAniItem = true,
                 itemSize = itemSizes[5],
                 itemPosition = itemPositions[5],
@@ -163,7 +176,7 @@ fun FBPlayerInfoView(
 // photo, name
 @Composable
 fun FBPlayerInfoFirstItem(
-    fbPlayerInfoViewModel: FBPlayerInfoViewModel = hiltViewModel(),
+    fbPlayerInfoViewModel: FBPlayerInfoViewModel,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -213,7 +226,7 @@ fun FBPlayerInfoFirstItem(
 // age, birth, nationality
 @Composable
 fun FBPlayerInfoSecondItem(
-    fbPlayerInfoViewModel: FBPlayerInfoViewModel = hiltViewModel(),
+    fbPlayerInfoViewModel: FBPlayerInfoViewModel,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -296,7 +309,7 @@ fun FBPlayerInfoSecondItem(
 // weight, height
 @Composable
 fun FBPlayerInfoThirdItem(
-    fbPlayerInfoViewModel: FBPlayerInfoViewModel = hiltViewModel(),
+    fbPlayerInfoViewModel: FBPlayerInfoViewModel,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -358,8 +371,8 @@ fun FBPlayerInfoThirdItem(
 // league stats
 @Composable
 fun FBPlayerInfoFourthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    fbPlayerInfoViewModel: FBPlayerInfoViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
+    fbPlayerInfoViewModel: FBPlayerInfoViewModel,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -456,8 +469,8 @@ fun FBPlayerInfoFourthItem(
 // last game stats
 @Composable
 fun FBPlayerInfoFifthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    fbPlayerInfoViewModel: FBPlayerInfoViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
+    fbPlayerInfoViewModel: FBPlayerInfoViewModel,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -583,8 +596,8 @@ fun FBPlayerInfoFifthItem(
 // next game stats
 @Composable
 fun FBPlayerInfoSixthItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    fbPlayerInfoViewModel: FBPlayerInfoViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
+    fbPlayerInfoViewModel: FBPlayerInfoViewModel,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,

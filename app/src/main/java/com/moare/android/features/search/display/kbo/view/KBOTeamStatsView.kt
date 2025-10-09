@@ -54,7 +54,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun KBOTeamStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchViewModel: SearchViewModel,
     kboTeamStatsViewModel: KBOTeamStatsViewModel = hiltViewModel(),
     data: KBOTeamStatsDisplayModel
 ) {
@@ -76,6 +76,7 @@ fun KBOTeamStatsView(
     }
 
     InfoViewContainer(
+        searchViewModel = searchViewModel,
         itemCount = (statsList?.size ?: 0) + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier,

@@ -5,21 +5,28 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.amazonaws.auth.BasicAWSCredentials
+import com.moare.android.core.mvi.AppViewModel
 import com.moare.android.features.search.display.search.SearchView
+import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
@@ -41,26 +48,50 @@ class MainActivity : ComponentActivity() {
             val viewForTest: SportDisplayType? = null
 
             MoareAndroidTheme {
-                Surface(
-                    modifier = Modifier
-                        .systemBarsPadding()
-                        .fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    if (viewForTest != null) {
-                        SearchView(viewForTest = viewForTest)
-                    } else {
-                        SearchView()
-
-                        if (!isSplashFinished) {
-                            SplashView {
-                                isSplashFinished = true
-                            }
-                        }
-                    }
-                }
+                AppRoot()
+//                Surface(
+//                    modifier = Modifier
+//                        .systemBarsPadding()
+//                        .fillMaxSize(),
+//                    color = MaterialTheme.colors.background
+//                ) {
+//                    if (viewForTest != null) {
+//                        SearchView(viewForTest = viewForTest)
+//                    } else {
+//                        SearchView()
+//
+//                        if (!isSplashFinished) {
+//                            SplashView {
+//                                isSplashFinished = true
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
+    }
+}
+
+@Composable
+fun AppRoot(viewModel: AppViewModel = hiltViewModel()) {
+    Surface(
+        modifier = Modifier
+            .systemBarsPadding()
+            .fillMaxSize(),
+        color = MaterialTheme.colors.background
+    ) {
+//        if (viewForTest != null) {
+//            SearchView(viewForTest = viewForTest)
+//        } else {
+//            SearchView(vm.searchProvider.get())
+        SearchView(viewModel, viewModel.searchStore)
+
+//            if (!isSplashFinished) {
+//                SplashView {
+//                    isSplashFinished = true
+//                }
+//            }
+//        }
     }
 }
 

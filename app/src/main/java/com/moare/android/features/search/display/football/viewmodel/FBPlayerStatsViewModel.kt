@@ -21,7 +21,6 @@ sealed class FBPlayerStatsIntent {
     data class InitData(val displayModel: FBPlayerStatsDisplayModel) : FBPlayerStatsIntent()
 }
 
-@HiltViewModel
 class FBPlayerStatsViewModel @Inject constructor(
     private val nameProvider: TranslatedNameProvider
 ) : BaseStatsViewModel<FBPlayerStatsIntent, FBPlayerStatsDisplayModel>(nameProvider) {
