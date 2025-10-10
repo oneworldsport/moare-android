@@ -49,12 +49,19 @@ import com.moare.android.core.mvi.StackItem
 import com.moare.android.features.search.display.football.view.FBPlayerInfoView
 import com.moare.android.features.search.display.football.view.FBPlayerStatsView
 import com.moare.android.features.search.display.football.view.FBTeamInfoView
+import com.moare.android.features.search.display.football.view.FBTeamStatsView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerInfoView
+import com.moare.android.features.search.display.kbo.view.KBOPlayerStatsView
 import com.moare.android.features.search.display.kbo.view.KBOTeamInfoView
+import com.moare.android.features.search.display.kbo.view.KBOTeamStatsView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerInfoView
+import com.moare.android.features.search.display.mlb.view.MLBPlayerStatsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamInfoView
+import com.moare.android.features.search.display.mlb.view.MLBTeamStatsView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
+import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
 import com.moare.android.features.search.display.nba.view.NBATeamInfoView
+import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDisplayType
@@ -63,6 +70,7 @@ import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
 import com.moare.android.ui.util.rememberKeyboardVisibility
 import kotlinx.coroutines.delay
+import java.util.Stack
 
 @Composable
 fun SearchView(
@@ -322,34 +330,30 @@ fun SearchView(
                 ) {
                     when (val top = stack.lastOrNull()) {
                         is StackItem.FBPlayerInfo -> FBPlayerInfoView(searchStore, top.store)
-                        is StackItem.FBPlayerStats -> FBPlayerStatsView(searchStore, top.store, top.displayModel)
+                        is StackItem.FBPlayerStats -> FBPlayerStatsView(searchStore, top.store)
                         is StackItem.FBTeamInfo -> FBTeamInfoView(searchStore, top.store)
+                        is StackItem.FBTeamStats -> FBTeamStatsView(searchStore, top.store)
 
                         is StackItem.NBAPlayerInfo -> NBAPlayerInfoView(searchStore, top.store)
+                        is StackItem.NBAPlayerStats -> NBAPlayerStatsView(searchStore, top.store)
                         is StackItem.NBATeamInfo -> NBATeamInfoView(searchStore, top.store)
+                        is StackItem.NBATeamStats -> NBATeamStatsView(searchStore, top.store)
 
                         is StackItem.MLBPlayerInfo -> MLBPlayerInfoView(searchStore, top.store)
+                        is StackItem.MLBPlayerStats -> MLBPlayerStatsView(searchStore, top.store)
                         is StackItem.MLBTeamInfo -> MLBTeamInfoView(searchStore, top.store)
+                        is StackItem.MLBTeamStats -> MLBTeamStatsView(searchStore, top.store)
 
                         is StackItem.KBOPlayerInfo -> KBOPlayerInfoView(searchStore, top.store)
+                        is StackItem.KBOPlayerStats -> KBOPlayerStatsView(searchStore, top.store)
                         is StackItem.KBOTeamInfo -> KBOTeamInfoView(searchStore, top.store)
+                        is StackItem.KBOTeamStats -> KBOTeamStatsView(searchStore, top.store)
                         else -> Unit
                     }
                     // football
-//                    displayModels[SportDisplayType.FB_PLAYER_INFO]?.let {
-//                        FBPlayerInfoView(searchViewModel = searchViewModel, data = it as FBPlayerInfoDisplayModel)
-//                    }
-//                    displayModels[SportDisplayType.FB_PLAYER_STATS]?.let {
-//                        FBPlayerStatsView(searchViewModel = searchViewModel,data = it as FBPlayerStatsDisplayModel)
-//                    }
+
 //                    displayModels[SportDisplayType.FB_PLAYER_STANDINGS]?.let {
 //                        FBPlayerStandingsView(searchViewModel = searchViewModel,data = it as FBPlayerStandingsDisplayModel)
-//                    }
-//                    displayModels[SportDisplayType.FB_TEAM_INFO]?.let {
-//                        FBTeamInfoView(searchViewModel = searchViewModel,data = it as FBTeamInfoDisplayModel)
-//                    }
-//                    displayModels[SportDisplayType.FB_TEAM_STATS]?.let {
-//                        FBTeamStatsView(searchViewModel = searchViewModel,data = it as FBTeamStatsDisplayModel)
 //                    }
 //                    displayModels[SportDisplayType.FB_TEAM_STANDINGS]?.let {
 //                        FBTeamStandingsView(searchViewModel = searchViewModel,data = it as FBTeamStandingsDisplayModel)
@@ -361,20 +365,8 @@ fun SearchView(
 //                        FBGameStatsView(searchViewModel = searchViewModel,data = it as FBGameStatsDisplayModel)
 //                    }
 //                    // nba
-//                    displayModels[SportDisplayType.NBA_PLAYER_INFO]?.let {
-//                        NBAPlayerInfoView(searchViewModel = searchViewModel,data = it as NBAPlayerInfoDisplayModel)
-//                    }
-//                    displayModels[SportDisplayType.NBA_PLAYER_STATS]?.let {
-//                        NBAPlayerStatsView(searchViewModel = searchViewModel,data = it as NBAPlayerStatsDisplayModel)
-//                    }
 //                    displayModels[SportDisplayType.NBA_PLAYER_STANDINGS]?.let {
 //                        NBAPlayerStandingsView(searchViewModel = searchViewModel,data = it as NBAPlayerStandingsDisplayModel)
-//                    }
-//                    displayModels[SportDisplayType.NBA_TEAM_INFO]?.let {
-//                        NBATeamInfoView(searchViewModel = searchViewModel,data = it as NBATeamInfoDisplayModel)
-//                    }
-//                    displayModels[SportDisplayType.NBA_TEAM_STATS]?.let {
-//                        NBATeamStatsView(searchViewModel = searchViewModel,data = it as NBATeamStatsDisplayModel)
 //                    }
 //                    displayModels[SportDisplayType.NBA_TEAM_STANDINGS]?.let {
 //                        NBATeamStandingsView(searchViewModel = searchViewModel,data = it as NBATeamStandingsDisplayModel)
@@ -389,23 +381,11 @@ fun SearchView(
 //                        NBALeagueTournamentView(searchViewModel = searchViewModel,data = it as NBATournamentDisplayModel)
 //                    }
 //                    // kbo
-//                    displayModels[SportDisplayType.KBO_PLAYER_INFO]?.let {
-//                        KBOPlayerInfoView(searchViewModel = searchViewModel,data = it as KBOPlayerInfoDisplayModel)
-//                    }
-//                    displayModels[SportDisplayType.KBO_PLAYER_STATS]?.let {
-//                        KBOPlayerStatsView(searchViewModel = searchViewModel,data = it as KBOPlayerStatsDisplayModel)
-//                    }
 //                    displayModels[SportDisplayType.KBO_PLAYER_STANDINGS]?.let {
 ////                        KBOPlayerStandingsView(data = it)
 //                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
 //                            Text(StringConstants.viewPreparingAdviseText("'KBO 선수 순위'"))
 //                        }
-//                    }
-//                    displayModels[SportDisplayType.KBO_TEAM_INFO]?.let {
-//                        KBOTeamInfoView(searchViewModel = searchViewModel,data = it as KBOTeamInfoDisplayModel)
-//                    }
-//                    displayModels[SportDisplayType.KBO_TEAM_STATS]?.let {
-//                        KBOTeamStatsView(searchViewModel = searchViewModel,data = it as KBOTeamStatsDisplayModel)
 //                    }
 //                    displayModels[SportDisplayType.KBO_TEAM_STANDINGS]?.let {
 //                        KBOTeamStandingsView(searchViewModel = searchViewModel,data = it as KBOTeamStandingsDisplayModel)
@@ -417,23 +397,11 @@ fun SearchView(
 //                        KBOGameStatsView(searchViewModel = searchViewModel,data = it as KBOGameStatsDisplayModel)
 //                    }
 //                    // mlb
-//                    displayModels[SportDisplayType.MLB_PLAYER_INFO]?.let {
-//                        MLBPlayerInfoView(searchViewModel = searchViewModel,data = it as MLBPlayerInfoDisplayModel)
-//                    }
-//                    displayModels[SportDisplayType.MLB_PLAYER_STATS]?.let {
-//                        MLBPlayerStatsView(searchViewModel = searchViewModel,data = it as MLBPlayerStatsDisplayModel)
-//                    }
 //                    displayModels[SportDisplayType.MLB_PLAYER_STANDINGS]?.let {
 ////                        MLBPlayerStandingsView(data = it)
 //                        CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
 //                            Text(StringConstants.viewPreparingAdviseText("'MLB 선수 순위'"))
 //                        }
-//                    }
-//                    displayModels[SportDisplayType.MLB_TEAM_INFO]?.let {
-//                        MLBTeamInfoView(searchViewModel = searchViewModel,data = it as MLBTeamInfoDisplayModel)
-//                    }
-//                    displayModels[SportDisplayType.MLB_TEAM_STATS]?.let {
-//                        MLBTeamStatsView(searchViewModel = searchViewModel,data = it as MLBTeamStatsDisplayModel)
 //                    }
 //                    displayModels[SportDisplayType.MLB_TEAM_STANDINGS]?.let {
 //                        MLBTeamStandingsView(searchViewModel = searchViewModel,data = it as MLBTeamStandingsDisplayModel)

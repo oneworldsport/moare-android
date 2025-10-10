@@ -33,8 +33,8 @@ import com.moare.android.features.search.display.common.components.EmptyStatData
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerStatsIntent
-import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerStatsViewModel
+import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerStatsAction
+import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerStatsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStatsDisplayModel
@@ -48,44 +48,33 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun MLBPlayerStatsView(
-    searchViewModel: SearchViewModel,
-    mlbPlayerStatsViewModel: MLBPlayerStatsViewModel = hiltViewModel(),
-    data: MLBPlayerStatsDisplayModel
+    searchStore: SearchViewModel,
+    store: MLBPlayerStatsStore
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by mlbPlayerStatsViewModel.displayModel.collectAsState()
-    val statsList = displayModel?.stats
-
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.MLBPlayerStats) {
-            mlbPlayerStatsViewModel.send(MLBPlayerStatsIntent.InitData(data))
-        }
-    }
+    val displayModel by store.displayModel.collectAsState()
+    val statsList = displayModel.stats
 
     InfoViewContainer(
-        searchStore = searchViewModel,
-        itemCount = (statsList?.size ?: 0) + 1,
+        searchStore = searchStore,
+        itemCount = statsList.size + 1,
 //        shouldShowMeasureContent = true,
         modifier = Modifier
             .verticalScroll(rememberScrollState()),
         measureContent = {
-            MLBPlayerStatsPlayerInfoItem { index, coordinates ->
+            MLBPlayerStatsPlayerInfoItem(store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            MLBPlayerStatsList { index, coordinates ->
+            MLBPlayerStatsList(store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
         },
         displayContent = {
             MLBPlayerStatsPlayerInfoItem(
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
@@ -95,6 +84,7 @@ fun MLBPlayerStatsView(
             )
 
             MLBPlayerStatsList(
+                store = store,
                 isAniItem = true,
                 itemSizes = itemSizes,
                 itemPositions = itemPositions,
@@ -109,7 +99,7 @@ fun MLBPlayerStatsView(
 // player info
 @Composable
 fun MLBPlayerStatsPlayerInfoItem(
-    mlbPlayerStatsViewModel: MLBPlayerStatsViewModel = hiltViewModel(),
+    store: MLBPlayerStatsStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -120,113 +110,113 @@ fun MLBPlayerStatsPlayerInfoItem(
     measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by mlbPlayerStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val playerNameDic by store.playerNameDic.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    displayModel?.let {
-        val player = it.player
+    val player = displayModel.player
 
-        var nationalityKrName by remember { mutableStateOf("") }
+    var nationalityKrName by remember { mutableStateOf("") }
 
-        LaunchedEffect(displayModel) {
-            nationalityKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, input = player.birthCountry)
-        }
+    LaunchedEffect(displayModel) {
+        nationalityKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, input = player.birthCountry)
+    }
 
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            startPosition = startPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(0, coordinates) }
-            },
-            modifier = containerModifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        startPosition = startPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(0, coordinates) }
+        },
+        modifier = containerModifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .alpha(contentsAlpha)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .alpha(contentsAlpha)
+            URLImage(url = MLBUtil.playerPhotoUrl(player.id))
+
+            // name
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(start = 6.dp, end = 8.dp)
             ) {
-                URLImage(url = MLBUtil.playerPhotoUrl(player.id))
-
-                // name
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 6.dp, end = 8.dp)
-                ) {
-                    Text(
-                        text = mlbPlayerStatsViewModel.playerNameDictionary["${player.id}"] ?: player.fullName,
-                        fontWeight = FontWeight.Medium
-                    )
-
-                    Text(
-                        text = player.fullName,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Light,
-                        maxLines = 2
-                    )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "국적: ",
-                            fontSize = 15.sp
-                        )
-
-                        Text(
-                            text = nationalityKrName,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-
-                URLImage(
-                    url = MLBUtil.teamLogoUrl(it.teamId),
-                    isSvg = true
+                Text(
+                    text = playerNameDic["${player.id}"] ?: player.fullName,
+                    fontWeight = FontWeight.Medium
                 )
 
-                // team, jersey, position
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 6.dp)
+                Text(
+                    text = player.fullName,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Light,
+                    maxLines = 2
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = mlbPlayerStatsViewModel.teamNameDictionary["full_${it.teamId}"] ?: "",
-                        fontWeight = FontWeight.Medium
+                        text = "국적: ",
+                        fontSize = 15.sp
                     )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "등번호: ",
-                            fontSize = 15.sp
-                        )
+                    Text(
+                        text = nationalityKrName,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
 
-                        Text(
-                            text = player.primaryNumber,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+            URLImage(
+                url = MLBUtil.teamLogoUrl(displayModel.teamId),
+                isSvg = true
+            )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "포지션: ",
-                            fontSize = 15.sp
-                        )
+            // team, jersey, position
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(start = 6.dp)
+            ) {
+                Text(
+                    text = teamNameDic["full_${displayModel.teamId}"] ?: "",
+                    fontWeight = FontWeight.Medium
+                )
 
-                        Text(
-                            text = player.primaryPosition.name,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "등번호: ",
+                        fontSize = 15.sp
+                    )
+
+                    Text(
+                        text = player.primaryNumber,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "포지션: ",
+                        fontSize = 15.sp
+                    )
+
+                    Text(
+                        text = player.primaryPosition.name,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
@@ -236,7 +226,7 @@ fun MLBPlayerStatsPlayerInfoItem(
 // stats list
 @Composable
 fun MLBPlayerStatsList(
-    mlbPlayerStatsViewModel: MLBPlayerStatsViewModel = hiltViewModel(),
+    store: MLBPlayerStatsStore,
     isAniItem: Boolean = false,
     itemSizes: Map<Int, DpSize>? = null,
     itemPositions: Map<Int, Offset>? = null,
@@ -247,29 +237,26 @@ fun MLBPlayerStatsList(
     measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by mlbPlayerStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val statsList = displayModel.stats
 
-    displayModel?.let {
-        val statsList = it.stats
-
-        /* ---------------------
-           ui
-           --------------------- */
-        for ((index, value) in statsList.withIndex()) {
-            MLBPlayerStatsListItem(
-                index = index,
-                data = value,
-                isAniItem = isAniItem,
-                itemSizes = itemSizes,
-                itemPositions = itemPositions,
-                startPosition = startPosition,
-                aniPosition = aniPosition,
-                contentsAlpha = contentsAlpha,
-                containerModifier = containerModifier,
-                measureContentAlpha = measureContentAlpha,
-                updateItemPosition = updateItemPosition
-            )
-        }
+    /* ---------------------
+       ui
+       --------------------- */
+    for ((index, value) in statsList.withIndex()) {
+        MLBPlayerStatsListItem(
+            index = index,
+            data = value,
+            isAniItem = isAniItem,
+            itemSizes = itemSizes,
+            itemPositions = itemPositions,
+            startPosition = startPosition,
+            aniPosition = aniPosition,
+            contentsAlpha = contentsAlpha,
+            containerModifier = containerModifier,
+            measureContentAlpha = measureContentAlpha,
+            updateItemPosition = updateItemPosition
+        )
     }
 }
 

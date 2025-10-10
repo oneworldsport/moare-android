@@ -2,6 +2,7 @@ package com.moare.android.features.search.display.common.viewmodel
 
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
+import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +11,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-abstract class BaseInfoStore<A, T: SportDisplayModel>(
+abstract class BaseStatsStore<A, T: SportDisplayModel>(
     private val initial: T,
     private val nameProvider: TranslatedNameProvider
 ) {

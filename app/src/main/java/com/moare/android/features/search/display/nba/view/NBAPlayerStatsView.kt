@@ -39,8 +39,8 @@ import com.moare.android.features.search.display.common.components.EmptyStatData
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsIntent
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsViewModel
+import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsAction
+import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStatsDisplayModel
@@ -54,44 +54,33 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBAPlayerStatsView(
-    searchViewModel: SearchViewModel,
-    nbaPlayerStatsViewModel: NBAPlayerStatsViewModel = hiltViewModel(),
-    data: NBAPlayerStatsDisplayModel
+    searchStore: SearchViewModel,
+    store: NBAPlayerStatsStore
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by nbaPlayerStatsViewModel.displayModel.collectAsState()
-    val statsList = displayModel?.stats
-
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.NBAPlayerStats) {
-            nbaPlayerStatsViewModel.send(NBAPlayerStatsIntent.InitData(data))
-        }
-    }
+    val displayModel by store.displayModel.collectAsState()
+    val statsList = displayModel.stats
 
     InfoViewContainer(
-        searchStore = searchViewModel,
-        itemCount = (statsList?.size ?: 0) + 1,
+        searchStore = searchStore,
+        itemCount = statsList.size + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier,
 //            .verticalScroll(rememberScrollState()),
         measureContent = {
-            NBAPlayerStatsPlayerInfoItem { index, coordinates ->
+            NBAPlayerStatsPlayerInfoItem(store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            NBAPlayerStatsList { index, coordinates ->
+            NBAPlayerStatsList(store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
         },
         displayContent = {
             NBAPlayerStatsPlayerInfoItem(
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
@@ -101,6 +90,7 @@ fun NBAPlayerStatsView(
             )
 
             NBAPlayerStatsList(
+                store = store,
                 isAniItem = true,
                 itemSizes = itemSizes,
                 itemPositions = itemPositions,
@@ -115,7 +105,7 @@ fun NBAPlayerStatsView(
 // player info
 @Composable
 fun NBAPlayerStatsPlayerInfoItem(
-    nbaPlayerStatsViewModel: NBAPlayerStatsViewModel = hiltViewModel(),
+    store: NBAPlayerStatsStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -126,106 +116,106 @@ fun NBAPlayerStatsPlayerInfoItem(
     measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by nbaPlayerStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val playerNameDic by store.playerNameDic.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    displayModel?.let {
-        val player = it.player
+    val player = displayModel.player
 
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            startPosition = startPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(0, coordinates) }
-            },
-            modifier = containerModifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        startPosition = startPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(0, coordinates) }
+        },
+        modifier = containerModifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .alpha(contentsAlpha)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .alpha(contentsAlpha)
+            URLImage(url = NBAUtil.playerPhotoUrl(player.personId))
+
+            // name
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(start = 6.dp, end = 8.dp)
             ) {
-                URLImage(url = NBAUtil.playerPhotoUrl(player.personId))
-
-                // name
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 6.dp, end = 8.dp)
-                ) {
-                    Text(
-                        text = nbaPlayerStatsViewModel.playerNameDictionary[player.personId.toString()] ?: player.displayFirstLast,
-                        fontWeight = FontWeight.Medium
-                    )
-
-                    Text(
-                        text = player.displayFirstLast,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Light,
-                        maxLines = 2
-                    )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "국적: ",
-                            fontSize = 15.sp
-                        )
-
-                        Text(
-                            text = player.country,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-
-                URLImage(
-                    url = NBAUtil.teamLogoUrl(player.teamId),
-                    isSvg = true
+                Text(
+                    text = playerNameDic[player.personId.toString()] ?: player.displayFirstLast,
+                    fontWeight = FontWeight.Medium
                 )
 
-                // nationality, team, jersey, position
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 6.dp)
+                Text(
+                    text = player.displayFirstLast,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Light,
+                    maxLines = 2
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = nbaPlayerStatsViewModel.teamNameDictionary["full_${player.teamId}"] ?: "${player.teamCity} ${player.teamName}",
-                        fontWeight = FontWeight.Medium
+                        text = "국적: ",
+                        fontSize = 15.sp
                     )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "등번호: ",
-                            fontSize = 15.sp
-                        )
+                    Text(
+                        text = player.country,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
 
-                        Text(
-                            text = player.jersey,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+            URLImage(
+                url = NBAUtil.teamLogoUrl(player.teamId),
+                isSvg = true
+            )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "포지션: ",
-                            fontSize = 15.sp
-                        )
+            // nationality, team, jersey, position
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(start = 6.dp)
+            ) {
+                Text(
+                    text = teamNameDic["full_${player.teamId}"] ?: "${player.teamCity} ${player.teamName}",
+                    fontWeight = FontWeight.Medium
+                )
 
-                        Text(
-                            text = player.position,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "등번호: ",
+                        fontSize = 15.sp
+                    )
+
+                    Text(
+                        text = player.jersey,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "포지션: ",
+                        fontSize = 15.sp
+                    )
+
+                    Text(
+                        text = player.position,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
@@ -235,7 +225,7 @@ fun NBAPlayerStatsPlayerInfoItem(
 // stats list
 @Composable
 fun NBAPlayerStatsList(
-    nbaPlayerStatsViewModel: NBAPlayerStatsViewModel = hiltViewModel(),
+    store: NBAPlayerStatsStore,
     isAniItem: Boolean = false,
     itemSizes: Map<Int, DpSize>? = null,
     itemPositions: Map<Int, Offset>? = null,
@@ -246,29 +236,26 @@ fun NBAPlayerStatsList(
     measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by nbaPlayerStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val statsList = displayModel.stats
 
-    displayModel?.let {
-        val statsList = it.stats
-
-        /* ---------------------
-           ui
-           --------------------- */
-        for ((index, value) in statsList.withIndex()) {
-            NBAPlayerStatsListItem(
-                index = index,
-                data = value,
-                isAniItem = isAniItem,
-                itemSizes = itemSizes,
-                itemPositions = itemPositions,
-                startPosition = startPosition,
-                aniPosition = aniPosition,
-                contentsAlpha = contentsAlpha,
-                containerModifier = containerModifier,
-                measureContentAlpha = measureContentAlpha,
-                updateItemPosition = updateItemPosition
-            )
-        }
+    /* ---------------------
+       ui
+       --------------------- */
+    for ((index, value) in statsList.withIndex()) {
+        NBAPlayerStatsListItem(
+            index = index,
+            data = value,
+            isAniItem = isAniItem,
+            itemSizes = itemSizes,
+            itemPositions = itemPositions,
+            startPosition = startPosition,
+            aniPosition = aniPosition,
+            contentsAlpha = contentsAlpha,
+            containerModifier = containerModifier,
+            measureContentAlpha = measureContentAlpha,
+            updateItemPosition = updateItemPosition
+        )
     }
 }
 

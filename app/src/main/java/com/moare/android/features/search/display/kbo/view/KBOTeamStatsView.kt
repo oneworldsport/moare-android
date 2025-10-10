@@ -38,8 +38,8 @@ import com.moare.android.features.search.display.common.components.EmptyStatData
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsIntent
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsViewModel
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsAction
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
@@ -53,43 +53,29 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun KBOTeamStatsView(
-    searchViewModel: SearchViewModel,
-    kboTeamStatsViewModel: KBOTeamStatsViewModel = hiltViewModel(),
-    data: KBOTeamStatsDisplayModel
+    searchStore: SearchViewModel,
+    store: KBOTeamStatsStore
 ) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val displayModel by kboTeamStatsViewModel.displayModel.collectAsState()
-    val statsList = displayModel?.stats
-
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.KBOTeamStats) {
-            kboTeamStatsViewModel.send(KBOTeamStatsIntent.InitData(data))
-        }
-    }
+    val displayModel by store.displayModel.collectAsState()
+    val statsList = displayModel.stats
 
     InfoViewContainer(
-        searchStore = searchViewModel,
-        itemCount = (statsList?.size ?: 0) + 1,
+        searchStore = searchStore,
+        itemCount = statsList.size + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier,
 //            .verticalScroll(rememberScrollState()),
         measureContent = {
-            KBOTeamStatsTeamInfoItem { index, coordinates ->
+            KBOTeamStatsTeamInfoItem(store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            KBOTeamStatsList { index, coordinates ->
+            KBOTeamStatsList(store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
         }, displayContent = {
             KBOTeamStatsTeamInfoItem(
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
@@ -99,6 +85,7 @@ fun KBOTeamStatsView(
             )
 
             KBOTeamStatsList(
+                store = store,
                 isAniItem = true,
                 itemSizes = itemSizes,
                 itemPositions = itemPositions,
@@ -113,7 +100,7 @@ fun KBOTeamStatsView(
 // team info
 @Composable
 fun KBOTeamStatsTeamInfoItem(
-    kboTeamStatsViewModel: KBOTeamStatsViewModel = hiltViewModel(),
+    store: KBOTeamStatsStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -123,70 +110,69 @@ fun KBOTeamStatsTeamInfoItem(
     measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by kboTeamStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    displayModel?.let {
-        val team = it.team
-        val venue = it.venue
+    val team = displayModel.team
+    val venue = displayModel.venue
 
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(0, coordinates) }
-            },
-            modifier = containerModifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(0, coordinates) }
+        },
+        modifier = containerModifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .alpha(contentsAlpha)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .alpha(contentsAlpha)
-            ) {
-                URLImage(url = KBOUtil.teamLogoUrl(team.id))
+            URLImage(url = KBOUtil.teamLogoUrl(team.id))
 
-                // name, city
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 6.dp)
+            // name, city
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(start = 6.dp)
+            ) {
+                Text(
+                    text = teamNameDic["full_${team.id}"] ?: team.teamName,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = kboTeamStatsViewModel.teamNameDictionary["full_${team.id}"] ?: team.teamName,
-                        fontWeight = FontWeight.Medium
+                        text = "연고지: ",
+                        fontSize = 15.sp
                     )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "연고지: ",
-                            fontSize = 15.sp
-                        )
+                    Text(
+                        text = team.city,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
 
-                        Text(
-                            text = team.city,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "홈구장: ",
+                        fontSize = 15.sp
+                    )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "홈구장: ",
-                            fontSize = 15.sp
-                        )
-
-                        Text(
-                            text = kboTeamStatsViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    Text(
+                        text = teamNameDic["venue_${team.id}"] ?: venue.name,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
@@ -196,7 +182,7 @@ fun KBOTeamStatsTeamInfoItem(
 // stats list
 @Composable
 fun KBOTeamStatsList(
-    kboTeamStatsViewModel: KBOTeamStatsViewModel = hiltViewModel(),
+    store: KBOTeamStatsStore,
     isAniItem: Boolean = false,
     itemSizes: Map<Int, DpSize>? = null,
     itemPositions: Map<Int, Offset>? = null,
@@ -206,33 +192,32 @@ fun KBOTeamStatsList(
     measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by kboTeamStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val statsList = displayModel.stats
 
-    displayModel?.let {
-        val statsList = it.stats
-
-        /* ---------------------
-           ui
-           --------------------- */
-        for ((index, value) in statsList.withIndex()) {
-            KBOTeamStatsListItem(
-                index = index,
-                data = value,
-                isAniItem = isAniItem,
-                itemSizes = itemSizes,
-                itemPositions = itemPositions,
-                aniPosition = aniPosition,
-                contentsAlpha = contentsAlpha,
-                containerModifier = containerModifier,
-                measureContentAlpha = measureContentAlpha,
-                updateItemPosition = updateItemPosition
-            )
-        }
+    /* ---------------------
+       ui
+       --------------------- */
+    for ((index, value) in statsList.withIndex()) {
+        KBOTeamStatsListItem(
+            store = store,
+            index = index,
+            data = value,
+            isAniItem = isAniItem,
+            itemSizes = itemSizes,
+            itemPositions = itemPositions,
+            aniPosition = aniPosition,
+            contentsAlpha = contentsAlpha,
+            containerModifier = containerModifier,
+            measureContentAlpha = measureContentAlpha,
+            updateItemPosition = updateItemPosition
+        )
     }
 }
 
 @Composable
 fun KBOTeamStatsListItem(
+    store: KBOTeamStatsStore,
     index: Int,
     data: KBOTeamStats,
     isAniItem: Boolean,
@@ -259,6 +244,7 @@ fun KBOTeamStatsListItem(
             .fillMaxWidth()
     ) {
         KBOTeamStatsItem(
+            store = store,
             data = data,
             contentsAlpha = contentsAlpha,
             measureContentAlpha = measureContentAlpha
@@ -268,7 +254,7 @@ fun KBOTeamStatsListItem(
 
 @Composable
 fun KBOTeamStatsItem(
-    kboTeamStatsViewModel: KBOTeamStatsViewModel = hiltViewModel(),
+    store: KBOTeamStatsStore,
     data: KBOTeamStats,
     contentsAlpha: Float,
     measureContentAlpha: Float,
@@ -277,7 +263,6 @@ fun KBOTeamStatsItem(
     var hitterStatsOpenState by remember { mutableStateOf(false) }
     var pitcherStatsOpenState by remember { mutableStateOf(false) }
 
-    val displayModel by kboTeamStatsViewModel.displayModel.collectAsState()
     val rank = data.rankData
     val hitter = data.hitterData
     val pitcher = data.pitcherData
