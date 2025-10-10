@@ -31,10 +31,6 @@ abstract class BasePlayerStandingsStore<A, T: SportDisplayModel>(
     protected val _teamNameDic = MutableStateFlow<Map<String, String>>(emptyMap())
     val teamNameDic: StateFlow<Map<String, String>> = _teamNameDic
 
-
-    /* ---------------------
-       ui state
-       --------------------- */
     protected var _categorySelectedIndex = MutableStateFlow(0)
     val categorySelectedIndex: StateFlow<Int> = _categorySelectedIndex
 
@@ -44,9 +40,6 @@ abstract class BasePlayerStandingsStore<A, T: SportDisplayModel>(
     protected var _filteredStandingsStartIndex = MutableStateFlow(0)
     val filteredStandingsStartIndex: StateFlow<Int> = _filteredStandingsStartIndex
 
-    /* ---------------------
-       etc
-       --------------------- */
     var shouldScrollCategory = true
     protected var selectedEntity: EntityInfo? = null
     protected var filteredStandingsEndIndex = 0 // NOTE: one bigger then actual showing end item's index. Because of subList.

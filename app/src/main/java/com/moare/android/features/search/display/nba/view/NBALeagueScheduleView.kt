@@ -1,26 +1,8 @@
 package com.moare.android.features.search.display.nba.view
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,21 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.constants.UIConstants
-import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.FBUtil
-import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
@@ -51,86 +22,56 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
-import com.moare.android.features.search.display.football.view.FBLeagueScheduleList
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleIntent
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleIntent
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleViewModel
+import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
+import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleStore
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
-import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
-import com.moare.android.ui.common.components.CalendarList
-import com.moare.android.ui.common.components.CalendarType
-import com.moare.android.ui.common.components.CapsuleButton
-import com.moare.android.ui.common.components.LeagueTitle
-import com.moare.android.ui.common.components.ProgressIndicator
-import com.moare.android.ui.common.components.URLImage
-import com.moare.android.ui.common.components.URLImageSize
-import com.moare.android.ui.theme.Moare
-import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBALeagueScheduleView(
-    searchViewModel: SearchViewModel,
-    nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel(),
-    data: NBALeagueScheduleDisplayModel
+    searchStore: SearchViewModel,
+    store: NBALeagueScheduleStore
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by nbaLeagueScheduleViewModel.displayModel.collectAsState()
-    val yearMonthList by nbaLeagueScheduleViewModel.yearMonthList.collectAsState()
-    val days by nbaLeagueScheduleViewModel.days.collectAsState()
-    val selectedYearMonthIndex by nbaLeagueScheduleViewModel.selectedYearMonthIndex.collectAsState()
-    val selectedDayIndex by nbaLeagueScheduleViewModel.selectedDayIndex.collectAsState()
-    val yearMonthCalendarScrollTrigger by nbaLeagueScheduleViewModel.yearMonthCalendarScrollTrigger.collectAsState()
-    val dayCalendarScrollTrigger by nbaLeagueScheduleViewModel.dayCalendarScrollTrigger.collectAsState()
-    val isAllResultOpened by nbaLeagueScheduleViewModel.isAllResultOpened.collectAsState()
-    val displayDataState by nbaLeagueScheduleViewModel.displayDataState.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val yearMonthList by store.yearMonthList.collectAsState()
+    val days by store.days.collectAsState()
+    val selectedYearMonthIndex by store.selectedYearMonthIndex.collectAsState()
+    val selectedDayIndex by store.selectedDayIndex.collectAsState()
+    val yearMonthCalendarScrollTrigger by store.yearMonthCalendarScrollTrigger.collectAsState()
+    val dayCalendarScrollTrigger by store.dayCalendarScrollTrigger.collectAsState()
+    val isAllResultOpened by store.isAllResultOpened.collectAsState()
+    val displayDataState by store.displayDataState.collectAsState()
 
-    val displayModels by searchViewModel.displayModels.collectAsState()
-    val viewStack by searchViewModel.viewStack.collectAsState()
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       etc
-       --------------------- */
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.NBALeagueSchedule) {
-            nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.InitData(data))
-        }
-    }
+    val displayModels by searchStore.displayModels.collectAsState()
+    val viewStack by searchStore.viewStack.collectAsState()
 
     LaunchedEffect(viewStack) {
         // update games data after refreshing in NBAGameStatsView
         if (viewStack.isNotEmpty() && viewStack.last() is SportDecodableModel.NBALeagueSchedule) {
             val nbaLeagueSchedule = viewStack.last() as SportDecodableModel.NBALeagueSchedule
 
-            poppedView?.let {
-                if (it is SportDecodableModel.NBAGameStats) {
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateGamesData(nbaLeagueSchedule, it) { data ->
-                        searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
-                    })
-                }
-            }
+//            poppedView?.let {
+//                if (it is SportDecodableModel.NBAGameStats) {
+//                    store.send(NBALeagueScheduleAction.UpdateGamesData(nbaLeagueSchedule, it) { data ->
+//                        searchStore.send(SearchViewModel.Intent.UpdateLastViewStack(data))
+//                    })
+//                }
+//            }
         }
     }
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
-            shouldShowCalendar = displayModel?.scheduleType != ScheduleType.TEAM_FLAT,
-            shouldFetchSchedule = displayModel?.scheduleType == ScheduleType.LEAGUE,
+            shouldShowCalendar = displayModel.scheduleType != ScheduleType.TEAM_FLAT,
+            shouldFetchSchedule = displayModel.scheduleType == ScheduleType.LEAGUE,
             displayDataState = displayDataState,
             calendarUiState = CalendarUiState(
                 yearMonthList,
@@ -145,51 +86,56 @@ fun NBALeagueScheduleView(
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
                 onSelectYearMonth = { yearMonth, index ->
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.SelectYearMonth(yearMonth, index) { data ->
+                    store.send(NBALeagueScheduleAction.SelectYearMonth(yearMonth, index) { data ->
                         // 현재 구조 콜백 수정 필요?
-                        searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
+                        searchStore.send(SearchViewModel.Intent.UpdateLastViewStack(data))
                     })
                 },
                 onSelectDay = { day, index ->
-                    nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.SelectDay(day, index))
+                    store.send(NBALeagueScheduleAction.SelectDay(day, index))
                 }
             ),
             allResultButtonAction = {
-                nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.ToggleAllResult)
+                store.send(NBALeagueScheduleAction.ToggleAllResult)
             }
         ),
         titleContent = {},
         gameListContent = {
-            NBALeagueScheduleList(searchViewModel = searchViewModel)
+            NBALeagueScheduleList(searchStore = searchStore, store = store)
         }
     )
 }
 
 @Composable
 fun NBALeagueScheduleList(
-    searchViewModel: SearchViewModel,
-    nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel()
+    searchStore: SearchViewModel,
+    store: NBALeagueScheduleStore
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
-    val filteredGames by nbaLeagueScheduleViewModel.filteredGames.collectAsState()
-    val selectedDayIndex by nbaLeagueScheduleViewModel.selectedDayIndex.collectAsState()
-    val teamNameDic = nbaLeagueScheduleViewModel.teamNameDictionary
+    val filteredGames by store.filteredGames.collectAsState()
+    val selectedDayIndex by store.selectedDayIndex.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            NBALeagueScheduleListItem(searchViewModel = searchViewModel, data = item, teamNameDic = teamNameDic)
+            NBALeagueScheduleListItem(
+                searchStore = searchStore,
+                store = store,
+                data = item,
+                teamNameDic = teamNameDic
+            )
         }
     }
 }
 
 @Composable
 fun NBALeagueScheduleListItem(
-    searchViewModel: SearchViewModel,
-    nbaLeagueScheduleViewModel: NBALeagueScheduleViewModel = hiltViewModel(),
+    searchStore: SearchViewModel,
+    store: NBALeagueScheduleStore,
     teamNameDic: Map<String, String>,
     data: NBAGameForSchedule,
 ) {
@@ -206,10 +152,10 @@ fun NBALeagueScheduleListItem(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val gameResultOpenedStateList by nbaLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
-    val displayModel by nbaLeagueScheduleViewModel.displayModel.collectAsState()
+    val gameResultOpenedStateList by store.gameResultOpenedStateList.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
 
-    val displayModels by searchViewModel.displayModels.collectAsState()
+    val displayModels by searchStore.displayModels.collectAsState()
     val nbaGameStatsModel = displayModels[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel
 
     /* ---------------------
@@ -294,15 +240,13 @@ fun NBALeagueScheduleListItem(
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-                displayModel?.let {
-                    searchViewModel.send(SearchViewModel.Intent.SelectNBAGame(data, it.season))
-                }
+                searchStore.send(SearchViewModel.Intent.SelectNBAGame(data, displayModel.season))
 
                 // set selected game's isOpened true
-                nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateResultOpenedState(gameId, true))
+                store.send(NBALeagueScheduleAction.UpdateResultOpenedState(gameId, true))
             },
             onCapsuleButtonClick = {
-                nbaLeagueScheduleViewModel.send(NBALeagueScheduleIntent.UpdateResultOpenedState(gameId, !isResultOpened))
+                store.send(NBALeagueScheduleAction.UpdateResultOpenedState(gameId, !isResultOpened))
             }
         )
     )

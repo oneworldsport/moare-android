@@ -20,9 +20,6 @@ abstract class BaseTeamStandingsStore<A, T: SportDisplayModel>(
     protected val _displayModel = MutableStateFlow(initial)
     val displayModel: StateFlow<T> = _displayModel
 
-    protected val _playerNameDic = MutableStateFlow<Map<String, String>>(emptyMap())
-    val playerNameDic: StateFlow<Map<String, String>> = _playerNameDic
-
     protected val _teamNameDic = MutableStateFlow<Map<String, String>>(emptyMap())
     val teamNameDic: StateFlow<Map<String, String>> = _teamNameDic
 

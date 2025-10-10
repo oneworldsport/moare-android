@@ -8,21 +8,28 @@ import com.moare.android.core.util.DayInfo
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.displaymodels.SportDisplayModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 
-abstract class BaseScheduleViewModel<I, T>(
+abstract class BaseScheduleStore<A, T: SportDisplayModel>(
+    private val initial: T,
     private val nameProvider: TranslatedNameProvider
-) : MVIViewModel<I, T>() {
-    /* ---------------------
-       data state
-       --------------------- */
-    protected val _displayModel = MutableStateFlow<T?>(null)
-    val displayModel: StateFlow<T?> = _displayModel
+) {
+    protected val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    protected val _displayModel = MutableStateFlow(initial)
+    val displayModel: StateFlow<T> = _displayModel
 
     protected val _displayDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
     val displayDataState: StateFlow<ApiFetchState> = _displayDataState
+
+    protected val _teamNameDic = MutableStateFlow<Map<String, String>>(emptyMap())
+    val teamNameDic: StateFlow<Map<String, String>> = _teamNameDic
 
     protected val _yearMonthList = MutableStateFlow<List<String>>(emptyList())
     val yearMonthList: StateFlow<List<String>> = _yearMonthList
@@ -30,9 +37,6 @@ abstract class BaseScheduleViewModel<I, T>(
     protected val _days = MutableStateFlow<List<DayInfo>>(emptyList())
     val days: StateFlow<List<DayInfo>> = _days
 
-    /* ---------------------
-       ui state
-       --------------------- */
     protected val _selectedYearMonth = MutableStateFlow("")
     val selectedYearMonth: StateFlow<String> = _selectedYearMonth
 
@@ -54,12 +58,9 @@ abstract class BaseScheduleViewModel<I, T>(
     protected val _isAllResultOpened = MutableStateFlow(false)
     val isAllResultOpened: StateFlow<Boolean> = _isAllResultOpened
 
-    /* ---------------------
-       etc
-       --------------------- */
-    var teamNameDictionary: Map<String, String> = emptyMap()
+    abstract fun send(action: A)
 
-    override fun initData(displayModel: T) {
+    open fun initData() {
         // init with default value
         _displayDataState.value = ApiFetchState.Idle
         _yearMonthList.value = emptyList()
@@ -71,27 +72,22 @@ abstract class BaseScheduleViewModel<I, T>(
         _selectedDayIndex.value = 0
         _isAllResultOpened.value = false
 
-        // init data
-        _displayModel.value = displayModel
-
-        if (displayModel is SportDisplayModel) {
-            loadDictionaries(displayModel.leagueId)
-        }
+        loadDictionaries(displayModel.value.leagueId)
     }
 
     private fun loadDictionaries(leagueId: Int) {
         when (leagueId) {
             in Constants.Ids.FOOTBALL_LEAGUES -> {
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.FOOTBALL_TEAM_DIC)
+                _teamNameDic.value = nameProvider.getDictionary(Constants.Keys.FOOTBALL_TEAM_DIC)
             }
             Constants.Ids.NBA -> {
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
+                _teamNameDic.value = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
             }
             Constants.Ids.KBO -> {
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.KBO_TEAM_DIC)
+                _teamNameDic.value = nameProvider.getDictionary(Constants.Keys.KBO_TEAM_DIC)
             }
             Constants.Ids.MLB -> {
-                teamNameDictionary = nameProvider.getDictionary(Constants.Keys.MLB_TEAM_DIC)
+                _teamNameDic.value = nameProvider.getDictionary(Constants.Keys.MLB_TEAM_DIC)
             }
             else -> {}
         }
@@ -113,4 +109,8 @@ abstract class BaseScheduleViewModel<I, T>(
     }
 
     abstract fun toggleAllResult()
+
+    open fun dispose() {
+        scope.cancel()
+    }
 }

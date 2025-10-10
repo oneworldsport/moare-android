@@ -215,11 +215,11 @@ fun MLBGameStatsView(
         },
         gameContent = {
             if (game?.status?.detailedState == StringConstants.MLB.GAME_SCHEDULED) {
-                MLBLeagueScheduleListItem(
-                    searchViewModel = searchViewModel,
-                    data = ModelConverter().mlbGameToGameScheduleConverter(game),
-                    teamNameDic = teamNameDic
-                )
+//                MLBLeagueScheduleListItem(
+//                    searchStore = searchViewModel,
+//                    data = ModelConverter().mlbGameToGameScheduleConverter(game),
+//                    teamNameDic = teamNameDic
+//                )
             } else {
                 MLBGameStatsScoreInfoItem()
             }

@@ -261,11 +261,12 @@ fun FBGameStatsView(
         },
         gameContent = {
             displayModel?.game?.let { game ->
-                FBLeagueScheduleListItem(
-                    searchViewModel = searchViewModel,
-                    data = ModelConverter().fbGameToGameScheduleConverter(game),
-                    teamNameDic = teamNameDic
-                )
+//                FBLeagueScheduleListItem(
+//                    searchStore = searchViewModel,
+//                    store = null,
+//                    data = ModelConverter().fbGameToGameScheduleConverter(game),
+//                    teamNameDic = teamNameDic
+//                )
             }
         }
     )

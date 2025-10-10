@@ -247,11 +247,11 @@ fun NBAGameStatsView(
         },
         gameContent = {
             if (displayModel?.game?.gameSummary?.gameStatusId == StringConstants.NBA.GAME_SCHEDULED) {
-                NBALeagueScheduleListItem(
-                    searchViewModel = searchViewModel,
-                    data = ModelConverter().nbaGameToGameScheduleConverter(displayModel!!.game),
-                    teamNameDic = teamNameDic
-                )
+//                NBALeagueScheduleListItem(
+//                    searchStore = searchViewModel,
+//                    data = ModelConverter().nbaGameToGameScheduleConverter(displayModel!!.game),
+//                    teamNameDic = teamNameDic
+//                )
             } else {
                 NBAGameStatsScoreInfoItem()
             }

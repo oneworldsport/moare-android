@@ -201,11 +201,11 @@ fun KBOGameStatsView(
                 game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_SCHEDULED ||
                 game?.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_CANCELED
             ) {
-                KBOLeagueScheduleListItem(
-                    searchViewModel = searchViewModel,
-                    data = ModelConverter().kboGameToGameScheduleConverter(game),
-                    teamNameDic = teamNameDic
-                )
+//                KBOLeagueScheduleListItem(
+//                    searchStore = searchViewModel,
+//                    data = ModelConverter().kboGameToGameScheduleConverter(game),
+//                    teamNameDic = teamNameDic
+//                )
             } else {
                 KBOGameStatsScoreInfoItem()
             }
