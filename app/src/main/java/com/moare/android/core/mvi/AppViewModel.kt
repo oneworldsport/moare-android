@@ -1,6 +1,8 @@
 package com.moare.android.core.mvi
 
 import androidx.lifecycle.ViewModel
+import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
+import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleAction
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleStore
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
@@ -15,6 +17,8 @@ import com.moare.android.features.search.display.football.viewmodel.FBTeamStandi
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsStore
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsStore
+import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
+import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoAction
@@ -27,6 +31,8 @@ import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsA
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsStore
+import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsAction
+import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerInfoAction
@@ -39,6 +45,8 @@ import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsA
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsStore
+import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
+import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsStore
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleStore
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoAction
@@ -77,6 +85,7 @@ sealed interface StackItem {
     data class FBTeamStats(override val id: ViewId, val store: FBTeamStatsStore) : StackItem
     data class FBTeamStandings(override val id: ViewId, val store: FBTeamStandingsStore) : StackItem
     data class FBLeagueSchedule(override val id: ViewId, val store: FBLeagueScheduleStore) : StackItem
+    data class FBGameStats(override val id: ViewId, val store: FBGameStatsStore) : StackItem
 
     data class NBAPlayerInfo(override val id: ViewId, val store: NBAPlayerInfoStore) : StackItem
     data class NBAPlayerStats(override val id: ViewId, val store: NBAPlayerStatsStore) : StackItem
@@ -85,6 +94,7 @@ sealed interface StackItem {
     data class NBATeamStats(override val id: ViewId, val store: NBATeamStatsStore) : StackItem
     data class NBATeamStandings(override val id: ViewId, val store: NBATeamStandingsStore) : StackItem
     data class NBALeagueSchedule(override val id: ViewId, val store: NBALeagueScheduleStore) : StackItem
+    data class NBAGameStats(override val id: ViewId, val store: NBAGameStatsStore) : StackItem
 
     data class MLBPlayerInfo(override val id: ViewId, val store: MLBPlayerInfoStore) : StackItem
     data class MLBPlayerStats(override val id: ViewId, val store: MLBPlayerStatsStore) : StackItem
@@ -92,6 +102,7 @@ sealed interface StackItem {
     data class MLBTeamStats(override val id: ViewId, val store: MLBTeamStatsStore) : StackItem
     data class MLBTeamStandings(override val id: ViewId, val store: MLBTeamStandingsStore) : StackItem
     data class MLBLeagueSchedule(override val id: ViewId, val store: MLBLeagueScheduleStore) : StackItem
+    data class MLBGameStats(override val id: ViewId, val store: MLBGameStatsStore) : StackItem
 
     data class KBOPlayerInfo(override val id: ViewId, val store: KBOPlayerInfoStore) : StackItem
     data class KBOPlayerStats(override val id: ViewId, val store: KBOPlayerStatsStore) : StackItem
@@ -99,6 +110,7 @@ sealed interface StackItem {
     data class KBOTeamStats(override val id: ViewId, val store: KBOTeamStatsStore) : StackItem
     data class KBOTeamStandings(override val id: ViewId, val store: KBOTeamStandingsStore) : StackItem
     data class KBOLeagueSchedule(override val id: ViewId, val store: KBOLeagueScheduleStore) : StackItem
+    data class KBOGameStats(override val id: ViewId, val store: KBOGameStatsStore) : StackItem
 }
 
 @HiltViewModel
@@ -111,6 +123,7 @@ class AppViewModel @Inject constructor(
     private val fbTeamStatsFactory: FBTeamStatsStore.Factory,
     private val fbTeamStandingsFactory: FBTeamStandingsStore.Factory,
     private val fbLeagueScheduleFactory: FBLeagueScheduleStore.Factory,
+    private val fbGameStatsFactory: FBGameStatsStore.Factory,
 
     private val nbaPlayerInfoFactory: NBAPlayerInfoStore.Factory,
     private val nbaPlayerStatsFactory: NBAPlayerStatsStore.Factory,
@@ -119,6 +132,7 @@ class AppViewModel @Inject constructor(
     private val nbaTeamStatsFactory: NBATeamStatsStore.Factory,
     private val nbaTeamStandingsFactory: NBATeamStandingsStore.Factory,
     private val nbaLeagueScheduleFactory: NBALeagueScheduleStore.Factory,
+    private val nbaGameStatsFactory: NBAGameStatsStore.Factory,
 
     private val mlbPlayerInfoFactory: MLBPlayerInfoStore.Factory,
     private val mlbPlayerStatsFactory: MLBPlayerStatsStore.Factory,
@@ -126,6 +140,7 @@ class AppViewModel @Inject constructor(
     private val mlbTeamStatsFactory: MLBTeamStatsStore.Factory,
     private val mlbTeamStandingsFactory: MLBTeamStandingsStore.Factory,
     private val mlbLeagueScheduleFactory: MLBLeagueScheduleStore.Factory,
+    private val mlbGameStatsFactory: MLBGameStatsStore.Factory,
 
     private val kboPlayerInfoFactory: KBOPlayerInfoStore.Factory,
     private val kboPlayerStatsFactory: KBOPlayerStatsStore.Factory,
@@ -133,6 +148,7 @@ class AppViewModel @Inject constructor(
     private val kboTeamStatsFactory: KBOTeamStatsStore.Factory,
     private val kboTeamStandingsFactory: KBOTeamStandingsStore.Factory,
     private val kboLeagueScheduleFactory: KBOLeagueScheduleStore.Factory,
+    private val kboGameStatsFactory: KBOGameStatsStore.Factory
 ) : ViewModel() {
     private val _stack = MutableStateFlow<List<StackItem>>(emptyList())
     val stack: StateFlow<List<StackItem>> = _stack
@@ -201,6 +217,11 @@ class AppViewModel @Inject constructor(
                         store.send(FBLeagueScheduleAction.InitData)
                         _stack.update { it + StackItem.FBLeagueSchedule(id, store) }
                     }
+                    is SportDecodableModel.FBGameStats -> {
+                        val store = fbGameStatsFactory.create(model.displayModel)
+                        store.send(FBGameStatsAction.InitData)
+                        _stack.update { it + StackItem.FBGameStats(id, store) }
+                    }
 
                     is SportDecodableModel.NBAPlayerInfo -> {
                         val store = nbaPlayerInfoFactory.create(model.displayModel)
@@ -237,6 +258,11 @@ class AppViewModel @Inject constructor(
                         store.send(NBALeagueScheduleAction.InitData)
                         _stack.update { it + StackItem.NBALeagueSchedule(id, store) }
                     }
+                    is SportDecodableModel.NBAGameStats -> {
+                        val store = nbaGameStatsFactory.create(model.displayModel)
+                        store.send(NBAGameStatsAction.InitData)
+                        _stack.update { it + StackItem.NBAGameStats(id, store) }
+                    }
 
                     is SportDecodableModel.MLBPlayerInfo -> {
                         val store = mlbPlayerInfoFactory.create(model.displayModel)
@@ -267,6 +293,11 @@ class AppViewModel @Inject constructor(
                         val store = mlbLeagueScheduleFactory.create(model.displayModel)
                         store.send(MLBLeagueScheduleAction.InitData)
                         _stack.update { it + StackItem.MLBLeagueSchedule(id, store) }
+                    }
+                    is SportDecodableModel.MLBGameStats -> {
+                        val store = mlbGameStatsFactory.create(model.displayModel)
+                        store.send(MLBGameStatsAction.InitData)
+                        _stack.update { it + StackItem.MLBGameStats(id, store) }
                     }
 
                     is SportDecodableModel.KBOPlayerInfo -> {
@@ -299,6 +330,11 @@ class AppViewModel @Inject constructor(
                         store.send(KBOLeagueScheduleAction.InitData)
                         _stack.update { it + StackItem.KBOLeagueSchedule(id, store) }
                     }
+                    is SportDecodableModel.KBOGameStats -> {
+                        val store = kboGameStatsFactory.create(model.displayModel)
+                        store.send(KBOGameStatsAction.InitData)
+                        _stack.update { it + StackItem.KBOGameStats(id, store) }
+                    }
                     else -> null
                 }
             }
@@ -314,6 +350,7 @@ class AppViewModel @Inject constructor(
             is StackItem.FBTeamStats -> item.store.dispose()
             is StackItem.FBTeamStandings -> item.store.dispose()
             is StackItem.FBLeagueSchedule -> item.store.dispose()
+            is StackItem.FBGameStats -> item.store.dispose()
 
             is StackItem.NBAPlayerInfo -> item.store.dispose()
             is StackItem.NBAPlayerStats -> item.store.dispose()
@@ -322,6 +359,7 @@ class AppViewModel @Inject constructor(
             is StackItem.NBATeamStats -> item.store.dispose()
             is StackItem.NBATeamStandings -> item.store.dispose()
             is StackItem.NBALeagueSchedule -> item.store.dispose()
+            is StackItem.NBAGameStats -> item.store.dispose()
 
             is StackItem.MLBPlayerInfo -> item.store.dispose()
             is StackItem.MLBPlayerStats -> item.store.dispose()
@@ -329,6 +367,7 @@ class AppViewModel @Inject constructor(
             is StackItem.MLBTeamStats -> item.store.dispose()
             is StackItem.MLBTeamStandings -> item.store.dispose()
             is StackItem.MLBLeagueSchedule -> item.store.dispose()
+            is StackItem.MLBGameStats -> item.store.dispose()
 
             is StackItem.KBOPlayerInfo -> item.store.dispose()
             is StackItem.KBOPlayerStats -> item.store.dispose()
@@ -336,6 +375,7 @@ class AppViewModel @Inject constructor(
             is StackItem.KBOTeamStats -> item.store.dispose()
             is StackItem.KBOTeamStandings -> item.store.dispose()
             is StackItem.KBOLeagueSchedule -> item.store.dispose()
+            is StackItem.KBOGameStats -> item.store.dispose()
         }
     }
 }

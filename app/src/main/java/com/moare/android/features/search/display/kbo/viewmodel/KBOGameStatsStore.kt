@@ -2,36 +2,33 @@ package com.moare.android.features.search.display.kbo.viewmodel
 
 import androidx.compose.ui.unit.dp
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsViewModel
+import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsStore
+import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
 import com.moare.android.features.search.models.models.kbo.KBOGameLineup
 import com.moare.android.features.search.models.models.kbo.KBOGamePitcherStats
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
 
-sealed class KBOGameStatsIntent {
-    data class InitData(val displayModel: KBOGameStatsDisplayModel) : KBOGameStatsIntent()
-    data class SelectFirstCategory(val index: Int) : KBOGameStatsIntent()
-    data class SelectSecondCategory(val index: Int) : KBOGameStatsIntent()
-    data class SelectTeam(val index: Int) : KBOGameStatsIntent()
+sealed interface KBOGameStatsAction {
+    data object InitData : KBOGameStatsAction
+    data class SelectFirstCategory(val index: Int) : KBOGameStatsAction
+    data class SelectSecondCategory(val index: Int) : KBOGameStatsAction
+    data class SelectTeam(val index: Int) : KBOGameStatsAction
 }
 
-@HiltViewModel
-class KBOGameStatsViewModel @Inject constructor(
-    private val nameProvider: TranslatedNameProvider
-) : BaseGameStatsViewModel<KBOGameStatsIntent, KBOGameStatsDisplayModel>(nameProvider) {
-    /* ---------------------
-       constants
-       --------------------- */
+class KBOGameStatsStore @AssistedInject constructor(
+    private val nameProvider: TranslatedNameProvider,
+    @Assisted val initial: KBOGameStatsDisplayModel
+) : BaseGameStatsStore<KBOGameStatsAction, KBOGameStatsDisplayModel>(initial, nameProvider) {
     val lineScoreItemHeight = 50.dp
     val teamButtonWidth = 100.dp
 
-    /* ---------------------
-       data state
-       --------------------- */
     private val _teamLineup = MutableStateFlow<KBOGameLineup?>(null)
     val teamLineup: StateFlow<KBOGameLineup?> = _teamLineup
 
@@ -41,20 +38,25 @@ class KBOGameStatsViewModel @Inject constructor(
     private val _teamPitchers = MutableStateFlow<List<KBOGamePitcherStats>>(emptyList())
     val teamPitchers: StateFlow<List<KBOGamePitcherStats>> = _teamPitchers
 
-    override fun send(intent: KBOGameStatsIntent) {
-        when (intent) {
-            is KBOGameStatsIntent.InitData -> initData(intent.displayModel)
-            is KBOGameStatsIntent.SelectFirstCategory -> selectFirstCategory(intent.index)
-            is KBOGameStatsIntent.SelectSecondCategory -> selectSecondCategory(intent.index)
-            is KBOGameStatsIntent.SelectTeam -> selectTeam(intent.index)
+    @AssistedFactory
+    interface Factory {
+        fun create(displayModel: KBOGameStatsDisplayModel) : KBOGameStatsStore
+    }
+
+    override fun send(action: KBOGameStatsAction) {
+        when (action) {
+            is KBOGameStatsAction.InitData -> initData()
+            is KBOGameStatsAction.SelectFirstCategory -> selectFirstCategory(action.index)
+            is KBOGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
+            is KBOGameStatsAction.SelectTeam -> selectTeam(action.index)
         }
     }
 
     /* ---------------------
        init
        --------------------- */
-    override fun initData(displayModel: KBOGameStatsDisplayModel) {
-        super.initData(displayModel)
+    override fun initData() {
+        super.initData()
 
         // init with default value
         _teamLineup.value = null
@@ -72,9 +74,9 @@ class KBOGameStatsViewModel @Inject constructor(
 
         // set selected team's players stats
         _teamLineup.value = if (index == 0) {
-            displayModel.value?.game?.lineup?.home
+            displayModel.value.game.lineup?.home
         } else {
-            displayModel.value?.game?.lineup?.away
+            displayModel.value.game.lineup?.away
         }
 
         _teamHitters.value = teamLineup.value?.hitters ?: emptyList()
@@ -86,7 +88,6 @@ class KBOGameStatsViewModel @Inject constructor(
 
     override fun selectFirstCategory(index: Int) {
         super.selectFirstCategory(index)
-        _firstCategorySelectedIndex.value = index
 
         sortHitters()
     }

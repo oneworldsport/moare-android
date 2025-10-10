@@ -6,30 +6,27 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.rounded
-import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsViewModel
+import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
 import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
 import com.moare.android.features.search.models.models.nba.NBALineScore
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
 
-sealed class NBAGameStatsIntent {
-    data class InitData(val displayModel: NBAGameStatsDisplayModel) : NBAGameStatsIntent()
-    data class SelectFirstCategory(val index: Int) : NBAGameStatsIntent()
-    data class SelectSecondCategory(val index: Int) : NBAGameStatsIntent()
-    data class SelectTeam(val index: Int) : NBAGameStatsIntent()
+sealed interface NBAGameStatsAction {
+    data object InitData : NBAGameStatsAction
+    data class SelectSecondCategory(val index: Int) : NBAGameStatsAction
+    data class SelectTeam(val index: Int) : NBAGameStatsAction
 }
 
-@HiltViewModel
-class NBAGameStatsViewModel @Inject constructor(
-    private val nameProvider: TranslatedNameProvider
-) : BaseGameStatsViewModel<NBAGameStatsIntent, NBAGameStatsDisplayModel>(nameProvider) {
-    /* ---------------------
-       constants
-       --------------------- */
+class NBAGameStatsStore @AssistedInject constructor(
+    private val nameProvider: TranslatedNameProvider,
+    @Assisted val initial: NBAGameStatsDisplayModel
+) : BaseGameStatsStore<NBAGameStatsAction, NBAGameStatsDisplayModel>(initial, nameProvider) {
     val dataItemHeight = 40.dp
     val firstCategoryItemHeight = 34.dp
     val secondCategoryItemHeight = 40.dp
@@ -42,9 +39,6 @@ class NBAGameStatsViewModel @Inject constructor(
     val dataFontSize = 14.sp
     val lineScoreItemHeight = 50.dp
 
-    /* ---------------------
-       data state
-       --------------------- */
     private val _homeTeamLineScore = MutableStateFlow<NBALineScore?>(null)
     val homeTeamLineScore: StateFlow<NBALineScore?> = _homeTeamLineScore
 
@@ -57,26 +51,27 @@ class NBAGameStatsViewModel @Inject constructor(
     private val _playersTotalStats = MutableStateFlow<NBAGameBoxScoreStats?>(null)
     val playersTotalStats: StateFlow<NBAGameBoxScoreStats?> = _playersTotalStats
 
-    /* ---------------------
-       etc
-       --------------------- */
     private var homeTeamId = 0
     private var awayTeamId = 0
 
-    override fun send(intent: NBAGameStatsIntent) {
-        when (intent) {
-            is NBAGameStatsIntent.InitData -> initData(intent.displayModel)
-            is NBAGameStatsIntent.SelectFirstCategory -> selectFirstCategory(intent.index)
-            is NBAGameStatsIntent.SelectSecondCategory -> selectSecondCategory(intent.index)
-            is NBAGameStatsIntent.SelectTeam -> selectTeam(intent.index)
+    @AssistedFactory
+    interface Factory {
+        fun create(displayModel: NBAGameStatsDisplayModel) : NBAGameStatsStore
+    }
+
+    override fun send(action: NBAGameStatsAction) {
+        when (action) {
+            is NBAGameStatsAction.InitData -> initData()
+            is NBAGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
+            is NBAGameStatsAction.SelectTeam -> selectTeam(action.index)
         }
     }
 
     /* ---------------------
        init
        --------------------- */
-    override fun initData(displayModel: NBAGameStatsDisplayModel) {
-        super.initData(displayModel)
+    override fun initData() {
+        super.initData()
 
         // init with default value
         _homeTeamLineScore.value = null
@@ -87,39 +82,19 @@ class NBAGameStatsViewModel @Inject constructor(
         homeTeamId = 0
         awayTeamId = 0
 
-        displayModel.game.gameSummary?.let {
+        displayModel.value.game.gameSummary?.let {
             homeTeamId = it.homeTeamId
             awayTeamId = it.visitorTeamId
         }
 
         // set lineScore
-        _homeTeamLineScore.value = displayModel.game.lineScore.find { it.teamId == homeTeamId }
-        _awayTeamLineScore.value = displayModel.game.lineScore.find { it.teamId == awayTeamId }
+        _homeTeamLineScore.value = displayModel.value.game.lineScore.find { it.teamId == homeTeamId }
+        _awayTeamLineScore.value = displayModel.value.game.lineScore.find { it.teamId == awayTeamId }
 
-        displayModel.game.boxScoreTraditional?.let {
+        displayModel.value.game.boxScoreTraditional?.let {
             // set current(home) team's players stats
             selectTeam(0)
         }
-    }
-
-    /* ---------------------
-       implements
-       --------------------- */
-    override fun selectFirstCategory(index: Int) {
-        super.selectFirstCategory(index)
-
-        val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
-        val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
-
-        when (index) {
-            0 -> _secondCategorySelectedIndex.value = 0
-            1 -> _secondCategorySelectedIndex.value = attackCategoriesSize
-            2 -> _secondCategorySelectedIndex.value = attackCategoriesSize + defendCategoriesSize
-        }
-
-        _firstCategorySelectedIndex.value = index
-
-        sortPlayers()
     }
 
     override fun selectSecondCategory(index: Int) {
@@ -142,9 +117,9 @@ class NBAGameStatsViewModel @Inject constructor(
 
         // set selected team's players stats
         _playersStats.value = if (index == 0) {
-            displayModel.value?.game?.boxScoreTraditional?.homeTeam?.players ?: emptyList()
+            displayModel.value.game.boxScoreTraditional?.homeTeam?.players ?: emptyList()
         } else {
-            displayModel.value?.game?.boxScoreTraditional?.awayTeam?.players ?: emptyList()
+            displayModel.value.game.boxScoreTraditional?.awayTeam?.players ?: emptyList()
         }
 
         setPlayersTotalStats()
@@ -215,7 +190,7 @@ class NBAGameStatsViewModel @Inject constructor(
         playersTotalStats.threePointersPercentage = if (playersTotalStats.threePointersAttempted > 0)
             (playersTotalStats.threePointersMade.toDouble() / playersTotalStats.threePointersAttempted).rounded(3) else 0.0
 
-        playersTotalStats.plusMinusPoints = if (selectedTeamIndex.value == 0) {
+        playersTotalStats.plusMinusPoints = if (teamCategorySelectedIndex.value == 0) {
             (homeTeamLineScore.value?.pts ?: 0) - (awayTeamLineScore.value?.pts ?: 0)
         } else {
             (awayTeamLineScore.value?.pts ?: 0) - (homeTeamLineScore.value?.pts ?: 0)

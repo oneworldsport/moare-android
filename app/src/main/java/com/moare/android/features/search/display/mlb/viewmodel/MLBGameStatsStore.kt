@@ -2,35 +2,30 @@ package com.moare.android.features.search.display.mlb.viewmodel
 
 import androidx.compose.ui.unit.dp
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsViewModel
+import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.mlb.MLBGameBoxscoreTeamData
 import com.moare.android.features.search.models.models.mlb.MLBGameBoxscoreTeamPlayer
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
 
-sealed class MLBGameStatsIntent {
-    data class InitData(val displayModel: MLBGameStatsDisplayModel) : MLBGameStatsIntent()
-    data class SelectFirstCategory(val index: Int) : MLBGameStatsIntent()
-    data class SelectSecondCategory(val index: Int) : MLBGameStatsIntent()
-    data class SelectTeam(val index: Int) : MLBGameStatsIntent()
+sealed interface MLBGameStatsAction {
+    data object InitData : MLBGameStatsAction
+    data class SelectFirstCategory(val index: Int) : MLBGameStatsAction
+    data class SelectSecondCategory(val index: Int) : MLBGameStatsAction
+    data class SelectTeam(val index: Int) : MLBGameStatsAction
 }
 
-@HiltViewModel
-class MLBGameStatsViewModel @Inject constructor(
-    private val nameProvider: TranslatedNameProvider
-) : BaseGameStatsViewModel<MLBGameStatsIntent, MLBGameStatsDisplayModel>(nameProvider) {
-    /* ---------------------
-       constants
-       --------------------- */
+class MLBGameStatsStore @AssistedInject constructor(
+    private val nameProvider: TranslatedNameProvider,
+    @Assisted val initial: MLBGameStatsDisplayModel
+) : BaseGameStatsStore<MLBGameStatsAction, MLBGameStatsDisplayModel>(initial, nameProvider) {
     val lineScoreItemHeight = 50.dp
     val teamButtonWidth = 100.dp
 
-    /* ---------------------
-       data state
-       --------------------- */
     private val _teamBoxScore = MutableStateFlow<MLBGameBoxscoreTeamData?>(null)
     val teamBoxScore: StateFlow<MLBGameBoxscoreTeamData?> = _teamBoxScore
 
@@ -40,20 +35,22 @@ class MLBGameStatsViewModel @Inject constructor(
     private val _teamPitchers = MutableStateFlow<List<Pair<String, MLBGameBoxscoreTeamPlayer>>>(emptyList())
     val teamPitchers: StateFlow<List<Pair<String, MLBGameBoxscoreTeamPlayer>>> = _teamPitchers
 
-    override fun send(intent: MLBGameStatsIntent) {
-        when (intent) {
-            is MLBGameStatsIntent.InitData -> initData(intent.displayModel)
-            is MLBGameStatsIntent.SelectFirstCategory -> selectFirstCategory(intent.index)
-            is MLBGameStatsIntent.SelectSecondCategory -> selectSecondCategory(intent.index)
-            is MLBGameStatsIntent.SelectTeam -> selectTeam(intent.index)
+    @AssistedFactory
+    interface Factory {
+        fun create(displayModel: MLBGameStatsDisplayModel) : MLBGameStatsStore
+    }
+
+    override fun send(action: MLBGameStatsAction) {
+        when (action) {
+            is MLBGameStatsAction.InitData -> initData()
+            is MLBGameStatsAction.SelectFirstCategory -> selectFirstCategory(action.index)
+            is MLBGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
+            is MLBGameStatsAction.SelectTeam -> selectTeam(action.index)
         }
     }
 
-    /* ---------------------
-       init
-       --------------------- */
-    override fun initData(displayModel: MLBGameStatsDisplayModel) {
-        super.initData(displayModel)
+    override fun initData() {
+        super.initData()
 
         // init with default value
         _teamBoxScore.value = null
@@ -63,17 +60,14 @@ class MLBGameStatsViewModel @Inject constructor(
         selectTeam(0)
     }
 
-    /* ---------------------
-       implements
-       --------------------- */
     override fun selectTeam(index: Int) {
         super.selectTeam(index)
 
         // set selected team's players stats
         _teamBoxScore.value = if (index == 0) {
-            displayModel.value?.game?.boxscore?.teams?.home
+            displayModel.value.game.boxscore?.teams?.home
         } else {
-            displayModel.value?.game?.boxscore?.teams?.away
+            displayModel.value.game.boxscore?.teams?.away
         }
 
         _teamHitters.value = teamBoxScore.value?.players?.filter {
@@ -90,7 +84,6 @@ class MLBGameStatsViewModel @Inject constructor(
 
     override fun selectFirstCategory(index: Int) {
         super.selectFirstCategory(index)
-        _firstCategorySelectedIndex.value = index
 
         sortHitters()
     }

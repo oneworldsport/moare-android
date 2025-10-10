@@ -46,6 +46,7 @@ import com.moare.android.R
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.mvi.AppViewModel
 import com.moare.android.core.mvi.StackItem
+import com.moare.android.features.search.display.football.view.FBGameStatsView
 import com.moare.android.features.search.display.football.view.FBLeagueScheduleView
 import com.moare.android.features.search.display.football.view.FBPlayerInfoView
 import com.moare.android.features.search.display.football.view.FBPlayerStandingsView
@@ -53,18 +54,21 @@ import com.moare.android.features.search.display.football.view.FBPlayerStatsView
 import com.moare.android.features.search.display.football.view.FBTeamInfoView
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
+import com.moare.android.features.search.display.kbo.view.KBOGameStatsView
 import com.moare.android.features.search.display.kbo.view.KBOLeagueScheduleView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerInfoView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerStatsView
 import com.moare.android.features.search.display.kbo.view.KBOTeamInfoView
 import com.moare.android.features.search.display.kbo.view.KBOTeamStandingsView
 import com.moare.android.features.search.display.kbo.view.KBOTeamStatsView
+import com.moare.android.features.search.display.mlb.view.MLBGameStatsView
 import com.moare.android.features.search.display.mlb.view.MLBLeagueScheduleView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerInfoView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerStatsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamInfoView
 import com.moare.android.features.search.display.mlb.view.MLBTeamStandingsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamStatsView
+import com.moare.android.features.search.display.nba.view.NBAGameStatsView
 import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
 import com.moare.android.features.search.display.nba.view.NBAPlayerStandingsView
@@ -346,6 +350,7 @@ fun SearchView(
                         is StackItem.FBTeamStats -> FBTeamStatsView(searchStore, top.store)
                         is StackItem.FBTeamStandings -> FBTeamStandingsView(searchStore, top.store)
                         is StackItem.FBLeagueSchedule -> FBLeagueScheduleView(searchStore, top.store)
+                        is StackItem.FBGameStats -> FBGameStatsView(searchStore, top.store)
 
                         is StackItem.NBAPlayerInfo -> NBAPlayerInfoView(searchStore, top.store)
                         is StackItem.NBAPlayerStats -> NBAPlayerStatsView(searchStore, top.store)
@@ -354,6 +359,7 @@ fun SearchView(
                         is StackItem.NBATeamStats -> NBATeamStatsView(searchStore, top.store)
                         is StackItem.NBATeamStandings -> NBATeamStandingsView(searchStore, top.store)
                         is StackItem.NBALeagueSchedule -> NBALeagueScheduleView(searchStore, top.store)
+                        is StackItem.NBAGameStats -> NBAGameStatsView(searchStore, top.store)
 
                         is StackItem.MLBPlayerInfo -> MLBPlayerInfoView(searchStore, top.store)
                         is StackItem.MLBPlayerStats -> MLBPlayerStatsView(searchStore, top.store)
@@ -367,6 +373,7 @@ fun SearchView(
                         is StackItem.MLBTeamStats -> MLBTeamStatsView(searchStore, top.store)
                         is StackItem.MLBTeamStandings -> MLBTeamStandingsView(searchStore, top.store)
                         is StackItem.MLBLeagueSchedule -> MLBLeagueScheduleView(searchStore, top.store)
+                        is StackItem.MLBGameStats -> MLBGameStatsView(searchStore, top.store)
 
                         is StackItem.KBOPlayerInfo -> KBOPlayerInfoView(searchStore, top.store)
                         is StackItem.KBOPlayerStats -> KBOPlayerStatsView(searchStore, top.store)
@@ -380,27 +387,12 @@ fun SearchView(
                         is StackItem.KBOTeamStats -> KBOTeamStatsView(searchStore, top.store)
                         is StackItem.KBOTeamStandings -> KBOTeamStandingsView(searchStore, top.store)
                         is StackItem.KBOLeagueSchedule -> KBOLeagueScheduleView(searchStore, top.store)
+                        is StackItem.KBOGameStats -> KBOGameStatsView(searchStore, top.store)
                         else -> Unit
                     }
-                    // football
 
-//                    displayModels[SportDisplayType.FB_GAME_STATS]?.let {
-//                        FBGameStatsView(searchViewModel = searchViewModel,data = it as FBGameStatsDisplayModel)
-//                    }
-//                    // nba
-//                    displayModels[SportDisplayType.NBA_GAME_STATS]?.let {
-//                        NBAGameStatsView(searchViewModel = searchViewModel,data = it as NBAGameStatsDisplayModel)
-//                    }
 //                    displayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT]?.let {
 //                        NBALeagueTournamentView(searchViewModel = searchViewModel,data = it as NBATournamentDisplayModel)
-//                    }
-//                    // kbo
-//                    displayModels[SportDisplayType.KBO_GAME_STATS]?.let {
-//                        KBOGameStatsView(searchViewModel = searchViewModel,data = it as KBOGameStatsDisplayModel)
-//                    }
-//                    // mlb
-//                    displayModels[SportDisplayType.MLB_GAME_STATS]?.let {
-//                        MLBGameStatsView(searchViewModel = searchViewModel,data = it as MLBGameStatsDisplayModel)
 //                    }
                 }
             }

@@ -176,7 +176,7 @@ fun FBLeagueScheduleList(
 @Composable
 fun FBLeagueScheduleListItem(
     searchStore: SearchViewModel,
-    store: FBLeagueScheduleStore,
+    store: FBLeagueScheduleStore?,
     // FBLeagueScheduleViewModel이 한번도 초기화 된적 없이 FBGameStatsView에서 함수가 호출될때 teamNameDictionary를 store에서 가져올수가 없어 추가.
     // TODO: 그러면 결국 store는 nullable이어도 된다는건데..?
     teamNameDic: Map<String, String>,
@@ -196,8 +196,8 @@ fun FBLeagueScheduleListItem(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by store.displayModel.collectAsState()
-    val gameResultOpenedStateList by store.gameResultOpenedStateList.collectAsState()
+    val displayModel = store?.displayModel?.collectAsState()?.value
+    val gameResultOpenedStateList = store?.gameResultOpenedStateList?.collectAsState()?.value
 
     val displayModels by searchStore.displayModels.collectAsState()
     val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
@@ -236,7 +236,9 @@ fun FBLeagueScheduleListItem(
        --------------------- */
     LaunchedEffect(data) {
         if (StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus)) {
-            isResultOpened = gameResultOpenedStateList[gameId] ?: false
+            gameResultOpenedStateList?.let {
+                isResultOpened = gameResultOpenedStateList[gameId] ?: false
+            }
         } else if (gameStatus == StringConstants.Football.GAME_NOT_STARTED) {
             isResultOpened = false
         } else {
@@ -244,8 +246,10 @@ fun FBLeagueScheduleListItem(
         }
     }
     LaunchedEffect(gameResultOpenedStateList) {
-        if (StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus)) {
-            isResultOpened = gameResultOpenedStateList[gameId] ?: false
+        gameResultOpenedStateList?.let {
+            if (StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus)) {
+                isResultOpened = gameResultOpenedStateList[gameId] ?: false
+            }
         }
     }
     LaunchedEffect(fbGameStatsModel) {
@@ -280,13 +284,15 @@ fun FBLeagueScheduleListItem(
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-                searchStore.send(SearchViewModel.Intent.SelectFBGame(data, displayModel.season, displayModel.leagueId))
+                displayModel?.let {
+                    searchStore.send(SearchViewModel.Intent.SelectFBGame(data, displayModel.season, displayModel.leagueId))
+                }
 
                 // set selected game's isOpened true
-                store.send(FBLeagueScheduleAction.UpdateResultOpenedState(gameId, true))
+                store?.send(FBLeagueScheduleAction.UpdateResultOpenedState(gameId, true))
             },
             onCapsuleButtonClick = {
-                store.send(FBLeagueScheduleAction.UpdateResultOpenedState(gameId, !isResultOpened))
+                store?.send(FBLeagueScheduleAction.UpdateResultOpenedState(gameId, !isResultOpened))
             }
         )
     )

@@ -5,8 +5,9 @@ import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.percentageOf
-import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsViewModel
+import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.models.football.FBGameLineups
 import com.moare.android.features.search.models.models.football.FBGamePlayerStats
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
@@ -21,25 +22,22 @@ import com.moare.android.features.search.models.models.football.FBPlayerStatsPas
 import com.moare.android.features.search.models.models.football.FBPlayerStatsPenalty
 import com.moare.android.features.search.models.models.football.FBPlayerStatsShots
 import com.moare.android.features.search.models.models.football.FBPlayerStatsTackles
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
 
-sealed class FBGameStatsIntent {
-    data class InitData(val displayModel: FBGameStatsDisplayModel) : FBGameStatsIntent()
-    data class SelectFirstCategory(val index: Int) : FBGameStatsIntent()
-    data class SelectSecondCategory(val index: Int) : FBGameStatsIntent()
-    data class SelectTeam(val index: Int) : FBGameStatsIntent()
+sealed interface FBGameStatsAction {
+    data object InitData : FBGameStatsAction
+    data class SelectSecondCategory(val index: Int) : FBGameStatsAction
+    data class SelectTeam(val index: Int) : FBGameStatsAction
 }
 
-@HiltViewModel
-class FBGameStatsViewModel @Inject constructor(
-    private val nameProvider: TranslatedNameProvider
-) : BaseGameStatsViewModel<FBGameStatsIntent, FBGameStatsDisplayModel>(nameProvider) {
-    /* ---------------------
-       constants
-       --------------------- */
+class FBGameStatsStore @AssistedInject constructor(
+    private val nameProvider: TranslatedNameProvider,
+    @Assisted val initial: FBGameStatsDisplayModel
+) : BaseGameStatsStore<FBGameStatsAction, FBGameStatsDisplayModel>(initial, nameProvider) {
     val dataItemHeight = 40.dp
     val categoryItemHeight = 34.dp
     val firstItemWidth = 120.dp
@@ -49,9 +47,6 @@ class FBGameStatsViewModel @Inject constructor(
     val categoryFontSize = 14.sp
     val dataFontSize = 14.sp
 
-    /* ---------------------
-       data state
-       --------------------- */
     private val _playersStats = MutableStateFlow<List<FBGamePlayerStats>>(emptyList())
     val playerStats: StateFlow<List<FBGamePlayerStats>> = _playersStats
 
@@ -64,20 +59,21 @@ class FBGameStatsViewModel @Inject constructor(
     private val _coach = MutableStateFlow<FBPerson?>(null)
     val coach: StateFlow<FBPerson?> = _coach
 
-    override fun send(intent: FBGameStatsIntent) {
-        when (intent) {
-            is FBGameStatsIntent.InitData -> initData(intent.displayModel)
-            is FBGameStatsIntent.SelectFirstCategory -> selectFirstCategory(intent.index)
-            is FBGameStatsIntent.SelectSecondCategory -> selectSecondCategory(intent.index)
-            is FBGameStatsIntent.SelectTeam -> selectTeam(intent.index)
+    @AssistedFactory
+    interface Factory {
+        fun create(displayModel: FBGameStatsDisplayModel) : FBGameStatsStore
+    }
+
+    override fun send(action: FBGameStatsAction) {
+        when (action) {
+            is FBGameStatsAction.InitData -> initData()
+            is FBGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
+            is FBGameStatsAction.SelectTeam -> selectTeam(action.index)
         }
     }
 
-    /* ---------------------
-       init
-       --------------------- */
-    override fun initData(displayModel: FBGameStatsDisplayModel) {
-        super.initData(displayModel)
+    override fun initData() {
+        super.initData()
 
         // init with default value
         _playersStats.value = emptyList()
@@ -86,51 +82,22 @@ class FBGameStatsViewModel @Inject constructor(
         _coach.value = null
 
         // set current(home) team's players stats
-        val homeTeamId = displayModel.game.teams.home.id
-        val playersStats = displayModel.game.players.find { it.team.id == homeTeamId }?.players
+        val homeTeamId = displayModel.value.game.teams.home.id
+        val playersStats = displayModel.value.game.players.find { it.team.id == homeTeamId }?.players
         _playersStats.value = playersStats ?: emptyList()
 
         setPlayersTotalStats()
 
         // set current(home) team's coach, lineups
-        val lineups = displayModel.game.lineups.find { it.team.id == homeTeamId }
+        val lineups = displayModel.value.game.lineups.find { it.team.id == homeTeamId }
         _lineups.value = lineups
         _coach.value = lineups?.coach
 
         sortPlayers()
     }
 
-    /* ---------------------
-       implements
-       --------------------- */
-    override fun selectFirstCategory(index: Int) {
-        super.selectFirstCategory(index)
-
-        val attackCategoriesSize = StringConstants.Football.GAME_STATS_ATTACK_CATEGORIES.size
-        val defendCategoriesSize = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES.size
-
-        when (index) {
-            0 -> _secondCategorySelectedIndex.value = 0
-            1 -> _secondCategorySelectedIndex.value = attackCategoriesSize
-            2 -> _secondCategorySelectedIndex.value = attackCategoriesSize + defendCategoriesSize
-        }
-
-        _firstCategorySelectedIndex.value = index
-
-        sortPlayers()
-    }
-
     override fun selectSecondCategory(index: Int) {
         super.selectSecondCategory(index)
-
-        val attackCategories = StringConstants.Football.GAME_STATS_ATTACK_CATEGORIES
-        val defendCategories = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES
-
-        when (index) {
-            in attackCategories.indices -> _firstCategorySelectedIndex.value = 0
-            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstCategorySelectedIndex.value = 1
-            else -> _firstCategorySelectedIndex.value = 2
-        }
 
         sortPlayers()
     }
@@ -140,17 +107,17 @@ class FBGameStatsViewModel @Inject constructor(
 
         // set selected team's players stats
         val teamId = when (index) {
-            0 -> displayModel.value?.game?.teams?.home?.id
-            1 -> displayModel.value?.game?.teams?.away?.id
+            0 -> displayModel.value.game.teams.home.id
+            1 -> displayModel.value.game.teams.away.id
             else -> null
         }
 
-        val playersStats = displayModel.value?.game?.players?.find { teamId != null && it.team.id == teamId }?.players
+        val playersStats = displayModel.value.game.players.find { teamId != null && it.team.id == teamId }?.players
         _playersStats.value = playersStats ?: emptyList()
         setPlayersTotalStats()
 
         // set selected team's coach, lineups
-        val lineups = displayModel.value?.game?.lineups?.find { teamId != null && it.team.id == teamId }
+        val lineups = displayModel.value.game.lineups.find { teamId != null && it.team.id == teamId }
         _lineups.value = lineups
         _coach.value = lineups?.coach
 
