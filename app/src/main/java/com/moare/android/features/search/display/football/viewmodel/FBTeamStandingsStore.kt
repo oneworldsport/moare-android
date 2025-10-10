@@ -3,32 +3,30 @@ package com.moare.android.features.search.display.football.viewmodel
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsViewModel
+import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsStore
+import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.models.football.FBTeamStatsFixtures
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-sealed class FBTeamStandingsIntent {
-    data class InitData(val displayModel: FBTeamStandingsDisplayModel) : FBTeamStandingsIntent()
-    data class SelectConference(val index: Int) : FBTeamStandingsIntent()
-    data class SelectCategory(val index: Int) : FBTeamStandingsIntent()
+sealed interface FBTeamStandingsAction {
+    data object InitData : FBTeamStandingsAction
+    data class SelectHeaderCategory(val index: Int) : FBTeamStandingsAction
+    data class SelectCategory(val index: Int) : FBTeamStandingsAction
 }
 
-@HiltViewModel
-class FBTeamStandingsViewModel @Inject constructor(
-    private val nameProvider: TranslatedNameProvider
-) : BaseTeamStandingsViewModel<FBTeamStandingsIntent, FBTeamStandingsDisplayModel>(nameProvider) {
-    /* ---------------------
-       constants
-       --------------------- */
+class FBTeamStandingsStore @AssistedInject constructor(
+    private val nameProvider: TranslatedNameProvider,
+    @Assisted val initial: FBTeamStandingsDisplayModel
+) : BaseTeamStandingsStore<FBTeamStandingsAction, FBTeamStandingsDisplayModel>(initial, nameProvider) {
     val dataItemHeight = 40.dp
     val categoryItemHeight = 40.dp
     val firstCategoryItemWidth = 132.dp
@@ -38,41 +36,36 @@ class FBTeamStandingsViewModel @Inject constructor(
     val categoryFontSize = 15.sp
     val dataFontSize = 15.sp
 
-    /* ---------------------
-       data state
-       --------------------- */
     private var _standings = MutableStateFlow<List<FBTeamStandingsDisplay>>(emptyList())
     val standings: StateFlow<List<FBTeamStandingsDisplay>> = _standings
 
     private var _isMLS = MutableStateFlow(false)
     val isMLS: StateFlow<Boolean> = _isMLS
 
-    /* ---------------------
-       ui state
-       --------------------- */
-    private var _selectedConferenceIndex = MutableStateFlow(0)
-    val selectedConferenceIndex: StateFlow<Int> = _selectedConferenceIndex
+    @AssistedFactory
+    interface Factory {
+        fun create(displayModel: FBTeamStandingsDisplayModel) : FBTeamStandingsStore
+    }
 
-    override fun send(intent: FBTeamStandingsIntent) {
-        viewModelScope.launch {
-            when (intent) {
-                is FBTeamStandingsIntent.InitData -> initData(intent.displayModel)
-                is FBTeamStandingsIntent.SelectConference -> selectConference(intent.index)
-                is FBTeamStandingsIntent.SelectCategory -> selectCategory(intent.index)
+    override fun send(action: FBTeamStandingsAction) {
+        scope.launch {
+            when (action) {
+                is FBTeamStandingsAction.InitData -> initData()
+                is FBTeamStandingsAction.SelectHeaderCategory -> selectHeaderCategory(index = action.index)
+                is FBTeamStandingsAction.SelectCategory -> selectCategory(action.index)
             }
         }
     }
 
-    override fun initData(displayModel: FBTeamStandingsDisplayModel) {
-        super.initData(displayModel)
+    override fun initData() {
+        super.initData()
 
         // init data
-        _selectedConferenceIndex.value = 0
-        _standings.value = displayModel.standings
-        _isMLS.value = displayModel.leagueId == Constants.Ids.MLS
+        _standings.value = displayModel.value.standings
+        _isMLS.value = displayModel.value.leagueId == Constants.Ids.MLS
 
         if (isMLS.value) {
-            selectConference(isInit = true)
+            selectHeaderCategory(index = 0, isInit = true)
         } else {
             sortStandings()
         }
@@ -81,20 +74,22 @@ class FBTeamStandingsViewModel @Inject constructor(
     /* ---------------------
        implements
        --------------------- */
-    private fun selectConference(index: Int = 0, isInit: Boolean = false) {
+    override fun selectHeaderCategory(index: Int, isInit: Boolean) {
+        super.selectHeaderCategory(index, isInit)
+
         val standings = if (isInit) {
-            val entityTeam = displayModel.value?.standings?.firstOrNull { team ->
+            val entityTeam = displayModel.value.standings.firstOrNull { team ->
                 // Any first team that matches with any team in entityInfo
-                displayModel.value?.entityInfo?.firstOrNull { it.teamId == team.team.id } != null
+                displayModel.value.entityInfo.firstOrNull { it.teamId == team.team.id } != null
             }
 
             // When init, if entity's conference is east, set index 1.
             // Otherwise do nothing, which would be set as default(0).
             if (Constants.Ids.MLSTeam.eastConference.contains(entityTeam?.team?.id)) {
-                _selectedConferenceIndex.value = 1
+                _headerCategorySelectedIndex.value = 1
             }
 
-            displayModel.value?.standings?.filter {
+            displayModel.value.standings.filter {
                 if (entityTeam != null) {
                     Constants.Ids.MLSTeam.eastConference.contains(it.team.id)
                 } else {
@@ -102,9 +97,9 @@ class FBTeamStandingsViewModel @Inject constructor(
                 }
             }
         } else {
-            _selectedConferenceIndex.value = index
+            _headerCategorySelectedIndex.value = index
 
-            displayModel.value?.standings?.filter {
+            displayModel.value.standings.filter {
                 if (index == 0) {
                     Constants.Ids.MLSTeam.westConference.contains(it.team.id)
                 } else {
@@ -113,7 +108,7 @@ class FBTeamStandingsViewModel @Inject constructor(
             }
         }
 
-        _standings.value = standings ?: emptyList()
+        _standings.value = standings
 
         sortStandings()
     }
@@ -125,9 +120,9 @@ class FBTeamStandingsViewModel @Inject constructor(
     }
 
     private fun sortStandings() {
-        var standings = standings.value.toMutableList()
+        val standings = standings.value.toMutableList()
 
-        when (selectedCategoryIndex.value) {
+        when (categorySelectedIndex.value) {
             0 -> standings.sortByDescending { calculatePoints(it.homeAwayStats) }
             1 -> standings.sortByDescending { it.homeAwayStats.wins.total }
             2 -> standings.sortByDescending { it.homeAwayStats.draws.total }

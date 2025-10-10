@@ -5,28 +5,26 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsViewModel
+import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsStore
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-sealed class MLBTeamStandingsIntent {
-    data class InitData(val displayModel: MLBTeamStandingsDisplayModel) : MLBTeamStandingsIntent()
-    data class SelectHeaderCategory(val index: Int) : MLBTeamStandingsIntent()
-    data class SelectCategory(val index: Int) : MLBTeamStandingsIntent()
+sealed interface MLBTeamStandingsAction {
+    data object InitData : MLBTeamStandingsAction
+    data class SelectHeaderCategory(val index: Int) : MLBTeamStandingsAction
+    data class SelectCategory(val index: Int) : MLBTeamStandingsAction
 }
 
-@HiltViewModel
-class MLBTeamStandingsViewModel @Inject constructor(
-    private val nameProvider: TranslatedNameProvider
-) : BaseTeamStandingsViewModel<MLBTeamStandingsIntent, MLBTeamStandingsDisplayModel>(nameProvider) {
-    /* ---------------------
-       constants
-       --------------------- */
+class MLBTeamStandingsStore @AssistedInject constructor(
+    private val nameProvider: TranslatedNameProvider,
+    @Assisted val initial: MLBTeamStandingsDisplayModel
+) : BaseTeamStandingsStore<MLBTeamStandingsAction, MLBTeamStandingsDisplayModel>(initial, nameProvider) {
     val dataItemHeight = 40.dp
     val categoryItemHeight = 44.dp
     val firstCategoryItemWidth = 132.dp
@@ -35,9 +33,6 @@ class MLBTeamStandingsViewModel @Inject constructor(
     val dataFontSize = 15.sp
     val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 60.dp, 60.dp, 50.dp, 50.dp, 50.dp, 70.dp)
 
-    /* ---------------------
-       data state
-       --------------------- */
     private var _westStandings = MutableStateFlow<List<MLBTeamStandingsDisplay>>(emptyList())
     val westStandings: StateFlow<List<MLBTeamStandingsDisplay>> = _westStandings
 
@@ -47,18 +42,17 @@ class MLBTeamStandingsViewModel @Inject constructor(
     private var _centralStandings = MutableStateFlow<List<MLBTeamStandingsDisplay>>(emptyList())
     val centralStandings: StateFlow<List<MLBTeamStandingsDisplay>> = _centralStandings
 
-    /* ---------------------
-       ui state
-       --------------------- */
-    private var _headerCategorySelectedIndex = MutableStateFlow(0)
-    val headerCategorySelectedIndex: StateFlow<Int> = _headerCategorySelectedIndex
+    @AssistedFactory
+    interface Factory {
+        fun create(displayModel: MLBTeamStandingsDisplayModel) : MLBTeamStandingsStore
+    }
 
-    override fun send(intent: MLBTeamStandingsIntent) {
-        viewModelScope.launch {
-            when (intent) {
-                is MLBTeamStandingsIntent.InitData -> initData(intent.displayModel)
-                is MLBTeamStandingsIntent.SelectHeaderCategory -> selectHeaderCategory(intent.index)
-                is MLBTeamStandingsIntent.SelectCategory -> selectCategory(intent.index)
+    override fun send(action: MLBTeamStandingsAction) {
+        scope.launch {
+            when (action) {
+                is MLBTeamStandingsAction.InitData -> initData()
+                is MLBTeamStandingsAction.SelectHeaderCategory -> selectHeaderCategory(index = action.index)
+                is MLBTeamStandingsAction.SelectCategory -> selectCategory(action.index)
             }
         }
     }
@@ -66,11 +60,11 @@ class MLBTeamStandingsViewModel @Inject constructor(
     /* ---------------------
        init
        --------------------- */
-    override fun initData(displayModel: MLBTeamStandingsDisplayModel) {
-        super.initData(displayModel)
+    override fun initData() {
+        super.initData()
 
         // init with default value
-        _selectedCategoryIndex.value = 1 // defalue category is "승률"
+        _categorySelectedIndex.value = 1 // defalue category is "승률"
         _westStandings.value = emptyList()
         _eastStandings.value = emptyList()
         _centralStandings.value = emptyList()
@@ -81,11 +75,13 @@ class MLBTeamStandingsViewModel @Inject constructor(
     /* ---------------------
        implements
        --------------------- */
-    private fun selectHeaderCategory(index: Int = 0, isInit: Boolean = false) {
+    override fun selectHeaderCategory(index: Int, isInit: Boolean) {
+        super.selectHeaderCategory(index, isInit)
+
         if (isInit) {
-            val entityTeam = displayModel.value?.standings?.firstOrNull { team ->
+            val entityTeam = displayModel.value.standings.firstOrNull { team ->
                 // Any first team that matches with any team in entityInfo
-                displayModel.value?.entityInfo?.firstOrNull { it.teamId == team.team.id } != null
+                displayModel.value.entityInfo.firstOrNull { it.teamId == team.team.id } != null
             }
             val teamLeagueId = entityTeam?.team?.league?.id
 
@@ -95,55 +91,55 @@ class MLBTeamStandingsViewModel @Inject constructor(
                 _headerCategorySelectedIndex.value = 1
             }
 
-            val standings = displayModel.value?.standings
+            val standings = displayModel.value.standings
 
-            _westStandings.value = standings?.filter {
+            _westStandings.value = standings.filter {
                 if (teamLeagueId == Constants.Ids.AMERICAN_LEAGUE) {
                     it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_WEST
                 } else {
                     it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_WEST
                 }
-            } ?: emptyList()
-            _eastStandings.value = standings?.filter {
+            }
+            _eastStandings.value = standings.filter {
                 if (teamLeagueId == Constants.Ids.AMERICAN_LEAGUE) {
                     it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_EAST
                 } else {
                     it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_EAST
                 }
-            } ?: emptyList()
-            _centralStandings.value = standings?.filter {
+            }
+            _centralStandings.value = standings.filter {
                 if (teamLeagueId == Constants.Ids.AMERICAN_LEAGUE) {
                     it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_CENTRAL
                 } else {
                     it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_CENTRAL
                 }
-            } ?: emptyList()
+            }
         } else {
             _headerCategorySelectedIndex.value = index
 
-            val standings = displayModel.value?.standings
+            val standings = displayModel.value.standings
 
-            _westStandings.value = standings?.filter {
+            _westStandings.value = standings.filter {
                 if (index == 0) {
                     it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_WEST
                 } else {
                     it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_WEST
                 }
-            } ?: emptyList()
-            _eastStandings.value = standings?.filter {
+            }
+            _eastStandings.value = standings.filter {
                 if (index == 0) {
                     it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_EAST
                 } else {
                     it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_EAST
                 }
-            } ?: emptyList()
-            _centralStandings.value = standings?.filter {
+            }
+            _centralStandings.value = standings.filter {
                 if (index == 0) {
                     it.team.division.id == Constants.Ids.NATIONAL_LEAGUE_CENTRAL
                 } else {
                     it.team.division.id == Constants.Ids.AMERICAN_LEAGUE_CENTRAL
                 }
-            } ?: emptyList()
+            }
         }
 
         sortStandings()
@@ -160,7 +156,7 @@ class MLBTeamStandingsViewModel @Inject constructor(
         val eastStandings = eastStandings.value.toMutableList()
         val centralStandings = centralStandings.value.toMutableList()
 
-        when (selectedCategoryIndex.value) {
+        when (categorySelectedIndex.value) {
             0 -> {
                 westStandings.sortBy { it.stats.recordData?.gamesBack?.toFloatOrNull() }
                 eastStandings.sortBy { it.stats.recordData?.gamesBack?.toFloatOrNull() }

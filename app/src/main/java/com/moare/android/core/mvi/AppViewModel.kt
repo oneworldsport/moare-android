@@ -3,10 +3,14 @@ package com.moare.android.core.mvi
 import androidx.lifecycle.ViewModel
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoStore
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsAction
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsStore
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsAction
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsStore
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoStore
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsStore
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoAction
@@ -15,6 +19,8 @@ import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerStatsAct
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerStatsStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoStore
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsAction
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerInfoAction
@@ -23,14 +29,20 @@ import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerStatsAct
 import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerStatsStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamInfoAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamInfoStore
+import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsAction
+import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsStore
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoAction
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoStore
+import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsAction
+import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsStore
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsAction
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsStore
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoAction
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoStore
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsAction
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsStore
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsAction
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchDelegate
@@ -52,23 +64,29 @@ sealed interface StackItem {
 
     data class FBPlayerInfo(override val id: ViewId, val store: FBPlayerInfoStore) : StackItem
     data class FBPlayerStats(override val id: ViewId, val store: FBPlayerStatsStore) : StackItem
+    data class FBPlayerStandings(override val id: ViewId, val store: FBPlayerStandingsStore) : StackItem
     data class FBTeamInfo(override val id: ViewId, val store: FBTeamInfoStore) : StackItem
     data class FBTeamStats(override val id: ViewId, val store: FBTeamStatsStore) : StackItem
+    data class FBTeamStandings(override val id: ViewId, val store: FBTeamStandingsStore) : StackItem
 
     data class NBAPlayerInfo(override val id: ViewId, val store: NBAPlayerInfoStore) : StackItem
     data class NBAPlayerStats(override val id: ViewId, val store: NBAPlayerStatsStore) : StackItem
+    data class NBAPlayerStandings(override val id: ViewId, val store: NBAPlayerStandingsStore) : StackItem
     data class NBATeamInfo(override val id: ViewId, val store: NBATeamInfoStore) : StackItem
     data class NBATeamStats(override val id: ViewId, val store: NBATeamStatsStore) : StackItem
+    data class NBATeamStandings(override val id: ViewId, val store: NBATeamStandingsStore) : StackItem
 
     data class MLBPlayerInfo(override val id: ViewId, val store: MLBPlayerInfoStore) : StackItem
     data class MLBPlayerStats(override val id: ViewId, val store: MLBPlayerStatsStore) : StackItem
     data class MLBTeamInfo(override val id: ViewId, val store: MLBTeamInfoStore) : StackItem
     data class MLBTeamStats(override val id: ViewId, val store: MLBTeamStatsStore) : StackItem
+    data class MLBTeamStandings(override val id: ViewId, val store: MLBTeamStandingsStore) : StackItem
 
     data class KBOPlayerInfo(override val id: ViewId, val store: KBOPlayerInfoStore) : StackItem
     data class KBOPlayerStats(override val id: ViewId, val store: KBOPlayerStatsStore) : StackItem
     data class KBOTeamInfo(override val id: ViewId, val store: KBOTeamInfoStore) : StackItem
     data class KBOTeamStats(override val id: ViewId, val store: KBOTeamStatsStore) : StackItem
+    data class KBOTeamStandings(override val id: ViewId, val store: KBOTeamStandingsStore) : StackItem
 }
 
 @HiltViewModel
@@ -76,23 +94,29 @@ class AppViewModel @Inject constructor(
     val searchFactory: SearchViewModel.Factory,
     private val fbPlayerInfoFactory: FBPlayerInfoStore.Factory,
     private val fbPlayerStatsFactory: FBPlayerStatsStore.Factory,
+    private val fbPlayerStandingsFactory: FBPlayerStandingsStore.Factory,
     private val fbTeamInfoFactory: FBTeamInfoStore.Factory,
     private val fbTeamStatsFactory: FBTeamStatsStore.Factory,
+    private val fbTeamStandingsFactory: FBTeamStandingsStore.Factory,
 
     private val nbaPlayerInfoFactory: NBAPlayerInfoStore.Factory,
     private val nbaPlayerStatsFactory: NBAPlayerStatsStore.Factory,
+    private val nbaPlayerStandingsFactory: NBAPlayerStandingsStore.Factory,
     private val nbaTeamInfoFactory: NBATeamInfoStore.Factory,
     private val nbaTeamStatsFactory: NBATeamStatsStore.Factory,
+    private val nbaTeamStandingsFactory: NBATeamStandingsStore.Factory,
 
     private val mlbPlayerInfoFactory: MLBPlayerInfoStore.Factory,
     private val mlbPlayerStatsFactory: MLBPlayerStatsStore.Factory,
     private val mlbTeamInfoFactory: MLBTeamInfoStore.Factory,
     private val mlbTeamStatsFactory: MLBTeamStatsStore.Factory,
+    private val mlbTeamStandingsFactory: MLBTeamStandingsStore.Factory,
 
     private val kboPlayerInfoFactory: KBOPlayerInfoStore.Factory,
     private val kboPlayerStatsFactory: KBOPlayerStatsStore.Factory,
     private val kboTeamInfoFactory: KBOTeamInfoStore.Factory,
     private val kboTeamStatsFactory: KBOTeamStatsStore.Factory,
+    private val kboTeamStandingsFactory: KBOTeamStandingsStore.Factory,
 ) : ViewModel() {
     private val _stack = MutableStateFlow<List<StackItem>>(emptyList())
     val stack: StateFlow<List<StackItem>> = _stack
@@ -136,6 +160,11 @@ class AppViewModel @Inject constructor(
                         store.send(FBPlayerStatsAction.InitData)
                         _stack.update { it + StackItem.FBPlayerStats(id, store) }
                     }
+                    is SportDecodableModel.FBPlayerStandings -> {
+                        val store = fbPlayerStandingsFactory.create(model.displayModel)
+                        store.send(FBPlayerStandingsAction.InitData)
+                        _stack.update { it + StackItem.FBPlayerStandings(id, store) }
+                    }
                     is SportDecodableModel.FBTeamInfo -> {
                         val store = fbTeamInfoFactory.create(model.displayModel)
                         store.send(FBTeamInfoAction.InitData)
@@ -145,6 +174,11 @@ class AppViewModel @Inject constructor(
                         val store = fbTeamStatsFactory.create(model.displayModel)
                         store.send(FBTeamStatsAction.InitData)
                         _stack.update { it + StackItem.FBTeamStats(id, store) }
+                    }
+                    is SportDecodableModel.FBTeamStandings -> {
+                        val store = fbTeamStandingsFactory.create(model.displayModel)
+                        store.send(FBTeamStandingsAction.InitData)
+                        _stack.update { it + StackItem.FBTeamStandings(id, store) }
                     }
 
                     is SportDecodableModel.NBAPlayerInfo -> {
@@ -157,6 +191,11 @@ class AppViewModel @Inject constructor(
                         store.send(NBAPlayerStatsAction.InitData)
                         _stack.update { it + StackItem.NBAPlayerStats(id, store) }
                     }
+                    is SportDecodableModel.NBAPlayerStandings -> {
+                        val store = nbaPlayerStandingsFactory.create(model.displayModel)
+                        store.send(NBAPlayerStandingsAction.InitData)
+                        _stack.update { it + StackItem.NBAPlayerStandings(id, store) }
+                    }
                     is SportDecodableModel.NBATeamInfo -> {
                         val store = nbaTeamInfoFactory.create(model.displayModel)
                         store.send(NBATeamInfoAction.InitData)
@@ -166,6 +205,11 @@ class AppViewModel @Inject constructor(
                         val store = nbaTeamStatsFactory.create(model.displayModel)
                         store.send(NBATeamStatsAction.InitData)
                         _stack.update { it + StackItem.NBATeamStats(id, store) }
+                    }
+                    is SportDecodableModel.NBATeamStandings -> {
+                        val store = nbaTeamStandingsFactory.create(model.displayModel)
+                        store.send(NBATeamStandingsAction.InitData)
+                        _stack.update { it + StackItem.NBATeamStandings(id, store) }
                     }
 
                     is SportDecodableModel.MLBPlayerInfo -> {
@@ -188,6 +232,11 @@ class AppViewModel @Inject constructor(
                         store.send(MLBTeamStatsAction.InitData)
                         _stack.update { it + StackItem.MLBTeamStats(id, store) }
                     }
+                    is SportDecodableModel.MLBTeamStandings -> {
+                        val store = mlbTeamStandingsFactory.create(model.displayModel)
+                        store.send(MLBTeamStandingsAction.InitData)
+                        _stack.update { it + StackItem.MLBTeamStandings(id, store) }
+                    }
 
                     is SportDecodableModel.KBOPlayerInfo -> {
                         val store = kboPlayerInfoFactory.create(model.displayModel)
@@ -209,6 +258,11 @@ class AppViewModel @Inject constructor(
                         store.send(KBOTeamStatsAction.InitData)
                         _stack.update { it + StackItem.KBOTeamStats(id, store) }
                     }
+                    is SportDecodableModel.KBOTeamStandings -> {
+                        val store = kboTeamStandingsFactory.create(model.displayModel)
+                        store.send(KBOTeamStandingsAction.InitData)
+                        _stack.update { it + StackItem.KBOTeamStandings(id, store) }
+                    }
                     else -> null
                 }
             }
@@ -219,23 +273,29 @@ class AppViewModel @Inject constructor(
         when (item) {
             is StackItem.FBPlayerInfo -> item.store.dispose()
             is StackItem.FBPlayerStats -> item.store.dispose()
+            is StackItem.FBPlayerStandings -> item.store.dispose()
             is StackItem.FBTeamInfo -> item.store.dispose()
             is StackItem.FBTeamStats -> item.store.dispose()
+            is StackItem.FBTeamStandings -> item.store.dispose()
 
             is StackItem.NBAPlayerInfo -> item.store.dispose()
             is StackItem.NBAPlayerStats -> item.store.dispose()
+            is StackItem.NBAPlayerStandings -> item.store.dispose()
             is StackItem.NBATeamInfo -> item.store.dispose()
             is StackItem.NBATeamStats -> item.store.dispose()
+            is StackItem.NBATeamStandings -> item.store.dispose()
 
             is StackItem.MLBPlayerInfo -> item.store.dispose()
             is StackItem.MLBPlayerStats -> item.store.dispose()
             is StackItem.MLBTeamInfo -> item.store.dispose()
             is StackItem.MLBTeamStats -> item.store.dispose()
+            is StackItem.MLBTeamStandings -> item.store.dispose()
 
             is StackItem.KBOPlayerInfo -> item.store.dispose()
             is StackItem.KBOPlayerStats -> item.store.dispose()
             is StackItem.KBOTeamInfo -> item.store.dispose()
             is StackItem.KBOTeamStats -> item.store.dispose()
+            is StackItem.KBOTeamStandings -> item.store.dispose()
         }
     }
 }

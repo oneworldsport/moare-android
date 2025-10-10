@@ -3,31 +3,26 @@ package com.moare.android.features.search.display.kbo.viewmodel
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
-import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsViewModel
+import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsStore
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-sealed class KBOTeamStandingsIntent {
-    data class InitData(val displayModel: KBOTeamStandingsDisplayModel) : KBOTeamStandingsIntent()
-    data class SelectCategory(val index: Int) : KBOTeamStandingsIntent()
+sealed interface KBOTeamStandingsAction {
+    data object InitData : KBOTeamStandingsAction
+    data class SelectCategory(val index: Int) : KBOTeamStandingsAction
 }
 
-@HiltViewModel
-class KBOTeamStandingsViewModel @Inject constructor(
-    private val nameProvider: TranslatedNameProvider
-) : BaseTeamStandingsViewModel<KBOTeamStandingsIntent, KBOTeamStandingsDisplayModel>(nameProvider) {
-    /* ---------------------
-       constants
-       --------------------- */
+class KBOTeamStandingsStore @AssistedInject constructor(
+    private val nameProvider: TranslatedNameProvider,
+    @Assisted val initial: KBOTeamStandingsDisplayModel
+) : BaseTeamStandingsStore<KBOTeamStandingsAction, KBOTeamStandingsDisplayModel>(initial, nameProvider) {
     val dataItemHeight = 40.dp
     val categoryItemHeight = 44.dp
     val firstCategoryItemWidth = 132.dp
@@ -35,17 +30,19 @@ class KBOTeamStandingsViewModel @Inject constructor(
     val categoryFontSize = 15.sp
     val dataFontSize = 15.sp
 
-    /* ---------------------
-       data state
-       --------------------- */
     private var _standings = MutableStateFlow<List<KBOTeamStandingsDisplay>>(emptyList())
     val standings: StateFlow<List<KBOTeamStandingsDisplay>> = _standings
 
-    override fun send(intent: KBOTeamStandingsIntent) {
-        viewModelScope.launch {
-            when (intent) {
-                is KBOTeamStandingsIntent.InitData -> initData(intent.displayModel)
-                is KBOTeamStandingsIntent.SelectCategory -> selectCategory(intent.index)
+    @AssistedFactory
+    interface Factory {
+        fun create(displayModel: KBOTeamStandingsDisplayModel) : KBOTeamStandingsStore
+    }
+
+    override fun send(action: KBOTeamStandingsAction) {
+        scope.launch {
+            when (action) {
+                is KBOTeamStandingsAction.InitData -> initData()
+                is KBOTeamStandingsAction.SelectCategory -> selectCategory(action.index)
             }
         }
     }
@@ -53,12 +50,12 @@ class KBOTeamStandingsViewModel @Inject constructor(
     /* ---------------------
        init
        --------------------- */
-    override fun initData(displayModel: KBOTeamStandingsDisplayModel) {
-        super.initData(displayModel)
+    override fun initData() {
+        super.initData()
 
         // init with default value
-        _selectedCategoryIndex.value = 1 // defalue category is "승률"
-        _standings.value = displayModel.standings
+        _categorySelectedIndex.value = 1 // defalue category is "승률"
+        _standings.value = displayModel.value.standings
 
         sortStandings()
     }
@@ -73,9 +70,9 @@ class KBOTeamStandingsViewModel @Inject constructor(
     }
 
     private fun sortStandings() {
-        var standings = standings.value.toMutableList()
+        val standings = standings.value.toMutableList()
 
-        when (selectedCategoryIndex.value) {
+        when (categorySelectedIndex.value) {
             0 -> standings.sortBy { it.stats.rankData.gb.toFloatOrNull() }
             1 -> standings.sortByDescending { it.stats.rankData.winpct.toFloatOrNull() }
             2 -> standings.sortByDescending { it.stats.rankData.wins.toIntOrNull() }

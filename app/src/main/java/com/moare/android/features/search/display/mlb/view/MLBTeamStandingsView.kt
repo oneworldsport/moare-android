@@ -1,7 +1,5 @@
 package com.moare.android.features.search.display.mlb.view
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
@@ -18,7 +16,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -30,8 +27,8 @@ import com.moare.android.features.search.display.common.container.component.Stan
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsIntent
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsViewModel
+import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsAction
+import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
@@ -43,9 +40,8 @@ import com.moare.android.ui.util.CenterColumn
 
 @Composable
 fun MLBTeamStandingsView(
-    searchViewModel: SearchViewModel,
-    mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel(),
-    data: MLBTeamStandingsDisplayModel
+    searchStore: SearchViewModel,
+    store: MLBTeamStandingsStore
 ) {
     /* ---------------------
        ui state
@@ -55,25 +51,14 @@ fun MLBTeamStandingsView(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by mlbTeamStandingsViewModel.displayModel.collectAsState()
-    val selectedCategoryIndex by mlbTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
-    val headerCategorySelectedIndex by mlbTeamStandingsViewModel.headerCategorySelectedIndex.collectAsState()
-    val westStandings by mlbTeamStandingsViewModel.westStandings.collectAsState()
-    val eastStandings by mlbTeamStandingsViewModel.eastStandings.collectAsState()
-    val centralStandings by mlbTeamStandingsViewModel.centralStandings.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val selectedCategoryIndex by store.categorySelectedIndex.collectAsState()
+    val headerCategorySelectedIndex by store.headerCategorySelectedIndex.collectAsState()
+    val westStandings by store.westStandings.collectAsState()
+    val eastStandings by store.eastStandings.collectAsState()
+    val centralStandings by store.centralStandings.collectAsState()
 
-    val season = displayModel?.standings?.firstOrNull()?.team?.season
-
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.MLBTeamStandings) {
-            mlbTeamStandingsViewModel.send(MLBTeamStandingsIntent.InitData(data))
-        }
-    }
+    val season = displayModel.standings.firstOrNull()?.team?.season
 
     StandingsViewContainer(
         state = NewStandingsContainerState(
@@ -82,14 +67,14 @@ fun MLBTeamStandingsView(
             standings = emptyList(),
             headerCategorySelectedIndex = headerCategorySelectedIndex,
             secondCategorySelectedIndex = selectedCategoryIndex,
-            columnWidthList = mlbTeamStandingsViewModel.columnWidthList,
+            columnWidthList = store.columnWidthList,
         ),
         actions = StandingsContainerActions(
             headerCategoryButtonAction = { index ->
-                mlbTeamStandingsViewModel.send(MLBTeamStandingsIntent.SelectHeaderCategory(index))
+                store.send(MLBTeamStandingsAction.SelectHeaderCategory(index))
             },
             secondCategoryButtonAction = { index, _ ->
-                mlbTeamStandingsViewModel.send(MLBTeamStandingsIntent.SelectCategory(index))
+                store.send(MLBTeamStandingsAction.SelectCategory(index))
             },
             itemButtonAction = {}
         ),
@@ -105,7 +90,8 @@ fun MLBTeamStandingsView(
             CenterColumn {
                 // west
                 MLBTeamStandingsDataList(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
+                    store = store,
                     divisionTitle = "서부",
                     standings = westStandings,
                     hScrollState = hScrollState
@@ -113,7 +99,8 @@ fun MLBTeamStandingsView(
 
                 // east
                 MLBTeamStandingsDataList(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
+                    store = store,
                     divisionTitle = "동부",
                     standings = eastStandings,
                     hScrollState = hScrollState
@@ -121,7 +108,8 @@ fun MLBTeamStandingsView(
 
                 // central
                 MLBTeamStandingsDataList(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
+                    store = store,
                     divisionTitle = "중부",
                     standings = centralStandings,
                     hScrollState = hScrollState
@@ -133,13 +121,13 @@ fun MLBTeamStandingsView(
 
 @Composable
 fun MLBTeamStandingsDataList(
-    searchViewModel: SearchViewModel,
-    mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel(),
+    searchStore: SearchViewModel,
+    store: MLBTeamStandingsStore,
     divisionTitle: String,
     standings: List<MLBTeamStandingsDisplay>,
     hScrollState: ScrollState
 ) {
-    val teamNameDic = mlbTeamStandingsViewModel.teamNameDictionary
+    val teamNameDic by store.teamNameDic.collectAsState()
 
     Row {
         CenterColumn(
@@ -171,7 +159,7 @@ fun MLBTeamStandingsDataList(
                         name = teamNameDic["short_${teamId}"] ?: data.team.shortName,
                         isLastItem = index == standings.size,
                         action = {
-                            searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = teamId))
+                            searchStore.send(SearchViewModel.Intent.ShowTeamStats(teamId = teamId))
                         }
                     )
                 }
@@ -197,6 +185,7 @@ fun MLBTeamStandingsDataList(
 
                             for (index in 0 until StringConstants.MLB.TEAM_STANDINGS_CATEGORIES.size) {
                                 MLBTeamStandingsDataListItem(
+                                    store = store,
                                     data = data,
                                     index = index
                                 )
@@ -211,7 +200,7 @@ fun MLBTeamStandingsDataList(
 
 @Composable
 fun MLBTeamStandingsDataListItem(
-    mlbTeamStandingsViewModel: MLBTeamStandingsViewModel = hiltViewModel(),
+    store: MLBTeamStandingsStore,
     data: MLBTeamStandingsDisplay,
     index: Int
 ) {
@@ -249,6 +238,6 @@ fun MLBTeamStandingsDataListItem(
         textAlign = TextAlign.Center,
         fontSize = 15.sp,
         modifier = Modifier
-            .width(mlbTeamStandingsViewModel.columnWidthList.getOrNull(index) ?: 100.dp)
+            .width(store.columnWidthList.getOrNull(index) ?: 100.dp)
     )
 }

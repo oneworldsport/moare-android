@@ -1,7 +1,5 @@
 package com.moare.android.features.search.display.nba.view
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
@@ -12,9 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.dropFirstWord
@@ -23,20 +19,17 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.state.StandingsHighlightItemState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsIntent
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsViewModel
+import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsAction
+import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.util.convertDpToPx
 import kotlinx.coroutines.delay
 
 @Composable
 fun NBAPlayerStandingsView(
-    searchViewModel: SearchViewModel,
-    nbaPlayerStandingsViewModel: NBAPlayerStandingsViewModel = hiltViewModel(),
-    data: NBAPlayerStandingsDisplayModel
+    searchStore: SearchViewModel,
+    store: NBAPlayerStandingsStore
 ) {
     /* ---------------------
        ui state
@@ -48,19 +41,16 @@ fun NBAPlayerStandingsView(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by nbaPlayerStandingsViewModel.displayModel.collectAsState()
-    val displayDataState by nbaPlayerStandingsViewModel.displayDataState.collectAsState()
-    val firstSelectedIndex by nbaPlayerStandingsViewModel.firstSelectedIndex.collectAsState()
-    val secondCategorySelectedIndex by nbaPlayerStandingsViewModel.secondCategorySelectedIndex.collectAsState()
-    val filteredStandings by nbaPlayerStandingsViewModel.filteredStandings.collectAsState()
-    val entityIndex by nbaPlayerStandingsViewModel.entityIndex.collectAsState()
-    val filteredStandingsStartIndex by nbaPlayerStandingsViewModel.filteredStandingsStartIndex.collectAsState()
-    val playerNameDic = nbaPlayerStandingsViewModel.playerNameDictionary
-    val teamNameDic = nbaPlayerStandingsViewModel.teamNameDictionary
+    val displayModel by store.displayModel.collectAsState()
+    val displayDataState by store.displayDataState.collectAsState()
+    val categorySelectedIndex by store.categorySelectedIndex.collectAsState()
+    val filteredStandings by store.filteredStandings.collectAsState()
+    val entityIndex by store.entityIndex.collectAsState()
+    val filteredStandingsStartIndex by store.filteredStandingsStartIndex.collectAsState()
+    val playerNameDic by store.playerNameDic.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    val season = displayModel?.standings?.firstOrNull()?.stats?.groupValue
-
-    val poppedView by searchViewModel.poppedView.collectAsState()
+    val season = displayModel.standings.firstOrNull()?.stats?.groupValue
 
     val playerStandings: List<StandingsItemState> = filteredStandings.map {
         val stats = it.stats
@@ -106,17 +96,8 @@ fun NBAPlayerStandingsView(
         80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 50.dp,
         80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp)
 
-    val previousScrollPosition = convertDpToPx(nbaPlayerStandingsViewModel.dataItemHeight * 10).toInt()
-    val firstScrollPosition = convertDpToPx(nbaPlayerStandingsViewModel.dataItemHeight).toInt()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.NBAPlayerStandings) {
-            nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.InitData(data))
-        }
-    }
+    val previousScrollPosition = convertDpToPx(store.dataItemHeight * 10).toInt()
+    val firstScrollPosition = convertDpToPx(store.dataItemHeight).toInt()
 
     LaunchedEffect(verticalScrollState.value) {
         // prevent executing at first open
@@ -127,10 +108,10 @@ fun NBAPlayerStandingsView(
 
         when (verticalScrollState.value) {
             0 -> {
-                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.ShowMoreStandings(true))
+                store.send(NBAPlayerStandingsAction.ShowMoreStandings(true))
             }
             verticalScrollState.maxValue -> {
-                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.ShowMoreStandings(false))
+                store.send(NBAPlayerStandingsAction.ShowMoreStandings(false))
             }
         }
     }
@@ -148,7 +129,7 @@ fun NBAPlayerStandingsView(
         state = NewStandingsContainerState(
             secondCategories = StringConstants.NBA.PLAYER_STANDINGS_SECOND_CATEGORIES,
             standings = playerStandings,
-            secondCategorySelectedIndex = secondCategorySelectedIndex,
+            secondCategorySelectedIndex = categorySelectedIndex,
             highlightState = StandingsHighlightItemState(
                 itemIndex = entityIndex,
                 standingsStartIndex = filteredStandingsStartIndex
@@ -158,10 +139,10 @@ fun NBAPlayerStandingsView(
         ),
         actions = StandingsContainerActions(
             secondCategoryButtonAction = { index, category ->
-                nbaPlayerStandingsViewModel.send(NBAPlayerStandingsIntent.SelectSecondCategory(index, category))
+                store.send(NBAPlayerStandingsAction.SelectCategory(index, category))
             },
             itemButtonAction = { id ->
-                searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(season = displayModel?.season, category = "basketball", playerId = id))
+                searchStore.send(SearchViewModel.Intent.ShowPlayerStats(season = displayModel.season, category = "basketball", playerId = id))
             }
         ),
         verticalScrollState = verticalScrollState,
