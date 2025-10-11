@@ -2,12 +2,15 @@ package com.moare.android.features.search.display.mlb.viewmodel
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsStore
+import com.moare.android.features.search.models.ModelConverter
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamStandingsResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -19,12 +22,20 @@ sealed interface MLBTeamStandingsAction {
     data object InitData : MLBTeamStandingsAction
     data class SelectHeaderCategory(val index: Int) : MLBTeamStandingsAction
     data class SelectCategory(val index: Int) : MLBTeamStandingsAction
+    data class ShowTeamStats(val id: Int) : MLBTeamStandingsAction
+}
+
+sealed interface MLBTeamStandingsDelegate {
+    data class ShowTeamStats(val model: SportDecodableModel) : MLBTeamStandingsDelegate
 }
 
 class MLBTeamStandingsStore @AssistedInject constructor(
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: MLBTeamStandingsDisplayModel
-) : BaseTeamStandingsStore<MLBTeamStandingsAction, MLBTeamStandingsDisplayModel>(initial, nameProvider) {
+    @Assisted val model: SportDecodableModel.MLBTeamStandings,
+    @Assisted val emitToParent: (MLBTeamStandingsDelegate) -> Unit
+) : BaseTeamStandingsStore<MLBTeamStandingsAction, MLBTeamStandingsResponseModel, MLBTeamStandingsDisplayModel>(
+    model.responseModel, model.displayModel, nameProvider
+) {
     val dataItemHeight = 40.dp
     val categoryItemHeight = 44.dp
     val firstCategoryItemWidth = 132.dp
@@ -44,7 +55,10 @@ class MLBTeamStandingsStore @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: MLBTeamStandingsDisplayModel) : MLBTeamStandingsStore
+        fun create(
+            model: SportDecodableModel.MLBTeamStandings,
+            emitToParent: (MLBTeamStandingsDelegate) -> Unit
+        ) : MLBTeamStandingsStore
     }
 
     override fun send(action: MLBTeamStandingsAction) {
@@ -53,6 +67,7 @@ class MLBTeamStandingsStore @AssistedInject constructor(
                 is MLBTeamStandingsAction.InitData -> initData()
                 is MLBTeamStandingsAction.SelectHeaderCategory -> selectHeaderCategory(index = action.index)
                 is MLBTeamStandingsAction.SelectCategory -> selectCategory(action.index)
+                is MLBTeamStandingsAction.ShowTeamStats -> showTeamStats(action.id)
             }
         }
     }
@@ -262,5 +277,19 @@ class MLBTeamStandingsStore @AssistedInject constructor(
         _westStandings.value = westStandings
         _eastStandings.value = eastStandings
         _centralStandings.value = centralStandings
+    }
+
+    private fun showTeamStats(id: Int) {
+        val team = responseModel.standings.find { team ->
+            team.team.id == id
+        }
+        val responseModel = MLBTeamInfoResponseModel(info = team)
+
+        val dataModel = SportDecodableModel.MLBTeamStats(
+            responseModel = responseModel,
+            displayModel = ModelConverter.mlbTeamStatsConverter(responseModel)
+        )
+
+        emitToParent(MLBTeamStandingsDelegate.ShowTeamStats(dataModel))
     }
 }

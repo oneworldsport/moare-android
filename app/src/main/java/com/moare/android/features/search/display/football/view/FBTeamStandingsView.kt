@@ -80,7 +80,7 @@ fun FBTeamStandingsView(
                 store.send(FBTeamStandingsAction.SelectCategory(index))
             },
             itemButtonAction = { id ->
-                searchStore.send(SearchAction.ShowTeamStats(teamId = id))
+                store.send(FBTeamStandingsAction.ShowTeamStats(id))
             }
         ),
         titleContent = {

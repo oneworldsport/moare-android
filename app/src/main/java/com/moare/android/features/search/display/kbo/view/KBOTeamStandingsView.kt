@@ -11,6 +11,7 @@ import com.moare.android.features.search.display.common.container.state.NewStand
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
@@ -81,7 +82,7 @@ fun KBOTeamStandingsView(
                 store.send(KBOTeamStandingsAction.SelectCategory(index))
             },
             itemButtonAction = { id ->
-                searchStore.send(SearchAction.ShowTeamStats(teamId = id))
+                store.send(KBOTeamStandingsAction.ShowTeamStats(id))
             }
         ),
         titleContent = {

@@ -11,14 +11,15 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-abstract class BaseTeamStandingsStore<A, T: SportDisplayModel>(
-    private val initial: T,
+abstract class BaseTeamStandingsStore<A, R, D: SportDisplayModel>(
+    val responseModel: R,
+    private val initial: D,
     private val nameProvider: TranslatedNameProvider
 ) {
     protected val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     protected val _displayModel = MutableStateFlow(initial)
-    val displayModel: StateFlow<T> = _displayModel
+    val displayModel: StateFlow<D> = _displayModel
 
     protected val _teamNameDic = MutableStateFlow<Map<String, String>>(emptyMap())
     val teamNameDic: StateFlow<Map<String, String>> = _teamNameDic

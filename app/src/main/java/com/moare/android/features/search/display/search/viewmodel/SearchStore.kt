@@ -77,7 +77,6 @@ sealed interface SearchAction {
     data class SelectKBOGame(val game: KBOGameForSchedule, val season: Int) : SearchAction
     data class SelectMLBGame(val game: MLBGameForSchedule, val season: Int) : SearchAction
 
-    data class ShowTeamStats(val teamId: Int) : SearchAction
     data class ShowGameStats(val gameType: String) : SearchAction
     data class RefreshGame(val season: Int, val category: String) : SearchAction
     data class SelectNBATournamentRound(val gameList: List<NBAGame>) : SearchAction
@@ -207,7 +206,6 @@ class SearchStore @AssistedInject constructor(
                 is SearchAction.SelectNBAGame -> selectNBAGame(action.game, action.season)
                 is SearchAction.SelectKBOGame -> selectKBOGame(action.game, action.season)
                 is SearchAction.SelectMLBGame -> selectMLBGame(action.game, action.season)
-                is SearchAction.ShowTeamStats -> showTeamStats(action.teamId)
                 is SearchAction.ShowGameStats -> showGameStats(action.gameType)
                 is SearchAction.RefreshGame -> refreshGame(action.season, action.category)
                 is SearchAction.SelectNBATournamentRound -> selectNBATournamentRound(action.gameList)
@@ -424,93 +422,6 @@ class SearchStore @AssistedInject constructor(
 //
 //            dataModel = result.data
 //        }
-    }
-
-    private suspend fun showTeamStats(teamId: Int) {
-//        val modelConverter = ModelConverter()
-//
-//        val dataModel: SportDecodableModel
-//
-//        when (val lastView = viewStack.value.lastOrNull()) {
-//            is SportDecodableModel.FBTeamStandings -> {
-//                val team = lastView.responseModel.standings.find { team ->
-//                    team.team.id == teamId
-//                }
-//
-//                val responseModel = FBTeamInfoResponseModel(info = team)
-//                dataModel = SportDecodableModel.FBTeamStats(
-//                    responseModel = responseModel,
-//                    displayModel = modelConverter.fbTeamStatsConverter(responseModel)
-//                )
-//            }
-//            is SportDecodableModel.FBTeamInfo -> {
-//                dataModel = SportDecodableModel.FBTeamStats(
-//                    responseModel = lastView.responseModel,
-//                    displayModel = modelConverter.fbTeamStatsConverter(lastView.responseModel)
-//                )
-//            }
-//
-//            is SportDecodableModel.NBATeamStandings -> {
-//                val team = lastView.responseModel.standings.find { team ->
-//                    team.team.id == teamId
-//                }
-//
-//                val responseModel = NBATeamInfoResponseModel(info = team)
-//                dataModel = SportDecodableModel.NBATeamStats(
-//                    responseModel = responseModel,
-//                    displayModel = modelConverter.nbaTeamStatsConverter(responseModel)
-//                )
-//            }
-//            is SportDecodableModel.NBATeamInfo -> {
-//                dataModel = SportDecodableModel.NBATeamStats(
-//                    responseModel = lastView.responseModel,
-//                    displayModel = modelConverter.nbaTeamStatsConverter(lastView.responseModel)
-//                )
-//            }
-//
-//            is SportDecodableModel.KBOTeamStandings -> {
-//                val team = lastView.responseModel.standings.find { team ->
-//                    team.team.id == teamId
-//                }
-//
-//                val responseModel = KBOTeamInfoResponseModel(info = team)
-//                dataModel = SportDecodableModel.KBOTeamStats(
-//                    responseModel = responseModel,
-//                    displayModel = modelConverter.kboTeamStatsConverter(responseModel)
-//                )
-//            }
-//            is SportDecodableModel.KBOTeamInfo -> {
-//                dataModel = SportDecodableModel.KBOTeamStats(
-//                    responseModel = lastView.responseModel,
-//                    displayModel = modelConverter.kboTeamStatsConverter(lastView.responseModel)
-//                )
-//            }
-//
-//            is SportDecodableModel.MLBTeamStandings -> {
-//                val team = lastView.responseModel.standings.find { team ->
-//                    team.team.id == teamId
-//                }
-//
-//                val responseModel = MLBTeamInfoResponseModel(info = team)
-//                dataModel = SportDecodableModel.MLBTeamStats(
-//                    responseModel = responseModel,
-//                    displayModel = modelConverter.mlbTeamStatsConverter(responseModel)
-//                )
-//            }
-//            is SportDecodableModel.MLBTeamInfo -> {
-//                dataModel = SportDecodableModel.MLBTeamStats(
-//                    responseModel = lastView.responseModel,
-//                    displayModel = modelConverter.mlbTeamStatsConverter(lastView.responseModel)
-//                )
-//            }
-//
-//            else -> return // Make it do nothing
-//        }
-//
-//        _resultVisibleState.emit(false)
-//        delay(1000)
-//
-//        _resultVisibleState.emit(true)
     }
 
     private suspend fun showGameStats(gameType: String) {

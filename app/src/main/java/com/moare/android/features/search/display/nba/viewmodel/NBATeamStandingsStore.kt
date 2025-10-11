@@ -4,9 +4,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsStore
+import com.moare.android.features.search.models.ModelConverter
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
 import com.moare.android.features.search.models.models.nba.NBATeamStats
+import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBATeamStandingsResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -18,12 +22,20 @@ sealed interface NBATeamStandingsAction {
     data object InitData : NBATeamStandingsAction
     data class SelectHeaderCategory(val index: Int) : NBATeamStandingsAction
     data class SelectCategory(val index: Int) : NBATeamStandingsAction
+    data class ShowTeamStats(val id: Int) : NBATeamStandingsAction
+}
+
+sealed interface NBATeamStandingsDelegate {
+    data class ShowTeamStats(val model: SportDecodableModel) : NBATeamStandingsDelegate
 }
 
 class NBATeamStandingsStore @AssistedInject constructor(
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: NBATeamStandingsDisplayModel
-) : BaseTeamStandingsStore<NBATeamStandingsAction, NBATeamStandingsDisplayModel>(initial, nameProvider) {
+    @Assisted val model: SportDecodableModel.NBATeamStandings,
+    @Assisted val emitToParent: (NBATeamStandingsDelegate) -> Unit
+) : BaseTeamStandingsStore<NBATeamStandingsAction, NBATeamStandingsResponseModel, NBATeamStandingsDisplayModel>(
+    model.responseModel, model.displayModel, nameProvider
+) {
     val dataItemHeight = 40.dp
     val categoryItemHeight = 44.dp
     val firstCategoryItemWidth = 132.dp
@@ -36,7 +48,10 @@ class NBATeamStandingsStore @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: NBATeamStandingsDisplayModel) : NBATeamStandingsStore
+        fun create(
+            model: SportDecodableModel.NBATeamStandings,
+            emitToParent: (NBATeamStandingsDelegate) -> Unit
+        ) : NBATeamStandingsStore
     }
 
     override fun send(action: NBATeamStandingsAction) {
@@ -45,6 +60,7 @@ class NBATeamStandingsStore @AssistedInject constructor(
                 is NBATeamStandingsAction.InitData -> initData()
                 is NBATeamStandingsAction.SelectHeaderCategory -> selectHeaderCategory(index = action.index)
                 is NBATeamStandingsAction.SelectCategory -> selectCategory(action.index)
+                is NBATeamStandingsAction.ShowTeamStats -> showTeamStats(action.id)
             }
         }
     }
@@ -135,6 +151,20 @@ class NBATeamStandingsStore @AssistedInject constructor(
         }
 
         _standings.value = standings
+    }
+
+    private fun showTeamStats(id: Int) {
+        val team = responseModel.standings.find { team ->
+            team.team.id == id
+        }
+        val responseModel = NBATeamInfoResponseModel(info = team)
+
+        val dataModel = SportDecodableModel.NBATeamStats(
+            responseModel = responseModel,
+            displayModel = ModelConverter.nbaTeamStatsConverter(responseModel)
+        )
+
+        emitToParent(NBATeamStandingsDelegate.ShowTeamStats(dataModel))
     }
 
     // TODO: Should move to util

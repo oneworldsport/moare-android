@@ -25,6 +25,7 @@ import com.moare.android.features.search.display.common.container.component.Stan
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
@@ -155,8 +156,8 @@ fun MLBTeamStandingsDataList(
                         isSvgLogo = true,
                         name = teamNameDic["short_${teamId}"] ?: data.team.shortName,
                         isLastItem = index == standings.size,
-                        action = {
-                            searchStore.send(SearchAction.ShowTeamStats(teamId = teamId))
+                        action = { id ->
+                            store.send(MLBTeamStandingsAction.ShowTeamStats(id))
                         }
                     )
                 }

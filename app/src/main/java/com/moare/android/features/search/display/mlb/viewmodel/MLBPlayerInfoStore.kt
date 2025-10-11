@@ -46,7 +46,7 @@ class MLBPlayerInfoStore @AssistedInject constructor(
     }
 
     private fun showPlayerStats() {
-        val dataModel: SportDecodableModel = SportDecodableModel.MLBPlayerStats(
+        val dataModel = SportDecodableModel.MLBPlayerStats(
             responseModel = responseModel,
             displayModel = ModelConverter.mlbPlayerStatsConverter(responseModel)
         )

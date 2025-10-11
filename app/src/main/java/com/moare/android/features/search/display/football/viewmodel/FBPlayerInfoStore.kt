@@ -46,7 +46,7 @@ class FBPlayerInfoStore @AssistedInject constructor(
     }
 
     private fun showPlayerStats() {
-        val dataModel: SportDecodableModel = SportDecodableModel.FBPlayerStats(
+        val dataModel = SportDecodableModel.FBPlayerStats(
             responseModel = responseModel,
             displayModel = ModelConverter.fbPlayerStatsConverter(responseModel)
         )

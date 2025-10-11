@@ -6,10 +6,13 @@ import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsStore
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
+import com.moare.android.features.search.models.ModelConverter
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.models.football.FBTeamStatsFixtures
+import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -21,12 +24,20 @@ sealed interface FBTeamStandingsAction {
     data object InitData : FBTeamStandingsAction
     data class SelectHeaderCategory(val index: Int) : FBTeamStandingsAction
     data class SelectCategory(val index: Int) : FBTeamStandingsAction
+    data class ShowTeamStats(val id: Int) : FBTeamStandingsAction
+}
+
+sealed interface FBTeamStandingsDelegate {
+    data class ShowTeamStats(val model: SportDecodableModel) : FBTeamStandingsDelegate
 }
 
 class FBTeamStandingsStore @AssistedInject constructor(
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: FBTeamStandingsDisplayModel
-) : BaseTeamStandingsStore<FBTeamStandingsAction, FBTeamStandingsDisplayModel>(initial, nameProvider) {
+    @Assisted val model: SportDecodableModel.FBTeamStandings,
+    @Assisted val emitToParent: (FBTeamStandingsDelegate) -> Unit
+) : BaseTeamStandingsStore<FBTeamStandingsAction, FBTeamStandingsResponseModel, FBTeamStandingsDisplayModel>(
+    model.responseModel, model.displayModel, nameProvider
+) {
     val dataItemHeight = 40.dp
     val categoryItemHeight = 40.dp
     val firstCategoryItemWidth = 132.dp
@@ -44,7 +55,10 @@ class FBTeamStandingsStore @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: FBTeamStandingsDisplayModel) : FBTeamStandingsStore
+        fun create(
+            model: SportDecodableModel.FBTeamStandings,
+            emitToParent: (FBTeamStandingsDelegate) -> Unit
+        ) : FBTeamStandingsStore
     }
 
     override fun send(action: FBTeamStandingsAction) {
@@ -53,6 +67,7 @@ class FBTeamStandingsStore @AssistedInject constructor(
                 is FBTeamStandingsAction.InitData -> initData()
                 is FBTeamStandingsAction.SelectHeaderCategory -> selectHeaderCategory(index = action.index)
                 is FBTeamStandingsAction.SelectCategory -> selectCategory(action.index)
+                is FBTeamStandingsAction.ShowTeamStats -> showTeamStats(action.id)
             }
         }
     }
@@ -136,6 +151,20 @@ class FBTeamStandingsStore @AssistedInject constructor(
         }
 
         _standings.value = standings
+    }
+
+    private fun showTeamStats(id: Int) {
+        val team = responseModel.standings.find { team ->
+            team.team.id == id
+        }
+        val responseModel = FBTeamInfoResponseModel(info = team)
+
+        val dataModel = SportDecodableModel.FBTeamStats(
+            responseModel = responseModel,
+            displayModel = ModelConverter.fbTeamStatsConverter(responseModel)
+        )
+
+        emitToParent(FBTeamStandingsDelegate.ShowTeamStats(dataModel))
     }
 
     // TODO: Should move to util or make it as intent(mvi)

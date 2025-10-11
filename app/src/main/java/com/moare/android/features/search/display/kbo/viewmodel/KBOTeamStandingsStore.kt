@@ -2,11 +2,17 @@ package com.moare.android.features.search.display.kbo.viewmodel
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsStore
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsDelegate
+import com.moare.android.features.search.models.ModelConverter
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
+import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamStandingsResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -17,12 +23,20 @@ import kotlinx.coroutines.launch
 sealed interface KBOTeamStandingsAction {
     data object InitData : KBOTeamStandingsAction
     data class SelectCategory(val index: Int) : KBOTeamStandingsAction
+    data class ShowTeamStats(val id: Int) : KBOTeamStandingsAction
+}
+
+sealed interface KBOTeamStandingsDelegate {
+    data class ShowTeamStats(val model: SportDecodableModel) : KBOTeamStandingsDelegate
 }
 
 class KBOTeamStandingsStore @AssistedInject constructor(
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: KBOTeamStandingsDisplayModel
-) : BaseTeamStandingsStore<KBOTeamStandingsAction, KBOTeamStandingsDisplayModel>(initial, nameProvider) {
+    @Assisted val model: SportDecodableModel.KBOTeamStandings,
+    @Assisted val emitToParent: (KBOTeamStandingsDelegate) -> Unit
+) : BaseTeamStandingsStore<KBOTeamStandingsAction, KBOTeamStandingsResponseModel, KBOTeamStandingsDisplayModel>(
+    model.responseModel, model.displayModel, nameProvider
+) {
     val dataItemHeight = 40.dp
     val categoryItemHeight = 44.dp
     val firstCategoryItemWidth = 132.dp
@@ -35,7 +49,10 @@ class KBOTeamStandingsStore @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: KBOTeamStandingsDisplayModel) : KBOTeamStandingsStore
+        fun create(
+            model: SportDecodableModel.KBOTeamStandings,
+            emitToParent: (KBOTeamStandingsDelegate) -> Unit
+        ) : KBOTeamStandingsStore
     }
 
     override fun send(action: KBOTeamStandingsAction) {
@@ -43,6 +60,7 @@ class KBOTeamStandingsStore @AssistedInject constructor(
             when (action) {
                 is KBOTeamStandingsAction.InitData -> initData()
                 is KBOTeamStandingsAction.SelectCategory -> selectCategory(action.index)
+                is KBOTeamStandingsAction.ShowTeamStats -> showTeamStats(action.id)
             }
         }
     }
@@ -99,5 +117,19 @@ class KBOTeamStandingsStore @AssistedInject constructor(
         }
 
         _standings.value = standings
+    }
+
+    private fun showTeamStats(id: Int) {
+        val team = responseModel.standings.find { team ->
+            team.team.id == id
+        }
+        val responseModel = KBOTeamInfoResponseModel(info = team)
+
+        val dataModel = SportDecodableModel.KBOTeamStats(
+            responseModel = responseModel,
+            displayModel = ModelConverter.kboTeamStatsConverter(responseModel)
+        )
+
+        emitToParent(KBOTeamStandingsDelegate.ShowTeamStats(dataModel))
     }
 }

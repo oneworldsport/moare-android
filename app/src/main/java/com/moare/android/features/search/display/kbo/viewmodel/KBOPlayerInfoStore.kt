@@ -46,7 +46,7 @@ class KBOPlayerInfoStore @AssistedInject constructor(
     }
 
     private fun showPlayerStats() {
-        val dataModel: SportDecodableModel = SportDecodableModel.KBOPlayerStats(
+        val dataModel = SportDecodableModel.KBOPlayerStats(
             responseModel = responseModel,
             displayModel = ModelConverter.kboPlayerStatsConverter(responseModel)
         )
