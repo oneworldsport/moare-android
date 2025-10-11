@@ -35,6 +35,7 @@ import com.moare.android.features.search.display.common.container.view.InfoViewC
 import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoStore
+import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamInfoAction
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.BaseballLeagueTitle
@@ -651,7 +652,7 @@ fun KBOPlayerInfoSeventhItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchStore.send(SearchAction.ShowGameStats(gameType = "previous"))
+            store.send(KBOPlayerInfoAction.ShowGameStats())
         }
     ) {
         Text(
@@ -844,7 +845,7 @@ fun KBOPlayerInfoEighthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchStore.send(SearchAction.ShowGameStats(gameType = "next"))
+            store.send(KBOPlayerInfoAction.ShowGameStats(false))
         }
     ) {
         Text(

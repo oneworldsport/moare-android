@@ -470,7 +470,7 @@ fun FBPlayerInfoFifthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchStore.send(SearchAction.ShowGameStats(gameType = "previous"))
+            store.send(FBPlayerInfoAction.ShowGameStats())
         }
     ) {
         Text(
@@ -595,7 +595,7 @@ fun FBPlayerInfoSixthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchStore.send(SearchAction.ShowGameStats(gameType = "next"))
+            store.send(FBPlayerInfoAction.ShowGameStats(false))
         }
     ) {
         Text(

@@ -7,6 +7,8 @@ import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfo
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
+import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.mlb.MLBPlayerInfoResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -16,10 +18,12 @@ import dagger.assisted.AssistedInject
 sealed interface MLBPlayerInfoAction {
     data object InitData : MLBPlayerInfoAction
     data object ShowPlayerStats : MLBPlayerInfoAction
+    data class ShowGameStats(val isPrevious: Boolean = true) : MLBPlayerInfoAction
 }
 
 sealed interface MLBPlayerInfoDelegate {
-    data class ShowPlayerStats(val model: SportDecodableModel) : MLBPlayerInfoDelegate
+    data class ShowPlayerStats(val model: SportDecodableModel.MLBPlayerStats) : MLBPlayerInfoDelegate
+    data class ShowGameStats(val model: SportDecodableModel.MLBGameStats) : MLBPlayerInfoDelegate
 }
 
 class MLBPlayerInfoStore @AssistedInject constructor(
@@ -42,6 +46,7 @@ class MLBPlayerInfoStore @AssistedInject constructor(
         when (action) {
             is MLBPlayerInfoAction.InitData -> initData()
             is MLBPlayerInfoAction.ShowPlayerStats -> showPlayerStats()
+            is MLBPlayerInfoAction.ShowGameStats -> showGameStats(action.isPrevious)
         }
     }
 
@@ -52,5 +57,16 @@ class MLBPlayerInfoStore @AssistedInject constructor(
         )
 
         emitToParent(MLBPlayerInfoDelegate.ShowPlayerStats(dataModel))
+    }
+
+    private fun showGameStats(isPrevious: Boolean) {
+        val responseModel = if (isPrevious) MLBGameStatsResponseModel(responseModel.lastGame) else MLBGameStatsResponseModel(responseModel.nextGame)
+
+        val dataModel = SportDecodableModel.MLBGameStats(
+            responseModel = responseModel,
+            displayModel = ModelConverter.mlbGameStatsConverter(responseModel)
+        )
+
+        emitToParent(MLBPlayerInfoDelegate.ShowGameStats(dataModel))
     }
 }

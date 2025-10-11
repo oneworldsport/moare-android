@@ -2,11 +2,16 @@ package com.moare.android.features.search.display.nba.viewmodel
 
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseInfoStore
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoDelegate
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoDelegate
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoDelegate
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDisplayModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -15,10 +20,12 @@ import dagger.assisted.AssistedInject
 sealed interface NBATeamInfoAction {
     data object InitData : NBATeamInfoAction
     data object ShowTeamStats : NBATeamInfoAction
+    data class ShowGameStats(val isPrevious: Boolean = true) : NBATeamInfoAction
 }
 
 sealed interface NBATeamInfoDelegate {
-    data class ShowTeamStats(val model: SportDecodableModel) : NBATeamInfoDelegate
+    data class ShowTeamStats(val model: SportDecodableModel.NBATeamStats) : NBATeamInfoDelegate
+    data class ShowGameStats(val model: SportDecodableModel.NBAGameStats) : NBATeamInfoDelegate
 }
 
 class NBATeamInfoStore @AssistedInject constructor(
@@ -41,6 +48,7 @@ class NBATeamInfoStore @AssistedInject constructor(
         when (action) {
             is NBATeamInfoAction.InitData -> initData()
             is NBATeamInfoAction.ShowTeamStats -> showTeamStats()
+            is NBATeamInfoAction.ShowGameStats -> showGameStats(action.isPrevious)
         }
     }
 
@@ -51,5 +59,16 @@ class NBATeamInfoStore @AssistedInject constructor(
         )
 
         emitToParent(NBATeamInfoDelegate.ShowTeamStats(dataModel))
+    }
+
+    private fun showGameStats(isPrevious: Boolean) {
+        val responseModel = if (isPrevious) NBAGameStatsResponseModel(responseModel.lastGame) else NBAGameStatsResponseModel(responseModel.nextGame)
+
+        val dataModel = SportDecodableModel.NBAGameStats(
+            responseModel = responseModel,
+            displayModel = ModelConverter.nbaGameStatsConverter(responseModel)
+        )
+
+        emitToParent(NBATeamInfoDelegate.ShowGameStats(dataModel))
     }
 }

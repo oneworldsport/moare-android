@@ -7,6 +7,8 @@ import com.moare.android.features.search.display.search.viewmodel.SearchDelegate
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
+import com.moare.android.features.search.models.models.football.FBGame
+import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -15,10 +17,12 @@ import dagger.assisted.AssistedInject
 sealed interface FBPlayerInfoAction {
     data object InitData : FBPlayerInfoAction
     data object ShowPlayerStats : FBPlayerInfoAction
+    data class ShowGameStats(val isPrevious: Boolean = true) : FBPlayerInfoAction
 }
 
 sealed interface FBPlayerInfoDelegate {
-    data class ShowPlayerStats(val model: SportDecodableModel) : FBPlayerInfoDelegate
+    data class ShowPlayerStats(val model: SportDecodableModel.FBPlayerStats) : FBPlayerInfoDelegate
+    data class ShowGameStats(val model: SportDecodableModel.FBGameStats) : FBPlayerInfoDelegate
 }
 
 class FBPlayerInfoStore @AssistedInject constructor(
@@ -42,6 +46,7 @@ class FBPlayerInfoStore @AssistedInject constructor(
         when (action) {
             is FBPlayerInfoAction.InitData -> initData()
             is FBPlayerInfoAction.ShowPlayerStats -> showPlayerStats()
+            is FBPlayerInfoAction.ShowGameStats -> showGameStats(action.isPrevious)
         }
     }
 
@@ -53,4 +58,26 @@ class FBPlayerInfoStore @AssistedInject constructor(
 
         emitToParent(FBPlayerInfoDelegate.ShowPlayerStats(dataModel))
     }
+
+    private fun showGameStats(isPrevious: Boolean) {
+        val responseModel = if (isPrevious) FBGameStatsResponseModel(responseModel.lastGame) else FBGameStatsResponseModel(responseModel.nextGame)
+
+        val dataModel = SportDecodableModel.FBGameStats(
+            responseModel = responseModel,
+            displayModel = ModelConverter.fbGameStatsConverter(responseModel)
+        )
+
+        emitToParent(FBPlayerInfoDelegate.ShowGameStats(dataModel))
+    }
 }
+
+
+
+
+
+
+
+
+
+
+

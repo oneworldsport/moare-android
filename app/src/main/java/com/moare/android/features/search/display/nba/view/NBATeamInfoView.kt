@@ -32,6 +32,7 @@ import com.moare.android.features.search.display.common.container.component.Movi
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
+import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoAction
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoAction
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoStore
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
@@ -467,7 +468,7 @@ fun NBATeamInfoFifthItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier,
         onClick = {
-            searchStore.send(SearchAction.ShowGameStats(gameType = "previous"))
+            store.send(NBATeamInfoAction.ShowGameStats())
         }
     ) {
         Text(
@@ -573,7 +574,7 @@ fun NBATeamInfoSixthItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier,
         onClick = {
-            searchStore.send(SearchAction.ShowGameStats(gameType = "next"))
+            store.send(NBATeamInfoAction.ShowGameStats(false))
         }
     ) {
         Text(

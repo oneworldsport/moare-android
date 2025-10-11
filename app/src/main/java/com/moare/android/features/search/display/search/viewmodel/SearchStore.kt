@@ -77,7 +77,6 @@ sealed interface SearchAction {
     data class SelectKBOGame(val game: KBOGameForSchedule, val season: Int) : SearchAction
     data class SelectMLBGame(val game: MLBGameForSchedule, val season: Int) : SearchAction
 
-    data class ShowGameStats(val gameType: String) : SearchAction
     data class RefreshGame(val season: Int, val category: String) : SearchAction
     data class SelectNBATournamentRound(val gameList: List<NBAGame>) : SearchAction
     data class SearchById(val id: String, val season: Int, val category: String, val dataType: String, val leagueId: Int) : SearchAction
@@ -206,7 +205,6 @@ class SearchStore @AssistedInject constructor(
                 is SearchAction.SelectNBAGame -> selectNBAGame(action.game, action.season)
                 is SearchAction.SelectKBOGame -> selectKBOGame(action.game, action.season)
                 is SearchAction.SelectMLBGame -> selectMLBGame(action.game, action.season)
-                is SearchAction.ShowGameStats -> showGameStats(action.gameType)
                 is SearchAction.RefreshGame -> refreshGame(action.season, action.category)
                 is SearchAction.SelectNBATournamentRound -> selectNBATournamentRound(action.gameList)
                 is SearchAction.SearchById -> searchById(action.id, action.season, action.category, action.dataType, action.leagueId)
@@ -422,97 +420,6 @@ class SearchStore @AssistedInject constructor(
 //
 //            dataModel = result.data
 //        }
-    }
-
-    private suspend fun showGameStats(gameType: String) {
-//        val modelConverter = ModelConverter()
-//
-//        val dataModel: SportDecodableModel
-//
-//        when (val lastView = viewStack.value.lastOrNull()) {
-//            is SportDecodableModel.FBPlayerInfo,
-//            is SportDecodableModel.FBTeamInfo-> {
-//                val lastGame: FBGame?
-//                val nextGame: FBGame?
-//                if (lastView is SportDecodableModel.FBPlayerInfo) {
-//                    lastGame = lastView.responseModel.lastGame
-//                    nextGame = lastView.responseModel.nextGame
-//                } else {
-//                    lastGame = (lastView as SportDecodableModel.FBTeamInfo).responseModel.lastGame
-//                    nextGame = lastView.responseModel.nextGame
-//                }
-//
-//                val responseModel = if (gameType == "previous") FBGameStatsResponseModel(lastGame) else FBGameStatsResponseModel(nextGame)
-//                dataModel = SportDecodableModel.FBGameStats(
-//                    responseModel = responseModel,
-//                    displayModel = modelConverter.fbGameStatsConverter(responseModel)
-//                )
-//            }
-//
-//            is SportDecodableModel.NBAPlayerInfo,
-//            is SportDecodableModel.NBATeamInfo-> {
-//                val lastGame: NBAGame?
-//                val nextGame: NBAGame?
-//                if (lastView is SportDecodableModel.NBAPlayerInfo) {
-//                    lastGame = lastView.responseModel.lastGame
-//                    nextGame = lastView.responseModel.nextGame
-//                } else {
-//                    lastGame = (lastView as SportDecodableModel.NBATeamInfo).responseModel.lastGame
-//                    nextGame = lastView.responseModel.nextGame
-//                }
-//
-//                val responseModel = if (gameType == "previous") NBAGameStatsResponseModel(lastGame) else NBAGameStatsResponseModel(nextGame)
-//                dataModel = SportDecodableModel.NBAGameStats(
-//                    responseModel = responseModel,
-//                    displayModel = modelConverter.nbaGameStatsConverter(responseModel)
-//                )
-//            }
-//
-//            is SportDecodableModel.KBOPlayerInfo,
-//            is SportDecodableModel.KBOTeamInfo-> {
-//                val lastGame: KBOGame?
-//                val nextGame: KBOGame?
-//                if (lastView is SportDecodableModel.KBOPlayerInfo) {
-//                    lastGame = lastView.responseModel.lastGame
-//                    nextGame = lastView.responseModel.nextGame
-//                } else {
-//                    lastGame = (lastView as SportDecodableModel.KBOTeamInfo).responseModel.lastGame
-//                    nextGame = lastView.responseModel.nextGame
-//                }
-//
-//                val responseModel = if (gameType == "previous") KBOGameStatsResponseModel(lastGame) else KBOGameStatsResponseModel(nextGame)
-//                dataModel = SportDecodableModel.KBOGameStats(
-//                    responseModel = responseModel,
-//                    displayModel = modelConverter.kboGameStatsConverter(responseModel)
-//                )
-//            }
-//
-//            is SportDecodableModel.MLBPlayerInfo,
-//            is SportDecodableModel.MLBTeamInfo-> {
-//                val lastGame: MLBGame?
-//                val nextGame: MLBGame?
-//                if (lastView is SportDecodableModel.MLBPlayerInfo) {
-//                    lastGame = lastView.responseModel.lastGame
-//                    nextGame = lastView.responseModel.nextGame
-//                } else {
-//                    lastGame = (lastView as SportDecodableModel.MLBTeamInfo).responseModel.lastGame
-//                    nextGame = lastView.responseModel.nextGame
-//                }
-//
-//                val responseModel = if (gameType == "previous") MLBGameStatsResponseModel(lastGame) else MLBGameStatsResponseModel(nextGame)
-//                dataModel = SportDecodableModel.MLBGameStats(
-//                    responseModel = responseModel,
-//                    displayModel = modelConverter.mlbGameStatsConverter(responseModel)
-//                )
-//            }
-//
-//             else -> return // Make it do nothing
-//        }
-//
-//        _resultVisibleState.emit(false)
-//        delay(1000)
-//
-//        _resultVisibleState.emit(true)
     }
 
     private suspend fun refreshGame(season: Int, category: String) {

@@ -35,6 +35,7 @@ import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoStore
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
@@ -459,7 +460,7 @@ fun FBTeamInfoFifthItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier,
         onClick = {
-            searchStore.send(SearchAction.ShowGameStats(gameType = "previous"))
+            store.send(FBTeamInfoAction.ShowGameStats())
         }
     ) {
         Text(
@@ -560,7 +561,7 @@ fun FBTeamInfoSixthItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier,
         onClick = {
-            searchStore.send(SearchAction.ShowGameStats(gameType = "next"))
+            store.send(FBTeamInfoAction.ShowGameStats(false))
         }
     ) {
         Text(

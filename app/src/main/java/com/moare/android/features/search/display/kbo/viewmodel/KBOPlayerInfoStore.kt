@@ -2,11 +2,12 @@ package com.moare.android.features.search.display.kbo.viewmodel
 
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseInfoStore
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoDelegate
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
+import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerInfoResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -16,10 +17,12 @@ import dagger.assisted.AssistedInject
 sealed interface KBOPlayerInfoAction {
     data object InitData : KBOPlayerInfoAction
     data object ShowPlayerStats : KBOPlayerInfoAction
+    data class ShowGameStats(val isPrevious: Boolean = true) : KBOPlayerInfoAction
 }
 
 sealed interface KBOPlayerInfoDelegate {
-    data class ShowPlayerStats(val model: SportDecodableModel) : KBOPlayerInfoDelegate
+    data class ShowPlayerStats(val model: SportDecodableModel.KBOPlayerStats) : KBOPlayerInfoDelegate
+    data class ShowGameStats(val model: SportDecodableModel.KBOGameStats) : KBOPlayerInfoDelegate
 }
 
 class KBOPlayerInfoStore @AssistedInject constructor(
@@ -38,10 +41,11 @@ class KBOPlayerInfoStore @AssistedInject constructor(
         ) : KBOPlayerInfoStore
     }
 
-    override fun send(aciton: KBOPlayerInfoAction) {
-        when (aciton) {
+    override fun send(action: KBOPlayerInfoAction) {
+        when (action) {
             is KBOPlayerInfoAction.InitData -> initData()
             is KBOPlayerInfoAction.ShowPlayerStats -> showPlayerStats()
+            is KBOPlayerInfoAction.ShowGameStats -> showGameStats(action.isPrevious)
         }
     }
 
@@ -52,5 +56,16 @@ class KBOPlayerInfoStore @AssistedInject constructor(
         )
 
         emitToParent(KBOPlayerInfoDelegate.ShowPlayerStats(dataModel))
+    }
+
+    private fun showGameStats(isPrevious: Boolean) {
+        val responseModel = if (isPrevious) KBOGameStatsResponseModel(responseModel.lastGame) else KBOGameStatsResponseModel(responseModel.nextGame)
+
+        val dataModel = SportDecodableModel.KBOGameStats(
+            responseModel = responseModel,
+            displayModel = ModelConverter.kboGameStatsConverter(responseModel)
+        )
+
+        emitToParent(KBOPlayerInfoDelegate.ShowGameStats(dataModel))
     }
 }

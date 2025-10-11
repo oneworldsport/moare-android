@@ -35,6 +35,7 @@ import com.moare.android.core.util.toKg
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
+import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoAction
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoStore
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
@@ -693,7 +694,7 @@ fun NBAPlayerInfoEighthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchStore.send(SearchAction.ShowGameStats(gameType = "previous"))
+            store.send(NBAPlayerInfoAction.ShowGameStats())
         }
     ) {
         Text(
@@ -857,7 +858,7 @@ fun NBAPlayerInfoNinthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchStore.send(SearchAction.ShowGameStats(gameType = "next"))
+            store.send(NBAPlayerInfoAction.ShowGameStats(false))
         }
     ) {
         Text(
