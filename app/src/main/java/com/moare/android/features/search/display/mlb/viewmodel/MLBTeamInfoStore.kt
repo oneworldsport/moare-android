@@ -2,7 +2,9 @@ package com.moare.android.features.search.display.mlb.viewmodel
 
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseInfoStore
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -14,12 +16,14 @@ sealed interface MLBTeamInfoAction {
 
 class MLBTeamInfoStore @AssistedInject constructor(
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: MLBTeamInfoDisplayModel
-) : BaseInfoStore<MLBTeamInfoAction, MLBTeamInfoDisplayModel>(initial, nameProvider) {
+    @Assisted val model: SportDecodableModel.MLBTeamInfo
+) : BaseInfoStore<MLBTeamInfoAction, MLBTeamInfoResponseModel, MLBTeamInfoDisplayModel>(
+    model.responseModel, model.displayModel, nameProvider
+) {
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: MLBTeamInfoDisplayModel) : MLBTeamInfoStore
+        fun create(model: SportDecodableModel.MLBTeamInfo) : MLBTeamInfoStore
     }
 
     override fun send(action: MLBTeamInfoAction) {

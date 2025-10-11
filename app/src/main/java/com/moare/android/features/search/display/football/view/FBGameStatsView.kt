@@ -236,7 +236,7 @@ fun FBGameStatsView(
             FBLeagueScheduleListItem(
                 searchStore = searchStore,
                 store = null,
-                data = ModelConverter().fbGameToGameScheduleConverter(game),
+                data = ModelConverter.fbGameToGameScheduleConverter(game),
                 teamNameDic = teamNameDic
             )
         }

@@ -143,7 +143,7 @@ fun NBAPlayerStandingsView(
                 store.send(NBAPlayerStandingsAction.SelectCategory(index, category))
             },
             itemButtonAction = { id ->
-                searchStore.send(SearchAction.ShowPlayerStats(season = displayModel.season, category = "basketball", playerId = id))
+                store.send(NBAPlayerStandingsAction.ShowPlayerStats(id))
             }
         ),
         verticalScrollState = verticalScrollState,

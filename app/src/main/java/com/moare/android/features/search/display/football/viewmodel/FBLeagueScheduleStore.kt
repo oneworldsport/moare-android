@@ -233,7 +233,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
         val game = fbGameStatsData.displayModel.game
         val newGames = fbLeagueScheduleData.displayModel.games.map {
             if (it.gameId == fbGameStatsData.displayModel.game.fixture.id.toString()) {
-                ModelConverter().fbGameToGameScheduleConverter(game)
+                ModelConverter.fbGameToGameScheduleConverter(game)
             } else it
         }
 

@@ -77,7 +77,6 @@ sealed interface SearchAction {
     data class SelectKBOGame(val game: KBOGameForSchedule, val season: Int) : SearchAction
     data class SelectMLBGame(val game: MLBGameForSchedule, val season: Int) : SearchAction
 
-    data class ShowPlayerStats(val season: Int? = null, val category: String? = null, val playerId: Int) : SearchAction
     data class ShowTeamStats(val teamId: Int) : SearchAction
     data class ShowGameStats(val gameType: String) : SearchAction
     data class RefreshGame(val season: Int, val category: String) : SearchAction
@@ -88,7 +87,6 @@ sealed interface SearchAction {
 }
 
 sealed interface SearchDelegate {
-//    data class PerformSearch(val searchType: SearchReducer.SearchType = SearchReducer.SearchType.QUERY, val aniDuration: Long = 0) : SearchAction
     data class Push(val model: SportDecodableModel) : SearchDelegate
 }
 
@@ -209,7 +207,6 @@ class SearchStore @AssistedInject constructor(
                 is SearchAction.SelectNBAGame -> selectNBAGame(action.game, action.season)
                 is SearchAction.SelectKBOGame -> selectKBOGame(action.game, action.season)
                 is SearchAction.SelectMLBGame -> selectMLBGame(action.game, action.season)
-                is SearchAction.ShowPlayerStats -> showPlayerStats(action.season, action.category, action.playerId)
                 is SearchAction.ShowTeamStats -> showTeamStats(action.teamId)
                 is SearchAction.ShowGameStats -> showGameStats(action.gameType)
                 is SearchAction.RefreshGame -> refreshGame(action.season, action.category)
@@ -380,137 +377,53 @@ class SearchStore @AssistedInject constructor(
     }
 
     private suspend fun selectKBOGame(game: KBOGameForSchedule, season: Int) {
-        val modelConverter = ModelConverter()
-
-        val dataModel: SportDecodableModel
-
-        // 취소된 경기는 DB에 데이터 없어서 KBOGameForSchedule을 사용해 KBOGameStatsView를 보여준다.
-        if (game.gameStatus.toIntOrNull() == StringConstants.KBO.GAME_CANCELED) {
-            val game = modelConverter.kboGameScheduleToGameConverter(game = game)
-
-            val responseModel = KBOGameStatsResponseModel(game = game)
-            dataModel = SportDecodableModel.KBOGameStats(responseModel, modelConverter.kboGameStatsConverter(responseModel))
-        } else {
-            val result = searchClient.fetchById(
-                season = season,
-                category = "baseball",
-                date = game.date,
-                dataType = "baseball_game_stats",
-                leagueId = Constants.Ids.KBO,
-                id = game.gameId
-            )
-
-            dataModel = result.data
-        }
-    }
-
-    private suspend fun selectMLBGame(game: MLBGameForSchedule, season: Int) {
-        val modelConverter = ModelConverter()
-
-        val dataModel: SportDecodableModel
-
-        // Postponed된 경기는 DB에 데이터 없어서 MLBGameForSchedule을 사용해 MLBGameStatsView를 보여준다.
-        if (game.gameStatus == StringConstants.MLB.GAME_POSTPONED) {
-            val game = modelConverter.mlbGameScheduleToGameConverter(game = game)
-
-            val responseModel = MLBGameStatsResponseModel(game = game)
-            dataModel = SportDecodableModel.MLBGameStats(responseModel, modelConverter.mlbGameStatsConverter(responseModel))
-        } else {
-            val result = searchClient.fetchById(
-                season = season,
-                category = "baseball",
-                date = game.date,
-                dataType = "baseball_game_stats",
-                leagueId = Constants.Ids.MLB,
-                id = game.gameId
-            )
-
-            dataModel = result.data
-        }
-    }
-
-    private suspend fun showPlayerStats(season: Int?, category: String?, playerId: Int) {
 //        val modelConverter = ModelConverter()
 //
 //        val dataModel: SportDecodableModel
 //
-//        when (val lastView = viewStack.value.lastOrNull()) {
-//            is SportDecodableModel.FBPlayerStandings -> {
-//                if (category == null) {
-//                    val player = lastView.responseModel.standings.find { player ->
-//                        player.player.id == playerId
-//                    }
+//        // 취소된 경기는 DB에 데이터 없어서 KBOGameForSchedule을 사용해 KBOGameStatsView를 보여준다.
+//        if (game.gameStatus.toIntOrNull() == StringConstants.KBO.GAME_CANCELED) {
+//            val game = modelConverter.kboGameScheduleToGameConverter(game = game)
 //
-//                    val responseModel = FBPlayerInfoResponseModel(info = player)
-//                    dataModel = SportDecodableModel.FBPlayerStats(
-//                        responseModel = responseModel,
-//                        displayModel = modelConverter.fbPlayerStatsConverter(responseModel)
-//                    )
-//                } else {
-//                    val leagueId = lastView.responseModel.standings.firstOrNull()?.statistics?.firstOrNull()?.league?.id ?: 39
+//            val responseModel = KBOGameStatsResponseModel(game = game)
+//            dataModel = SportDecodableModel.KBOGameStats(responseModel, modelConverter.kboGameStatsConverter(responseModel))
+//        } else {
+//            val result = searchClient.fetchById(
+//                season = season,
+//                category = "baseball",
+//                date = game.date,
+//                dataType = "baseball_game_stats",
+//                leagueId = Constants.Ids.KBO,
+//                id = game.gameId
+//            )
 //
-//                    // TODO: Has to add loading
-//                    val result = searchClient.fetchById(
-//                        season = season,
-//                        category = category,
-//                        dataType = "${category}_player_stats",
-//                        leagueId = leagueId,
-//                        id = playerId.toString()
-//                    )
-//
-//                    if (result.data is SportDecodableModel.FBPlayerStats) {
-//                        dataModel = result.data
-//                    } else {
-//                        return
-//                    }
-//                }
-//            }
-//            is SportDecodableModel.FBPlayerInfo -> {
-//                dataModel = SportDecodableModel.FBPlayerStats(
-//                    responseModel = lastView.responseModel,
-//                    displayModel = modelConverter.fbPlayerStatsConverter(lastView.responseModel)
-//                )
-//            }
-//
-//            is SportDecodableModel.NBAPlayerStandings -> {
-//                // NOTE: nba player stats data in standings has all the stats for now, so doesn't has to fetchById like football above.
-//                val player = lastView.responseModel.standings.find { player ->
-//                    player.player.personId == playerId
-//                }
-//
-//                val responseModel = NBAPlayerInfoResponseModel(info = player)
-//                dataModel = SportDecodableModel.NBAPlayerStats(
-//                    responseModel = responseModel,
-//                    displayModel = modelConverter.nbaPlayerStatsConverter(responseModel)
-//                )
-//            }
-//            is SportDecodableModel.NBAPlayerInfo -> {
-//                dataModel = SportDecodableModel.NBAPlayerStats(
-//                    responseModel = lastView.responseModel,
-//                    displayModel = modelConverter.nbaPlayerStatsConverter(lastView.responseModel)
-//                )
-//            }
-//
-//            is SportDecodableModel.KBOPlayerInfo -> {
-//                dataModel = SportDecodableModel.KBOPlayerStats(
-//                    responseModel = lastView.responseModel,
-//                    displayModel = modelConverter.kboPlayerStatsConverter(lastView.responseModel)
-//                )
-//            }
-//            is SportDecodableModel.MLBPlayerInfo -> {
-//                dataModel = SportDecodableModel.MLBPlayerStats(
-//                    responseModel = lastView.responseModel,
-//                    displayModel = modelConverter.mlbPlayerStatsConverter(lastView.responseModel)
-//                )
-//            }
-//
-//             else -> return // Make it do nothing
+//            dataModel = result.data
 //        }
+    }
+
+    private suspend fun selectMLBGame(game: MLBGameForSchedule, season: Int) {
+//        val modelConverter = ModelConverter()
 //
-//        _resultVisibleState.emit(false)
-//        delay(1000)
+//        val dataModel: SportDecodableModel
 //
-//        _resultVisibleState.emit(true)
+//        // Postponed된 경기는 DB에 데이터 없어서 MLBGameForSchedule을 사용해 MLBGameStatsView를 보여준다.
+//        if (game.gameStatus == StringConstants.MLB.GAME_POSTPONED) {
+//            val game = modelConverter.mlbGameScheduleToGameConverter(game = game)
+//
+//            val responseModel = MLBGameStatsResponseModel(game = game)
+//            dataModel = SportDecodableModel.MLBGameStats(responseModel, modelConverter.mlbGameStatsConverter(responseModel))
+//        } else {
+//            val result = searchClient.fetchById(
+//                season = season,
+//                category = "baseball",
+//                date = game.date,
+//                dataType = "baseball_game_stats",
+//                leagueId = Constants.Ids.MLB,
+//                id = game.gameId
+//            )
+//
+//            dataModel = result.data
+//        }
     }
 
     private suspend fun showTeamStats(teamId: Int) {

@@ -33,6 +33,7 @@ import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
+import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoStore
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
@@ -522,7 +523,7 @@ fun KBOPlayerInfoSixthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchStore.send(SearchAction.ShowPlayerStats(playerId = displayModel.info.id))
+            store.send(KBOPlayerInfoAction.ShowPlayerStats)
         }
     ) {
         BaseballLeagueTitle(

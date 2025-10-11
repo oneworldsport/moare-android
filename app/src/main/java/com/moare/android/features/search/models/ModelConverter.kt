@@ -90,12 +90,29 @@ import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerStan
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamStandingsResponseModel
 
-class ModelConverter(
-    val keywords: List<Keyword> = emptyList(),
-    val entityInfo: List<EntityInfo> = emptyList(),
-    val season: Int = CalendarUtil.currentYear
-) {
-    val leagueId = entityInfo.firstOrNull()?.leagueId
+object ModelConverter {
+    var keywords: List<Keyword> = emptyList()
+        private set
+
+    var entityInfo: List<EntityInfo> = emptyList()
+        private set
+
+    var leagueId: Int? = null
+        private set
+
+    var season: Int = CalendarUtil.currentYear
+        private set
+
+    fun configure(
+        keywords: List<Keyword>,
+        entityInfo: List<EntityInfo>,
+        season: Int
+    ) {
+        this.keywords = keywords
+        this.entityInfo = entityInfo
+        this.leagueId = ModelConverter.entityInfo.firstOrNull()?.leagueId
+        this.season = season
+    }
 
     /* ---------------------
        football

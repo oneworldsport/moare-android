@@ -34,6 +34,7 @@ import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoStore
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
@@ -57,21 +58,21 @@ fun FBPlayerInfoView(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 FBPlayerInfoFirstItem(
-                    fbPlayerInfoStore = store,
+                    store = store,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
                 }
 
                 FBPlayerInfoSecondItem(
-                    fbPlayerInfoStore = store,
+                    store = store,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
                 }
 
                 FBPlayerInfoThirdItem(
-                    fbPlayerInfoStore = store,
+                    store = store,
                     containerModifier = Modifier.weight(1f)
                 ) { index, coordinates ->
                     updateItemPosition(index, coordinates)
@@ -92,7 +93,7 @@ fun FBPlayerInfoView(
         },
         displayContent = {
             FBPlayerInfoFirstItem(
-                fbPlayerInfoStore = store,
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
@@ -101,7 +102,7 @@ fun FBPlayerInfoView(
             )
 
             FBPlayerInfoSecondItem(
-                fbPlayerInfoStore = store,
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[1],
                 itemPosition = itemPositions[1],
@@ -110,7 +111,7 @@ fun FBPlayerInfoView(
             )
 
             FBPlayerInfoThirdItem(
-                fbPlayerInfoStore = store,
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[2],
                 itemPosition = itemPositions[2],
@@ -119,7 +120,7 @@ fun FBPlayerInfoView(
             )
 
             FBPlayerInfoFourthItem(
-                fbPlayerInfoStore = store,
+                store = store,
                 searchStore = searchStore,
                 isAniItem = true,
                 itemSize = itemSizes[3],
@@ -129,7 +130,7 @@ fun FBPlayerInfoView(
             )
 
             FBPlayerInfoFifthItem(
-                fbPlayerInfoStore = store,
+                store = store,
                 searchStore = searchStore,
                 isAniItem = true,
                 itemSize = itemSizes[4],
@@ -139,7 +140,7 @@ fun FBPlayerInfoView(
             )
 
             FBPlayerInfoSixthItem(
-                fbPlayerInfoStore = store,
+                store = store,
                 searchStore = searchStore,
                 isAniItem = true,
                 itemSize = itemSizes[5],
@@ -155,7 +156,7 @@ fun FBPlayerInfoView(
 // photo, name
 @Composable
 fun FBPlayerInfoFirstItem(
-    fbPlayerInfoStore: FBPlayerInfoStore,
+    store: FBPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -164,8 +165,8 @@ fun FBPlayerInfoFirstItem(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by fbPlayerInfoStore.displayModel.collectAsState()
-    val playerNameDic by fbPlayerInfoStore.playerNameDic.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val playerNameDic by store.playerNameDic.collectAsState()
 
     val player = displayModel.info
 
@@ -204,7 +205,7 @@ fun FBPlayerInfoFirstItem(
 // age, birth, nationality
 @Composable
 fun FBPlayerInfoSecondItem(
-    fbPlayerInfoStore: FBPlayerInfoStore,
+    store: FBPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -213,7 +214,7 @@ fun FBPlayerInfoSecondItem(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by fbPlayerInfoStore.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
 
     val player = displayModel.info
 
@@ -285,7 +286,7 @@ fun FBPlayerInfoSecondItem(
 // weight, height
 @Composable
 fun FBPlayerInfoThirdItem(
-    fbPlayerInfoStore: FBPlayerInfoStore,
+    store: FBPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -294,7 +295,7 @@ fun FBPlayerInfoThirdItem(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by fbPlayerInfoStore.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
 
     val player = displayModel.info
 
@@ -346,7 +347,7 @@ fun FBPlayerInfoThirdItem(
 @Composable
 fun FBPlayerInfoFourthItem(
     searchStore: SearchStore,
-    fbPlayerInfoStore: FBPlayerInfoStore,
+    store: FBPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -354,8 +355,8 @@ fun FBPlayerInfoFourthItem(
     contentsAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by fbPlayerInfoStore.displayModel.collectAsState()
-    val teamNameDic by fbPlayerInfoStore.playerNameDic.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.playerNameDic.collectAsState()
 
     val stats = displayModel.stats
     val team = stats?.team
@@ -373,7 +374,7 @@ fun FBPlayerInfoFourthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchStore.send(SearchAction.ShowPlayerStats(playerId = displayModel.info.id))
+            store.send(FBPlayerInfoAction.ShowPlayerStats)
         }
     ) {
         league?.let {
@@ -402,7 +403,7 @@ fun FBPlayerInfoFourthItem(
                 team?.let {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.height(fbPlayerInfoStore.itemHeight)
+                        modifier = Modifier.height(store.itemHeight)
                     ) {
                         URLImage(
                             url = team.logo,
@@ -443,7 +444,7 @@ fun FBPlayerInfoFourthItem(
 @Composable
 fun FBPlayerInfoFifthItem(
     searchStore: SearchStore,
-    fbPlayerInfoStore: FBPlayerInfoStore,
+    store: FBPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -451,8 +452,8 @@ fun FBPlayerInfoFifthItem(
     contentsAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by fbPlayerInfoStore.displayModel.collectAsState()
-    val teamNameDic by fbPlayerInfoStore.playerNameDic.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.playerNameDic.collectAsState()
 
     val lastGame = displayModel.lastGame
     val lastGamePlayerStats = displayModel.lastGamePlayerStats
@@ -569,7 +570,7 @@ fun FBPlayerInfoFifthItem(
 @Composable
 fun FBPlayerInfoSixthItem(
     searchStore: SearchStore,
-    fbPlayerInfoStore: FBPlayerInfoStore,
+    store: FBPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -577,8 +578,8 @@ fun FBPlayerInfoSixthItem(
     contentsAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by fbPlayerInfoStore.displayModel.collectAsState()
-    val teamNameDic by fbPlayerInfoStore.playerNameDic.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.playerNameDic.collectAsState()
 
     val nextGame = displayModel.nextGame
 

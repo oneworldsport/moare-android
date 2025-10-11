@@ -237,7 +237,7 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
         val game = kboGameStatsData.displayModel.game
         val itemKey = "${game.gameInfo?.date?.split("+")?.firstOrNull() ?: ""}#${game.gameInfo?.gameId ?: ""}"
         val newGames = kboLeagueScheduleData.displayModel.games.map {
-            if (it.itemKey == itemKey) ModelConverter().kboGameToGameScheduleConverter(game) else it
+            if (it.itemKey == itemKey) ModelConverter.kboGameToGameScheduleConverter(game) else it
         }
 
         var newData = kboLeagueScheduleData

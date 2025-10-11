@@ -13,14 +13,15 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-abstract class BasePlayerStandingsStore<A, T: SportDisplayModel>(
-    private val initial: T,
+abstract class BasePlayerStandingsStore<A, R, D: SportDisplayModel>(
+    val responseModel: R,
+    private val initial: D,
     private val nameProvider: TranslatedNameProvider
 ) {
     protected val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     protected val _displayModel = MutableStateFlow(initial)
-    val displayModel: StateFlow<T> = _displayModel
+    val displayModel: StateFlow<D> = _displayModel
 
     protected val _displayDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
     val displayDataState: StateFlow<ApiFetchState> = _displayDataState

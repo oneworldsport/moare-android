@@ -131,7 +131,7 @@ fun FBPlayerStandingsView(
                 store.send(FBPlayerStandingsAction.SelectCategory(index, category))
             },
             itemButtonAction = { id ->
-                searchStore.send(SearchAction.ShowPlayerStats(season = displayModel.season, category = "football", playerId = id))
+                store.send(FBPlayerStandingsAction.ShowPlayerStats(id))
             }
         ),
         verticalScrollState = verticalScrollState,

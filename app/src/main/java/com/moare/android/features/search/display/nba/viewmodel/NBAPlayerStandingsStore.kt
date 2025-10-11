@@ -3,16 +3,20 @@ package com.moare.android.features.search.display.nba.viewmodel
 import android.util.Log
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.features.search.display.common.viewmodel.BasePlayerStandingsStore
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsAction
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsDelegate
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.KeywordInfo
+import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerStandingsResponseModel
 import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -20,19 +24,26 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 sealed interface NBAPlayerStandingsAction {
     data object InitData : NBAPlayerStandingsAction
     data class SelectCategory(val index: Int, val category: String) : NBAPlayerStandingsAction
     data class ShowMoreStandings(val isUp: Boolean) : NBAPlayerStandingsAction
+    data class ShowPlayerStats(val id: Int) : NBAPlayerStandingsAction
+}
+
+sealed interface NBAPlayerStandingsDelegate {
+    data class ShowPlayerStats(val model: SportDecodableModel) : NBAPlayerStandingsDelegate
 }
 
 class NBAPlayerStandingsStore @AssistedInject constructor(
     private val searchClient: SearchClient,
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: NBAPlayerStandingsDisplayModel
-) : BasePlayerStandingsStore<NBAPlayerStandingsAction, NBAPlayerStandingsDisplayModel>(initial, nameProvider) {
+    @Assisted val model: SportDecodableModel.NBAPlayerStandings,
+    @Assisted val emitToParent: (NBAPlayerStandingsDelegate) -> Unit
+) : BasePlayerStandingsStore<NBAPlayerStandingsAction, NBAPlayerStandingsResponseModel, NBAPlayerStandingsDisplayModel>(
+    model.responseModel, model.displayModel, nameProvider
+) {
     val dataItemHeight = 40.dp
     val itemWidth = 70.dp
     val firstCategoryItemWidth = 132.dp
@@ -51,7 +62,10 @@ class NBAPlayerStandingsStore @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: NBAPlayerStandingsDisplayModel) : NBAPlayerStandingsStore
+        fun create(
+            model: SportDecodableModel.NBAPlayerStandings,
+            emitToParent: (NBAPlayerStandingsDelegate) -> Unit
+        ) : NBAPlayerStandingsStore
     }
 
     override fun send(action: NBAPlayerStandingsAction) {
@@ -60,6 +74,7 @@ class NBAPlayerStandingsStore @AssistedInject constructor(
                 is NBAPlayerStandingsAction.InitData -> initData()
                 is NBAPlayerStandingsAction.SelectCategory -> selectCategory(action.index, action.category)
                 is NBAPlayerStandingsAction.ShowMoreStandings -> addStandings(action.isUp)
+                is NBAPlayerStandingsAction.ShowPlayerStats -> showPlayerStats(action.id)
             }
         }
     }
@@ -203,6 +218,23 @@ class NBAPlayerStandingsStore @AssistedInject constructor(
                 _displayDataState.value = ApiFetchState.Error("데이터를 불러오는데 실패하였습니다.")
                 Log.e("dsdf", e.localizedMessage ?: "error")
             }
+        }
+    }
+
+    private fun showPlayerStats(id: Int) {
+        scope.launch {
+            // NOTE: For now nba player stats data in standings has all the stats, so doesn't has to fetchById like football.
+            val player = responseModel.standings.find { player ->
+                player.player.personId == id
+            }
+            val responseModel = NBAPlayerInfoResponseModel(info = player)
+
+            val dataModel = SportDecodableModel.NBAPlayerStats(
+                responseModel = responseModel,
+                displayModel = ModelConverter.nbaPlayerStatsConverter(responseModel)
+            )
+
+            emitToParent(NBAPlayerStandingsDelegate.ShowPlayerStats(dataModel))
         }
     }
 }

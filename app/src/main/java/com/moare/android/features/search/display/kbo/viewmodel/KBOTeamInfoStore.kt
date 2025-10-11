@@ -3,8 +3,10 @@ package com.moare.android.features.search.display.kbo.viewmodel
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseInfoStore
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoStore
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -17,12 +19,14 @@ sealed interface KBOTeamInfoAction {
 
 class KBOTeamInfoStore @AssistedInject constructor(
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: KBOTeamInfoDisplayModel
-) : BaseInfoStore<KBOTeamInfoAction, KBOTeamInfoDisplayModel>(initial, nameProvider) {
+    @Assisted val model: SportDecodableModel.KBOTeamInfo
+) : BaseInfoStore<KBOTeamInfoAction, KBOTeamInfoResponseModel, KBOTeamInfoDisplayModel>(
+    model.responseModel, model.displayModel, nameProvider
+) {
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: KBOTeamInfoDisplayModel) : KBOTeamInfoStore
+        fun create(model: SportDecodableModel.KBOTeamInfo) : KBOTeamInfoStore
     }
 
     override fun send(action: KBOTeamInfoAction) {

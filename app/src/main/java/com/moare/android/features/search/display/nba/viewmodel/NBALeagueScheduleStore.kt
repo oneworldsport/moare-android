@@ -242,7 +242,7 @@ class NBALeagueScheduleStore @AssistedInject constructor(
     ) {
         val game = nbaGameStatsData.displayModel.game
         val newGames = nbaLeagueScheduleData.displayModel.games.map {
-            if (it.gameId == game.gameSummary?.gameCode) ModelConverter().nbaGameToGameScheduleConverter(game) else it
+            if (it.gameId == game.gameSummary?.gameCode) ModelConverter.nbaGameToGameScheduleConverter(game) else it
         }
 
         val newData = nbaLeagueScheduleData

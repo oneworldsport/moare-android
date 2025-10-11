@@ -230,7 +230,7 @@ class MLBLeagueScheduleStore @AssistedInject constructor(
     ) {
         val game = mlbGameStatsData.displayModel.game
         val newGames = mlbLeagueScheduleData.displayModel.games.map {
-            if (it.gameId == game.game.id) ModelConverter().mlbGameToGameScheduleConverter(game) else it
+            if (it.gameId == game.game.id) ModelConverter.mlbGameToGameScheduleConverter(game) else it
         }
 
         val newData = mlbLeagueScheduleData

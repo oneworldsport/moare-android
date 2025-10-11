@@ -3,8 +3,6 @@ package com.moare.android.features.search.display.football.viewmodel
 import android.util.Log
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
-import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BasePlayerStandingsStore
 import com.moare.android.features.search.models.ApiFetchState
@@ -13,6 +11,8 @@ import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
+import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -25,13 +25,21 @@ sealed interface FBPlayerStandingsAction {
     data object InitData : FBPlayerStandingsAction
     data class SelectCategory(val index: Int, val category: String) : FBPlayerStandingsAction
     data class ShowMoreStandings(val isUp: Boolean) : FBPlayerStandingsAction
+    data class ShowPlayerStats(val id: Int) : FBPlayerStandingsAction
+}
+
+sealed interface FBPlayerStandingsDelegate {
+    data class ShowPlayerStats(val model: SportDecodableModel) : FBPlayerStandingsDelegate
 }
 
 class FBPlayerStandingsStore @AssistedInject constructor(
     private val searchClient: SearchClient,
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: FBPlayerStandingsDisplayModel
-) : BasePlayerStandingsStore<FBPlayerStandingsAction, FBPlayerStandingsDisplayModel>(initial, nameProvider) {
+    @Assisted val model: SportDecodableModel.FBPlayerStandings,
+    @Assisted val emitToParent: (FBPlayerStandingsDelegate) -> Unit
+) : BasePlayerStandingsStore<FBPlayerStandingsAction, FBPlayerStandingsResponseModel, FBPlayerStandingsDisplayModel>(
+    model.responseModel, model.displayModel, nameProvider
+) {
     val dataItemHeight = 40.dp
     val categoryItemHeight = 40.dp
     val firstCategoryItemWidth = 132.dp
@@ -47,7 +55,10 @@ class FBPlayerStandingsStore @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: FBPlayerStandingsDisplayModel) : FBPlayerStandingsStore
+        fun create(
+            model: SportDecodableModel.FBPlayerStandings,
+            emitToParent: (FBPlayerStandingsDelegate) -> Unit
+        ) : FBPlayerStandingsStore
     }
 
     override fun send(action: FBPlayerStandingsAction) {
@@ -55,6 +66,7 @@ class FBPlayerStandingsStore @AssistedInject constructor(
             is FBPlayerStandingsAction.InitData -> initData()
             is FBPlayerStandingsAction.SelectCategory -> selectCategory(action.index, action.category)
             is FBPlayerStandingsAction.ShowMoreStandings -> addStandings(action.isUp)
+            is FBPlayerStandingsAction.ShowPlayerStats -> showPlayerStats(action.id)
         }
     }
 
@@ -161,6 +173,21 @@ class FBPlayerStandingsStore @AssistedInject constructor(
                 _displayDataState.value = ApiFetchState.Error("데이터를 불러오는데 실패하였습니다.")
                 Log.e("dsdf", e.localizedMessage ?: "error")
             }
+        }
+    }
+
+    private fun showPlayerStats(id: Int) {
+        scope.launch {
+            // TODO: Has to add loading
+            val result = searchClient.fetchById(
+                season = displayModel.value.season,
+                category = "football",
+                dataType = "football_player_stats",
+                leagueId = displayModel.value.leagueId,
+                id = id.toString()
+            )
+
+            emitToParent(FBPlayerStandingsDelegate.ShowPlayerStats(result.data))
         }
     }
 }

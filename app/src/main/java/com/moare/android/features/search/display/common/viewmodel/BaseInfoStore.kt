@@ -2,6 +2,7 @@ package com.moare.android.features.search.display.common.viewmodel
 
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,14 +11,15 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-abstract class BaseInfoStore<A, T: SportDisplayModel>(
-    private val initial: T,
+abstract class BaseInfoStore<A, R, D: SportDisplayModel>(
+    val responseModel: R,
+    private val initial: D,
     private val nameProvider: TranslatedNameProvider
 ) {
     protected val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     protected val _displayModel = MutableStateFlow(initial)
-    val displayModel: StateFlow<T> = _displayModel
+    val displayModel: StateFlow<D> = _displayModel
 
     protected val _playerNameDic = MutableStateFlow<Map<String, String>>(emptyMap())
     val playerNameDic: StateFlow<Map<String, String>> = _playerNameDic
