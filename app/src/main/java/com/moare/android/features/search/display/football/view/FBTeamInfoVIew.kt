@@ -36,8 +36,8 @@ import com.moare.android.features.search.display.common.container.view.InfoViewC
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
@@ -45,14 +45,9 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBTeamInfoView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: FBTeamInfoStore
 ) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val poppedView by searchStore.poppedView.collectAsState()
-
     InfoViewContainer(searchStore = searchStore, itemCount = 6, measureContent = {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -90,7 +85,7 @@ fun FBTeamInfoView(
                 .padding(top = 12.dp)
         ) {
             FBTeamInfoFifthItem(
-                searchViewModel = searchStore,
+                searchStore = searchStore,
                 fbTeamInfoStore = store,
                 containerModifier = Modifier.weight(1f)
             ) { index, coordinates ->
@@ -98,7 +93,7 @@ fun FBTeamInfoView(
             }
 
             FBTeamInfoSixthItem(
-                searchViewModel = searchStore,
+                searchStore = searchStore,
                 fbTeamInfoStore = store,
                 containerModifier = Modifier.weight(1f)
             ) { index, coordinates ->
@@ -134,7 +129,7 @@ fun FBTeamInfoView(
         )
 
         FBTeamInfoFourthItem(
-            searchViewModel = searchStore,
+            searchStore = searchStore,
             fbTeamInfoStore = store,
             isAniItem = true,
             itemSize = itemSizes[3],
@@ -144,7 +139,7 @@ fun FBTeamInfoView(
         )
 
         FBTeamInfoFifthItem(
-            searchViewModel = searchStore,
+            searchStore = searchStore,
             fbTeamInfoStore = store,
             isAniItem = true,
             itemSize = itemSizes[4],
@@ -154,7 +149,7 @@ fun FBTeamInfoView(
         )
 
         FBTeamInfoSixthItem(
-            searchViewModel = searchStore,
+            searchStore = searchStore,
             fbTeamInfoStore = store,
             isAniItem = true,
             itemSize = itemSizes[5],
@@ -356,7 +351,7 @@ fun FBTeamInfoThirdItem(
 // league stats
 @Composable
 fun FBTeamInfoFourthItem(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     fbTeamInfoStore: FBTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -382,7 +377,7 @@ fun FBTeamInfoFourthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = displayModel.team.id))
+            searchStore.send(SearchAction.ShowTeamStats(teamId = displayModel.team.id))
         }
     ) {
         league?.let {
@@ -437,7 +432,7 @@ fun FBTeamInfoFourthItem(
 // last game stats
 @Composable
 fun FBTeamInfoFifthItem(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     fbTeamInfoStore: FBTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -463,7 +458,7 @@ fun FBTeamInfoFifthItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier,
         onClick = {
-            searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
+            searchStore.send(SearchAction.ShowGameStats(gameType = "previous"))
         }
     ) {
         Text(
@@ -538,7 +533,7 @@ fun FBTeamInfoFifthItem(
 // next game stats
 @Composable
 fun FBTeamInfoSixthItem(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     fbTeamInfoStore: FBTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -564,7 +559,7 @@ fun FBTeamInfoSixthItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier,
         onClick = {
-            searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
+            searchStore.send(SearchAction.ShowGameStats(gameType = "next"))
         }
     ) {
         Text(

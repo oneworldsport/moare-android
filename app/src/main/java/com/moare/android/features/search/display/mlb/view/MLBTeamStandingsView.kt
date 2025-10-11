@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.features.search.display.common.container.component.StandingsRankItem
@@ -29,10 +27,9 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.util.CenterBox
@@ -40,7 +37,7 @@ import com.moare.android.ui.util.CenterColumn
 
 @Composable
 fun MLBTeamStandingsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBTeamStandingsStore
 ) {
     /* ---------------------
@@ -121,7 +118,7 @@ fun MLBTeamStandingsView(
 
 @Composable
 fun MLBTeamStandingsDataList(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBTeamStandingsStore,
     divisionTitle: String,
     standings: List<MLBTeamStandingsDisplay>,
@@ -159,7 +156,7 @@ fun MLBTeamStandingsDataList(
                         name = teamNameDic["short_${teamId}"] ?: data.team.shortName,
                         isLastItem = index == standings.size,
                         action = {
-                            searchStore.send(SearchViewModel.Intent.ShowTeamStats(teamId = teamId))
+                            searchStore.send(SearchAction.ShowTeamStats(teamId = teamId))
                         }
                     )
                 }

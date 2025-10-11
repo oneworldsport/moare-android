@@ -21,15 +21,15 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsAction
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.util.convertDpToPx
 import kotlinx.coroutines.delay
 
 @Composable
 fun FBPlayerStandingsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: FBPlayerStandingsStore
 ) {
     /* ---------------------
@@ -131,7 +131,7 @@ fun FBPlayerStandingsView(
                 store.send(FBPlayerStandingsAction.SelectCategory(index, category))
             },
             itemButtonAction = { id ->
-                searchStore.send(SearchViewModel.Intent.ShowPlayerStats(season = displayModel.season, category = "football", playerId = id))
+                searchStore.send(SearchAction.ShowPlayerStats(season = displayModel.season, category = "football", playerId = id))
             }
         ),
         verticalScrollState = verticalScrollState,

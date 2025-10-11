@@ -9,7 +9,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -22,17 +21,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.KBOUtil
 import com.moare.android.features.search.display.common.components.EmptyStatDataItem
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerStatsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStatsDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.kbo.KBOPlayerStats
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HDivider
@@ -43,7 +38,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun KBOPlayerStatsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOPlayerStatsStore
 ) {
     val displayModel by store.displayModel.collectAsState()

@@ -76,7 +76,8 @@ import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
 import com.moare.android.features.search.display.nba.view.NBATeamInfoView
 import com.moare.android.features.search.display.nba.view.NBATeamStandingsView
 import com.moare.android.features.search.display.nba.view.NBATeamStatsView
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.ui.common.components.ProgressIndicator
@@ -84,12 +85,11 @@ import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
 import com.moare.android.ui.util.rememberKeyboardVisibility
 import kotlinx.coroutines.delay
-import java.util.Stack
 
 @Composable
 fun SearchView(
     viewModel: AppViewModel,
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     viewForTest: SportDisplayType? = null
 ) {
     /* ---------------------
@@ -109,7 +109,6 @@ fun SearchView(
        --------------------- */
     val stack by viewModel.stack.collectAsState()
 
-    val displayModels by searchStore.displayModels.collectAsState()
     val searchDataState by searchStore.searchDataState.collectAsState()
     val showResult by searchStore.resultVisibleState.collectAsState()
     val searchState by searchStore.searchState.collectAsState()
@@ -145,7 +144,7 @@ fun SearchView(
        --------------------- */
     LaunchedEffect(viewForTest) {
         viewForTest?.let {
-            searchStore.send(SearchViewModel.Intent.TestSearch(viewForTest))
+//            searchStore.send(SearchStore.Intent.TestSearch(viewForTest))
         }
     }
 
@@ -178,13 +177,12 @@ fun SearchView(
     LaunchedEffect(keyboardVisibleState) {
         // NOTE: barFirstOpened prevents executing at first launch
         if (barFirstOpened && !keyboardVisibleState && focusState) {
-            searchStore.send(SearchViewModel.Intent.ToggleFocusState(false))
+            searchStore.send(SearchAction.ToggleFocusState(false))
         }
     }
 
     BackHandler {
-//        searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
-        viewModel.pop()
+        viewModel.pop(activity)
     }
 
     /* ---------------------
@@ -210,8 +208,7 @@ fun SearchView(
                         tint = Moare,
                         modifier = Modifier
                             .clickable {
-//                                searchViewModel.send(SearchViewModel.Intent.GoBack(activity))
-                                viewModel.pop()
+                                viewModel.pop(activity)
                             }
                     )
                 }
@@ -271,7 +268,7 @@ fun SearchView(
                         if (isNoticeOpened) {
                             isNoticeOpened = false
                         } else {
-                            searchStore.send(SearchViewModel.Intent.ToggleFocusState(false))
+                            searchStore.send(SearchAction.ToggleFocusState(false))
                         }
                     }
                 )
@@ -280,7 +277,7 @@ fun SearchView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatingSearchBar(
-                searchViewModel = searchStore,
+                searchStore = searchStore,
                 modifier = Modifier
 //                    .padding(top = 10.dp)
             )
@@ -298,9 +295,9 @@ fun SearchView(
                 },
                 exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
             ) {
-                TrendingKeywords(searchViewModel = searchStore) { keyword ->
-                    searchStore.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(keyword), false))
-                    searchStore.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.TRENDING_KEYWORD, aniDuration = 1000))
+                TrendingKeywords(searchStore = searchStore) { keyword ->
+                    searchStore.send(SearchAction.UpdateTextField(TextFieldValue(keyword), false))
+                    searchStore.send(SearchAction.PerformSearch(searchType = SearchStore.SearchType.TRENDING_KEYWORD, aniDuration = 1000))
                 }
             }
 
@@ -314,10 +311,10 @@ fun SearchView(
 //            key(System.currentTimeMillis()) {
                 key(autoCompleteList) { // redraw the composable with its initial state
                     AutoCompleteList(
-                        searchViewModel = searchStore,
+                        searchStore = searchStore,
                         onItemSelected = { query ->
-                            searchStore.send(SearchViewModel.Intent.UpdateTextField(TextFieldValue(query), false))
-                            searchStore.send(SearchViewModel.Intent.PerformSearch(searchType = SearchViewModel.SearchType.AUTO_COMPLETE, aniDuration = 2000))
+                            searchStore.send(SearchAction.UpdateTextField(TextFieldValue(query), false))
+                            searchStore.send(SearchAction.PerformSearch(searchType = SearchStore.SearchType.AUTO_COMPLETE, aniDuration = 2000))
                         }
                     )
                 }

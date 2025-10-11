@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,18 +25,15 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamInfoAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
@@ -45,7 +41,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun MLBTeamInfoView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBTeamInfoStore
 ) {
     InfoViewContainer(
@@ -363,7 +359,7 @@ fun MLBTeamInfoThirdItem(
 // league stats
 @Composable
 fun MLBTeamInfoFourthItem(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -391,7 +387,7 @@ fun MLBTeamInfoFourthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchStore.send(SearchViewModel.Intent.ShowTeamStats(teamId = displayModel.team.id))
+            searchStore.send(SearchAction.ShowTeamStats(teamId = displayModel.team.id))
         }
     ) {
         BaseballLeagueTitle(
@@ -446,7 +442,7 @@ fun MLBTeamInfoFourthItem(
 // last game stats
 @Composable
 fun MLBTeamInfoFifthItem(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -472,7 +468,7 @@ fun MLBTeamInfoFifthItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier,
         onClick = {
-            searchStore.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
+            searchStore.send(SearchAction.ShowGameStats(gameType = "previous"))
         }
     ) {
         Text(
@@ -550,7 +546,7 @@ fun MLBTeamInfoFifthItem(
 // next game stats
 @Composable
 fun MLBTeamInfoSixthItem(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -576,7 +572,7 @@ fun MLBTeamInfoSixthItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier,
         onClick = {
-            searchStore.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
+            searchStore.send(SearchAction.ShowGameStats(gameType = "next"))
         }
     ) {
         Text(

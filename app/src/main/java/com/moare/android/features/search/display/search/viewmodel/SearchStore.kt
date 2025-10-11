@@ -1,0 +1,858 @@
+package com.moare.android.features.search.display.search.viewmodel
+
+import android.app.Activity
+import android.content.Context
+import android.util.Log
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import com.moare.android.core.constants.Constants
+import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.mvi.StackItem
+import com.moare.android.core.util.Trie
+import com.moare.android.features.search.display.search.viewmodel.SearchStore.SearchType
+import com.moare.android.features.search.models.ModelConverter
+import com.moare.android.features.search.models.ApiFetchState
+import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.KeywordInfo
+import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
+import com.moare.android.features.search.models.NoticeModel
+import com.moare.android.features.search.models.SportDisplayType
+import com.moare.android.features.search.models.TrendingKeywords
+import com.moare.android.features.search.models.displaymodels.SportDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.models.football.FBGame
+import com.moare.android.features.search.models.models.football.FBGameForSchedule
+import com.moare.android.features.search.models.models.kbo.KBOGame
+import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
+import com.moare.android.features.search.models.models.mlb.MLBGame
+import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
+import com.moare.android.features.search.models.models.nba.NBAGame
+import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
+import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
+import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
+import com.moare.android.features.search.networking.KeywordsClient
+import com.moare.android.features.search.networking.SearchClient
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+sealed interface SearchAction {
+    data object BarFirstOpen : SearchAction
+    data class PerformSearch(val searchType: SearchType = SearchType.QUERY, val aniDuration: Long = 0) : SearchAction
+    data class ToggleFocusState(val isFocused: Boolean) : SearchAction
+    data class UpdateTextField(val newValue: TextFieldValue, val updateAutoCompleteList: Boolean = true) : SearchAction
+
+    data object ToggleSearchBar : SearchAction
+    data object ToggleAutoCompleteListVisibleState : SearchAction
+
+    data class SelectFBGame(val game: FBGameForSchedule, val season: Int, val leagueId: Int) : SearchAction
+    data class SelectNBAGame(val game: NBAGameForSchedule, val season: Int) : SearchAction
+    data class SelectKBOGame(val game: KBOGameForSchedule, val season: Int) : SearchAction
+    data class SelectMLBGame(val game: MLBGameForSchedule, val season: Int) : SearchAction
+
+    data class ShowPlayerStats(val season: Int? = null, val category: String? = null, val playerId: Int) : SearchAction
+    data class ShowTeamStats(val teamId: Int) : SearchAction
+    data class ShowGameStats(val gameType: String) : SearchAction
+    data class RefreshGame(val season: Int, val category: String) : SearchAction
+    data class SelectNBATournamentRound(val gameList: List<NBAGame>) : SearchAction
+    data class SearchById(val id: String, val season: Int, val category: String, val dataType: String, val leagueId: Int) : SearchAction
+
+    data class TestSearch(val viewForTest: SportDisplayType) : SearchAction
+}
+
+sealed interface SearchDelegate {
+//    data class PerformSearch(val searchType: SearchReducer.SearchType = SearchReducer.SearchType.QUERY, val aniDuration: Long = 0) : SearchAction
+    data class Push(val model: SportDecodableModel) : SearchDelegate
+}
+
+class SearchStore @AssistedInject constructor(
+    @ApplicationContext private val context: Context,
+    private val searchClient: SearchClient,
+    private val keywordsClient: KeywordsClient,
+    private val trieDeferred: CompletableDeferred<Pair<Trie, List<KeywordInfo>>>,
+    private val noticeDeferred: CompletableDeferred<List<NoticeModel>>,
+    private val trendingKeywordsDeferred: CompletableDeferred<TrendingKeywords>,
+    @Assisted val emitToParent: (SearchDelegate) -> Unit
+) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    
+    private val _searchDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
+    val searchDataState: StateFlow<ApiFetchState> = _searchDataState
+
+    // auto complete
+    private val _autoCompleteList = MutableStateFlow<List<String>>(emptyList())
+    val autoCompleteList: StateFlow<List<String>> = _autoCompleteList
+
+    private val _trendingKeywordList = MutableStateFlow<List<String>>(emptyList())
+    val trendingKeywordList: StateFlow<List<String>> = _trendingKeywordList
+
+    private val _noticeData = MutableStateFlow<List<NoticeModel>>(emptyList())
+    val noticeData: StateFlow<List<NoticeModel>> = _noticeData
+
+    /* ---------------------
+       ui state
+       --------------------- */
+    private val _barFirstOpened = MutableStateFlow(false)
+    val barFirstOpened: StateFlow<Boolean> = _barFirstOpened
+
+//    private val _focusRequester = MutableStateFlow(FocusRequester())
+//    val focusRequester: StateFlow<FocusRequester> = _focusRequester
+
+    private val _focusState = MutableStateFlow(false)
+    val focusState: StateFlow<Boolean> = _focusState
+
+    private val _query = MutableStateFlow(TextFieldValue(""))
+    val query: StateFlow<TextFieldValue> = _query
+
+    private val _searchState = MutableStateFlow(false)
+    val searchState: StateFlow<Boolean> = _searchState
+
+    private val _resultVisibleState = MutableStateFlow(false)
+    val resultVisibleState: StateFlow<Boolean> = _resultVisibleState
+
+    private val _autoCompleteListVisibleState = MutableStateFlow(false)
+    val autoCompleteListVisibleState: StateFlow<Boolean> = _autoCompleteListVisibleState
+
+    /* ---------------------
+       etc
+       --------------------- */
+    private val trie: Trie by lazy {
+        runBlocking { trieDeferred.await().first }
+    }
+
+    private val autoCompleteDataMap: Map<String, KeywordInfo> by lazy {
+        runBlocking {
+            trieDeferred.await().second.associateBy { it.keyword }
+        }
+    }
+
+    private var trendingKeywords: Map<String, KeywordInfo> = emptyMap()
+
+    /* ---------------------
+       init
+       --------------------- */
+    init {
+        scope.launch {
+            // test
+//            val inputStream = context.assets.open("football_player_standings.json")
+//            val jsonContent = inputStream.bufferedReader().use { it.readText() }
+//
+//            val data = DataModel.fromJson(jsonContent).data as SportDecodableModel.FBPlayerStandings
+//            _fbPlayerStandingsData.emit(data.displayModel)
+//            delay(5000)
+            trendingKeywords = trendingKeywordsDeferred.await().keywords.associateBy { it.keyword }
+            _trendingKeywordList.emit(trendingKeywords.keys.toList())
+
+            _noticeData.emit(noticeDeferred.await())
+        }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            emitToParent: (SearchDelegate) -> Unit
+        ): SearchStore
+    }
+
+    enum class SearchType {
+        QUERY, TRENDING_KEYWORD, AUTO_COMPLETE
+    }
+
+    fun send(action: SearchAction) {
+        // TODO: 비동기를 여기서 실행할지, 각 implements에서 실행할지 고민필요
+        scope.launch {
+            when (action) {
+                is SearchAction.BarFirstOpen -> barFirstOpen()
+                is SearchAction.PerformSearch -> {
+                    if (query.value.text.isBlank()) {
+                        val firstTrendingKeyword = trendingKeywordList.value.firstOrNull()
+                        if (!firstTrendingKeyword.isNullOrBlank()) {
+                            updateTextField(TextFieldValue(firstTrendingKeyword), false)
+                            performSearch(SearchType.TRENDING_KEYWORD, action.aniDuration)
+                        }
+                    } else {
+                        performSearch(action.searchType, action.aniDuration)
+                    }
+                }
+                is SearchAction.ToggleFocusState -> toggleFocusState(action.isFocused)
+                is SearchAction.ToggleAutoCompleteListVisibleState -> toggleAutoCompleteListVisibleState()
+                is SearchAction.UpdateTextField -> updateTextField(action.newValue, action.updateAutoCompleteList)
+                is SearchAction.ToggleSearchBar -> toggleSearchBar()
+                is SearchAction.SelectFBGame -> selectFBGame(action.game, action.season, action.leagueId)
+                is SearchAction.SelectNBAGame -> selectNBAGame(action.game, action.season)
+                is SearchAction.SelectKBOGame -> selectKBOGame(action.game, action.season)
+                is SearchAction.SelectMLBGame -> selectMLBGame(action.game, action.season)
+                is SearchAction.ShowPlayerStats -> showPlayerStats(action.season, action.category, action.playerId)
+                is SearchAction.ShowTeamStats -> showTeamStats(action.teamId)
+                is SearchAction.ShowGameStats -> showGameStats(action.gameType)
+                is SearchAction.RefreshGame -> refreshGame(action.season, action.category)
+                is SearchAction.SelectNBATournamentRound -> selectNBATournamentRound(action.gameList)
+                is SearchAction.SearchById -> searchById(action.id, action.season, action.category, action.dataType, action.leagueId)
+
+                is SearchAction.TestSearch -> testSearch(action.viewForTest)
+            }
+        }
+    }
+
+    /* ---------------------
+       implements
+       --------------------- */
+    private suspend fun barFirstOpen() {
+        _barFirstOpened.emit(true)
+    }
+
+    private suspend fun performSearch(searchType: SearchType, aniDuration: Long) {
+        // animation/search start time
+        val startTime = System.currentTimeMillis()
+
+        try {
+            _searchState.emit(true)
+            toggleFocusState(false)
+
+            val dataFetchDeferred = scope.async {
+//                delay(5000) // test for fetching delay
+                when (searchType) {
+                    SearchType.QUERY -> searchClient.fetchDataByQuery(query.value.text)
+                    SearchType.TRENDING_KEYWORD -> {
+                        val keyword = trendingKeywords[query.value.text]
+                        keyword?.let {
+                            searchClient.fetchDataByKeyword(keyword)
+                        }
+                    }
+                    SearchType.AUTO_COMPLETE -> {
+                        val keywordInfo = autoCompleteDataMap[query.value.text]
+                        keywordInfo?.let {
+                            keywordInfo.weight = null // To exclude field "weight" in the request body
+                            searchClient.fetchDataByKeyword(keywordInfo)
+                        }
+                    }
+                }
+            }
+
+            // delay for animation duration in case the data fetched before animation ends
+            delay(aniDuration)
+
+            // reset autocomplete list
+            _autoCompleteList.emit(emptyList())
+            _autoCompleteListVisibleState.emit(false)
+
+            // if data is still fetching after the animation duration, show loading
+            if (!dataFetchDeferred.isCompleted) {
+                _searchDataState.emit(ApiFetchState.Fetching)
+            }
+
+            val data = dataFetchDeferred.await()
+
+            // hide loading first before showing data
+            _searchDataState.emit(ApiFetchState.Success)
+
+            when (data?.data) {
+                // football
+                is SportDecodableModel.FBPlayerInfo, is SportDecodableModel.FBPlayerStandings, is SportDecodableModel.FBTeamInfo,
+                is SportDecodableModel.FBTeamStats, is SportDecodableModel.FBTeamStandings, is SportDecodableModel.FBLeagueSchedule,
+                is SportDecodableModel.FBGameStats, is SportDecodableModel.NBAPlayerInfo, is SportDecodableModel.NBAPlayerStats,
+                is SportDecodableModel.NBAPlayerStandings, is SportDecodableModel.NBATeamInfo, is SportDecodableModel.NBATeamStats,
+                is SportDecodableModel.NBATeamStandings, is SportDecodableModel.NBALeagueSchedule, is SportDecodableModel.NBAGameStats,
+                is SportDecodableModel.NBALeagueTournament, is SportDecodableModel.KBOPlayerInfo, is SportDecodableModel.KBOPlayerStats,
+                is SportDecodableModel.KBOPlayerStandings, is SportDecodableModel.KBOTeamInfo, is SportDecodableModel.KBOTeamStats,
+                is SportDecodableModel.KBOTeamStandings, is SportDecodableModel.KBOLeagueSchedule, is SportDecodableModel.KBOGameStats,
+                is SportDecodableModel.MLBPlayerInfo, is SportDecodableModel.MLBPlayerStats, is SportDecodableModel.MLBPlayerStandings,
+                is SportDecodableModel.MLBTeamInfo, is SportDecodableModel.MLBTeamStats, is SportDecodableModel.MLBTeamStandings,
+                is SportDecodableModel.MLBLeagueSchedule, is SportDecodableModel.MLBGameStats -> null
+                else -> {
+                    throw IllegalArgumentException("Unknown data type")
+                }
+            }
+
+            _resultVisibleState.emit(true)
+
+            emitToParent(SearchDelegate.Push(model = data.data))
+        } catch (e: Exception) {
+            _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
+            Log.e("dsdf", e.localizedMessage ?: "data type error")
+        }
+    }
+
+    private suspend fun toggleFocusState(isFocused: Boolean) {
+        if (isFocused) {
+            // move textfield's cursor to the end of the query
+            _query.emit(query.value.copy(
+                selection = TextRange(query.value.text.length)
+            ))
+            _focusState.emit(true)
+        } else {
+            _focusState.emit(false)
+        }
+    }
+
+    private suspend fun toggleAutoCompleteListVisibleState() {
+        _autoCompleteListVisibleState.emit(!autoCompleteListVisibleState.value)
+    }
+
+    private fun updateTextField(newValue: TextFieldValue, updateAutoCompleteList: Boolean = true) {
+        _query.value = newValue
+
+        // auto complete
+        if (updateAutoCompleteList) {
+            if (newValue.text.isBlank()) {
+                _autoCompleteList.value = emptyList()
+                _autoCompleteListVisibleState.value = false
+            } else {
+                val result = trie.search(newValue.text)
+
+                _autoCompleteList.value = result
+                _autoCompleteListVisibleState.value = true
+            }
+        }
+    }
+
+    private suspend fun toggleSearchBar() {
+        val currentSearchState = searchState.value
+
+        if (currentSearchState) {
+            _searchState.emit(false)
+            _resultVisibleState.emit(false)
+            _searchDataState.emit(ApiFetchState.Idle)
+            updateTextField(query.value)
+            delay(1000)
+            toggleFocusState(true)
+        } else {
+            // TODO: toggleSearchBar를 openSearchBar로 바꾸고, 여기 액션은 goBack() 에서만 쓰이기 때문에 goBack()으로 옮기는게 나을듯?
+            _searchState.emit(true)
+
+            // reset autocomplete list
+            _autoCompleteList.emit(emptyList())
+            _autoCompleteListVisibleState.emit(false)
+
+            _searchDataState.emit(ApiFetchState.Success)
+
+            _resultVisibleState.emit(true)
+        }
+    }
+
+    private suspend fun selectFBGame(game: FBGameForSchedule, season: Int, leagueId: Int) {
+        val result = searchClient.fetchById(
+            season = season,
+            category = "football",
+            date = game.date,
+            dataType = "football_game_stats",
+            leagueId = leagueId,
+            id = game.gameId
+        )
+    }
+
+    private suspend fun selectNBAGame(game: NBAGameForSchedule, season: Int) {
+        val result = searchClient.fetchById(
+            season = season,
+            category = "basketball",
+            date = game.date,
+            dataType = "basketball_game_stats",
+            leagueId = Constants.Ids.NBA,
+            id = game.gameId
+        )
+    }
+
+    private suspend fun selectKBOGame(game: KBOGameForSchedule, season: Int) {
+        val modelConverter = ModelConverter()
+
+        val dataModel: SportDecodableModel
+
+        // 취소된 경기는 DB에 데이터 없어서 KBOGameForSchedule을 사용해 KBOGameStatsView를 보여준다.
+        if (game.gameStatus.toIntOrNull() == StringConstants.KBO.GAME_CANCELED) {
+            val game = modelConverter.kboGameScheduleToGameConverter(game = game)
+
+            val responseModel = KBOGameStatsResponseModel(game = game)
+            dataModel = SportDecodableModel.KBOGameStats(responseModel, modelConverter.kboGameStatsConverter(responseModel))
+        } else {
+            val result = searchClient.fetchById(
+                season = season,
+                category = "baseball",
+                date = game.date,
+                dataType = "baseball_game_stats",
+                leagueId = Constants.Ids.KBO,
+                id = game.gameId
+            )
+
+            dataModel = result.data
+        }
+    }
+
+    private suspend fun selectMLBGame(game: MLBGameForSchedule, season: Int) {
+        val modelConverter = ModelConverter()
+
+        val dataModel: SportDecodableModel
+
+        // Postponed된 경기는 DB에 데이터 없어서 MLBGameForSchedule을 사용해 MLBGameStatsView를 보여준다.
+        if (game.gameStatus == StringConstants.MLB.GAME_POSTPONED) {
+            val game = modelConverter.mlbGameScheduleToGameConverter(game = game)
+
+            val responseModel = MLBGameStatsResponseModel(game = game)
+            dataModel = SportDecodableModel.MLBGameStats(responseModel, modelConverter.mlbGameStatsConverter(responseModel))
+        } else {
+            val result = searchClient.fetchById(
+                season = season,
+                category = "baseball",
+                date = game.date,
+                dataType = "baseball_game_stats",
+                leagueId = Constants.Ids.MLB,
+                id = game.gameId
+            )
+
+            dataModel = result.data
+        }
+    }
+
+    private suspend fun showPlayerStats(season: Int?, category: String?, playerId: Int) {
+//        val modelConverter = ModelConverter()
+//
+//        val dataModel: SportDecodableModel
+//
+//        when (val lastView = viewStack.value.lastOrNull()) {
+//            is SportDecodableModel.FBPlayerStandings -> {
+//                if (category == null) {
+//                    val player = lastView.responseModel.standings.find { player ->
+//                        player.player.id == playerId
+//                    }
+//
+//                    val responseModel = FBPlayerInfoResponseModel(info = player)
+//                    dataModel = SportDecodableModel.FBPlayerStats(
+//                        responseModel = responseModel,
+//                        displayModel = modelConverter.fbPlayerStatsConverter(responseModel)
+//                    )
+//                } else {
+//                    val leagueId = lastView.responseModel.standings.firstOrNull()?.statistics?.firstOrNull()?.league?.id ?: 39
+//
+//                    // TODO: Has to add loading
+//                    val result = searchClient.fetchById(
+//                        season = season,
+//                        category = category,
+//                        dataType = "${category}_player_stats",
+//                        leagueId = leagueId,
+//                        id = playerId.toString()
+//                    )
+//
+//                    if (result.data is SportDecodableModel.FBPlayerStats) {
+//                        dataModel = result.data
+//                    } else {
+//                        return
+//                    }
+//                }
+//            }
+//            is SportDecodableModel.FBPlayerInfo -> {
+//                dataModel = SportDecodableModel.FBPlayerStats(
+//                    responseModel = lastView.responseModel,
+//                    displayModel = modelConverter.fbPlayerStatsConverter(lastView.responseModel)
+//                )
+//            }
+//
+//            is SportDecodableModel.NBAPlayerStandings -> {
+//                // NOTE: nba player stats data in standings has all the stats for now, so doesn't has to fetchById like football above.
+//                val player = lastView.responseModel.standings.find { player ->
+//                    player.player.personId == playerId
+//                }
+//
+//                val responseModel = NBAPlayerInfoResponseModel(info = player)
+//                dataModel = SportDecodableModel.NBAPlayerStats(
+//                    responseModel = responseModel,
+//                    displayModel = modelConverter.nbaPlayerStatsConverter(responseModel)
+//                )
+//            }
+//            is SportDecodableModel.NBAPlayerInfo -> {
+//                dataModel = SportDecodableModel.NBAPlayerStats(
+//                    responseModel = lastView.responseModel,
+//                    displayModel = modelConverter.nbaPlayerStatsConverter(lastView.responseModel)
+//                )
+//            }
+//
+//            is SportDecodableModel.KBOPlayerInfo -> {
+//                dataModel = SportDecodableModel.KBOPlayerStats(
+//                    responseModel = lastView.responseModel,
+//                    displayModel = modelConverter.kboPlayerStatsConverter(lastView.responseModel)
+//                )
+//            }
+//            is SportDecodableModel.MLBPlayerInfo -> {
+//                dataModel = SportDecodableModel.MLBPlayerStats(
+//                    responseModel = lastView.responseModel,
+//                    displayModel = modelConverter.mlbPlayerStatsConverter(lastView.responseModel)
+//                )
+//            }
+//
+//             else -> return // Make it do nothing
+//        }
+//
+//        _resultVisibleState.emit(false)
+//        delay(1000)
+//
+//        _resultVisibleState.emit(true)
+    }
+
+    private suspend fun showTeamStats(teamId: Int) {
+//        val modelConverter = ModelConverter()
+//
+//        val dataModel: SportDecodableModel
+//
+//        when (val lastView = viewStack.value.lastOrNull()) {
+//            is SportDecodableModel.FBTeamStandings -> {
+//                val team = lastView.responseModel.standings.find { team ->
+//                    team.team.id == teamId
+//                }
+//
+//                val responseModel = FBTeamInfoResponseModel(info = team)
+//                dataModel = SportDecodableModel.FBTeamStats(
+//                    responseModel = responseModel,
+//                    displayModel = modelConverter.fbTeamStatsConverter(responseModel)
+//                )
+//            }
+//            is SportDecodableModel.FBTeamInfo -> {
+//                dataModel = SportDecodableModel.FBTeamStats(
+//                    responseModel = lastView.responseModel,
+//                    displayModel = modelConverter.fbTeamStatsConverter(lastView.responseModel)
+//                )
+//            }
+//
+//            is SportDecodableModel.NBATeamStandings -> {
+//                val team = lastView.responseModel.standings.find { team ->
+//                    team.team.id == teamId
+//                }
+//
+//                val responseModel = NBATeamInfoResponseModel(info = team)
+//                dataModel = SportDecodableModel.NBATeamStats(
+//                    responseModel = responseModel,
+//                    displayModel = modelConverter.nbaTeamStatsConverter(responseModel)
+//                )
+//            }
+//            is SportDecodableModel.NBATeamInfo -> {
+//                dataModel = SportDecodableModel.NBATeamStats(
+//                    responseModel = lastView.responseModel,
+//                    displayModel = modelConverter.nbaTeamStatsConverter(lastView.responseModel)
+//                )
+//            }
+//
+//            is SportDecodableModel.KBOTeamStandings -> {
+//                val team = lastView.responseModel.standings.find { team ->
+//                    team.team.id == teamId
+//                }
+//
+//                val responseModel = KBOTeamInfoResponseModel(info = team)
+//                dataModel = SportDecodableModel.KBOTeamStats(
+//                    responseModel = responseModel,
+//                    displayModel = modelConverter.kboTeamStatsConverter(responseModel)
+//                )
+//            }
+//            is SportDecodableModel.KBOTeamInfo -> {
+//                dataModel = SportDecodableModel.KBOTeamStats(
+//                    responseModel = lastView.responseModel,
+//                    displayModel = modelConverter.kboTeamStatsConverter(lastView.responseModel)
+//                )
+//            }
+//
+//            is SportDecodableModel.MLBTeamStandings -> {
+//                val team = lastView.responseModel.standings.find { team ->
+//                    team.team.id == teamId
+//                }
+//
+//                val responseModel = MLBTeamInfoResponseModel(info = team)
+//                dataModel = SportDecodableModel.MLBTeamStats(
+//                    responseModel = responseModel,
+//                    displayModel = modelConverter.mlbTeamStatsConverter(responseModel)
+//                )
+//            }
+//            is SportDecodableModel.MLBTeamInfo -> {
+//                dataModel = SportDecodableModel.MLBTeamStats(
+//                    responseModel = lastView.responseModel,
+//                    displayModel = modelConverter.mlbTeamStatsConverter(lastView.responseModel)
+//                )
+//            }
+//
+//            else -> return // Make it do nothing
+//        }
+//
+//        _resultVisibleState.emit(false)
+//        delay(1000)
+//
+//        _resultVisibleState.emit(true)
+    }
+
+    private suspend fun showGameStats(gameType: String) {
+//        val modelConverter = ModelConverter()
+//
+//        val dataModel: SportDecodableModel
+//
+//        when (val lastView = viewStack.value.lastOrNull()) {
+//            is SportDecodableModel.FBPlayerInfo,
+//            is SportDecodableModel.FBTeamInfo-> {
+//                val lastGame: FBGame?
+//                val nextGame: FBGame?
+//                if (lastView is SportDecodableModel.FBPlayerInfo) {
+//                    lastGame = lastView.responseModel.lastGame
+//                    nextGame = lastView.responseModel.nextGame
+//                } else {
+//                    lastGame = (lastView as SportDecodableModel.FBTeamInfo).responseModel.lastGame
+//                    nextGame = lastView.responseModel.nextGame
+//                }
+//
+//                val responseModel = if (gameType == "previous") FBGameStatsResponseModel(lastGame) else FBGameStatsResponseModel(nextGame)
+//                dataModel = SportDecodableModel.FBGameStats(
+//                    responseModel = responseModel,
+//                    displayModel = modelConverter.fbGameStatsConverter(responseModel)
+//                )
+//            }
+//
+//            is SportDecodableModel.NBAPlayerInfo,
+//            is SportDecodableModel.NBATeamInfo-> {
+//                val lastGame: NBAGame?
+//                val nextGame: NBAGame?
+//                if (lastView is SportDecodableModel.NBAPlayerInfo) {
+//                    lastGame = lastView.responseModel.lastGame
+//                    nextGame = lastView.responseModel.nextGame
+//                } else {
+//                    lastGame = (lastView as SportDecodableModel.NBATeamInfo).responseModel.lastGame
+//                    nextGame = lastView.responseModel.nextGame
+//                }
+//
+//                val responseModel = if (gameType == "previous") NBAGameStatsResponseModel(lastGame) else NBAGameStatsResponseModel(nextGame)
+//                dataModel = SportDecodableModel.NBAGameStats(
+//                    responseModel = responseModel,
+//                    displayModel = modelConverter.nbaGameStatsConverter(responseModel)
+//                )
+//            }
+//
+//            is SportDecodableModel.KBOPlayerInfo,
+//            is SportDecodableModel.KBOTeamInfo-> {
+//                val lastGame: KBOGame?
+//                val nextGame: KBOGame?
+//                if (lastView is SportDecodableModel.KBOPlayerInfo) {
+//                    lastGame = lastView.responseModel.lastGame
+//                    nextGame = lastView.responseModel.nextGame
+//                } else {
+//                    lastGame = (lastView as SportDecodableModel.KBOTeamInfo).responseModel.lastGame
+//                    nextGame = lastView.responseModel.nextGame
+//                }
+//
+//                val responseModel = if (gameType == "previous") KBOGameStatsResponseModel(lastGame) else KBOGameStatsResponseModel(nextGame)
+//                dataModel = SportDecodableModel.KBOGameStats(
+//                    responseModel = responseModel,
+//                    displayModel = modelConverter.kboGameStatsConverter(responseModel)
+//                )
+//            }
+//
+//            is SportDecodableModel.MLBPlayerInfo,
+//            is SportDecodableModel.MLBTeamInfo-> {
+//                val lastGame: MLBGame?
+//                val nextGame: MLBGame?
+//                if (lastView is SportDecodableModel.MLBPlayerInfo) {
+//                    lastGame = lastView.responseModel.lastGame
+//                    nextGame = lastView.responseModel.nextGame
+//                } else {
+//                    lastGame = (lastView as SportDecodableModel.MLBTeamInfo).responseModel.lastGame
+//                    nextGame = lastView.responseModel.nextGame
+//                }
+//
+//                val responseModel = if (gameType == "previous") MLBGameStatsResponseModel(lastGame) else MLBGameStatsResponseModel(nextGame)
+//                dataModel = SportDecodableModel.MLBGameStats(
+//                    responseModel = responseModel,
+//                    displayModel = modelConverter.mlbGameStatsConverter(responseModel)
+//                )
+//            }
+//
+//             else -> return // Make it do nothing
+//        }
+//
+//        _resultVisibleState.emit(false)
+//        delay(1000)
+//
+//        _resultVisibleState.emit(true)
+    }
+
+    private suspend fun refreshGame(season: Int, category: String) {
+//        try {
+//            when (val lastView = viewStack.value.lastOrNull()) {
+//                is SportDecodableModel.FBGameStats -> {
+//                    val game = (displayModels.value[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel)?.game
+//                    game?.let {
+//                        // TODO: Has to add loading
+//                        val result = searchClient.fetchById(
+//                            season = season,
+//                            category = category,
+//                            date = it.fixture.date,
+//                            dataType = "${category}_game_stats",
+//                            leagueId = it.league.id,
+//                            id = it.fixture.id.toString()
+//                        )
+//
+//                        if (result.data is SportDecodableModel.FBGameStats) {
+//                            val data = result.data
+////                    _fbGameStatsData.emit(data.displayModel)
+//                        }
+//                    }
+//                }
+//
+//                is SportDecodableModel.NBAGameStats -> {
+//                    val game = (displayModels.value[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel)?.game
+//                    val gameSummary = game?.gameSummary
+//                    val boxScoreTraditional = game?.boxScoreTraditional
+//                    gameSummary?.let { gameSummary ->
+//                        boxScoreTraditional?.let { boxScoreTraditional->
+//                            // TODO: Has to add loading
+//                            val result = searchClient.fetchById(
+//                                season = season,
+//                                category = category,
+//                                date = gameSummary.date,
+//                                dataType = "${category}_game_stats",
+//                                leagueId = Constants.Ids.NBA,
+//                                id = boxScoreTraditional.gameId
+//                            )
+//
+//                            if (result.data is SportDecodableModel.NBAGameStats) {
+//                                val data = result.data
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                is SportDecodableModel.KBOGameStats -> {
+//                    val game = (displayModels.value[SportDisplayType.KBO_GAME_STATS] as? KBOGameStatsDisplayModel)?.game
+//                    val gameInfo = game?.gameInfo
+//                    gameInfo?.let {
+//                        // TODO: Has to add loading
+//                        val result = searchClient.fetchById(
+//                            season = season,
+//                            category = category,
+//                            date = gameInfo.date,
+//                            dataType = "${category}_game_stats",
+//                            leagueId = Constants.Ids.KBO,
+//                            id = gameInfo.gameId
+//                        )
+//
+//                        if (result.data is SportDecodableModel.KBOGameStats) {
+//                            val data = result.data
+//                        }
+//                    }
+//                }
+//
+//                is SportDecodableModel.MLBGameStats -> {
+//                    val game = (displayModels.value[SportDisplayType.MLB_GAME_STATS] as? MLBGameStatsDisplayModel)?.game
+//                    game?.let {
+//                        // TODO: Has to add loading
+//                        val result = searchClient.fetchById(
+//                            season = season,
+//                            category = category,
+//                            date = game.gameInfo.gameDate,
+//                            dataType = "${category}_game_stats",
+//                            leagueId = Constants.Ids.MLB,
+//                            id = game.game.pk.toString()
+//                        )
+//
+//                        if (result.data is SportDecodableModel.MLBGameStats) {
+//                            val data = result.data
+//                        }
+//                    }
+//                }
+//
+//                else -> return // do nothing
+//            }
+//        } catch (e: Exception) {
+//            Log.e("dsdf", e.localizedMessage ?: "error")
+//        }
+    }
+
+    private suspend fun selectNBATournamentRound(gameList: List<NBAGame>) {
+//        val modelConverter = ModelConverter()
+//
+//        val dataModel: SportDecodableModel
+//
+//        when (val lastView = viewStack.value.lastOrNull()) {
+//            is SportDecodableModel.NBALeagueTournament-> {
+//                val responseModel = NBAGameScheduleResponseModel(
+//                    scheduleType = ScheduleType.TEAM_FLAT,
+//                    scheduledMonths = emptyList(),
+//                    schedule = modelConverter.nbaGameListToGameScheduleListConverter(gameList)
+//                )
+//                dataModel = SportDecodableModel.NBALeagueSchedule(
+//                    responseModel = responseModel,
+//                    displayModel = modelConverter.nbaLeagueScheduleConverter(responseModel)
+//                )
+//            }
+//
+//            else -> return // Make it do nothing
+//        }
+//
+//        _resultVisibleState.emit(false)
+//        delay(1000)
+//
+//        _resultVisibleState.emit(true)
+    }
+
+    private suspend fun searchById(
+        id: String,
+        season: Int,
+        category: String,
+        dataType: String, // TODO: Should make constants
+        leagueId: Int
+    ) {
+        val result = searchClient.fetchById(
+            season = season,
+            category = category,
+            dataType = dataType,
+            leagueId = leagueId,
+            id = id
+        )
+    }
+
+    // test code
+    private suspend fun testSearch(viewForTest: SportDisplayType) {
+        try {
+            _searchState.emit(true)
+            toggleFocusState(false)
+
+            val result = searchClient.fetchFromJson(context, viewForTest)
+
+            _resultVisibleState.emit(true)
+        } catch (e: Exception) {
+            _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
+            Log.e("dsdf", e.localizedMessage ?: "data type error")
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

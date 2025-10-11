@@ -45,58 +45,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
-import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.displayOrDash
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueTournamentViewModel
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATournamentDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGame
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
-import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBALeagueTournamentView(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     nbaLeagueTournamentViewModel: NBALeagueTournamentViewModel = hiltViewModel(),
     data: NBATournamentDisplayModel
 ) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.NBALeagueTournament) {
-            nbaLeagueTournamentViewModel.send(NBALeagueTournamentViewModel.Intent.InitData(data))
-        }
-    }
-
-    /* ---------------------
-       ui
-       --------------------- */
     Column(
         modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 10.dp)
     ) {
-        NBALeagueTournamentMainContainer(searchViewModel)
+        NBALeagueTournamentMainContainer(searchStore)
     }
 }
 
 @Composable
 fun NBALeagueTournamentMainContainer(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     nbaLeagueTournamentViewModel: NBALeagueTournamentViewModel = hiltViewModel()
 ) {
     /* ---------------------
@@ -154,7 +135,7 @@ fun NBALeagueTournamentMainContainer(
             // western 1 round - first game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = westFirstRoundFirstGameList,
                     firstTeamId = westFirstRoundFirstGameFirstTeamId,
                     secondTeamId = westFirstRoundFirstGameSecondTeamId
@@ -166,7 +147,7 @@ fun NBALeagueTournamentMainContainer(
                 Spacer(Modifier.width(nbaLeagueTournamentViewModel.secondRoundContainerSpace))
 
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = westSecondRoundFirstGameList,
                     firstTeamId = westSecondRoundFirstGameFirstTeamId,
                     secondTeamId = westSecondRoundFirstGameSecondTeamId
@@ -176,7 +157,7 @@ fun NBALeagueTournamentMainContainer(
             // western 1 round - second game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = westFirstRoundSecondGameList,
                     firstTeamId = westFirstRoundSecondGameFirstTeamId,
                     secondTeamId = westFirstRoundSecondGameSecondTeamId,
@@ -189,7 +170,7 @@ fun NBALeagueTournamentMainContainer(
                 Spacer(Modifier.width(nbaLeagueTournamentViewModel.finalRoundContainerSpace))
 
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = westFinalRoundGameList,
                     firstTeamId = westFinalRoundGameFirstTeamId,
                     secondTeamId = westFinalRoundGameSecondTeamId,
@@ -201,7 +182,7 @@ fun NBALeagueTournamentMainContainer(
             // western 1 round - third game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = westFirstRoundThirdGameList,
                     firstTeamId = westFirstRoundThirdGameFirstTeamId,
                     secondTeamId = westFirstRoundThirdGameSecondTeamId,
@@ -213,7 +194,7 @@ fun NBALeagueTournamentMainContainer(
                 Spacer(Modifier.width(nbaLeagueTournamentViewModel.secondRoundContainerSpace))
 
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = westSecondRoundSecondGameList,
                     firstTeamId = westSecondRoundSecondGameFirstTeamId,
                     secondTeamId = westSecondRoundSecondGameSecondTeamId,
@@ -224,7 +205,7 @@ fun NBALeagueTournamentMainContainer(
             // western 1 round - fourth game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = westFirstRoundFourthGameList,
                     firstTeamId = westFirstRoundFourthGameFirstTeamId,
                     secondTeamId = westFirstRoundFourthGameSecondTeamId,
@@ -247,7 +228,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 1 round - first game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = eastFirstRoundFirstGameList,
                     firstTeamId = eastFirstRoundFirstGameFirstTeamId,
                     secondTeamId = eastFirstRoundFirstGameSecondTeamId,
@@ -258,7 +239,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 2 round - first game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = eastSecondRoundFirstGameList,
                     firstTeamId = eastSecondRoundFirstGameFirstTeamId,
                     secondTeamId = eastSecondRoundFirstGameSecondTeamId,
@@ -271,7 +252,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 1 round - second game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = eastFirstRoundSecondGameList,
                     firstTeamId = eastFirstRoundSecondGameFirstTeamId,
                     secondTeamId = eastFirstRoundSecondGameSecondTeamId,
@@ -283,7 +264,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern final round
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = eastFinalRoundGameList,
                     firstTeamId = eastFinalRoundGameFirstTeamId,
                     secondTeamId = eastFinalRoundGameSecondTeamId,
@@ -298,7 +279,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 1 round - third game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = eastFirstRoundThirdGameList,
                     firstTeamId = eastFirstRoundThirdGameFirstTeamId,
                     secondTeamId = eastFirstRoundThirdGameSecondTeamId,
@@ -309,7 +290,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 2 round - second game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = eastSecondRoundSecondGameList,
                     firstTeamId = eastSecondRoundSecondGameFirstTeamId,
                     secondTeamId = eastSecondRoundSecondGameSecondTeamId,
@@ -323,7 +304,7 @@ fun NBALeagueTournamentMainContainer(
             // eastern 1 round - fourth game
             CenterRow {
                 NBALeagueTournamentRoundContainer(
-                    searchViewModel = searchViewModel,
+                    searchStore = searchStore,
                     gameList = eastFirstRoundFourthGameList,
                     firstTeamId = eastFirstRoundFourthGameFirstTeamId,
                     secondTeamId = eastFirstRoundFourthGameSecondTeamId,
@@ -337,7 +318,7 @@ fun NBALeagueTournamentMainContainer(
 
 @Composable
 fun NBALeagueTournamentRoundContainer(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     nbaLeagueTournamentViewModel: NBALeagueTournamentViewModel = hiltViewModel(),
     gameList: List<NBAGame>?,
     firstTeamId: Int?,
@@ -450,7 +431,7 @@ fun NBALeagueTournamentRoundContainer(
                 }
                 .clickable {
                     gameList?.let {
-                        searchViewModel.send(SearchViewModel.Intent.SelectNBATournamentRound(it))
+                        searchStore.send(SearchAction.SelectNBATournamentRound(it))
                     }
                 }
         ) {

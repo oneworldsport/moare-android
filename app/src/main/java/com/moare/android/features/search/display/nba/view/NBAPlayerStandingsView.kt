@@ -21,14 +21,15 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsAction
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.util.convertDpToPx
 import kotlinx.coroutines.delay
 
 @Composable
 fun NBAPlayerStandingsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: NBAPlayerStandingsStore
 ) {
     /* ---------------------
@@ -142,7 +143,7 @@ fun NBAPlayerStandingsView(
                 store.send(NBAPlayerStandingsAction.SelectCategory(index, category))
             },
             itemButtonAction = { id ->
-                searchStore.send(SearchViewModel.Intent.ShowPlayerStats(season = displayModel.season, category = "basketball", playerId = id))
+                searchStore.send(SearchAction.ShowPlayerStats(season = displayModel.season, category = "basketball", playerId = id))
             }
         ),
         verticalScrollState = verticalScrollState,

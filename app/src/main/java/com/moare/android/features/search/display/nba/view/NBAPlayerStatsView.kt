@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
@@ -39,11 +37,8 @@ import com.moare.android.features.search.display.common.components.EmptyStatData
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsAction
 import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStatsDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.nba.NBAPlayerStats
 import com.moare.android.ui.common.components.HDivider
 import com.moare.android.ui.common.components.NBATitle
@@ -54,7 +49,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBAPlayerStatsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: NBAPlayerStatsStore
 ) {
     /* ---------------------

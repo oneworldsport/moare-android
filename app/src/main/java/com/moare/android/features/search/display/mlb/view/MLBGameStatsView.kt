@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
@@ -47,9 +45,8 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBGameLineScoreInning
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.CapsuleButton
@@ -62,7 +59,7 @@ import com.moare.android.ui.util.CenterColumn
 
 @Composable
 fun MLBGameStatsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBGameStatsStore
 ) {
     /* ---------------------
@@ -178,7 +175,7 @@ fun MLBGameStatsView(
                 store.send(MLBGameStatsAction.SelectFirstCategory(index))
             },
             refreshButtonAction = {
-                searchStore.send(SearchViewModel.Intent.RefreshGame(season = displayModel.season, category = "baseball"))
+                searchStore.send(SearchAction.RefreshGame(season = displayModel.season, category = "baseball"))
             },
             secondStatsCategoryButtonAction = { index ->
                 store.send(MLBGameStatsAction.SelectSecondCategory(index))

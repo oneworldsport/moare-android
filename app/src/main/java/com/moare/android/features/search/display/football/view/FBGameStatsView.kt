@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.FBUtil
 import com.moare.android.core.util.MatchDescriptionConverter
@@ -26,17 +25,15 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.ModelConverter
-import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.ui.common.components.LeagueTitle
 
 @Composable
 fun FBGameStatsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: FBGameStatsStore
 ) {
     val horizontalScrollState = rememberScrollState()
@@ -51,9 +48,6 @@ fun FBGameStatsView(
     val playersTotalStats by store.playersTotalStats.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
     val playerNameDic by store.playerNameDic.collectAsState()
-
-    val displayModels by searchStore.displayModels.collectAsState()
-    val fbLeagueScheduleModel = displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] as? FBLeagueScheduleDisplayModel
 
     val teamIds = listOf(displayModel.game.teams.home.id, displayModel.game.teams.away.id)
     val teamCategories = teamIds.map {
@@ -189,8 +183,8 @@ fun FBGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowTitle = fbLeagueScheduleModel == null,
-            shouldShowGameItem = fbLeagueScheduleModel == null,
+//            shouldShowTitle = fbLeagueScheduleModel == null,
+//            shouldShowGameItem = fbLeagueScheduleModel == null,
             shouldShowStats = displayModel.game.fixture.status.short != StringConstants.Football.GAME_NOT_STARTED,
             shouldShowCoach = true,
             shouldShowRefreshButton = StringConstants.Football.GAME_LIVE_LIST.contains(displayModel.game.fixture.status.short),
@@ -215,7 +209,7 @@ fun FBGameStatsView(
                 store.send(FBGameStatsAction.SelectSecondCategory(index))
             },
             refreshButtonAction = {
-                searchStore.send(SearchViewModel.Intent.RefreshGame(season = displayModel.season, category = "football"))
+//                searchStore.send(SearchStore.Intent.RefreshGame(season = displayModel.season, category = "football"))
             }
         ),
         titleContent = {

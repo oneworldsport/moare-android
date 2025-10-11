@@ -37,7 +37,7 @@ import com.moare.android.features.search.display.common.container.view.InfoViewC
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.football.FBTeamStats
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
@@ -47,7 +47,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBTeamStatsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: FBTeamStatsStore
 ) {
     val displayModel by store.displayModel.collectAsState()

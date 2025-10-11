@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
@@ -24,16 +23,16 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 
 @Composable
 fun MLBLeagueScheduleView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBLeagueScheduleStore
 ) {
     /* ---------------------
@@ -47,23 +46,6 @@ fun MLBLeagueScheduleView(
     val dayCalendarScrollTrigger by store.dayCalendarScrollTrigger.collectAsState()
     val isAllResultOpened by store.isAllResultOpened.collectAsState()
     val displayDataState by store.displayDataState.collectAsState()
-
-    val viewStack by searchStore.viewStack.collectAsState()
-
-    LaunchedEffect(viewStack) {
-        // update games data after refreshing in MLBGameStatsView
-        if (viewStack.isNotEmpty() && viewStack.last() is SportDecodableModel.MLBLeagueSchedule) {
-            val mlbLeagueSchedule = viewStack.last() as SportDecodableModel.MLBLeagueSchedule
-
-//            poppedView?.let {
-//                if (it is SportDecodableModel.MLBGameStats) {
-//                    store.send(MLBLeagueScheduleAction.UpdateGamesData(mlbLeagueSchedule, it) { data ->
-//                        searchStore.send(SearchViewModel.Intent.UpdateLastViewStack(data))
-//                    })
-//                }
-//            }
-        }
-    }
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
@@ -81,9 +63,9 @@ fun MLBLeagueScheduleView(
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
                 onSelectYearMonth = { yearMonth, index ->
-                    store.send(MLBLeagueScheduleAction.SelectYearMonth(yearMonth, index) { data ->
-                        searchStore.send(SearchViewModel.Intent.UpdateLastViewStack(data))
-                    })
+//                    store.send(MLBLeagueScheduleAction.SelectYearMonth(yearMonth, index) { data ->
+//                        searchStore.send(SearchStore.Intent.UpdateLastViewStack(data))
+//                    })
                 },
                 onSelectDay = { day, index ->
                     store.send(MLBLeagueScheduleAction.SelectDay(day, index))
@@ -102,7 +84,7 @@ fun MLBLeagueScheduleView(
 
 @Composable
 fun MLBLeagueScheduleList(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBLeagueScheduleStore
 ) {
     /* ---------------------
@@ -131,7 +113,7 @@ fun MLBLeagueScheduleList(
 // 계속 MLBGameStatsScoreInfoItem를 사용할거는 아니기때문에(축구처럼 애니메이션 적용을 위해) 나중에 바뀔 여지 있음.
 @Composable
 fun MLBLeagueScheduleListItem(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBLeagueScheduleStore,
     teamNameDic: Map<String, String>,
     data: MLBGameForSchedule,
@@ -151,9 +133,6 @@ fun MLBLeagueScheduleListItem(
        --------------------- */
     val gameResultOpenedStateList by store.gameResultOpenedStateList.collectAsState()
     val displayModel by store.displayModel.collectAsState()
-
-    val displayModels by searchStore.displayModels.collectAsState()
-    val mlbGameStatsModel = displayModels[SportDisplayType.MLB_GAME_STATS] as? MLBGameStatsDisplayModel
 
     /* ---------------------
        constants
@@ -189,17 +168,10 @@ fun MLBLeagueScheduleListItem(
             isResultOpened = gameResultOpenedStateList[gameId] ?: false
         }
     }
-    LaunchedEffect(mlbGameStatsModel) {
-        mlbGameStatsModel?.let {
-            if (gameStatus != StringConstants.MLB.GAME_SCHEDULED) {
-                isResultOpened = true
-            }
-        }
-    }
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
-            isClickEnabled = mlbGameStatsModel == null,
+//            isClickEnabled = mlbGameStatsModel == null,
             homeTeamLogo = MLBUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
@@ -209,18 +181,15 @@ fun MLBLeagueScheduleListItem(
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
-            isCapsuleButtonDisabled = mlbGameStatsModel != null || !StringConstants.MLB.GAME_FINISHED_LIST.contains(gameStatus),
+            isCapsuleButtonDisabled = !StringConstants.MLB.GAME_FINISHED_LIST.contains(gameStatus),
             date = data.date,
             venue = teamNameDic["venue_${homeTeamId}"] ?: "",
-            shouldShowOnlyDateTime = mlbGameStatsModel == null,
-            shouldShowVenue = mlbGameStatsModel != null,
-            shouldShowHomeLabel = mlbGameStatsModel != null,
-            shouldShowAwayLabel = mlbGameStatsModel != null,
+            shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
             isSvgLogo = true
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-                searchStore.send(SearchViewModel.Intent.SelectMLBGame(data, displayModel.season))
+//                searchStore.send(SearchStore.Intent.SelectMLBGame(data, displayModel.season))
 
                 // set selected game's isOpened true
                 store.send(MLBLeagueScheduleAction.UpdateResultOpenedState(gameId, true))

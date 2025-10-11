@@ -1,5 +1,6 @@
 package com.moare.android.core.mvi
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
@@ -61,16 +62,15 @@ import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsA
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsStore
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsAction
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsStore
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchDelegate
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
-import javax.inject.Provider
 
 @JvmInline
 value class ViewId(val value: String = java.util.UUID.randomUUID().toString())
@@ -115,7 +115,7 @@ sealed interface StackItem {
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
-    val searchFactory: SearchViewModel.Factory,
+    val searchFactory: SearchStore.Factory,
     private val fbPlayerInfoFactory: FBPlayerInfoStore.Factory,
     private val fbPlayerStatsFactory: FBPlayerStatsStore.Factory,
     private val fbPlayerStandingsFactory: FBPlayerStandingsStore.Factory,
@@ -153,21 +153,45 @@ class AppViewModel @Inject constructor(
     private val _stack = MutableStateFlow<List<StackItem>>(emptyList())
     val stack: StateFlow<List<StackItem>> = _stack
 
-    var searchStore: SearchViewModel = searchFactory.create { delegate ->
+    private val _didPop = MutableStateFlow(false)
+    val didPop: StateFlow<Boolean> = _didPop
+
+    private val _includesPreviousView = MutableStateFlow(false)
+    val includesPreviousView: StateFlow<Boolean> = _includesPreviousView
+
+    var searchStore: SearchStore = searchFactory.create { delegate ->
         onSearchDelegate(delegate)
     }
 
-    fun pop() {
+    fun pop(activity: Activity?) {
         if (!searchStore.searchState.value) {
-            if (stack.value.isNotEmpty()) {
-//                searchStore.send()
+            if (stack.value.isEmpty()) {
+                // close app
+                activity?.finishAffinity()
+            } else {
+                // If searchBar is Opened and there are stack, don't pop and show the previous view.
+                searchStore.send(SearchAction.ToggleSearchBar)
             }
         } else {
+            _didPop.value = true
+            // NOTE: FBGameStats로 뒤로갔을때(FBLeagueSchedule -> FBGameStats인 경우) includesPreviousView가 true여야 하지만 false여도
+            // 그냥 FBGameStats 화면이 잘 나오기 때문에 상관없음
+            _includesPreviousView.value = false
+
+            val lastItem = _stack.value.lastOrNull()
+
             _stack.update { current ->
                 current.dropLast(1)
             }
 
-//            dispose()
+            lastItem?.let {
+                dispose(lastItem)
+
+                // 뒤로가기 후 보여줄 화면이 없으면(마지막 화면을 뒤로가기 했을 경우) SearchBar를 toggle.
+                if (stack.value.isEmpty()) {
+                    searchStore.send(SearchAction.ToggleSearchBar)
+                }
+            }
         }
     }
 

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,18 +33,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.features.search.display.common.components.EmptyStatDataItem
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBTeamStats
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HDivider
@@ -56,7 +51,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun MLBTeamStatsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: MLBTeamStatsStore
 ) {
     val displayModel by store.displayModel.collectAsState()

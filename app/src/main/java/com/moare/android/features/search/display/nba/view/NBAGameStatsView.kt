@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
@@ -51,9 +50,8 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.nba.NBALineScore
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.NBATitle
@@ -67,7 +65,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBAGameStatsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: NBAGameStatsStore
 ) {
     /* ---------------------
@@ -197,7 +195,7 @@ fun NBAGameStatsView(
                 store.send(NBAGameStatsAction.SelectSecondCategory(index))
             },
             refreshButtonAction = {
-                searchStore.send(SearchViewModel.Intent.RefreshGame(season = displayModel.season, category = "basketball"))
+                searchStore.send(SearchAction.RefreshGame(season = displayModel.season, category = "basketball"))
             }
         ),
         titleContent = {

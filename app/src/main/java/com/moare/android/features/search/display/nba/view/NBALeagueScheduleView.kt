@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
@@ -24,17 +23,16 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 
 @Composable
 fun NBALeagueScheduleView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: NBALeagueScheduleStore
 ) {
     /* ---------------------
@@ -49,24 +47,6 @@ fun NBALeagueScheduleView(
     val dayCalendarScrollTrigger by store.dayCalendarScrollTrigger.collectAsState()
     val isAllResultOpened by store.isAllResultOpened.collectAsState()
     val displayDataState by store.displayDataState.collectAsState()
-
-    val displayModels by searchStore.displayModels.collectAsState()
-    val viewStack by searchStore.viewStack.collectAsState()
-
-    LaunchedEffect(viewStack) {
-        // update games data after refreshing in NBAGameStatsView
-        if (viewStack.isNotEmpty() && viewStack.last() is SportDecodableModel.NBALeagueSchedule) {
-            val nbaLeagueSchedule = viewStack.last() as SportDecodableModel.NBALeagueSchedule
-
-//            poppedView?.let {
-//                if (it is SportDecodableModel.NBAGameStats) {
-//                    store.send(NBALeagueScheduleAction.UpdateGamesData(nbaLeagueSchedule, it) { data ->
-//                        searchStore.send(SearchViewModel.Intent.UpdateLastViewStack(data))
-//                    })
-//                }
-//            }
-        }
-    }
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
@@ -86,10 +66,10 @@ fun NBALeagueScheduleView(
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
                 onSelectYearMonth = { yearMonth, index ->
-                    store.send(NBALeagueScheduleAction.SelectYearMonth(yearMonth, index) { data ->
-                        // 현재 구조 콜백 수정 필요?
-                        searchStore.send(SearchViewModel.Intent.UpdateLastViewStack(data))
-                    })
+//                    store.send(NBALeagueScheduleAction.SelectYearMonth(yearMonth, index) { data ->
+//                        // 현재 구조 콜백 수정 필요?
+//                        searchStore.send(SearchStore.Intent.UpdateLastViewStack(data))
+//                    })
                 },
                 onSelectDay = { day, index ->
                     store.send(NBALeagueScheduleAction.SelectDay(day, index))
@@ -108,7 +88,7 @@ fun NBALeagueScheduleView(
 
 @Composable
 fun NBALeagueScheduleList(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: NBALeagueScheduleStore
 ) {
     /* ---------------------
@@ -134,7 +114,7 @@ fun NBALeagueScheduleList(
 
 @Composable
 fun NBALeagueScheduleListItem(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: NBALeagueScheduleStore,
     teamNameDic: Map<String, String>,
     data: NBAGameForSchedule,
@@ -154,9 +134,6 @@ fun NBALeagueScheduleListItem(
        --------------------- */
     val gameResultOpenedStateList by store.gameResultOpenedStateList.collectAsState()
     val displayModel by store.displayModel.collectAsState()
-
-    val displayModels by searchStore.displayModels.collectAsState()
-    val nbaGameStatsModel = displayModels[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel
 
     /* ---------------------
        constants
@@ -208,17 +185,10 @@ fun NBALeagueScheduleListItem(
             isResultOpened = gameResultOpenedStateList[gameId] ?: false
         }
     }
-    LaunchedEffect(nbaGameStatsModel) {
-        nbaGameStatsModel?.let {
-            if (gameStatus != StringConstants.NBA.GAME_SCHEDULED) {
-                isResultOpened = true
-            }
-        }
-    }
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
-            isClickEnabled = nbaGameStatsModel == null,
+//            isClickEnabled = nbaGameStatsModel == null,
             homeTeamLogo = NBAUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
@@ -228,19 +198,16 @@ fun NBALeagueScheduleListItem(
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
-            isCapsuleButtonDisabled = nbaGameStatsModel != null || gameStatus != StringConstants.NBA.GAME_FINAL,
+            isCapsuleButtonDisabled = gameStatus != StringConstants.NBA.GAME_FINAL,
             date = data.date,
             venue = teamNameDic["venue_${homeTeamId}"] ?: "",
 //            gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
-            shouldShowOnlyDateTime = (displayModel?.scheduleType != ScheduleType.TEAM_FLAT && nbaGameStatsModel == null), // (리그, 팀)일정 화면에서만 true
-            shouldShowVenue = nbaGameStatsModel != null,
-            shouldShowHomeLabel = nbaGameStatsModel != null,
-            shouldShowAwayLabel = nbaGameStatsModel != null,
+            shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
             isSvgLogo = true
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-                searchStore.send(SearchViewModel.Intent.SelectNBAGame(data, displayModel.season))
+//                searchStore.send(SearchStore.Intent.SelectNBAGame(data, displayModel.season))
 
                 // set selected game's isOpened true
                 store.send(NBALeagueScheduleAction.UpdateResultOpenedState(gameId, true))

@@ -34,8 +34,8 @@ import com.moare.android.features.search.display.common.container.component.Movi
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
@@ -43,7 +43,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun KBOPlayerInfoView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOPlayerInfoStore
 ) {
     InfoViewContainer(
@@ -158,7 +158,7 @@ fun KBOPlayerInfoView(
             )
 
             KBOPlayerInfoSixthItem(
-                searchViewModel = searchStore,
+                searchStore = searchStore,
                 store = store,
                 isAniItem = true,
                 itemSize = itemSizes[5],
@@ -168,7 +168,7 @@ fun KBOPlayerInfoView(
             )
 
             KBOPlayerInfoSeventhItem(
-                searchViewModel = searchStore,
+                searchStore = searchStore,
                 store = store,
                 isAniItem = true,
                 itemSize = itemSizes[6],
@@ -178,7 +178,7 @@ fun KBOPlayerInfoView(
             )
 
             KBOPlayerInfoEighthItem(
-                searchViewModel = searchStore,
+                searchStore = searchStore,
                 store = store,
                 isAniItem = true,
                 itemSize = itemSizes[7],
@@ -233,7 +233,7 @@ fun KBOPlayerInfoFirstItem(
 // logo, team, name
 @Composable
 fun KBOPlayerInfoSecondItem(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -260,7 +260,7 @@ fun KBOPlayerInfoSecondItem(
         modifier = containerModifier,
         onClick = {
             searchStore.send(
-                SearchViewModel.Intent.SearchById(
+                SearchAction.SearchById(
                     id = player.teamId.toString(),
                     season = displayModel.season,
                     category = "baseball",
@@ -496,7 +496,7 @@ fun KBOPlayerInfoFifthItem(
 // league stats
 @Composable
 fun KBOPlayerInfoSixthItem(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -522,7 +522,7 @@ fun KBOPlayerInfoSixthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(playerId = displayModel.info.id))
+            searchStore.send(SearchAction.ShowPlayerStats(playerId = displayModel.info.id))
         }
     ) {
         BaseballLeagueTitle(
@@ -621,7 +621,7 @@ fun KBOPlayerInfoSixthItem(
 // last game
 @Composable
 fun KBOPlayerInfoSeventhItem(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -650,7 +650,7 @@ fun KBOPlayerInfoSeventhItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
+            searchStore.send(SearchAction.ShowGameStats(gameType = "previous"))
         }
     ) {
         Text(
@@ -816,7 +816,7 @@ fun KBOPlayerInfoSeventhItem(
 // next game
 @Composable
 fun KBOPlayerInfoEighthItem(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -843,7 +843,7 @@ fun KBOPlayerInfoEighthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
+            searchStore.send(SearchAction.ShowGameStats(gameType = "next"))
         }
     ) {
         Text(

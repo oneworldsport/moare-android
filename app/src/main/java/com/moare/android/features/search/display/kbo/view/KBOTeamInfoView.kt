@@ -31,8 +31,8 @@ import com.moare.android.features.search.display.common.container.component.Movi
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
@@ -40,7 +40,7 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun KBOTeamInfoView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOTeamInfoStore
 ) {
     InfoViewContainer(
@@ -346,7 +346,7 @@ fun KBOTeamInfoThirdItem(
 // league stats
 @Composable
 fun KBOTeamInfoFourthItem(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -373,7 +373,7 @@ fun KBOTeamInfoFourthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchStore.send(SearchViewModel.Intent.ShowTeamStats(teamId = displayModel.team.id))
+            searchStore.send(SearchAction.ShowTeamStats(teamId = displayModel.team.id))
         }
     ) {
         BaseballLeagueTitle(
@@ -426,7 +426,7 @@ fun KBOTeamInfoFourthItem(
 // last game stats
 @Composable
 fun KBOTeamInfoFifthItem(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -452,7 +452,7 @@ fun KBOTeamInfoFifthItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier,
         onClick = {
-            searchStore.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
+            searchStore.send(SearchAction.ShowGameStats(gameType = "previous"))
         }
     ) {
         Text(
@@ -530,7 +530,7 @@ fun KBOTeamInfoFifthItem(
 // next game stats
 @Composable
 fun KBOTeamInfoSixthItem(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOTeamInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -556,7 +556,7 @@ fun KBOTeamInfoSixthItem(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = containerModifier,
         onClick = {
-            searchStore.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
+            searchStore.send(SearchAction.ShowGameStats(gameType = "next"))
         }
     ) {
         Text(

@@ -2,11 +2,9 @@ package com.moare.android.features.search.display.kbo.view
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.KBOUtil
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
@@ -15,14 +13,13 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 
 @Composable
 fun KBOTeamStandingsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: KBOTeamStandingsStore
 ) {
     /* ---------------------
@@ -84,7 +81,7 @@ fun KBOTeamStandingsView(
                 store.send(KBOTeamStandingsAction.SelectCategory(index))
             },
             itemButtonAction = { id ->
-                searchStore.send(SearchViewModel.Intent.ShowTeamStats(teamId = id))
+                searchStore.send(SearchAction.ShowTeamStats(teamId = id))
             }
         ),
         titleContent = {

@@ -14,12 +14,13 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.LeagueTitle
 
 @Composable
 fun FBTeamStandingsView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: FBTeamStandingsStore
 ) {
     val headerCategories = listOf("서부 컨퍼런스", "동부 컨퍼런스")
@@ -79,7 +80,7 @@ fun FBTeamStandingsView(
                 store.send(FBTeamStandingsAction.SelectCategory(index))
             },
             itemButtonAction = { id ->
-                searchStore.send(SearchViewModel.Intent.ShowTeamStats(teamId = id))
+                searchStore.send(SearchAction.ShowTeamStats(teamId = id))
             }
         ),
         titleContent = {

@@ -24,7 +24,7 @@ import java.util.UUID
 
 sealed interface FBLeagueScheduleAction {
     data object InitData : FBLeagueScheduleAction
-    data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int, val updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) : FBLeagueScheduleAction
+    data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int) : FBLeagueScheduleAction
     data class SelectDay(val day: DayInfo, val selectedIndex: Int) : FBLeagueScheduleAction
     data object ToggleAllResult : FBLeagueScheduleAction
     data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : FBLeagueScheduleAction
@@ -54,7 +54,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
     override fun send(action: FBLeagueScheduleAction) {
         when (action) {
             is FBLeagueScheduleAction.InitData -> initData()
-            is FBLeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex, action.updateViewStack)
+            is FBLeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex)
             is FBLeagueScheduleAction.SelectDay -> selectDay(action.day, action.selectedIndex)
             is FBLeagueScheduleAction.ToggleAllResult -> toggleAllResult()
             is FBLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.gameId, action.isOpened)
@@ -102,12 +102,12 @@ class FBLeagueScheduleStore @AssistedInject constructor(
         }
     }
 
-    private fun selectYearMonth(yearMonth: String, selectedIndex: Int, updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) {
+    private fun selectYearMonth(yearMonth: String, selectedIndex: Int) {
         _selectedYearMonth.value = yearMonth
         _selectedYearMonthIndex.value = selectedIndex
 
         when (displayModel.value.scheduleType) {
-            ScheduleType.LEAGUE -> { fetchGames(updateViewStack) }
+            ScheduleType.LEAGUE -> { fetchGames() }
             ScheduleType.TEAM -> { setDays() }
             else -> {}
         }
@@ -189,7 +189,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
         }
     }
 
-    private fun fetchGames(updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit) {
+    private fun fetchGames() {
         _displayDataState.value = ApiFetchState.Fetching
 
         scope.launch {
@@ -210,7 +210,6 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                 if (result.data is SportDecodableModel.FBLeagueSchedule) {
                     val data = result.data
                     _displayModel.value = data.displayModel
-                    updateViewStack(data)
                     setDays()
                 }
             } catch (e: Exception) {

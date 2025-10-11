@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.moare.android.features.search.display.common.scope.InfoViewScope
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.util.screenHeightPx
 import kotlinx.coroutines.delay
 
@@ -37,7 +37,7 @@ import kotlinx.coroutines.delay
  */
 @Composable
 fun InfoViewContainer(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     itemCount: Int,
     shouldShowMeasureContent: Boolean = false, // NOTE: StatsView가 아코디언 UI로 바뀌면서 measureContent를 사용해야하는 경우가 있어 추가.
     modifier: Modifier = Modifier,
@@ -65,11 +65,6 @@ fun InfoViewContainer(
     )
     var startPosition by remember { mutableStateOf(Offset.Zero) }
     var measureContentAlpha by remember { mutableFloatStateOf(0f) }
-
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val poppedView by searchStore.poppedView.collectAsState()
 
     val scope = InfoViewScope(
         density = density,

@@ -1,12 +1,10 @@
 package com.moare.android.features.search.display.search
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,8 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.util.convertPxToDp
 import com.moare.android.ui.util.screenWidthDp
 import kotlinx.coroutines.delay
@@ -46,7 +42,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun AutoCompleteList(
     modifier: Modifier = Modifier,
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     onItemSelected: (String) -> Unit
 ) {
     var selectedQuery by remember { mutableStateOf("") }
@@ -61,7 +57,7 @@ fun AutoCompleteList(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
+    val autoCompleteList by searchStore.autoCompleteList.collectAsState()
 
     LaunchedEffect(autoCompleteList) {
         selectedQuery = ""

@@ -35,7 +35,8 @@ import com.moare.android.features.search.display.common.container.view.InfoViewC
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.LeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
@@ -44,14 +45,9 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBPlayerInfoView(
-    searchStore: SearchViewModel,
+    searchStore: SearchStore,
     store: FBPlayerInfoStore
 ) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val poppedView by searchStore.poppedView.collectAsState()
-
     InfoViewContainer(
         searchStore = searchStore,
         itemCount = 6,
@@ -124,7 +120,7 @@ fun FBPlayerInfoView(
 
             FBPlayerInfoFourthItem(
                 fbPlayerInfoStore = store,
-                searchViewModel = searchStore,
+                searchStore = searchStore,
                 isAniItem = true,
                 itemSize = itemSizes[3],
                 itemPosition = itemPositions[3],
@@ -134,7 +130,7 @@ fun FBPlayerInfoView(
 
             FBPlayerInfoFifthItem(
                 fbPlayerInfoStore = store,
-                searchViewModel = searchStore,
+                searchStore = searchStore,
                 isAniItem = true,
                 itemSize = itemSizes[4],
                 itemPosition = itemPositions[4],
@@ -144,7 +140,7 @@ fun FBPlayerInfoView(
 
             FBPlayerInfoSixthItem(
                 fbPlayerInfoStore = store,
-                searchViewModel = searchStore,
+                searchStore = searchStore,
                 isAniItem = true,
                 itemSize = itemSizes[5],
                 itemPosition = itemPositions[5],
@@ -349,7 +345,7 @@ fun FBPlayerInfoThirdItem(
 // league stats
 @Composable
 fun FBPlayerInfoFourthItem(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     fbPlayerInfoStore: FBPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -377,7 +373,7 @@ fun FBPlayerInfoFourthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchViewModel.send(SearchViewModel.Intent.ShowPlayerStats(playerId = displayModel.info.id))
+            searchStore.send(SearchAction.ShowPlayerStats(playerId = displayModel.info.id))
         }
     ) {
         league?.let {
@@ -446,7 +442,7 @@ fun FBPlayerInfoFourthItem(
 // last game stats
 @Composable
 fun FBPlayerInfoFifthItem(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     fbPlayerInfoStore: FBPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -473,7 +469,7 @@ fun FBPlayerInfoFifthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "previous"))
+            searchStore.send(SearchAction.ShowGameStats(gameType = "previous"))
         }
     ) {
         Text(
@@ -572,7 +568,7 @@ fun FBPlayerInfoFifthItem(
 // next game stats
 @Composable
 fun FBPlayerInfoSixthItem(
-    searchViewModel: SearchViewModel,
+    searchStore: SearchStore,
     fbPlayerInfoStore: FBPlayerInfoStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
@@ -598,7 +594,7 @@ fun FBPlayerInfoSixthItem(
         modifier = Modifier
             .padding(top = if (isAniItem) 0.dp else 12.dp),
         onClick = {
-            searchViewModel.send(SearchViewModel.Intent.ShowGameStats(gameType = "next"))
+            searchStore.send(SearchAction.ShowGameStats(gameType = "next"))
         }
     ) {
         Text(
