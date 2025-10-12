@@ -146,7 +146,7 @@ fun GameStatsViewContainer(
             this.titleContent()
         }
 
-        if (state.shouldShowGameItem) {
+        if (state.shouldShowGameContent) {
             this.gameContent()
         }
 

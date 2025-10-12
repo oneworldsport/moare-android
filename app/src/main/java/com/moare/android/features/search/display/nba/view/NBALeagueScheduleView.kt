@@ -21,6 +21,7 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
+import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleAction
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleStore
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
@@ -33,7 +34,8 @@ import com.moare.android.features.search.models.responsemodels.football.Schedule
 @Composable
 fun NBALeagueScheduleView(
     searchStore: SearchStore,
-    store: NBALeagueScheduleStore
+    store: NBALeagueScheduleStore,
+    didPop: Boolean,
 ) {
     /* ---------------------
        viewmodel state
@@ -47,6 +49,14 @@ fun NBALeagueScheduleView(
     val dayCalendarScrollTrigger by store.dayCalendarScrollTrigger.collectAsState()
     val isAllResultOpened by store.isAllResultOpened.collectAsState()
     val displayDataState by store.displayDataState.collectAsState()
+
+    LaunchedEffect(didPop) {
+        // 뒤로가서 일정화면으로 돌아왔을때 filteredGames update
+        if (didPop) {
+            // TODO: NBAGameStatsView에서 뒤로왔을때만 실행하게 개선 필요
+            store.send(NBALeagueScheduleAction.UpdateFilteredGames)
+        }
+    }
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
@@ -66,10 +76,7 @@ fun NBALeagueScheduleView(
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
                 onSelectYearMonth = { yearMonth, index ->
-//                    store.send(NBALeagueScheduleAction.SelectYearMonth(yearMonth, index) { data ->
-//                        // 현재 구조 콜백 수정 필요?
-//                        searchStore.send(SearchStore.Intent.UpdateLastViewStack(data))
-//                    })
+                    store.send(NBALeagueScheduleAction.SelectYearMonth(yearMonth, index))
                 },
                 onSelectDay = { day, index ->
                     store.send(NBALeagueScheduleAction.SelectDay(day, index))
@@ -188,7 +195,6 @@ fun NBALeagueScheduleListItem(
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
-//            isClickEnabled = nbaGameStatsModel == null,
             homeTeamLogo = NBAUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
@@ -200,17 +206,12 @@ fun NBALeagueScheduleListItem(
             gameStatusColor = gameStatusColor,
             isCapsuleButtonDisabled = gameStatus != StringConstants.NBA.GAME_FINAL,
             date = data.date,
-            venue = teamNameDic["venue_${homeTeamId}"] ?: "",
 //            gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
-            isSvgLogo = true
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-//                searchStore.send(SearchStore.Intent.SelectNBAGame(data, displayModel.season))
-
-                // set selected game's isOpened true
-                store.send(NBALeagueScheduleAction.UpdateResultOpenedState(gameId, true))
+                store.send(NBALeagueScheduleAction.SelectGame(data))
             },
             onCapsuleButtonClick = {
                 store.send(NBALeagueScheduleAction.UpdateResultOpenedState(gameId, !isResultOpened))

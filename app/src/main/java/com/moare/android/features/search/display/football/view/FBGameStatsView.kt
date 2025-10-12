@@ -27,14 +27,13 @@ import com.moare.android.features.search.display.football.viewmodel.FBGameStatsA
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.ModelConverter
-import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.ui.common.components.LeagueTitle
 
 @Composable
 fun FBGameStatsView(
     searchStore: SearchStore,
-    store: FBGameStatsStore
+    store: FBGameStatsStore,
+    isCombinedView: Boolean = false
 ) {
     val horizontalScrollState = rememberScrollState()
 
@@ -49,7 +48,9 @@ fun FBGameStatsView(
     val teamNameDic by store.teamNameDic.collectAsState()
     val playerNameDic by store.playerNameDic.collectAsState()
 
-    val teamIds = listOf(displayModel.game.teams.home.id, displayModel.game.teams.away.id)
+    val game = displayModel.game
+
+    val teamIds = listOf(game.teams.home.id, game.teams.away.id)
     val teamCategories = teamIds.map {
         GameStatsTeamState(
             name = teamNameDic["short_${it}"] ?: "",
@@ -115,7 +116,7 @@ fun FBGameStatsView(
     }
     val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 60.dp, 50.dp, 80.dp, 70.dp, 70.dp, 80.dp, 60.dp, 60.dp, 60.dp, 50.dp, 50.dp, 50.dp, 80.dp, 50.dp)
     val gameDetailTitle = "심판: "
-    val gameDetailContent = displayModel.game.fixture.referee
+    val gameDetailContent = game.fixture.referee
 
     // TODO: 나중에 다른 GameStatsView도 playersTotalStats 작업이 되면 StandingsRankItem 수정한 후 아래 주석 추가.
 //    playersTotalStats?.let { totalStats ->
@@ -183,11 +184,11 @@ fun FBGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-//            shouldShowTitle = fbLeagueScheduleModel == null,
-//            shouldShowGameItem = fbLeagueScheduleModel == null,
-            shouldShowStats = displayModel.game.fixture.status.short != StringConstants.Football.GAME_NOT_STARTED,
+            shouldShowTitle = !isCombinedView,
+            shouldShowGameContent = !isCombinedView,
+            shouldShowStats = game.fixture.status.short != StringConstants.Football.GAME_NOT_STARTED,
             shouldShowCoach = true,
-            shouldShowRefreshButton = StringConstants.Football.GAME_LIVE_LIST.contains(displayModel.game.fixture.status.short),
+            shouldShowRefreshButton = StringConstants.Football.GAME_LIVE_LIST.contains(game.fixture.status.short),
             teamCategories = teamCategories,
             secondCategories = StringConstants.Football.GAME_STATS_SECOND_CATEGORIES,
             coachState = GameStatsCoachState(
@@ -213,8 +214,6 @@ fun FBGameStatsView(
             }
         ),
         titleContent = {
-            val game = displayModel.game
-
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -231,8 +230,6 @@ fun FBGameStatsView(
             }
         },
         gameContent = {
-            val game = displayModel.game
-
             FBLeagueScheduleListItem(
                 searchStore = searchStore,
                 store = null,

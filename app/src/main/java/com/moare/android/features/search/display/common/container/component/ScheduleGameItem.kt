@@ -146,17 +146,6 @@ fun ScheduleGameItem(
                 )
             }
 
-            // venue
-            if (state.shouldShowVenue) {
-                Text(
-                    text = "장소: ${state.venue}",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Light,
-                    maxLines = 1,
-                    modifier = Modifier.padding(bottom = 2.dp)
-                )
-            }
-
             // game type
             if (state.gameType != null && state.shouldShowGameType) {
                 Text(

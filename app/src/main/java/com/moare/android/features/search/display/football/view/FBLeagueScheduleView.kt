@@ -39,7 +39,9 @@ import com.moare.android.ui.common.components.LeagueTitle
 @Composable
 fun FBLeagueScheduleView(
     searchStore: SearchStore,
-    store: FBLeagueScheduleStore
+    store: FBLeagueScheduleStore,
+    didPop: Boolean,
+    isCombinedView: Boolean = false
 ) {
     var shouldAnimateScroll by remember { mutableStateOf(true) }
 
@@ -54,13 +56,23 @@ fun FBLeagueScheduleView(
     val dayCalendarScrollTrigger by store.dayCalendarScrollTrigger.collectAsState()
     val isAllResultOpened by store.isAllResultOpened.collectAsState()
     val displayDataState by store.displayDataState.collectAsState()
+    val selectedGame by store.selectedGame.collectAsState()
+    val league by store.league.collectAsState()
+
+    LaunchedEffect(didPop) {
+        // 뒤로가서 일정화면으로 돌아왔을때 filteredGames update
+        if (!isCombinedView && didPop) {
+            // TODO: FBGameStatsView에서 뒤로왔을때만 실행하게 개선 필요
+            store.send(FBLeagueScheduleAction.UpdateFilteredGames)
+        }
+    }
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
-//            shouldShowCalendar = fbGameStatsModel == null,
-//            shouldShowAllResultToggleButton = fbGameStatsModel == null,
+            shouldShowCalendar = selectedGame == null,
+            shouldShowAllResultToggleButton = selectedGame == null,
             displayDataState = displayDataState,
-//            shouldFillBelow = fbGameStatsModel == null,
+            shouldFillBelow = selectedGame == null,
             calendarUiState = CalendarUiState(
                 yearMonthList,
                 days,
@@ -88,22 +100,24 @@ fun FBLeagueScheduleView(
             }
         ),
         titleContent = {
-//            fbGameStatsModel?.let {
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    LeagueTitle(
-//                        url = it.game.league.logo,
-//                        leagueName = it.game.league.name,
-//                        leagueSeason = it.game.league.season
-//                    )
-//
-//                    Text(
-//                        text = " - " + MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = it.game.league.round),
-//                        fontSize = 14.sp
-//                    )
-//                }
-//            }
+            selectedGame?.let {
+                league?.let { league ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        LeagueTitle(
+                            url = league.logo,
+                            leagueName = league.name,
+                            leagueSeason = league.season
+                        )
+
+                        Text(
+                            text = " - " + MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = league.round),
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
         },
         gameListContent = {
             FBLeagueScheduleList(searchStore = searchStore, store = store)
@@ -123,22 +137,17 @@ fun FBLeagueScheduleList(
     val selectedDayIndex by store.selectedDayIndex.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
 
-//    val displayModels by searchStore.displayModels.collectAsState()
-//    val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
-
-//    val gameListToDisplay = if (fbGameStatsModel == null) filteredGames[selectedDayIndex] ?: emptyList() else listOf(ModelConverter().fbGameToGameScheduleConverter(fbGameStatsModel.game))
+    val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
 
     LazyColumn {
-//        items(gameListToDisplay) { item ->
-//            FBLeagueScheduleListItem(
-//                searchStore = searchStore,
-//                store = store,
-//                data = item,
-//                teamNameDic = teamNameDic
-//            )
-//        }
-
-
+        items(gameListToDisplay) { item ->
+            FBLeagueScheduleListItem(
+                searchStore = searchStore,
+                store = store,
+                data = item,
+                teamNameDic = teamNameDic
+            )
+        }
 //        for (value in gameListToDisplay) {
 //            FBLeagueScheduleItem(data = value)
 //        }
@@ -170,9 +179,9 @@ fun FBLeagueScheduleListItem(
        --------------------- */
     val displayModel = store?.displayModel?.collectAsState()?.value
     val gameResultOpenedStateList = store?.gameResultOpenedStateList?.collectAsState()?.value
+    val selectedGame = store?.selectedGame?.collectAsState()?.value
 
-//    val displayModels by searchStore.displayModels.collectAsState()
-//    val fbGameStatsModel = displayModels[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel
+    val isFromSchedule = store != null
 
     /* ---------------------
        constants
@@ -234,7 +243,7 @@ fun FBLeagueScheduleListItem(
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
-//            isClickEnabled = fbGameStatsModel == null,
+            isClickEnabled = if (isFromSchedule) selectedGame == null else false,
             homeTeamLogo = FBUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
@@ -244,25 +253,17 @@ fun FBLeagueScheduleListItem(
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
-//            isCapsuleButtonDisabled = fbGameStatsModel != null || !StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus),
+            isCapsuleButtonDisabled = (if (isFromSchedule) selectedGame != null else true) || !StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus),
             date = data.date,
-//            venue = teamNameDic["venue_${homeTeamId}"] ?: (fbGameStatsModel?.game?.fixture?.venue?.name ?: ""),
-            venue = teamNameDic["venue_${homeTeamId}"] ?: "",
             gameType = MatchDescriptionConverter.convert(input = data.gameInfo?.round ?: ""),
-//            shouldShowOnlyDateTime = fbGameStatsModel == null,
-//            shouldShowVenue = fbGameStatsModel != null,
-//            shouldShowGameType = fbGameStatsModel == null,
-//            shouldShowHomeLabel = fbGameStatsModel != null,
-//            shouldShowAwayLabel = fbGameStatsModel != null
+            shouldShowOnlyDateTime = if (isFromSchedule) selectedGame == null else false,
+            shouldShowGameType = if (isFromSchedule) selectedGame == null else false,
+            shouldShowHomeLabel = if (isFromSchedule) selectedGame != null else true,
+            shouldShowAwayLabel = if (isFromSchedule) selectedGame != null else true
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-//                displayModel?.let {
-//                    searchStore.send(SearchStore.Intent.SelectFBGame(data, displayModel.season, displayModel.leagueId))
-//                }
-
-                // set selected game's isOpened true
-                store?.send(FBLeagueScheduleAction.UpdateResultOpenedState(gameId, true))
+                store?.send(FBLeagueScheduleAction.SelectGame(data))
             },
             onCapsuleButtonClick = {
                 store?.send(FBLeagueScheduleAction.UpdateResultOpenedState(gameId, !isResultOpened))

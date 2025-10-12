@@ -1,17 +1,16 @@
 package com.moare.android.features.search.display.football.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.viewModelScope
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.features.search.display.common.viewmodel.BaseScheduleStore
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
-import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
+import com.moare.android.features.search.models.models.football.FBLeague
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
@@ -19,6 +18,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -28,27 +28,41 @@ sealed interface FBLeagueScheduleAction {
     data class SelectDay(val day: DayInfo, val selectedIndex: Int) : FBLeagueScheduleAction
     data object ToggleAllResult : FBLeagueScheduleAction
     data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : FBLeagueScheduleAction
-    data class UpdateGamesData(
-        val fbLeagueScheduleData: SportDecodableModel.FBLeagueSchedule,
-        val fbGameStatsData: SportDecodableModel.FBGameStats,
-        val updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit
-    ) : FBLeagueScheduleAction
+    data class SelectGame(val game: FBGameForSchedule) : FBLeagueScheduleAction
+    data object UpdateSelectedGame : FBLeagueScheduleAction
+    data object UpdateFilteredGames : FBLeagueScheduleAction
+}
+
+sealed interface FBLeagueScheduleDelegate {
+    data class ShowGameStats(val model: SportDecodableModel.FBGameStats) : FBLeagueScheduleDelegate
 }
 
 class FBLeagueScheduleStore @AssistedInject constructor(
     private val searchClient: SearchClient,
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: FBLeagueScheduleDisplayModel
-) : BaseScheduleStore<FBLeagueScheduleAction, FBLeagueScheduleDisplayModel>(initial, nameProvider) {
+    @Assisted val model: FBLeagueScheduleDisplayModel,
+    @Assisted val emitToParent: (FBLeagueScheduleDelegate) -> Unit
+) : BaseScheduleStore<FBLeagueScheduleAction, FBLeagueScheduleDisplayModel>(model, nameProvider) {
     private val _filteredGames = MutableStateFlow<Map<Int, List<FBGameForSchedule>>>(emptyMap())
     val filteredGames: StateFlow<Map<Int, List<FBGameForSchedule>>> = _filteredGames
+
+    // FBGameStatsView에서 title 정보에 사용
+    // FBGameStatsStore에서 DidRefreshGame을 실행하면, AppViewModel에서 설정됨.
+    private val _league = MutableStateFlow<FBLeague?>(null)
+    val league: StateFlow<FBLeague?> = _league
+
+    private val _selectedGame = MutableStateFlow<FBGameForSchedule?>(null)
+    val selectedGame: StateFlow<FBGameForSchedule?> = _selectedGame
 
     private val _gameResultOpenedStateList = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     val gameResultOpenedStateList: StateFlow<Map<String, Boolean>> = _gameResultOpenedStateList
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: FBLeagueScheduleDisplayModel) : FBLeagueScheduleStore
+        fun create(
+            model: FBLeagueScheduleDisplayModel,
+            emitToParent: (FBLeagueScheduleDelegate) -> Unit
+        ) : FBLeagueScheduleStore
     }
 
     override fun send(action: FBLeagueScheduleAction) {
@@ -58,7 +72,9 @@ class FBLeagueScheduleStore @AssistedInject constructor(
             is FBLeagueScheduleAction.SelectDay -> selectDay(action.day, action.selectedIndex)
             is FBLeagueScheduleAction.ToggleAllResult -> toggleAllResult()
             is FBLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.gameId, action.isOpened)
-            is FBLeagueScheduleAction.UpdateGamesData -> updateGamesData(action.fbLeagueScheduleData, action.fbGameStatsData, action.updateViewStack)
+            is FBLeagueScheduleAction.SelectGame -> selectGame(action.game)
+            is FBLeagueScheduleAction.UpdateSelectedGame -> updateSelectedGame()
+            is FBLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
         }
     }
 
@@ -225,30 +241,80 @@ class FBLeagueScheduleStore @AssistedInject constructor(
         _gameResultOpenedStateList.value = newMap
     }
 
+    private fun selectGame(game: FBGameForSchedule) {
+        _selectedGame.value = game
+        _filteredGames.update { currentMap ->
+            currentMap.toMutableMap().apply {
+                this[selectedDayIndex.value] = listOf(game)
+            }
+        }
+
+        scope.launch {
+            val result = searchClient.fetchById(
+                season = displayModel.value.season,
+                category = "football",
+                date = game.date,
+                dataType = "football_game_stats",
+                leagueId = displayModel.value.leagueId,
+                id = game.gameId
+            )
+
+            if (result.data is SportDecodableModel.FBGameStats) {
+                emitToParent(FBLeagueScheduleDelegate.ShowGameStats(result.data))
+                updateResultOpenedState(game.gameId, true)
+            }
+        }
+    }
+
+    private fun updateSelectedGame() {
+        // 바뀐 displayModel에 있는 (update된)game으로 기존 selectedGame을 update한다.
+        val game = displayModel.value.games.find { it.gameId == selectedGame.value?.gameId }
+        game?.let {
+            _filteredGames.update { currentMap ->
+                currentMap.toMutableMap().apply {
+                    this[selectedDayIndex.value] = listOf(game)
+                }
+            }
+        }
+    }
+
+    private fun updateFilteredGames() {
+        _filteredGames.update { currentMap ->
+            currentMap.toMutableMap().apply {
+                this[selectedDayIndex.value] = displayModel.value.games.filter { game ->
+                    CalendarUtil.isSameDate(game.date, selectedYearMonth.value, selectedDayIndex.value + 1)
+                }
+            }
+        }
+
+        // 해당 액션은 뒤로왔을때 실행되므로 선택된 게임은 없앤다.
+        _selectedGame.value = null
+    }
+
     private fun updateGamesData(
         fbLeagueScheduleData: SportDecodableModel.FBLeagueSchedule,
         fbGameStatsData: SportDecodableModel.FBGameStats,
         updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit
     ) {
-        val game = fbGameStatsData.displayModel.game
-        val newGames = fbLeagueScheduleData.displayModel.games.map {
-            if (it.gameId == fbGameStatsData.displayModel.game.fixture.id.toString()) {
-                ModelConverter.fbGameToGameScheduleConverter(game)
-            } else it
-        }
-
-        val newData = fbLeagueScheduleData
-        newData.displayModel.games = newGames
-        _displayModel.value = newData.displayModel
-
-        val newFilteredGames = filteredGames.value.toMutableMap()
-        newFilteredGames[selectedDayIndex.value] = newData.displayModel.games.filter { game ->
-            CalendarUtil.isSameDate(game.date, selectedYearMonth.value, selectedDayIndex.value + 1)
-        }
-
-        _filteredGames.value = newFilteredGames
-
-        updateViewStack(newData)
+//        val game = fbGameStatsData.displayModel.game
+//        val newGames = fbLeagueScheduleData.displayModel.games.map {
+//            if (it.gameId == fbGameStatsData.displayModel.game.fixture.id.toString()) {
+//                ModelConverter.fbGameToGameScheduleConverter(game)
+//            } else it
+//        }
+//
+//        val newData = fbLeagueScheduleData
+//        newData.displayModel.games = newGames
+//        _displayModel.value = newData.displayModel
+//
+//        val newFilteredGames = filteredGames.value.toMutableMap()
+//        newFilteredGames[selectedDayIndex.value] = newData.displayModel.games.filter { game ->
+//            CalendarUtil.isSameDate(game.date, selectedYearMonth.value, selectedDayIndex.value + 1)
+//        }
+//
+//        _filteredGames.value = newFilteredGames
+//
+//        updateViewStack(newData)
     }
 }
 

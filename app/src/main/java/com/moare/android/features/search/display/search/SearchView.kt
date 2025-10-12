@@ -108,6 +108,8 @@ fun SearchView(
        viewmodel state
        --------------------- */
     val stack by viewModel.stack.collectAsState()
+    val didPop by viewModel.didPop.collectAsState()
+    val includesPreviousView by viewModel.includesPreviousView.collectAsState()
 
     val searchDataState by searchStore.searchDataState.collectAsState()
     val showResult by searchStore.resultVisibleState.collectAsState()
@@ -339,53 +341,25 @@ fun SearchView(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(top = 10.dp)
                 ) {
-                    when (val top = stack.lastOrNull()) {
-                        is StackItem.FBPlayerInfo -> FBPlayerInfoView(searchStore, top.store)
-                        is StackItem.FBPlayerStats -> FBPlayerStatsView(searchStore, top.store)
-                        is StackItem.FBPlayerStandings -> FBPlayerStandingsView(searchStore, top.store)
-                        is StackItem.FBTeamInfo -> FBTeamInfoView(searchStore, top.store)
-                        is StackItem.FBTeamStats -> FBTeamStatsView(searchStore, top.store)
-                        is StackItem.FBTeamStandings -> FBTeamStandingsView(searchStore, top.store)
-                        is StackItem.FBLeagueSchedule -> FBLeagueScheduleView(searchStore, top.store)
-                        is StackItem.FBGameStats -> FBGameStatsView(searchStore, top.store)
+                    if (includesPreviousView) {
+                        stack.takeLast(2).firstOrNull()?.let { item ->
+                            StackItemView(
+                                searchStore = searchStore,
+                                item = item,
+                                didPop = true,
+                                isCombinedView = true
+                            )
+                            // isCombinedView
+                        }
+                    }
 
-                        is StackItem.NBAPlayerInfo -> NBAPlayerInfoView(searchStore, top.store)
-                        is StackItem.NBAPlayerStats -> NBAPlayerStatsView(searchStore, top.store)
-                        is StackItem.NBAPlayerStandings -> NBAPlayerStandingsView(searchStore, top.store)
-                        is StackItem.NBATeamInfo -> NBATeamInfoView(searchStore, top.store)
-                        is StackItem.NBATeamStats -> NBATeamStatsView(searchStore, top.store)
-                        is StackItem.NBATeamStandings -> NBATeamStandingsView(searchStore, top.store)
-                        is StackItem.NBALeagueSchedule -> NBALeagueScheduleView(searchStore, top.store)
-                        is StackItem.NBAGameStats -> NBAGameStatsView(searchStore, top.store)
-
-                        is StackItem.MLBPlayerInfo -> MLBPlayerInfoView(searchStore, top.store)
-                        is StackItem.MLBPlayerStats -> MLBPlayerStatsView(searchStore, top.store)
-//                        displayModels[SportDisplayType.MLB_PLAYER_STANDINGS]?.let {
-////                        MLBPlayerStandingsView(data = it)
-//                            CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-//                                Text(StringConstants.viewPreparingAdviseText("'MLB 선수 순위'"))
-//                            }
-//                        }
-                        is StackItem.MLBTeamInfo -> MLBTeamInfoView(searchStore, top.store)
-                        is StackItem.MLBTeamStats -> MLBTeamStatsView(searchStore, top.store)
-                        is StackItem.MLBTeamStandings -> MLBTeamStandingsView(searchStore, top.store)
-                        is StackItem.MLBLeagueSchedule -> MLBLeagueScheduleView(searchStore, top.store)
-                        is StackItem.MLBGameStats -> MLBGameStatsView(searchStore, top.store)
-
-                        is StackItem.KBOPlayerInfo -> KBOPlayerInfoView(searchStore, top.store)
-                        is StackItem.KBOPlayerStats -> KBOPlayerStatsView(searchStore, top.store)
-//                        displayModels[SportDisplayType.KBO_PLAYER_STANDINGS]?.let {
-////                        KBOPlayerStandingsView(data = it)
-//                            CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-//                                Text(StringConstants.viewPreparingAdviseText("'KBO 선수 순위'"))
-//                            }
-//                        }
-                        is StackItem.KBOTeamInfo -> KBOTeamInfoView(searchStore, top.store)
-                        is StackItem.KBOTeamStats -> KBOTeamStatsView(searchStore, top.store)
-                        is StackItem.KBOTeamStandings -> KBOTeamStandingsView(searchStore, top.store)
-                        is StackItem.KBOLeagueSchedule -> KBOLeagueScheduleView(searchStore, top.store)
-                        is StackItem.KBOGameStats -> KBOGameStatsView(searchStore, top.store)
-                        else -> Unit
+                    stack.lastOrNull()?.let { item ->
+                        StackItemView(
+                            searchStore = searchStore,
+                            item = item,
+                            didPop = didPop,
+                            isCombinedView = includesPreviousView
+                        )
                     }
 
 //                    displayModels[SportDisplayType.NBA_LEAGUE_TOURNAMENT]?.let {
@@ -405,6 +379,62 @@ fun SearchView(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun StackItemView(
+    searchStore: SearchStore,
+    item: StackItem,
+    didPop: Boolean,
+    isCombinedView: Boolean
+) {
+    when (item) {
+        is StackItem.FBPlayerInfo -> FBPlayerInfoView(searchStore, item.store)
+        is StackItem.FBPlayerStats -> FBPlayerStatsView(searchStore, item.store)
+        is StackItem.FBPlayerStandings -> FBPlayerStandingsView(searchStore, item.store)
+        is StackItem.FBTeamInfo -> FBTeamInfoView(searchStore, item.store)
+        is StackItem.FBTeamStats -> FBTeamStatsView(searchStore, item.store)
+        is StackItem.FBTeamStandings -> FBTeamStandingsView(searchStore, item.store)
+        is StackItem.FBLeagueSchedule -> FBLeagueScheduleView(searchStore, item.store, didPop, isCombinedView)
+        is StackItem.FBGameStats -> FBGameStatsView(searchStore, item.store, isCombinedView)
+
+        is StackItem.NBAPlayerInfo -> NBAPlayerInfoView(searchStore, item.store)
+        is StackItem.NBAPlayerStats -> NBAPlayerStatsView(searchStore, item.store)
+        is StackItem.NBAPlayerStandings -> NBAPlayerStandingsView(searchStore, item.store)
+        is StackItem.NBATeamInfo -> NBATeamInfoView(searchStore, item.store)
+        is StackItem.NBATeamStats -> NBATeamStatsView(searchStore, item.store)
+        is StackItem.NBATeamStandings -> NBATeamStandingsView(searchStore, item.store)
+        is StackItem.NBALeagueSchedule -> NBALeagueScheduleView(searchStore, item.store, didPop)
+        is StackItem.NBAGameStats -> NBAGameStatsView(searchStore, item.store)
+
+        is StackItem.MLBPlayerInfo -> MLBPlayerInfoView(searchStore, item.store)
+        is StackItem.MLBPlayerStats -> MLBPlayerStatsView(searchStore, item.store)
+//        displayModels[SportDisplayType.MLB_PLAYER_STANDINGS]?.let {
+////                        MLBPlayerStandingsView(data = it)
+//            CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+//                Text(StringConstants.viewPreparingAdviseText("'MLB 선수 순위'"))
+//            }
+//        }
+        is StackItem.MLBTeamInfo -> MLBTeamInfoView(searchStore, item.store)
+        is StackItem.MLBTeamStats -> MLBTeamStatsView(searchStore, item.store)
+        is StackItem.MLBTeamStandings -> MLBTeamStandingsView(searchStore, item.store)
+        is StackItem.MLBLeagueSchedule -> MLBLeagueScheduleView(searchStore, item.store, didPop)
+        is StackItem.MLBGameStats -> MLBGameStatsView(searchStore, item.store)
+
+        is StackItem.KBOPlayerInfo -> KBOPlayerInfoView(searchStore, item.store)
+        is StackItem.KBOPlayerStats -> KBOPlayerStatsView(searchStore, item.store)
+//        displayModels[SportDisplayType.KBO_PLAYER_STANDINGS]?.let {
+////                        KBOPlayerStandingsView(data = it)
+//            CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+//                Text(StringConstants.viewPreparingAdviseText("'KBO 선수 순위'"))
+//            }
+//        }
+        is StackItem.KBOTeamInfo -> KBOTeamInfoView(searchStore, item.store)
+        is StackItem.KBOTeamStats -> KBOTeamStatsView(searchStore, item.store)
+        is StackItem.KBOTeamStandings -> KBOTeamStandingsView(searchStore, item.store)
+        is StackItem.KBOLeagueSchedule -> KBOLeagueScheduleView(searchStore, item.store, didPop)
+        is StackItem.KBOGameStats -> KBOGameStatsView(searchStore, item.store)
     }
 }
 

@@ -23,6 +23,7 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
 import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleStore
+import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
@@ -33,11 +34,13 @@ import com.moare.android.features.search.models.responsemodels.football.Schedule
 @Composable
 fun KBOLeagueScheduleView(
     searchStore: SearchStore,
-    store: KBOLeagueScheduleStore
+    store: KBOLeagueScheduleStore,
+    didPop: Boolean,
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
+    val displayModel by store.displayModel.collectAsState()
     val yearMonthList by store.yearMonthList.collectAsState()
     val days by store.days.collectAsState()
     val selectedYearMonthIndex by store.selectedYearMonthIndex.collectAsState()
@@ -47,8 +50,18 @@ fun KBOLeagueScheduleView(
     val isAllResultOpened by store.isAllResultOpened.collectAsState()
     val displayDataState by store.displayDataState.collectAsState()
 
+    LaunchedEffect(didPop) {
+        // 뒤로가서 일정화면으로 돌아왔을때 filteredGames update
+        if (didPop) {
+            // TODO: KBOGameStatsView에서 뒤로왔을때만 실행하게 개선 필요
+            store.send(KBOLeagueScheduleAction.UpdateFilteredGames)
+        }
+    }
+
     ScheduleViewContainer(
         state = ScheduleContainerState(
+            shouldShowCalendar = displayModel.scheduleType != ScheduleType.TEAM_FLAT,
+            shouldFetchSchedule = displayModel.scheduleType == ScheduleType.LEAGUE,
             displayDataState = displayDataState,
             calendarUiState = CalendarUiState(
                 yearMonthList,
@@ -63,9 +76,7 @@ fun KBOLeagueScheduleView(
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
                 onSelectYearMonth = { yearMonth, index ->
-//                    store.send(KBOLeagueScheduleAction.SelectYearMonth(yearMonth, index) { data ->
-//                        searchStore.send(SearchStore.Intent.UpdateLastViewStack(data))
-//                    })
+                    store.send(KBOLeagueScheduleAction.SelectYearMonth(yearMonth, index))
                 },
                 onSelectDay = { day, index ->
                     store.send(KBOLeagueScheduleAction.SelectDay(day, index))
@@ -168,7 +179,7 @@ fun KBOLeagueScheduleListItem(
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
-//            isClickEnabled = kboGameStatsModel == null,
+//            isClickEnabled = kboGameStatsModel == null, // 취소된 경기는 클릭 안되게
             homeTeamLogo = KBOUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
@@ -180,15 +191,11 @@ fun KBOLeagueScheduleListItem(
             gameStatusColor = gameStatusColor,
             isCapsuleButtonDisabled = gameStatus != StringConstants.KBO.GAME_FINAL,
             date = data.date,
-            venue = teamNameDic["venue_${homeTeamId}"] ?: "",
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-//                searchStore.send(SearchStore.Intent.SelectKBOGame(data, displayModel.season))
-
-                // set selected game's isOpened true
-                store.send(KBOLeagueScheduleAction.UpdateResultOpenedState(itemKey, true))
+                store.send(KBOLeagueScheduleAction.SelectGame(data))
             },
             onCapsuleButtonClick = {
                 store.send(KBOLeagueScheduleAction.UpdateResultOpenedState(itemKey, !isResultOpened))

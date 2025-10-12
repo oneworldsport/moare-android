@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
@@ -23,6 +24,7 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleStore
+import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
@@ -33,11 +35,13 @@ import com.moare.android.features.search.models.responsemodels.football.Schedule
 @Composable
 fun MLBLeagueScheduleView(
     searchStore: SearchStore,
-    store: MLBLeagueScheduleStore
+    store: MLBLeagueScheduleStore,
+    didPop: Boolean,
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
+    val displayModel by store.displayModel.collectAsState()
     val yearMonthList by store.yearMonthList.collectAsState()
     val days by store.days.collectAsState()
     val selectedYearMonthIndex by store.selectedYearMonthIndex.collectAsState()
@@ -47,8 +51,18 @@ fun MLBLeagueScheduleView(
     val isAllResultOpened by store.isAllResultOpened.collectAsState()
     val displayDataState by store.displayDataState.collectAsState()
 
+    LaunchedEffect(didPop) {
+        // 뒤로가서 일정화면으로 돌아왔을때 filteredGames update
+        if (didPop) {
+            // TODO: MLBGameStatsView에서 뒤로왔을때만 실행하게 개선 필요
+            store.send(MLBLeagueScheduleAction.UpdateFilteredGames)
+        }
+    }
+
     ScheduleViewContainer(
         state = ScheduleContainerState(
+            shouldShowCalendar = displayModel.scheduleType != ScheduleType.TEAM_FLAT,
+            shouldFetchSchedule = displayModel.scheduleType == ScheduleType.LEAGUE,
             displayDataState = displayDataState,
             calendarUiState = CalendarUiState(
                 yearMonthList,
@@ -63,9 +77,7 @@ fun MLBLeagueScheduleView(
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
                 onSelectYearMonth = { yearMonth, index ->
-//                    store.send(MLBLeagueScheduleAction.SelectYearMonth(yearMonth, index) { data ->
-//                        searchStore.send(SearchStore.Intent.UpdateLastViewStack(data))
-//                    })
+                    store.send(MLBLeagueScheduleAction.SelectYearMonth(yearMonth, index))
                 },
                 onSelectDay = { day, index ->
                     store.send(MLBLeagueScheduleAction.SelectDay(day, index))
@@ -171,7 +183,7 @@ fun MLBLeagueScheduleListItem(
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
-//            isClickEnabled = mlbGameStatsModel == null,
+//            isClickEnabled = gameStatus != Constants, // 연기된 경기는 클릭 안되게
             homeTeamLogo = MLBUtil.teamLogoUrl(homeTeamId),
             homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
             homeTeamScore = data.homeTeamScore,
@@ -183,16 +195,11 @@ fun MLBLeagueScheduleListItem(
             gameStatusColor = gameStatusColor,
             isCapsuleButtonDisabled = !StringConstants.MLB.GAME_FINISHED_LIST.contains(gameStatus),
             date = data.date,
-            venue = teamNameDic["venue_${homeTeamId}"] ?: "",
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
-            isSvgLogo = true
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-//                searchStore.send(SearchStore.Intent.SelectMLBGame(data, displayModel.season))
-
-                // set selected game's isOpened true
-                store.send(MLBLeagueScheduleAction.UpdateResultOpenedState(gameId, true))
+                store.send(MLBLeagueScheduleAction.SelectGame(data))
             },
             onCapsuleButtonClick = {
                 store.send(MLBLeagueScheduleAction.UpdateResultOpenedState(gameId, !isResultOpened))

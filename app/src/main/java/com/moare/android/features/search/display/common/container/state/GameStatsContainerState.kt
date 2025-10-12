@@ -4,7 +4,7 @@ import androidx.compose.ui.unit.Dp
 
 data class GameStatsContainerState(
     val shouldShowTitle: Boolean = true,
-    val shouldShowGameItem: Boolean = true,
+    val shouldShowGameContent: Boolean = true,
     val shouldShowStats: Boolean = true,
     val shouldShowCoach: Boolean = false,
     val shouldShowRefreshButton: Boolean = false,
