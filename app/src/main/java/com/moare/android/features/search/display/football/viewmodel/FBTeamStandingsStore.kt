@@ -86,9 +86,6 @@ class FBTeamStandingsStore @AssistedInject constructor(
         }
     }
 
-    /* ---------------------
-       implements
-       --------------------- */
     override fun selectHeaderCategory(index: Int, isInit: Boolean) {
         super.selectHeaderCategory(index, isInit)
 

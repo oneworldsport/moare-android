@@ -312,7 +312,7 @@ object AWSUtils {
             val s3Client = entryPoint.getS3Client()
             val transferUtility = entryPoint.getTransferUtility()
             val dataStore = entryPoint.getDataStore()
-            val translatedNameProvider = entryPoint.getTranslatedNameProvider()
+            val tournamentTeamsDeferred = entryPoint.getTournamentTeamsDeferred()
 
             val bucket = "sport-search-engine"
             val objectMetadata: ObjectMetadata = withContext(Dispatchers.IO) {
@@ -330,7 +330,7 @@ object AWSUtils {
                 }
                 val jsonElement = Json.parseToJsonElement(jsonString)
                 val map: Map<String, List<Int?>> = Json.decodeFromJsonElement(jsonElement)
-                translatedNameProvider.setTournamentDictionary(category, map)
+                tournamentTeamsDeferred.complete(map)
 
                 return
             }
@@ -351,7 +351,7 @@ object AWSUtils {
                                 }
                                 val jsonElement = Json.parseToJsonElement(jsonString)
                                 val map: Map<String, List<Int?>> = Json.decodeFromJsonElement(jsonElement)
-                                translatedNameProvider.setTournamentDictionary(category, map)
+                                tournamentTeamsDeferred.complete(map)
                             }
                         }
                     }

@@ -54,6 +54,7 @@ import com.moare.android.features.search.display.football.view.FBPlayerStatsView
 import com.moare.android.features.search.display.football.view.FBTeamInfoView
 import com.moare.android.features.search.display.football.view.FBTeamStandingsView
 import com.moare.android.features.search.display.football.view.FBTeamStatsView
+import com.moare.android.features.search.display.football.view.FBTournamentView
 import com.moare.android.features.search.display.kbo.view.KBOGameStatsView
 import com.moare.android.features.search.display.kbo.view.KBOLeagueScheduleView
 import com.moare.android.features.search.display.kbo.view.KBOPlayerInfoView
@@ -398,6 +399,7 @@ fun StackItemView(
         is StackItem.FBTeamStandings -> FBTeamStandingsView(searchStore, item.store)
         is StackItem.FBLeagueSchedule -> FBLeagueScheduleView(searchStore, item.store, didPop, isCombinedView)
         is StackItem.FBGameStats -> FBGameStatsView(searchStore, item.store, isCombinedView)
+        is StackItem.FBTournament -> FBTournamentView(searchStore, item.store)
 
         is StackItem.NBAPlayerInfo -> NBAPlayerInfoView(searchStore, item.store)
         is StackItem.NBAPlayerStats -> NBAPlayerStatsView(searchStore, item.store)

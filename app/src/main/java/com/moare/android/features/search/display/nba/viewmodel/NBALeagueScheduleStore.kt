@@ -111,6 +111,7 @@ class NBALeagueScheduleStore @AssistedInject constructor(
                 val gameResultOpenedStateList = displayModel.value.games.associate { (it.gameId) to false }
                 _gameResultOpenedStateList.value = gameResultOpenedStateList
             }
+            else -> {}
         }
     }
 

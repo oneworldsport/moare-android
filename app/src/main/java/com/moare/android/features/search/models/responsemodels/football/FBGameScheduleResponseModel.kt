@@ -19,5 +19,9 @@ enum class ScheduleType {
     @SerialName("league")
     LEAGUE,
     @SerialName("team_flat")
-    TEAM_FLAT
+    TEAM_FLAT,
+    @SerialName("tournament_bracket")
+    TOURNAMENT_BRACKET,
+    @SerialName("tournament_draw")
+    TOURNAMENT_DRAW
 }

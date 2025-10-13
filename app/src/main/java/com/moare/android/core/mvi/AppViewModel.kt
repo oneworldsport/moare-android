@@ -24,6 +24,8 @@ import com.moare.android.features.search.display.football.viewmodel.FBTeamStandi
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsStore
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsStore
+import com.moare.android.features.search.display.football.viewmodel.FBTournamentAction
+import com.moare.android.features.search.display.football.viewmodel.FBTournamentStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsDelegate
 import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsStore
@@ -108,6 +110,7 @@ sealed interface StackItem {
     data class FBTeamStandings(override val id: ViewId, val store: FBTeamStandingsStore) : StackItem
     data class FBLeagueSchedule(override val id: ViewId, val store: FBLeagueScheduleStore) : StackItem
     data class FBGameStats(override val id: ViewId, val store: FBGameStatsStore) : StackItem
+    data class FBTournament(override val id: ViewId, val store: FBTournamentStore) : StackItem
 
     data class NBAPlayerInfo(override val id: ViewId, val store: NBAPlayerInfoStore) : StackItem
     data class NBAPlayerStats(override val id: ViewId, val store: NBAPlayerStatsStore) : StackItem
@@ -146,6 +149,7 @@ class AppViewModel @Inject constructor(
     private val fbTeamStandingsFactory: FBTeamStandingsStore.Factory,
     private val fbLeagueScheduleFactory: FBLeagueScheduleStore.Factory,
     private val fbGameStatsFactory: FBGameStatsStore.Factory,
+    private val fbTournamentFactory: FBTournamentStore.Factory,
 
     private val nbaPlayerInfoFactory: NBAPlayerInfoStore.Factory,
     private val nbaPlayerStatsFactory: NBAPlayerStatsStore.Factory,
@@ -279,6 +283,11 @@ class AppViewModel @Inject constructor(
                         }
                         store.send(FBGameStatsAction.InitData)
                         _stack.update { it + StackItem.FBGameStats(id, store) }
+                    }
+                    is SportDecodableModel.FBTournament -> {
+                        val store = fbTournamentFactory.create(model.displayModel)
+                        store.send(FBTournamentAction.InitData)
+                        _stack.update { it + StackItem.FBTournament(id, store) }
                     }
 
                     is SportDecodableModel.NBAPlayerInfo -> {
@@ -804,6 +813,7 @@ class AppViewModel @Inject constructor(
             is StackItem.FBTeamStandings -> item.store.dispose()
             is StackItem.FBLeagueSchedule -> item.store.dispose()
             is StackItem.FBGameStats -> item.store.dispose()
+            is StackItem.FBTournament -> item.store.dispose()
 
             is StackItem.NBAPlayerInfo -> item.store.dispose()
             is StackItem.NBAPlayerStats -> item.store.dispose()

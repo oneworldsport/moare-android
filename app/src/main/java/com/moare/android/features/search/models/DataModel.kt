@@ -9,6 +9,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBPlayerS
 import com.moare.android.features.search.models.displaymodels.football.FBTeamInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTournamentDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
@@ -175,6 +176,11 @@ data class DataModel(
                         val displayModel = ModelConverter.fbGameStatsConverter(responseModel)
                         SportDecodableModel.FBGameStats(responseModel, displayModel)
                     }
+                }
+                "football_league_tournament" -> {
+                    val responseModel: FBGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                    val displayModel = ModelConverter.fbTournamentConverter(responseModel)
+                    SportDecodableModel.FBTournament(responseModel, displayModel)
                 }
 
                 // basketball
@@ -523,6 +529,12 @@ sealed class SportDecodableModel {
     data class FBGameStats(
         val responseModel: FBGameStatsResponseModel,
         var displayModel: FBGameStatsDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class FBTournament(
+        val responseModel: FBGameScheduleResponseModel,
+        var displayModel: FBTournamentDisplayModel
     ) : SportDecodableModel()
 
     // nba

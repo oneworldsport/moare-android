@@ -254,10 +254,9 @@ class SearchStore @AssistedInject constructor(
             _searchDataState.emit(ApiFetchState.Success)
 
             when (data?.data) {
-                // football
                 is SportDecodableModel.FBPlayerInfo, is SportDecodableModel.FBPlayerStandings, is SportDecodableModel.FBTeamInfo,
                 is SportDecodableModel.FBTeamStats, is SportDecodableModel.FBTeamStandings, is SportDecodableModel.FBLeagueSchedule,
-                is SportDecodableModel.FBGameStats, is SportDecodableModel.NBAPlayerInfo, is SportDecodableModel.NBAPlayerStats,
+                is SportDecodableModel.FBGameStats, is SportDecodableModel.FBTournament, is SportDecodableModel.NBAPlayerInfo, is SportDecodableModel.NBAPlayerStats,
                 is SportDecodableModel.NBAPlayerStandings, is SportDecodableModel.NBATeamInfo, is SportDecodableModel.NBATeamStats,
                 is SportDecodableModel.NBATeamStandings, is SportDecodableModel.NBALeagueSchedule, is SportDecodableModel.NBAGameStats,
                 is SportDecodableModel.NBALeagueTournament, is SportDecodableModel.KBOPlayerInfo, is SportDecodableModel.KBOPlayerStats,

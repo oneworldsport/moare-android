@@ -13,6 +13,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamInf
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTournamentDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
@@ -70,6 +71,7 @@ import com.moare.android.features.search.models.responsemodels.football.FBPlayer
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerInfoResponseModel
@@ -272,6 +274,17 @@ object ModelConverter {
             entityInfo = entityInfo,
             season = season,
             game = game
+        )
+    }
+
+    fun fbTournamentConverter(response: FBGameScheduleResponseModel): FBTournamentDisplayModel {
+        return FBTournamentDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType ?: ScheduleType.TOURNAMENT_DRAW,
+            games = response.schedule
         )
     }
 
