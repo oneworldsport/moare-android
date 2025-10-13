@@ -46,8 +46,7 @@ fun LeagueTitle(
         URLImage(
             url = url,
             size = URLImageSize.SMALL,
-            modifier = Modifier.padding(horizontal = 4.dp),
-            isSvg = url.contains(".svg")
+            modifier = Modifier.padding(horizontal = 4.dp)
         )
 
         Text(
@@ -100,8 +99,7 @@ fun BaseballLeagueTitle(
         URLImage(
             url = url,
             size = URLImageSize.SMALL,
-            modifier = Modifier.padding(horizontal = 4.dp),
-            isSvg = url.contains(".svg")
+            modifier = Modifier.padding(horizontal = 4.dp)
         )
 
         Text(

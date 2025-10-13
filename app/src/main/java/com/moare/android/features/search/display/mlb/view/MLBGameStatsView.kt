@@ -276,8 +276,7 @@ fun MLBGameStatsScoreInfoItem(
                 )
                 URLImage(
                     url = MLBUtil.teamLogoUrl(awayTeamId),
-                    size = URLImageSize.SMALL,
-                    isSvg = true
+                    size = URLImageSize.SMALL
                 )
                 Text(
                     text = teamNameDic["short_$awayTeamId"] ?: "",
@@ -310,8 +309,7 @@ fun MLBGameStatsScoreInfoItem(
                 }
                 URLImage(
                     url = MLBUtil.teamLogoUrl(homeTeamId),
-                    size = URLImageSize.SMALL,
-                    isSvg = true
+                    size = URLImageSize.SMALL
                 )
                 Text(
                     text = teamNameDic["short_$homeTeamId"] ?: "",

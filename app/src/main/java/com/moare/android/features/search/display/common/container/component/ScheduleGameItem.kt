@@ -78,8 +78,7 @@ fun ScheduleGameItem(
         ) {
             URLImage(
                 url = state.homeTeamLogo,
-                size = URLImageSize.SMALL,
-                isSvg = state.isSvgLogo
+                size = URLImageSize.SMALL
             )
 
             Text(
@@ -188,8 +187,7 @@ fun ScheduleGameItem(
         ) {
             URLImage(
                 url = state.awayTeamLogo,
-                size = URLImageSize.SMALL,
-                isSvg = state.isSvgLogo
+                size = URLImageSize.SMALL
             )
 
             Text(

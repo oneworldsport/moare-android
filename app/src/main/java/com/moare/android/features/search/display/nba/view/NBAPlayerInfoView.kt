@@ -291,8 +291,7 @@ fun NBAPlayerInfoSecondItem(
         // TODO: "소속팀" 라벨 표시 필요
         URLImage(
             url = NBAUtil.teamLogoUrl(player.teamId),
-            modifier = Modifier.alpha(contentsAlpha),
-            isSvg = true
+            modifier = Modifier.alpha(contentsAlpha)
         )
 
         Text(

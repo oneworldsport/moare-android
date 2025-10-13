@@ -133,8 +133,7 @@ fun NBATeamStatsTeamInfoItem(
                 .alpha(contentsAlpha)
         ) {
             URLImage(
-                url = NBAUtil.teamLogoUrl(team.id),
-                isSvg = true
+                url = NBAUtil.teamLogoUrl(team.id)
             )
 
             // name, state and city

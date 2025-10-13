@@ -194,8 +194,7 @@ fun KBOTeamInfoFirstItem(
     ) {
         URLImage(
             url = KBOUtil.teamLogoUrl(team.id),
-            modifier = Modifier.alpha(contentsAlpha),
-            isSvg = true
+            modifier = Modifier.alpha(contentsAlpha)
         )
 
         Text(

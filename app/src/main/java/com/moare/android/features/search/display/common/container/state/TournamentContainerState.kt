@@ -6,6 +6,7 @@ data class TournamentBracketContainerState<T>(
     val leagueId: Int,
     val teamNameDic: Map<String, String>,
     val gameListTuple: List<GameListEntry<T>>,
+    val seedIdPairList: List<List<Pair<Int?, Int?>>>, // Bracket에 한 시리즈 아이템에서 위에 표시되는 팀과 아래 표시되는 팀 id 정보. gameListTuple의 gameList와 동일한 인덱스에 일치하는 정보가 있음.
     val isConference: Boolean,
     val isSeries: Boolean
 )
@@ -19,5 +20,9 @@ data class TournamentDrawContainerState<T>(
 
 data class GameListEntry<T>(
     val title: String,
-    val gameList: List<List<GameForSchedule<T>>>
+    val gameList: List<List<GameForSchedule<T>>?>
+)
+
+data class TournamentContainerAction<T>(
+    val selectSeries: ((List<GameForSchedule<T>>) -> Unit)? = null
 )

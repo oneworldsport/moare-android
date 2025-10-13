@@ -150,8 +150,7 @@ fun KBOPlayerStatsPlayerInfoItem(
             }
 
             URLImage(
-                url = KBOUtil.teamLogoUrl(player.teamId),
-                isSvg = true
+                url = KBOUtil.teamLogoUrl(player.teamId)
             )
 
             // team, jersey, position

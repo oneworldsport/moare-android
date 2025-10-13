@@ -171,8 +171,7 @@ fun NBAPlayerStatsPlayerInfoItem(
             }
 
             URLImage(
-                url = NBAUtil.teamLogoUrl(player.teamId),
-                isSvg = true
+                url = NBAUtil.teamLogoUrl(player.teamId)
             )
 
             // nationality, team, jersey, position

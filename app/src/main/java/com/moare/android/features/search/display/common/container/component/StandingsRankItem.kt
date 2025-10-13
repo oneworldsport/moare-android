@@ -63,8 +63,7 @@ fun StandingsRankItem(
         URLImage(
             url = imageUrl,
             customSize = 25.dp,
-            modifier = Modifier.padding(end = 4.dp),
-            isSvg = isSvgLogo
+            modifier = Modifier.padding(end = 4.dp)
         )
 
         if (shouldShowExtraInfo) {

@@ -1,0 +1,185 @@
+package com.moare.android.features.search.display.common.container.component
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.moare.android.core.constants.Constants
+import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.Util
+import com.moare.android.features.search.models.models.common.GameForSchedule
+import com.moare.android.features.search.models.models.football.FBGameForSchedule
+import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.ui.common.components.HCapsuleBar
+import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.common.components.URLImageSize
+import com.moare.android.ui.theme.Moare
+import com.moare.android.ui.util.CenterColumn
+import com.moare.android.ui.util.CenterRow
+
+@Composable
+fun <T> TournamentSingleGameItem(
+    leagueId: Int,
+    teamNameDic: Map<String, String>,
+    game: GameForSchedule<T>,
+    modifier: Modifier = Modifier,
+) {
+    val homeTeamId = game.homeTeamId
+    val awayTeamId = game.awayTeamId
+    val homeTeamScore = game.homeTeamScore
+    val awayTeamScore = game.awayTeamScore
+    val homeTeamPenaltyScore = (game as? FBGameForSchedule)?.gameInfo?.homeTeamPenaltyScore
+    val awayTeamPenaltyScore = (game as? FBGameForSchedule)?.gameInfo?.awayTeamPenaltyScore
+    val gameStatusText = Constants.GameStatus.gameStatusText(leagueId, game.gameStatus)
+    val shouldShowScore = !Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
+    val isFinished = gameStatusText == StringConstants.GAME_FINISHED_STR
+
+    val isHomeWinner = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+        homeTeamPenaltyScore > awayTeamPenaltyScore
+    } else {
+        homeTeamScore > awayTeamScore
+    }
+
+    CenterRow(modifier = modifier) {
+        CenterColumn(
+            modifier = Modifier
+                .width(80.dp)
+                .alpha(if (isFinished && !isHomeWinner) 0.3f else 1f)
+        ) {
+            if (isFinished && isHomeWinner) {
+                HCapsuleBar(modifier = Modifier.padding(bottom = 4.dp))
+            }
+
+            URLImage(
+                url = Util.teamLogoUrl(leagueId, homeTeamId),
+                size = URLImageSize.SMALL
+            )
+
+            Text(
+                text = teamNameDic["short_${homeTeamId}"] ?: "",
+                fontSize = 13.sp,
+                maxLines = 2
+            )
+        }
+
+        if (shouldShowScore) {
+            CenterColumn {
+                // 축구 패널티킥 경기는 일반 스코어 검정색
+                val scoreColor = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+                    Color.Black
+                } else {
+                    if (homeTeamScore >= awayTeamScore) Moare else Color.Black
+                }
+
+                Text(
+                    text = homeTeamScore.toString(),
+                    color = scoreColor,
+                    modifier = Modifier.width(30.dp)
+                )
+
+                if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+                    Text(
+                        text = homeTeamPenaltyScore.toString(),
+                        fontSize = 12.sp,
+                        color = if (homeTeamPenaltyScore >= awayTeamPenaltyScore) Moare else Color.Black
+                    )
+                }
+            }
+        }
+
+        CenterColumn(
+            modifier = Modifier.width(110.dp)
+        ) {
+            // game status
+            CapsuleButton(
+                text = gameStatusText,
+                color = Constants.GameStatus.gameStatusColor(leagueId, game.gameStatus)
+            ) { }
+
+            // game date
+            Text(
+                text = CalendarUtil.formatDate(game.date).split(" ").firstOrNull() ?: "",
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+
+            Text(
+                text = CalendarUtil.formatDate(game.date, formatType = TimeFormatType.AMPM),
+                fontSize = 12.sp,
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
+        }
+
+        if (shouldShowScore) {
+            CenterColumn {
+                // 축구 패널티킥 경기는 일반 스코어 검정색
+                val scoreColor = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+                    Color.Black
+                } else {
+                    if (awayTeamScore >= homeTeamScore) Moare else Color.Black
+                }
+
+                Text(
+                    text = awayTeamScore.toString(),
+                    color = scoreColor,
+                    modifier = Modifier.width(30.dp)
+                )
+
+                if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+                    Text(
+                        text = awayTeamPenaltyScore.toString(),
+                        fontSize = 12.sp,
+                        color = if (awayTeamPenaltyScore >= homeTeamPenaltyScore) Moare else Color.Black
+                    )
+                }
+            }
+        }
+
+        CenterColumn(
+            modifier = Modifier
+                .width(80.dp)
+                .alpha(if (isFinished && isHomeWinner) 0.3f else 1f)
+        ) {
+            if (isFinished && !isHomeWinner) {
+                HCapsuleBar(modifier = Modifier.padding(bottom = 4.dp))
+            }
+
+            URLImage(
+                url = Util.teamLogoUrl(leagueId, awayTeamId),
+                size = URLImageSize.SMALL
+            )
+
+            Text(
+                text = teamNameDic["short_${awayTeamId}"] ?: "",
+                fontSize = 13.sp,
+                maxLines = 2
+            )
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

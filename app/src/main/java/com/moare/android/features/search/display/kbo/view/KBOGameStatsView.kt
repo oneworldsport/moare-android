@@ -262,8 +262,7 @@ fun KBOGameStatsScoreInfoItem(
                 )
                 URLImage(
                     url = KBOUtil.teamLogoUrl(awayTeamId),
-                    size = URLImageSize.SMALL,
-                    isSvg = true
+                    size = URLImageSize.SMALL
                 )
                 Text(
                     text = teamNameDic["short_$awayTeamId"] ?: "",
@@ -296,8 +295,7 @@ fun KBOGameStatsScoreInfoItem(
                 }
                 URLImage(
                     url = KBOUtil.teamLogoUrl(homeTeamId),
-                    size = URLImageSize.SMALL,
-                    isSvg = true
+                    size = URLImageSize.SMALL
                 )
                 Text(
                     text = teamNameDic["short_$homeTeamId"] ?: "",

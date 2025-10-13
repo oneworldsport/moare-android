@@ -6,7 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 
@@ -52,6 +55,10 @@ fun Modifier.clickableCapsuleRippleEffect(
 
 fun Modifier.optionalFillMaxWidth(apply: Boolean): Modifier {
     return if (apply) this.fillMaxWidth() else this
+}
+
+fun Modifier.nullableMaxHeight(height: Dp?): Modifier {
+    return height?.let { this.height(height) } ?: this.fillMaxHeight()
 }
 
 fun Modifier.optionalClickable(apply: Boolean, onClick: (() -> Unit)): Modifier {

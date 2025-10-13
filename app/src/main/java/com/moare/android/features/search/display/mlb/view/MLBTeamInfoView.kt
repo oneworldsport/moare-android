@@ -195,8 +195,7 @@ fun MLBTeamInfoFirstItem(
     ) {
         URLImage(
             url = MLBUtil.teamLogoUrl(team.id),
-            modifier = Modifier.alpha(contentsAlpha),
-            isSvg = true
+            modifier = Modifier.alpha(contentsAlpha)
         )
 
         Text(

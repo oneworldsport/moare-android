@@ -272,8 +272,7 @@ fun MLBPlayerInfoSecondItem(
         // TODO: "소속팀" 라벨 표시 필요
         URLImage(
             url = MLBUtil.teamLogoUrl(displayModel.teamId),
-            modifier = Modifier.alpha(contentsAlpha),
-            isSvg = true
+            modifier = Modifier.alpha(contentsAlpha)
         )
 
         Text(

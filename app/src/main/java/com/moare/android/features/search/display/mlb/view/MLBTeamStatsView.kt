@@ -134,8 +134,7 @@ fun MLBTeamStatsTeamInfoItem(
                 .alpha(contentsAlpha)
         ) {
             URLImage(
-                url = MLBUtil.teamLogoUrl(team.id),
-                isSvg = true
+                url = MLBUtil.teamLogoUrl(team.id)
             )
 
             // name, state and city

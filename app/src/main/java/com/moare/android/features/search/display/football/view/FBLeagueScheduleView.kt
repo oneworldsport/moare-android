@@ -190,7 +190,7 @@ fun FBLeagueScheduleListItem(
         StringConstants.Football.GAME_NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
         StringConstants.Football.GAME_FIRST_HALF -> {
             if (gameInfo != null) {
-                "전반${gameInfo.status.elapsed}'"
+                "전반${gameInfo.elapsed}'"
             } else {
                 StringConstants.Football.GAME_FIRST_HALF_STR
             }
@@ -198,7 +198,7 @@ fun FBLeagueScheduleListItem(
         StringConstants.Football.GAME_HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
         StringConstants.Football.GAME_SECOND_HALF -> {
             if (gameInfo != null) {
-                "후반${gameInfo.status.elapsed}'"
+                "후반${gameInfo.elapsed}'"
             } else {
                 StringConstants.Football.GAME_SECOND_HALF_STR
             }

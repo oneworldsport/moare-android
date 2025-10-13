@@ -176,8 +176,8 @@ fun NBAGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowStats = displayModel.game.gameSummary?.gameStatusId != Constants.NBAGameStatus.NOT_STARTED,
-            shouldShowRefreshButton = displayModel.game.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE,
+            shouldShowStats = displayModel.game.gameSummary?.gameStatusId != Constants.GameStatus.NBA.NOT_STARTED,
+            shouldShowRefreshButton = displayModel.game.gameSummary?.gameStatusId == Constants.GameStatus.NBA.LIVE,
             teamCategories = teamCategories,
             secondCategories = StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,
@@ -263,8 +263,8 @@ fun NBAGameStatsScoreInfoItem(
        constants
        --------------------- */
     val gameStatusText = when (game.gameSummary?.gameStatusId) {
-        Constants.NBAGameStatus.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
-        Constants.NBAGameStatus.LIVE -> if (homeTeamLineScore?.ptsOt3 != null) {
+        Constants.GameStatus.NBA.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
+        Constants.GameStatus.NBA.LIVE -> if (homeTeamLineScore?.ptsOt3 != null) {
             StringConstants.NBA.GAME_OT_3
         } else if (homeTeamLineScore?.ptsOt2 != null) {
             StringConstants.NBA.GAME_OT_2
@@ -281,11 +281,11 @@ fun NBAGameStatsScoreInfoItem(
         } else {
             ""
         }
-        Constants.NBAGameStatus.FINISHED -> StringConstants.GAME_FINISHED_STR
+        Constants.GameStatus.NBA.FINISHED -> StringConstants.GAME_FINISHED_STR
         else -> ""
     }
 
-    val gameStatusColor = if (game.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE) {
+    val gameStatusColor = if (game.gameSummary?.gameStatusId == Constants.GameStatus.NBA.LIVE) {
         MaterialTheme.colors.primary
     } else {
         Color.Gray
@@ -321,8 +321,7 @@ fun NBAGameStatsScoreInfoItem(
                 }
                 URLImage(
                     url = NBAUtil.teamLogoUrl(homeTeamId),
-                    size = URLImageSize.SMALL,
-                    isSvg = true
+                    size = URLImageSize.SMALL
                 )
                 Text(
                     text = teamNameDic["short_$homeTeamId"] ?: "",
@@ -358,8 +357,7 @@ fun NBAGameStatsScoreInfoItem(
                 )
                 URLImage(
                     url = NBAUtil.teamLogoUrl(awayTeamId),
-                    size = URLImageSize.SMALL,
-                    isSvg = true
+                    size = URLImageSize.SMALL
                 )
                 Text(
                     text = teamNameDic["short_$awayTeamId"] ?: "",

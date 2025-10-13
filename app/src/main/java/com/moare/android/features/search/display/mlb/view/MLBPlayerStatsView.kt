@@ -173,8 +173,7 @@ fun MLBPlayerStatsPlayerInfoItem(
             }
 
             URLImage(
-                url = MLBUtil.teamLogoUrl(displayModel.teamId),
-                isSvg = true
+                url = MLBUtil.teamLogoUrl(displayModel.teamId)
             )
 
             // team, jersey, position

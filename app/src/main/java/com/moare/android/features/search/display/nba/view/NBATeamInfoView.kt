@@ -195,8 +195,7 @@ fun NBATeamInfoFirstItem(
     ) {
         URLImage(
             url = NBAUtil.teamLogoUrl(team.id),
-            modifier = Modifier.alpha(contentsAlpha),
-            isSvg = true
+            modifier = Modifier.alpha(contentsAlpha)
         )
 
         Text(
