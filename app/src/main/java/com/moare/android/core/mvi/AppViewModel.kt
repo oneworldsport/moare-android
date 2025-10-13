@@ -3,6 +3,7 @@ package com.moare.android.core.mvi
 import android.app.Activity
 import androidx.lifecycle.ViewModel
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
+import com.moare.android.features.search.display.football.viewmodel.FBGameStatsDelegate
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleAction
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleStore
@@ -24,6 +25,7 @@ import com.moare.android.features.search.display.football.viewmodel.FBTeamStandi
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
+import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsDelegate
 import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleDelegate
@@ -42,6 +44,7 @@ import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsS
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsAction
+import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsDelegate
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleDelegate
@@ -60,6 +63,7 @@ import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsS
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsStore
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
+import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsDelegate
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsStore
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
 import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleDelegate
@@ -270,7 +274,9 @@ class AppViewModel @Inject constructor(
                         _stack.update { it + StackItem.FBLeagueSchedule(id, store) }
                     }
                     is SportDecodableModel.FBGameStats -> {
-                        val store = fbGameStatsFactory.create(model.displayModel)
+                        val store = fbGameStatsFactory.create(model.displayModel) { delegate ->
+                            onFBGameStatsDelegate(id, delegate)
+                        }
                         store.send(FBGameStatsAction.InitData)
                         _stack.update { it + StackItem.FBGameStats(id, store) }
                     }
@@ -321,7 +327,9 @@ class AppViewModel @Inject constructor(
                         _stack.update { it + StackItem.NBALeagueSchedule(id, store) }
                     }
                     is SportDecodableModel.NBAGameStats -> {
-                        val store = nbaGameStatsFactory.create(model.displayModel)
+                        val store = nbaGameStatsFactory.create(model.displayModel) { delegate ->
+                            onNBAGameStatsDelegate(id, delegate)
+                        }
                         store.send(NBAGameStatsAction.InitData)
                         _stack.update { it + StackItem.NBAGameStats(id, store) }
                     }
@@ -365,7 +373,9 @@ class AppViewModel @Inject constructor(
                         _stack.update { it + StackItem.MLBLeagueSchedule(id, store) }
                     }
                     is SportDecodableModel.MLBGameStats -> {
-                        val store = mlbGameStatsFactory.create(model.displayModel)
+                        val store = mlbGameStatsFactory.create(model.displayModel) { delegate ->
+                            onMLBGameStatsDelegate(id, delegate)
+                        }
                         store.send(MLBGameStatsAction.InitData)
                         _stack.update { it + StackItem.MLBGameStats(id, store) }
                     }
@@ -409,7 +419,9 @@ class AppViewModel @Inject constructor(
                         _stack.update { it + StackItem.KBOLeagueSchedule(id, store) }
                     }
                     is SportDecodableModel.KBOGameStats -> {
-                        val store = kboGameStatsFactory.create(model.displayModel)
+                        val store = kboGameStatsFactory.create(model.displayModel) { delegate ->
+                            onKBOGameStatsDelegate(id, delegate)
+                        }
                         store.send(KBOGameStatsAction.InitData)
                         _stack.update { it + StackItem.KBOGameStats(id, store) }
                     }
@@ -420,16 +432,20 @@ class AppViewModel @Inject constructor(
     }
 
     private fun onFBPlayerInfoDelegate(delegate: FBPlayerInfoDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is FBPlayerInfoDelegate.ShowPlayerStats -> {
                 val store = fbPlayerStatsFactory.create(delegate.model.displayModel)
                 store.send(FBPlayerStatsAction.InitData)
-                _stack.update { it + StackItem.FBPlayerStats(ViewId(), store) }
+                _stack.update { it + StackItem.FBPlayerStats(id, store) }
             }
             is FBPlayerInfoDelegate.ShowGameStats -> {
-                val store = fbGameStatsFactory.create(delegate.model.displayModel)
+                val store = fbGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onFBGameStatsDelegate(id, delegate)
+                }
                 store.send(FBGameStatsAction.InitData)
-                _stack.update { it + StackItem.FBGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.FBGameStats(id, store) }
             }
         }
     }
@@ -437,7 +453,7 @@ class AppViewModel @Inject constructor(
     private fun onFBPlayerStandingsDelegate(delegate: FBPlayerStandingsDelegate) {
         when (delegate) {
             is FBPlayerStandingsDelegate.ShowPlayerStats -> {
-                val store = fbPlayerStatsFactory.create((delegate.model as SportDecodableModel.FBPlayerStats).displayModel)
+                val store = fbPlayerStatsFactory.create(delegate.model.displayModel)
                 store.send(FBPlayerStatsAction.InitData)
                 _stack.update { it + StackItem.FBPlayerStats(ViewId(), store) }
             }
@@ -445,16 +461,20 @@ class AppViewModel @Inject constructor(
     }
 
     private fun onFBTeamInfoDelegate(delegate: FBTeamInfoDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is FBTeamInfoDelegate.ShowTeamStats -> {
                 val store = fbTeamStatsFactory.create(delegate.model.displayModel)
                 store.send(FBTeamStatsAction.InitData)
-                _stack.update { it + StackItem.FBTeamStats(ViewId(), store) }
+                _stack.update { it + StackItem.FBTeamStats(id, store) }
             }
             is FBTeamInfoDelegate.ShowGameStats -> {
-                val store = fbGameStatsFactory.create(delegate.model.displayModel)
+                val store = fbGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onFBGameStatsDelegate(id, delegate)
+                }
                 store.send(FBGameStatsAction.InitData)
-                _stack.update { it + StackItem.FBGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.FBGameStats(id, store) }
             }
         }
     }
@@ -470,6 +490,8 @@ class AppViewModel @Inject constructor(
     }
 
     private fun onFBLeagueScheduleDelegate(delegate: FBLeagueScheduleDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is FBLeagueScheduleDelegate.ShowGameStats -> {
                 _didPop.value = false
@@ -481,24 +503,50 @@ class AppViewModel @Inject constructor(
                     }
                 }
 
-                val store = fbGameStatsFactory.create(delegate.model.displayModel)
+                val store = fbGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onFBGameStatsDelegate(id, delegate)
+                }
                 store.send(FBGameStatsAction.InitData)
-                _stack.update { it + StackItem.FBGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.FBGameStats(id, store) }
+            }
+        }
+    }
+
+    private fun onFBGameStatsDelegate(id: ViewId, delegate: FBGameStatsDelegate) {
+        when (delegate) {
+            is FBGameStatsDelegate.RefreshGame -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                // 현재 화면인 FBGameStats의 이전 화면인 FBLeagueSchedule을 찾아서 해당 Store에서 필요한 state를 업데이트 시킨다.
+                val idx = stack.value.indexOfFirst { it.id == id }
+                if (idx > 0) {
+                    for (prev in stack.value.subList(0, idx).asReversed()) {
+                        if (prev is StackItem.FBLeagueSchedule) {
+                            prev.store.send(FBLeagueScheduleAction.UpdateStateByRefreshGame(delegate.model))
+                            break
+                        }
+                    }
+                }
             }
         }
     }
 
     private fun onNBAPlayerInfoDelegate(delegate: NBAPlayerInfoDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is NBAPlayerInfoDelegate.ShowPlayerStats -> {
                 val store = nbaPlayerStatsFactory.create(delegate.model.displayModel)
                 store.send(NBAPlayerStatsAction.InitData)
-                _stack.update { it + StackItem.NBAPlayerStats(ViewId(), store) }
+                _stack.update { it + StackItem.NBAPlayerStats(id, store) }
             }
             is NBAPlayerInfoDelegate.ShowGameStats -> {
-                val store = nbaGameStatsFactory.create(delegate.model.displayModel)
+                val store = nbaGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onNBAGameStatsDelegate(id, delegate)
+                }
                 store.send(NBAGameStatsAction.InitData)
-                _stack.update { it + StackItem.NBAGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.NBAGameStats(id, store) }
             }
         }
     }
@@ -514,16 +562,20 @@ class AppViewModel @Inject constructor(
     }
 
     private fun onNBATeamInfoDelegate(delegate: NBATeamInfoDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is NBATeamInfoDelegate.ShowTeamStats -> {
                 val store = nbaTeamStatsFactory.create(delegate.model.displayModel)
                 store.send(NBATeamStatsAction.InitData)
-                _stack.update { it + StackItem.NBATeamStats(ViewId(), store) }
+                _stack.update { it + StackItem.NBATeamStats(id, store) }
             }
             is NBATeamInfoDelegate.ShowGameStats -> {
-                val store = nbaGameStatsFactory.create(delegate.model.displayModel)
+                val store = nbaGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onNBAGameStatsDelegate(id, delegate)
+                }
                 store.send(NBAGameStatsAction.InitData)
-                _stack.update { it + StackItem.NBAGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.NBAGameStats(id, store) }
             }
         }
     }
@@ -539,44 +591,75 @@ class AppViewModel @Inject constructor(
     }
 
     private fun onNBALeagueScheduleDelegate(delegate: NBALeagueScheduleDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is NBALeagueScheduleDelegate.ShowGameStats -> {
                 _didPop.value = false
                 _includesPreviousView.value = false
 
-                val store = nbaGameStatsFactory.create(delegate.model.displayModel)
+                val store = nbaGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onNBAGameStatsDelegate(id, delegate)
+                }
                 store.send(NBAGameStatsAction.InitData)
-                _stack.update { it + StackItem.NBAGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.NBAGameStats(id, store) }
+            }
+        }
+    }
+
+    private fun onNBAGameStatsDelegate(id: ViewId, delegate: NBAGameStatsDelegate) {
+        when (delegate) {
+            is NBAGameStatsDelegate.RefreshGame -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val idx = stack.value.indexOfFirst { it.id == id }
+                if (idx > 0) {
+                    for (prev in stack.value.subList(0, idx).asReversed()) {
+                        if (prev is StackItem.NBALeagueSchedule) {
+                            prev.store.send(NBALeagueScheduleAction.UpdateStateByRefreshGame(delegate.model))
+                            break
+                        }
+                    }
+                }
             }
         }
     }
 
     private fun onMLBPlayerInfoDelegate(delegate: MLBPlayerInfoDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is MLBPlayerInfoDelegate.ShowPlayerStats -> {
                 val store = mlbPlayerStatsFactory.create(delegate.model.displayModel)
                 store.send(MLBPlayerStatsAction.InitData)
-                _stack.update { it + StackItem.MLBPlayerStats(ViewId(), store) }
+                _stack.update { it + StackItem.MLBPlayerStats(id, store) }
             }
             is MLBPlayerInfoDelegate.ShowGameStats -> {
-                val store = mlbGameStatsFactory.create(delegate.model.displayModel)
+                val store = mlbGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onMLBGameStatsDelegate(id, delegate)
+                }
                 store.send(MLBGameStatsAction.InitData)
-                _stack.update { it + StackItem.MLBGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.MLBGameStats(id, store) }
             }
         }
     }
 
     private fun onMLBTeamInfoDelegate(delegate: MLBTeamInfoDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is MLBTeamInfoDelegate.ShowTeamStats -> {
                 val store = mlbTeamStatsFactory.create(delegate.model.displayModel)
                 store.send(MLBTeamStatsAction.InitData)
-                _stack.update { it + StackItem.MLBTeamStats(ViewId(), store) }
+                _stack.update { it + StackItem.MLBTeamStats(id, store) }
             }
             is MLBTeamInfoDelegate.ShowGameStats -> {
-                val store = mlbGameStatsFactory.create(delegate.model.displayModel)
+                val store = mlbGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onMLBGameStatsDelegate(id, delegate)
+                }
                 store.send(MLBGameStatsAction.InitData)
-                _stack.update { it + StackItem.MLBGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.MLBGameStats(id, store) }
             }
         }
     }
@@ -592,44 +675,75 @@ class AppViewModel @Inject constructor(
     }
 
     private fun onMLBLeagueScheduleDelegate(delegate: MLBLeagueScheduleDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is MLBLeagueScheduleDelegate.ShowGameStats -> {
                 _didPop.value = false
                 _includesPreviousView.value = false
 
-                val store = mlbGameStatsFactory.create(delegate.model.displayModel)
+                val store = mlbGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onMLBGameStatsDelegate(id, delegate)
+                }
                 store.send(MLBGameStatsAction.InitData)
-                _stack.update { it + StackItem.MLBGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.MLBGameStats(id, store) }
+            }
+        }
+    }
+
+    private fun onMLBGameStatsDelegate(id: ViewId, delegate: MLBGameStatsDelegate) {
+        when (delegate) {
+            is MLBGameStatsDelegate.RefreshGame -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val idx = stack.value.indexOfFirst { it.id == id }
+                if (idx > 0) {
+                    for (prev in stack.value.subList(0, idx).asReversed()) {
+                        if (prev is StackItem.MLBLeagueSchedule) {
+                            prev.store.send(MLBLeagueScheduleAction.UpdateStateByRefreshGame(delegate.model))
+                            break
+                        }
+                    }
+                }
             }
         }
     }
 
     private fun onKBOPlayerInfoDelegate(delegate: KBOPlayerInfoDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is KBOPlayerInfoDelegate.ShowPlayerStats -> {
                 val store = kboPlayerStatsFactory.create(delegate.model.displayModel)
                 store.send(KBOPlayerStatsAction.InitData)
-                _stack.update { it + StackItem.KBOPlayerStats(ViewId(), store) }
+                _stack.update { it + StackItem.KBOPlayerStats(id, store) }
             }
             is KBOPlayerInfoDelegate.ShowGameStats -> {
-                val store = kboGameStatsFactory.create(delegate.model.displayModel)
+                val store = kboGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onKBOGameStatsDelegate(id, delegate)
+                }
                 store.send(KBOGameStatsAction.InitData)
-                _stack.update { it + StackItem.KBOGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.KBOGameStats(id, store) }
             }
         }
     }
 
     private fun onKBOTeamInfoDelegate(delegate: KBOTeamInfoDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is KBOTeamInfoDelegate.ShowTeamStats -> {
                 val store = kboTeamStatsFactory.create(delegate.model.displayModel)
                 store.send(KBOTeamStatsAction.InitData)
-                _stack.update { it + StackItem.KBOTeamStats(ViewId(), store) }
+                _stack.update { it + StackItem.KBOTeamStats(id, store) }
             }
             is KBOTeamInfoDelegate.ShowGameStats -> {
-                val store = kboGameStatsFactory.create(delegate.model.displayModel)
+                val store = kboGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onKBOGameStatsDelegate(id, delegate)
+                }
                 store.send(KBOGameStatsAction.InitData)
-                _stack.update { it + StackItem.KBOGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.KBOGameStats(id, store) }
             }
         }
     }
@@ -645,14 +759,37 @@ class AppViewModel @Inject constructor(
     }
 
     private fun onKBOLeagueScheduleDelegate(delegate: KBOLeagueScheduleDelegate) {
+        val id = ViewId()
+
         when (delegate) {
             is KBOLeagueScheduleDelegate.ShowGameStats -> {
                 _didPop.value = false
                 _includesPreviousView.value = false
 
-                val store = kboGameStatsFactory.create(delegate.model.displayModel)
+                val store = kboGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onKBOGameStatsDelegate(id, delegate)
+                }
                 store.send(KBOGameStatsAction.InitData)
-                _stack.update { it + StackItem.KBOGameStats(ViewId(), store) }
+                _stack.update { it + StackItem.KBOGameStats(id, store) }
+            }
+        }
+    }
+
+    private fun onKBOGameStatsDelegate(id: ViewId, delegate: KBOGameStatsDelegate) {
+        when (delegate) {
+            is KBOGameStatsDelegate.RefreshGame -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val idx = stack.value.indexOfFirst { it.id == id }
+                if (idx > 0) {
+                    for (prev in stack.value.subList(0, idx).asReversed()) {
+                        if (prev is StackItem.KBOLeagueSchedule) {
+                            prev.store.send(KBOLeagueScheduleAction.UpdateStateByRefreshGame(delegate.model))
+                            break
+                        }
+                    }
+                }
             }
         }
     }

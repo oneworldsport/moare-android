@@ -2,12 +2,12 @@ package com.moare.android.features.search.display.football.viewmodel
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
+import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.models.football.FBGameLineups
 import com.moare.android.features.search.models.models.football.FBGamePlayerStats
 import com.moare.android.features.search.models.models.football.FBGamePlayerStatsDetail
@@ -22,22 +22,32 @@ import com.moare.android.features.search.models.models.football.FBPlayerStatsPas
 import com.moare.android.features.search.models.models.football.FBPlayerStatsPenalty
 import com.moare.android.features.search.models.models.football.FBPlayerStatsShots
 import com.moare.android.features.search.models.models.football.FBPlayerStatsTackles
+import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
+import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 sealed interface FBGameStatsAction {
     data object InitData : FBGameStatsAction
     data class SelectSecondCategory(val index: Int) : FBGameStatsAction
     data class SelectTeam(val index: Int) : FBGameStatsAction
+    data class RefreshGame(val shouldFetch: Boolean = true) : FBGameStatsAction // NOTE: shouldFetch는 최초에 FBGameStats에 진입했을때 받은 데이터로 FBLeagueSchedule데이터 업데이트 해줄때 사용.
+}
+
+sealed interface FBGameStatsDelegate {
+    data class RefreshGame(val model: SportDecodableModel.FBGameStats) : FBGameStatsDelegate
 }
 
 class FBGameStatsStore @AssistedInject constructor(
+    private val searchClient: SearchClient,
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: FBGameStatsDisplayModel
-) : BaseGameStatsStore<FBGameStatsAction, FBGameStatsDisplayModel>(initial, nameProvider) {
+    @Assisted val model: FBGameStatsDisplayModel,
+    @Assisted val emitToParent: (FBGameStatsDelegate) -> Unit
+) : BaseGameStatsStore<FBGameStatsAction, FBGameStatsDisplayModel>(model, nameProvider) {
     val dataItemHeight = 40.dp
     val categoryItemHeight = 34.dp
     val firstItemWidth = 120.dp
@@ -61,7 +71,10 @@ class FBGameStatsStore @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: FBGameStatsDisplayModel) : FBGameStatsStore
+        fun create(
+            model: FBGameStatsDisplayModel,
+            emitToParent: (FBGameStatsDelegate) -> Unit
+        ) : FBGameStatsStore
     }
 
     override fun send(action: FBGameStatsAction) {
@@ -69,6 +82,7 @@ class FBGameStatsStore @AssistedInject constructor(
             is FBGameStatsAction.InitData -> initData()
             is FBGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
             is FBGameStatsAction.SelectTeam -> selectTeam(action.index)
+            is FBGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
         }
     }
 
@@ -81,19 +95,7 @@ class FBGameStatsStore @AssistedInject constructor(
         _lineups.value = null
         _coach.value = null
 
-        // set current(home) team's players stats
-        val homeTeamId = displayModel.value.game.teams.home.id
-        val playersStats = displayModel.value.game.players.find { it.team.id == homeTeamId }?.players
-        _playersStats.value = playersStats ?: emptyList()
-
-        setPlayersTotalStats()
-
-        // set current(home) team's coach, lineups
-        val lineups = displayModel.value.game.lineups.find { it.team.id == homeTeamId }
-        _lineups.value = lineups
-        _coach.value = lineups?.coach
-
-        sortPlayers()
+        selectTeam(0)
     }
 
     override fun selectSecondCategory(index: Int) {
@@ -122,6 +124,7 @@ class FBGameStatsStore @AssistedInject constructor(
         _coach.value = lineups?.coach
 
         sortPlayers()
+        refreshGame(false) // NOTE: 이걸 안해주면 새로고침 누르기 전에는 FBLeagueSchedule 데이터가 업데이트 안됨.
     }
 
     override fun sortPlayers() {
@@ -231,4 +234,50 @@ class FBGameStatsStore @AssistedInject constructor(
 
         _playersTotalStats.value = playersTotalStats
     }
+
+    private fun refreshGame(shouldFetch: Boolean) {
+        if (shouldFetch) {
+            scope.launch {
+                val game = displayModel.value.game
+
+                // TODO: Has to add loading
+                val result = searchClient.fetchById(
+                    season = displayModel.value.season,
+                    category = "football",
+                    date = game.fixture.date,
+                    dataType = "football_game_stats",
+                    leagueId = game.league.id,
+                    id = game.fixture.id.toString()
+                )
+
+                if (result.data is SportDecodableModel.FBGameStats) {
+                    _displayModel.value = result.data.displayModel
+                    initData()
+                    emitToParent(FBGameStatsDelegate.RefreshGame(result.data))
+                }
+            }
+        } else {
+            val responseModel = FBGameStatsResponseModel(game = displayModel.value.game)
+            val dataModel = SportDecodableModel.FBGameStats(responseModel, displayModel.value)
+
+            emitToParent(FBGameStatsDelegate.RefreshGame(dataModel))
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

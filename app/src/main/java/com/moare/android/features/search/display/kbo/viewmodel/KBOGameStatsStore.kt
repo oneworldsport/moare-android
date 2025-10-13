@@ -1,31 +1,44 @@
 package com.moare.android.features.search.display.kbo.viewmodel
 
 import androidx.compose.ui.unit.dp
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
-import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsStore
-import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
+import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
+import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsDelegate
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
 import com.moare.android.features.search.models.models.kbo.KBOGameLineup
 import com.moare.android.features.search.models.models.kbo.KBOGamePitcherStats
+import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
+import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 sealed interface KBOGameStatsAction {
     data object InitData : KBOGameStatsAction
     data class SelectFirstCategory(val index: Int) : KBOGameStatsAction
     data class SelectSecondCategory(val index: Int) : KBOGameStatsAction
     data class SelectTeam(val index: Int) : KBOGameStatsAction
+    data class RefreshGame(val shouldFetch: Boolean = true) : KBOGameStatsAction
+}
+
+sealed interface KBOGameStatsDelegate {
+    data class RefreshGame(val model: SportDecodableModel.KBOGameStats) : KBOGameStatsDelegate
 }
 
 class KBOGameStatsStore @AssistedInject constructor(
+    private val searchClient: SearchClient,
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: KBOGameStatsDisplayModel
-) : BaseGameStatsStore<KBOGameStatsAction, KBOGameStatsDisplayModel>(initial, nameProvider) {
+    @Assisted val model: KBOGameStatsDisplayModel,
+    @Assisted val emitToParent: (KBOGameStatsDelegate) -> Unit
+) : BaseGameStatsStore<KBOGameStatsAction, KBOGameStatsDisplayModel>(model, nameProvider) {
     val lineScoreItemHeight = 50.dp
     val teamButtonWidth = 100.dp
 
@@ -40,7 +53,10 @@ class KBOGameStatsStore @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: KBOGameStatsDisplayModel) : KBOGameStatsStore
+        fun create(
+            model: KBOGameStatsDisplayModel,
+            emitToParent: (KBOGameStatsDelegate) -> Unit
+        ) : KBOGameStatsStore
     }
 
     override fun send(action: KBOGameStatsAction) {
@@ -49,6 +65,7 @@ class KBOGameStatsStore @AssistedInject constructor(
             is KBOGameStatsAction.SelectFirstCategory -> selectFirstCategory(action.index)
             is KBOGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
             is KBOGameStatsAction.SelectTeam -> selectTeam(action.index)
+            is KBOGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
         }
     }
 
@@ -84,6 +101,7 @@ class KBOGameStatsStore @AssistedInject constructor(
 
         sortHitters()
         sortPitchers()
+        refreshGame(false)
     }
 
     override fun selectFirstCategory(index: Int) {
@@ -136,5 +154,37 @@ class KBOGameStatsStore @AssistedInject constructor(
         }
 
         _teamPitchers.value = teamPitchers
+    }
+
+    private fun refreshGame(shouldFetch: Boolean) {
+        if (shouldFetch) {
+            scope.launch {
+                val game = displayModel.value.game
+                val gameInfo = game.gameInfo
+
+                gameInfo?.let {
+                    // TODO: Has to add loading
+                    val result = searchClient.fetchById(
+                        season = displayModel.value.season,
+                        category = "baseball",
+                        date = gameInfo.date,
+                        dataType = "baseball_game_stats",
+                        leagueId = Constants.Ids.KBO,
+                        id = gameInfo.gameId
+                    )
+
+                    if (result.data is SportDecodableModel.KBOGameStats) {
+                        _displayModel.value = result.data.displayModel
+                        initData()
+                        emitToParent(KBOGameStatsDelegate.RefreshGame(result.data))
+                    }
+                }
+            }
+        } else {
+            val responseModel = KBOGameStatsResponseModel(game = displayModel.value.game)
+            val dataModel = SportDecodableModel.KBOGameStats(responseModel, displayModel.value)
+
+            emitToParent(KBOGameStatsDelegate.RefreshGame(dataModel))
+        }
     }
 }

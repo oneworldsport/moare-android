@@ -7,6 +7,7 @@ import com.moare.android.core.util.DayInfo
 import com.moare.android.features.search.display.common.viewmodel.BaseScheduleStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleDelegate
+import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.ModelConverter
@@ -32,6 +33,8 @@ sealed interface KBOLeagueScheduleAction {
     data class UpdateResultOpenedState(val itemKey: String, val isOpened: Boolean) : KBOLeagueScheduleAction // NOTE: 더블헤더가 있는 날에 취소된 경기가 있으면 gameId가 같은 경우가 있어 gameId 대신에 itemKey를 사용
     data class SelectGame(val game: KBOGameForSchedule) : KBOLeagueScheduleAction
     data object UpdateFilteredGames : KBOLeagueScheduleAction
+
+    data class UpdateStateByRefreshGame(val model: SportDecodableModel.KBOGameStats) : KBOLeagueScheduleAction
 }
 
 sealed interface KBOLeagueScheduleDelegate {
@@ -67,6 +70,7 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
             is KBOLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.itemKey, action.isOpened)
             is KBOLeagueScheduleAction.SelectGame -> selectGame(action.game)
             is KBOLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
+            is KBOLeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
         }
     }
 
@@ -270,28 +274,10 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
         }
     }
 
-    private fun updateGamesData(
-        kboLeagueScheduleData: SportDecodableModel.KBOLeagueSchedule,
-        kboGameStatsData: SportDecodableModel.KBOGameStats,
-        updateViewStack: (SportDecodableModel.KBOLeagueSchedule) -> Unit
-    ) {
-//        val game = kboGameStatsData.displayModel.game
-//        val itemKey = "${game.gameInfo?.date?.split("+")?.firstOrNull() ?: ""}#${game.gameInfo?.gameId ?: ""}"
-//        val newGames = kboLeagueScheduleData.displayModel.games.map {
-//            if (it.itemKey == itemKey) ModelConverter.kboGameToGameScheduleConverter(game) else it
-//        }
-//
-//        var newData = kboLeagueScheduleData
-//        newData.displayModel.games = newGames
-//        _displayModel.value = newData.displayModel
-//
-//        val newFilteredGames = filteredGames.value.toMutableMap()
-//        newFilteredGames[selectedDayIndex.value] = newData.displayModel.games.filter { game ->
-//            CalendarUtil.isSameDate(game.date, selectedYearMonth.value, selectedDayIndex.value + 1)
-//        }
-//
-//        _filteredGames.value = newFilteredGames
-//
-//        updateViewStack(newData)
+    private fun updateStateByRefreshGame(model: SportDecodableModel.KBOGameStats) {
+        _displayModel.value = ModelConverter.kboGameDisplayToLeagueScheduleDisplayConverter(
+            gameStatsDisplayModel = model.displayModel,
+            leagueScheduleDisplayModel = displayModel.value
+        )
     }
 }

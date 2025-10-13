@@ -29,7 +29,7 @@ sealed interface FBPlayerStandingsAction {
 }
 
 sealed interface FBPlayerStandingsDelegate {
-    data class ShowPlayerStats(val model: SportDecodableModel) : FBPlayerStandingsDelegate
+    data class ShowPlayerStats(val model: SportDecodableModel.FBPlayerStats) : FBPlayerStandingsDelegate
 }
 
 class FBPlayerStandingsStore @AssistedInject constructor(
@@ -187,7 +187,9 @@ class FBPlayerStandingsStore @AssistedInject constructor(
                 id = id.toString()
             )
 
-            emitToParent(FBPlayerStandingsDelegate.ShowPlayerStats(result.data))
+            if (result.data is SportDecodableModel.FBPlayerStats) {
+                emitToParent(FBPlayerStandingsDelegate.ShowPlayerStats(result.data))
+            }
         }
     }
 }

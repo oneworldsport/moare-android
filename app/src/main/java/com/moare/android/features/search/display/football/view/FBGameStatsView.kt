@@ -210,7 +210,7 @@ fun FBGameStatsView(
                 store.send(FBGameStatsAction.SelectSecondCategory(index))
             },
             refreshButtonAction = {
-//                searchStore.send(SearchStore.Intent.RefreshGame(season = displayModel.season, category = "football"))
+                store.send(FBGameStatsAction.RefreshGame())
             }
         ),
         titleContent = {

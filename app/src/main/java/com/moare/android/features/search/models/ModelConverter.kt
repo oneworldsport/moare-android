@@ -795,6 +795,22 @@ object ModelConverter {
         )
     }
 
+    fun fbGameDisplayToLeagueScheduleDisplayConverter(
+        gameStatsDisplayModel: FBGameStatsDisplayModel,
+        leagueScheduleDisplayModel: FBLeagueScheduleDisplayModel
+    ): FBLeagueScheduleDisplayModel {
+        val game = gameStatsDisplayModel.game
+        val newGames = leagueScheduleDisplayModel.games.map {
+            if (it.gameId == game.fixture.id.toString()) {
+                fbGameToGameScheduleConverter(game)
+            } else {
+                it
+            }
+        }
+
+        return leagueScheduleDisplayModel.copy(games = newGames)
+    }
+
     fun nbaGameListToGameScheduleListConverter(gameList: List<NBAGame>): List<NBAGameForSchedule> {
         return gameList.mapNotNull {
             nbaGameToGameScheduleConverter(game = it)
@@ -818,6 +834,22 @@ object ModelConverter {
             _gameStatus = gameSummary?.gameStatusId?.toString(),
             gameInfo = gameSummary
         )
+    }
+
+    fun nbaGameDisplayToLeagueScheduleDisplayConverter(
+        gameStatsDisplayModel: NBAGameStatsDisplayModel,
+        leagueScheduleDisplayModel: NBALeagueScheduleDisplayModel
+    ): NBALeagueScheduleDisplayModel {
+        val game = gameStatsDisplayModel.game
+        val newGames = leagueScheduleDisplayModel.games.map {
+            if (it.gameId == game.gameSummary?.gameId) {
+                nbaGameToGameScheduleConverter(game)
+            } else {
+                it
+            }
+        }
+
+        return leagueScheduleDisplayModel.copy(games = newGames)
     }
 
     fun mlbGameToGameScheduleConverter(game: MLBGame): MLBGameForSchedule {
@@ -853,6 +885,22 @@ object ModelConverter {
         )
     }
 
+    fun mlbGameDisplayToLeagueScheduleDisplayConverter(
+        gameStatsDisplayModel: MLBGameStatsDisplayModel,
+        leagueScheduleDisplayModel: MLBLeagueScheduleDisplayModel
+    ): MLBLeagueScheduleDisplayModel {
+        val game = gameStatsDisplayModel.game
+        val newGames = leagueScheduleDisplayModel.games.map {
+            if (it.gameId == game.game.pk.toString()) {
+                mlbGameToGameScheduleConverter(game)
+            } else {
+                it
+            }
+        }
+
+        return leagueScheduleDisplayModel.copy(games = newGames)
+    }
+
     fun kboGameToGameScheduleConverter(game: KBOGame): KBOGameForSchedule {
         val date = game.gameInfo?.date?.split("+")?.firstOrNull()
         val homeTeamId = game.gameInfo?.homeTeamId ?: 0
@@ -884,6 +932,23 @@ object ModelConverter {
             lineScore = null,
             lineup = null
         )
+    }
+
+    fun kboGameDisplayToLeagueScheduleDisplayConverter(
+        gameStatsDisplayModel: KBOGameStatsDisplayModel,
+        leagueScheduleDisplayModel: KBOLeagueScheduleDisplayModel
+    ): KBOLeagueScheduleDisplayModel {
+        val game = gameStatsDisplayModel.game
+        val itemKey = "${game.gameInfo?.date?.split("+")?.firstOrNull() ?: ""}#${game.gameInfo?.gameId ?: ""}"
+        val newGames = leagueScheduleDisplayModel.games.map {
+            if (it.itemKey == itemKey) {
+                kboGameToGameScheduleConverter(game)
+            } else {
+                it
+            }
+        }
+
+        return leagueScheduleDisplayModel.copy(games = newGames)
     }
 }
 

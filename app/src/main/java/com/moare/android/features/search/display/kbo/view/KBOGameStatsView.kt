@@ -158,7 +158,7 @@ fun KBOGameStatsView(
                 store.send(KBOGameStatsAction.SelectFirstCategory(index))
             },
             refreshButtonAction = {
-                searchStore.send(SearchAction.RefreshGame(season = displayModel.season, category = "baseball"))
+                store.send(KBOGameStatsAction.RefreshGame())
             },
             secondStatsCategoryButtonAction = { index ->
                 store.send(KBOGameStatsAction.SelectSecondCategory(index))

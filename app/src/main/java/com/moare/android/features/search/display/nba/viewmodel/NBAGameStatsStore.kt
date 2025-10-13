@@ -2,31 +2,46 @@ package com.moare.android.features.search.display.nba.viewmodel
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
+import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
+import com.moare.android.features.search.display.football.viewmodel.FBGameStatsDelegate
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
 import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
 import com.moare.android.features.search.models.models.nba.NBALineScore
+import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
+import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 sealed interface NBAGameStatsAction {
     data object InitData : NBAGameStatsAction
     data class SelectSecondCategory(val index: Int) : NBAGameStatsAction
     data class SelectTeam(val index: Int) : NBAGameStatsAction
+    data class RefreshGame(val shouldFetch: Boolean = true) : NBAGameStatsAction
+}
+
+sealed interface NBAGameStatsDelegate {
+    data class RefreshGame(val model: SportDecodableModel.NBAGameStats) : NBAGameStatsDelegate
 }
 
 class NBAGameStatsStore @AssistedInject constructor(
+    private val searchClient: SearchClient,
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: NBAGameStatsDisplayModel
-) : BaseGameStatsStore<NBAGameStatsAction, NBAGameStatsDisplayModel>(initial, nameProvider) {
+    @Assisted val model: NBAGameStatsDisplayModel,
+    @Assisted val emitToParent: (NBAGameStatsDelegate) -> Unit
+) : BaseGameStatsStore<NBAGameStatsAction, NBAGameStatsDisplayModel>(model, nameProvider) {
     val dataItemHeight = 40.dp
     val firstCategoryItemHeight = 34.dp
     val secondCategoryItemHeight = 40.dp
@@ -56,7 +71,10 @@ class NBAGameStatsStore @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: NBAGameStatsDisplayModel) : NBAGameStatsStore
+        fun create(
+            model: NBAGameStatsDisplayModel,
+            emitToParent: (NBAGameStatsDelegate) -> Unit
+        ) : NBAGameStatsStore
     }
 
     override fun send(action: NBAGameStatsAction) {
@@ -64,6 +82,7 @@ class NBAGameStatsStore @AssistedInject constructor(
             is NBAGameStatsAction.InitData -> initData()
             is NBAGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
             is NBAGameStatsAction.SelectTeam -> selectTeam(action.index)
+            is NBAGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
         }
     }
 
@@ -124,6 +143,7 @@ class NBAGameStatsStore @AssistedInject constructor(
 
         setPlayersTotalStats()
         sortPlayers()
+        refreshGame(false)
     }
 
     override fun sortPlayers() {
@@ -197,6 +217,41 @@ class NBAGameStatsStore @AssistedInject constructor(
         }
 
         _playersTotalStats.value = playersTotalStats
+    }
+
+    private fun refreshGame(shouldFetch: Boolean) {
+        if (shouldFetch) {
+            scope.launch {
+                val game = displayModel.value.game
+                val gameSummary = game.gameSummary
+                val boxScoreTraditional = game.boxScoreTraditional
+
+                gameSummary?.let {
+                    boxScoreTraditional?.let {
+                        // TODO: Has to add loading
+                        val result = searchClient.fetchById(
+                            season = displayModel.value.season,
+                            category = "basketball",
+                            date = gameSummary.date,
+                            dataType = "basketball_game_stats",
+                            leagueId = Constants.Ids.NBA,
+                            id = boxScoreTraditional.gameId
+                        )
+
+                        if (result.data is SportDecodableModel.NBAGameStats) {
+                            _displayModel.value = result.data.displayModel
+                            initData()
+                            emitToParent(NBAGameStatsDelegate.RefreshGame(result.data))
+                        }
+                    }
+                }
+            }
+        } else {
+            val responseModel = NBAGameStatsResponseModel(game = displayModel.value.game)
+            val dataModel = SportDecodableModel.NBAGameStats(responseModel, displayModel.value)
+
+            emitToParent(NBAGameStatsDelegate.RefreshGame(dataModel))
+        }
     }
 }
 

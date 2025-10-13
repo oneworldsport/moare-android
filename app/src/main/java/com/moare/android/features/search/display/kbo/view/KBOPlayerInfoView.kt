@@ -259,18 +259,7 @@ fun KBOPlayerInfoSecondItem(
             updateItemPosition?.let { it(1, coordinates) }
         },
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = containerModifier,
-        onClick = {
-            searchStore.send(
-                SearchAction.SearchById(
-                    id = player.teamId.toString(),
-                    season = displayModel.season,
-                    category = "baseball",
-                    dataType = "baseball_team_info",
-                    leagueId = Constants.Ids.KBO
-                )
-            )
-        }
+        modifier = containerModifier
     ) {
         // TODO: "소속팀" 라벨 표시 필요
         URLImage(

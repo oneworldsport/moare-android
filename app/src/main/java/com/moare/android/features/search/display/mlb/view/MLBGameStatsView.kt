@@ -175,7 +175,7 @@ fun MLBGameStatsView(
                 store.send(MLBGameStatsAction.SelectFirstCategory(index))
             },
             refreshButtonAction = {
-                searchStore.send(SearchAction.RefreshGame(season = displayModel.season, category = "baseball"))
+                store.send(MLBGameStatsAction.RefreshGame())
             },
             secondStatsCategoryButtonAction = { index ->
                 store.send(MLBGameStatsAction.SelectSecondCategory(index))

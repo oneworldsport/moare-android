@@ -7,7 +7,9 @@ import com.moare.android.core.util.DayInfo
 import com.moare.android.features.search.display.common.viewmodel.BaseScheduleStore
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
+import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
+import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.models.football.FBLeague
@@ -31,6 +33,8 @@ sealed interface FBLeagueScheduleAction {
     data class SelectGame(val game: FBGameForSchedule) : FBLeagueScheduleAction
     data object UpdateSelectedGame : FBLeagueScheduleAction
     data object UpdateFilteredGames : FBLeagueScheduleAction
+
+    data class UpdateStateByRefreshGame(val model: SportDecodableModel.FBGameStats) : FBLeagueScheduleAction
 }
 
 sealed interface FBLeagueScheduleDelegate {
@@ -47,7 +51,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
     val filteredGames: StateFlow<Map<Int, List<FBGameForSchedule>>> = _filteredGames
 
     // FBGameStatsView에서 title 정보에 사용
-    // FBGameStatsStore에서 DidRefreshGame을 실행하면, AppViewModel에서 설정됨.
+    // FBGameStatsStore에서 Delegate의 RefreshGame을 실행하면, AppViewModel에서 설정됨.
     private val _league = MutableStateFlow<FBLeague?>(null)
     val league: StateFlow<FBLeague?> = _league
 
@@ -75,6 +79,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
             is FBLeagueScheduleAction.SelectGame -> selectGame(action.game)
             is FBLeagueScheduleAction.UpdateSelectedGame -> updateSelectedGame()
             is FBLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
+            is FBLeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
         }
     }
 
@@ -291,30 +296,12 @@ class FBLeagueScheduleStore @AssistedInject constructor(
         _selectedGame.value = null
     }
 
-    private fun updateGamesData(
-        fbLeagueScheduleData: SportDecodableModel.FBLeagueSchedule,
-        fbGameStatsData: SportDecodableModel.FBGameStats,
-        updateViewStack: (SportDecodableModel.FBLeagueSchedule) -> Unit
-    ) {
-//        val game = fbGameStatsData.displayModel.game
-//        val newGames = fbLeagueScheduleData.displayModel.games.map {
-//            if (it.gameId == fbGameStatsData.displayModel.game.fixture.id.toString()) {
-//                ModelConverter.fbGameToGameScheduleConverter(game)
-//            } else it
-//        }
-//
-//        val newData = fbLeagueScheduleData
-//        newData.displayModel.games = newGames
-//        _displayModel.value = newData.displayModel
-//
-//        val newFilteredGames = filteredGames.value.toMutableMap()
-//        newFilteredGames[selectedDayIndex.value] = newData.displayModel.games.filter { game ->
-//            CalendarUtil.isSameDate(game.date, selectedYearMonth.value, selectedDayIndex.value + 1)
-//        }
-//
-//        _filteredGames.value = newFilteredGames
-//
-//        updateViewStack(newData)
+    private fun updateStateByRefreshGame(model: SportDecodableModel.FBGameStats) {
+        _displayModel.value = ModelConverter.fbGameDisplayToLeagueScheduleDisplayConverter(
+            gameStatsDisplayModel = model.displayModel,
+            leagueScheduleDisplayModel = displayModel.value
+        )
+        _league.value = model.displayModel.game.league
     }
 }
 

@@ -32,6 +32,8 @@ sealed interface MLBLeagueScheduleAction {
     data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : MLBLeagueScheduleAction
     data class SelectGame(val game: MLBGameForSchedule) : MLBLeagueScheduleAction
     data object UpdateFilteredGames : MLBLeagueScheduleAction
+
+    data class UpdateStateByRefreshGame(val model: SportDecodableModel.MLBGameStats) : MLBLeagueScheduleAction
 }
 
 sealed interface MLBLeagueScheduleDelegate {
@@ -67,6 +69,7 @@ class MLBLeagueScheduleStore @AssistedInject constructor(
             is MLBLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.gameId, action.isOpened)
             is MLBLeagueScheduleAction.SelectGame -> selectGame(action.game)
             is MLBLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
+            is MLBLeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
         }
     }
 
@@ -266,27 +269,10 @@ class MLBLeagueScheduleStore @AssistedInject constructor(
         }
     }
 
-    private fun updateGamesData(
-        mlbLeagueScheduleData: SportDecodableModel.MLBLeagueSchedule,
-        mlbGameStatsData: SportDecodableModel.MLBGameStats,
-        updateViewStack: (SportDecodableModel.MLBLeagueSchedule) -> Unit
-    ) {
-//        val game = mlbGameStatsData.displayModel.game
-//        val newGames = mlbLeagueScheduleData.displayModel.games.map {
-//            if (it.gameId == game.game.id) ModelConverter.mlbGameToGameScheduleConverter(game) else it
-//        }
-//
-//        val newData = mlbLeagueScheduleData
-//        newData.displayModel.games = newGames
-//        _displayModel.value = newData.displayModel
-//
-//        val newFilteredGames = filteredGames.value.toMutableMap()
-//        newFilteredGames[selectedDayIndex.value] = newData.displayModel.games.filter { game ->
-//            CalendarUtil.isSameDate(game.date, selectedYearMonth.value, selectedDayIndex.value + 1)
-//        }
-//
-//        _filteredGames.value = newFilteredGames
-//
-//        updateViewStack(newData)
+    private fun updateStateByRefreshGame(model: SportDecodableModel.MLBGameStats) {
+        _displayModel.value = ModelConverter.mlbGameDisplayToLeagueScheduleDisplayConverter(
+            gameStatsDisplayModel = model.displayModel,
+            leagueScheduleDisplayModel = displayModel.value
+        )
     }
 }

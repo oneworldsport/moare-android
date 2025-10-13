@@ -72,9 +72,7 @@ sealed interface SearchAction {
     data object ToggleSearchBar : SearchAction
     data object ToggleAutoCompleteListVisibleState : SearchAction
 
-    data class RefreshGame(val season: Int, val category: String) : SearchAction
     data class SelectNBATournamentRound(val gameList: List<NBAGame>) : SearchAction
-    data class SearchById(val id: String, val season: Int, val category: String, val dataType: String, val leagueId: Int) : SearchAction
 
     data class TestSearch(val viewForTest: SportDisplayType) : SearchAction
 }
@@ -196,9 +194,7 @@ class SearchStore @AssistedInject constructor(
                 is SearchAction.ToggleAutoCompleteListVisibleState -> toggleAutoCompleteListVisibleState()
                 is SearchAction.UpdateTextField -> updateTextField(action.newValue, action.updateAutoCompleteList)
                 is SearchAction.ToggleSearchBar -> toggleSearchBar()
-                is SearchAction.RefreshGame -> refreshGame(action.season, action.category)
                 is SearchAction.SelectNBATournamentRound -> selectNBATournamentRound(action.gameList)
-                is SearchAction.SearchById -> searchById(action.id, action.season, action.category, action.dataType, action.leagueId)
 
                 is SearchAction.TestSearch -> testSearch(action.viewForTest)
             }
@@ -341,120 +337,6 @@ class SearchStore @AssistedInject constructor(
         }
     }
 
-    private suspend fun selectKBOGame(game: KBOGameForSchedule, season: Int) {
-        val result = searchClient.fetchById(
-            season = season,
-            category = "baseball",
-            date = game.date,
-            dataType = "baseball_game_stats",
-            leagueId = Constants.Ids.KBO,
-            id = game.gameId
-        )
-    }
-
-    private suspend fun selectMLBGame(game: MLBGameForSchedule, season: Int) {
-        val result = searchClient.fetchById(
-            season = season,
-            category = "baseball",
-            date = game.date,
-            dataType = "baseball_game_stats",
-            leagueId = Constants.Ids.MLB,
-            id = game.gameId
-        )
-    }
-
-    private suspend fun refreshGame(season: Int, category: String) {
-//        try {
-//            when (val lastView = viewStack.value.lastOrNull()) {
-//                is SportDecodableModel.FBGameStats -> {
-//                    val game = (displayModels.value[SportDisplayType.FB_GAME_STATS] as? FBGameStatsDisplayModel)?.game
-//                    game?.let {
-//                        // TODO: Has to add loading
-//                        val result = searchClient.fetchById(
-//                            season = season,
-//                            category = category,
-//                            date = it.fixture.date,
-//                            dataType = "${category}_game_stats",
-//                            leagueId = it.league.id,
-//                            id = it.fixture.id.toString()
-//                        )
-//
-//                        if (result.data is SportDecodableModel.FBGameStats) {
-//                            val data = result.data
-////                    _fbGameStatsData.emit(data.displayModel)
-//                        }
-//                    }
-//                }
-//
-//                is SportDecodableModel.NBAGameStats -> {
-//                    val game = (displayModels.value[SportDisplayType.NBA_GAME_STATS] as? NBAGameStatsDisplayModel)?.game
-//                    val gameSummary = game?.gameSummary
-//                    val boxScoreTraditional = game?.boxScoreTraditional
-//                    gameSummary?.let { gameSummary ->
-//                        boxScoreTraditional?.let { boxScoreTraditional->
-//                            // TODO: Has to add loading
-//                            val result = searchClient.fetchById(
-//                                season = season,
-//                                category = category,
-//                                date = gameSummary.date,
-//                                dataType = "${category}_game_stats",
-//                                leagueId = Constants.Ids.NBA,
-//                                id = boxScoreTraditional.gameId
-//                            )
-//
-//                            if (result.data is SportDecodableModel.NBAGameStats) {
-//                                val data = result.data
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                is SportDecodableModel.KBOGameStats -> {
-//                    val game = (displayModels.value[SportDisplayType.KBO_GAME_STATS] as? KBOGameStatsDisplayModel)?.game
-//                    val gameInfo = game?.gameInfo
-//                    gameInfo?.let {
-//                        // TODO: Has to add loading
-//                        val result = searchClient.fetchById(
-//                            season = season,
-//                            category = category,
-//                            date = gameInfo.date,
-//                            dataType = "${category}_game_stats",
-//                            leagueId = Constants.Ids.KBO,
-//                            id = gameInfo.gameId
-//                        )
-//
-//                        if (result.data is SportDecodableModel.KBOGameStats) {
-//                            val data = result.data
-//                        }
-//                    }
-//                }
-//
-//                is SportDecodableModel.MLBGameStats -> {
-//                    val game = (displayModels.value[SportDisplayType.MLB_GAME_STATS] as? MLBGameStatsDisplayModel)?.game
-//                    game?.let {
-//                        // TODO: Has to add loading
-//                        val result = searchClient.fetchById(
-//                            season = season,
-//                            category = category,
-//                            date = game.gameInfo.gameDate,
-//                            dataType = "${category}_game_stats",
-//                            leagueId = Constants.Ids.MLB,
-//                            id = game.game.pk.toString()
-//                        )
-//
-//                        if (result.data is SportDecodableModel.MLBGameStats) {
-//                            val data = result.data
-//                        }
-//                    }
-//                }
-//
-//                else -> return // do nothing
-//            }
-//        } catch (e: Exception) {
-//            Log.e("dsdf", e.localizedMessage ?: "error")
-//        }
-    }
-
     private suspend fun selectNBATournamentRound(gameList: List<NBAGame>) {
 //        val modelConverter = ModelConverter()
 //
@@ -480,22 +362,6 @@ class SearchStore @AssistedInject constructor(
 //        delay(1000)
 //
 //        _resultVisibleState.emit(true)
-    }
-
-    private suspend fun searchById(
-        id: String,
-        season: Int,
-        category: String,
-        dataType: String, // TODO: Should make constants
-        leagueId: Int
-    ) {
-        val result = searchClient.fetchById(
-            season = season,
-            category = category,
-            dataType = dataType,
-            leagueId = leagueId,
-            id = id
-        )
     }
 
     // test code

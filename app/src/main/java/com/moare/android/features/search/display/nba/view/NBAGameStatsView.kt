@@ -195,7 +195,7 @@ fun NBAGameStatsView(
                 store.send(NBAGameStatsAction.SelectSecondCategory(index))
             },
             refreshButtonAction = {
-                searchStore.send(SearchAction.RefreshGame(season = displayModel.season, category = "basketball"))
+                store.send(NBAGameStatsAction.RefreshGame())
             }
         ),
         titleContent = {

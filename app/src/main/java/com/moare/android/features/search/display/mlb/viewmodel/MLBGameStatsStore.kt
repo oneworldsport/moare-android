@@ -1,28 +1,43 @@
 package com.moare.android.features.search.display.mlb.viewmodel
 
 import androidx.compose.ui.unit.dp
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
+import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
+import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsDelegate
+import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.mlb.MLBGameBoxscoreTeamData
 import com.moare.android.features.search.models.models.mlb.MLBGameBoxscoreTeamPlayer
+import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
+import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 sealed interface MLBGameStatsAction {
     data object InitData : MLBGameStatsAction
     data class SelectFirstCategory(val index: Int) : MLBGameStatsAction
     data class SelectSecondCategory(val index: Int) : MLBGameStatsAction
     data class SelectTeam(val index: Int) : MLBGameStatsAction
+    data class RefreshGame(val shouldFetch: Boolean = true) : MLBGameStatsAction
+}
+
+sealed interface MLBGameStatsDelegate {
+    data class RefreshGame(val model: SportDecodableModel.MLBGameStats) : MLBGameStatsDelegate
 }
 
 class MLBGameStatsStore @AssistedInject constructor(
+    private val searchClient: SearchClient,
     private val nameProvider: TranslatedNameProvider,
-    @Assisted val initial: MLBGameStatsDisplayModel
-) : BaseGameStatsStore<MLBGameStatsAction, MLBGameStatsDisplayModel>(initial, nameProvider) {
+    @Assisted val model: MLBGameStatsDisplayModel,
+    @Assisted val emitToParent: (MLBGameStatsDelegate) -> Unit
+) : BaseGameStatsStore<MLBGameStatsAction, MLBGameStatsDisplayModel>(model, nameProvider) {
     val lineScoreItemHeight = 50.dp
     val teamButtonWidth = 100.dp
 
@@ -37,7 +52,10 @@ class MLBGameStatsStore @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(displayModel: MLBGameStatsDisplayModel) : MLBGameStatsStore
+        fun create(
+            model: MLBGameStatsDisplayModel,
+            emitToParent: (MLBGameStatsDelegate) -> Unit
+        ) : MLBGameStatsStore
     }
 
     override fun send(action: MLBGameStatsAction) {
@@ -46,6 +64,7 @@ class MLBGameStatsStore @AssistedInject constructor(
             is MLBGameStatsAction.SelectFirstCategory -> selectFirstCategory(action.index)
             is MLBGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
             is MLBGameStatsAction.SelectTeam -> selectTeam(action.index)
+            is MLBGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
         }
     }
 
@@ -80,6 +99,7 @@ class MLBGameStatsStore @AssistedInject constructor(
 
         sortHitters()
         sortPitchers()
+        refreshGame(false)
     }
 
     override fun selectFirstCategory(index: Int) {
@@ -132,5 +152,34 @@ class MLBGameStatsStore @AssistedInject constructor(
         }
 
         _teamPitchers.value = teamPitchers
+    }
+
+    private fun refreshGame(shouldFetch: Boolean) {
+        if (shouldFetch) {
+            scope.launch {
+                val game = displayModel.value.game
+
+                // TODO: Has to add loading
+                val result = searchClient.fetchById(
+                    season = displayModel.value.season,
+                    category = "baseball",
+                    date = game.gameInfo.gameDate,
+                    dataType = "baseball_game_stats",
+                    leagueId = Constants.Ids.MLB,
+                    id = game.game.pk.toString()
+                )
+
+                if (result.data is SportDecodableModel.MLBGameStats) {
+                    _displayModel.value = result.data.displayModel
+                    initData()
+                    emitToParent(MLBGameStatsDelegate.RefreshGame(result.data))
+                }
+            }
+        } else {
+            val responseModel = MLBGameStatsResponseModel(game = displayModel.value.game)
+            val dataModel = SportDecodableModel.MLBGameStats(responseModel, displayModel.value)
+
+            emitToParent(MLBGameStatsDelegate.RefreshGame(dataModel))
+        }
     }
 }
