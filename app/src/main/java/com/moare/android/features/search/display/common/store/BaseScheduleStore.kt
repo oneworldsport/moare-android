@@ -1,8 +1,7 @@
-package com.moare.android.features.search.display.common.viewmodel
+package com.moare.android.features.search.display.common.store
 
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.core.mvi.MVIViewModel
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.core.util.TimeFormatType

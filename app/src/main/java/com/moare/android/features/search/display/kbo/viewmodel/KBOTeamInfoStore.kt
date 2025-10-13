@@ -1,22 +1,15 @@
 package com.moare.android.features.search.display.kbo.viewmodel
 
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseInfoStore
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoDelegate
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoStore
-import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
-import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoDelegate
+import com.moare.android.features.search.display.common.store.BaseInfoStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import javax.inject.Inject
 
 
 sealed interface KBOTeamInfoAction {

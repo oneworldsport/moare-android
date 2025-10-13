@@ -4,14 +4,13 @@ import android.util.Log
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BasePlayerStandingsStore
+import com.moare.android.features.search.display.common.store.BasePlayerStandingsStore
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
-import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted

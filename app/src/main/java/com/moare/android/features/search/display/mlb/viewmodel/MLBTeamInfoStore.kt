@@ -1,11 +1,7 @@
 package com.moare.android.features.search.display.mlb.viewmodel
 
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseInfoStore
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoDelegate
-import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
-import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoDelegate
+import com.moare.android.features.search.display.common.store.BaseInfoStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
@@ -14,7 +10,6 @@ import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoRe
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import javax.inject.Inject
 
 sealed interface MLBTeamInfoAction {
     data object InitData : MLBTeamInfoAction

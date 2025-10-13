@@ -1,12 +1,10 @@
 package com.moare.android.features.search.display.kbo.viewmodel
 
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseInfoStore
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoDelegate
+import com.moare.android.features.search.display.common.store.BaseInfoStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
-import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerInfoResponseModel
 import dagger.assisted.Assisted

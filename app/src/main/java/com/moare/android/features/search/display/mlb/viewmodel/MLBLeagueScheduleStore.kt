@@ -4,9 +4,7 @@ import android.util.Log
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
-import com.moare.android.features.search.display.common.viewmodel.BaseScheduleStore
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleDelegate
+import com.moare.android.features.search.display.common.store.BaseScheduleStore
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.ModelConverter

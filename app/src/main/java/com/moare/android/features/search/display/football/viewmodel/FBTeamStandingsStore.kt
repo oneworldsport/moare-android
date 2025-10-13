@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsStore
+import com.moare.android.features.search.display.common.store.BaseTeamStandingsStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay

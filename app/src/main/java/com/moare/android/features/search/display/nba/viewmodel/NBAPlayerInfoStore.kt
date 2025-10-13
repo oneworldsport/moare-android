@@ -1,13 +1,10 @@
 package com.moare.android.features.search.display.nba.viewmodel
 
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseInfoStore
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoDelegate
+import com.moare.android.features.search.display.common.store.BaseInfoStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
-import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
 import dagger.assisted.Assisted

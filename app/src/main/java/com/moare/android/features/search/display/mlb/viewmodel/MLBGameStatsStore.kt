@@ -3,15 +3,12 @@ package com.moare.android.features.search.display.mlb.viewmodel
 import androidx.compose.ui.unit.dp
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsDelegate
+import com.moare.android.features.search.display.common.store.BaseGameStatsStore
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.mlb.MLBGameBoxscoreTeamData
 import com.moare.android.features.search.models.models.mlb.MLBGameBoxscoreTeamPlayer
 import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
-import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

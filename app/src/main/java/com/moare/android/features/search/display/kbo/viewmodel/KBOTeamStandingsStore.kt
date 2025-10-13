@@ -3,14 +3,11 @@ package com.moare.android.features.search.display.kbo.viewmodel
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseTeamStandingsStore
-import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
-import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsDelegate
+import com.moare.android.features.search.display.common.store.BaseTeamStandingsStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
-import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamStandingsResponseModel
 import dagger.assisted.Assisted

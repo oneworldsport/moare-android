@@ -1,4 +1,4 @@
-package com.moare.android.features.search.display.common.viewmodel
+package com.moare.android.features.search.display.common.store
 
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants

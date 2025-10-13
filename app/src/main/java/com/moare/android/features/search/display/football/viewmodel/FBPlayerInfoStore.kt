@@ -2,12 +2,10 @@ package com.moare.android.features.search.display.football.viewmodel
 
 import androidx.compose.ui.unit.dp
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchDelegate
+import com.moare.android.features.search.display.common.store.BaseInfoStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerInfoDisplayModel
-import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
 import dagger.assisted.Assisted

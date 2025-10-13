@@ -4,9 +4,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.percentageOf
-import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
+import com.moare.android.features.search.display.common.store.BaseGameStatsStore
 import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBGameLineups
 import com.moare.android.features.search.models.models.football.FBGamePlayerStats

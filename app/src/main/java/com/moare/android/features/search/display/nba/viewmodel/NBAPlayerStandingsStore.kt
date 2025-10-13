@@ -5,9 +5,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
-import com.moare.android.features.search.display.common.viewmodel.BasePlayerStandingsStore
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsAction
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsDelegate
+import com.moare.android.features.search.display.common.store.BasePlayerStandingsStore
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.KeywordInfo

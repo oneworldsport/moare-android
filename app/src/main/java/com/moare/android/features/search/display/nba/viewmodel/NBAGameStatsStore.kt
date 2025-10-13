@@ -7,15 +7,12 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.rounded
-import com.moare.android.features.search.display.common.viewmodel.BaseGameStatsStore
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsDelegate
+import com.moare.android.features.search.display.common.store.BaseGameStatsStore
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
 import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
 import com.moare.android.features.search.models.models.nba.NBALineScore
-import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted

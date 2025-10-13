@@ -2,7 +2,7 @@ package com.moare.android.features.search.display.football.viewmodel
 
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.features.search.display.common.viewmodel.BaseStatsStore
+import com.moare.android.features.search.display.common.store.BaseStatsStore
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBTeamStats
 import dagger.assisted.Assisted
@@ -10,7 +10,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
 
 sealed interface FBTeamStatsAction {
     data object InitData : FBTeamStatsAction
