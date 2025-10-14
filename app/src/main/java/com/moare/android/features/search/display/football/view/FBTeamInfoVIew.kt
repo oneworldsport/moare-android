@@ -175,7 +175,7 @@ fun FBTeamInfoFirstItem(
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by store.displayModel.collectAsState()
-    val teamNameDic by store.playerNameDic.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
     val team = displayModel.team
 
@@ -306,7 +306,7 @@ fun FBTeamInfoThirdItem(
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by store.displayModel.collectAsState()
-    val teamNameDic by store.playerNameDic.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
     val venue = displayModel.venue
 
@@ -445,7 +445,7 @@ fun FBTeamInfoFifthItem(
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by store.displayModel.collectAsState()
-    val teamNameDic by store.playerNameDic.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
     val lastGame = displayModel.lastGame
 
@@ -546,7 +546,7 @@ fun FBTeamInfoSixthItem(
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
     val displayModel by store.displayModel.collectAsState()
-    val teamNameDic by store.playerNameDic.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
     val nextGame = displayModel.nextGame
 
