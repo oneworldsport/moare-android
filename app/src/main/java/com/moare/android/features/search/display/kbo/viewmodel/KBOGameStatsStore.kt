@@ -16,6 +16,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 sealed interface KBOGameStatsAction {
@@ -24,6 +25,7 @@ sealed interface KBOGameStatsAction {
     data class SelectSecondCategory(val index: Int) : KBOGameStatsAction
     data class SelectTeam(val index: Int) : KBOGameStatsAction
     data class RefreshGame(val shouldFetch: Boolean = true) : KBOGameStatsAction
+    data object SortByBattingOrder : KBOGameStatsAction
 }
 
 sealed interface KBOGameStatsDelegate {
@@ -61,8 +63,9 @@ class KBOGameStatsStore @AssistedInject constructor(
             is KBOGameStatsAction.InitData -> initData()
             is KBOGameStatsAction.SelectFirstCategory -> selectFirstCategory(action.index)
             is KBOGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
-            is KBOGameStatsAction.SelectTeam -> selectTeam(action.index)
+            is KBOGameStatsAction.SelectTeam -> selectTeam(false, action.index)
             is KBOGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
+            is KBOGameStatsAction.SortByBattingOrder -> sortByBattingOrder()
         }
     }
 
@@ -77,14 +80,14 @@ class KBOGameStatsStore @AssistedInject constructor(
         _teamHitters.value = emptyList()
         _teamPitchers.value = emptyList()
 
-        selectTeam(0)
+        selectTeam(true, 0)
     }
 
     /* ---------------------
        implements
        --------------------- */
-    override fun selectTeam(index: Int) {
-        super.selectTeam(index)
+    override fun selectTeam(isInit:Boolean, index: Int) {
+        super.selectTeam(isInit, index)
 
         // set selected team's players stats
         _teamLineup.value = if (index == 0) {
@@ -96,7 +99,11 @@ class KBOGameStatsStore @AssistedInject constructor(
         _teamHitters.value = teamLineup.value?.hitters ?: emptyList()
         _teamPitchers.value = teamLineup.value?.pitchers ?: emptyList()
 
-        sortHitters()
+        if (isInit) {
+            sortByBattingOrder()
+        } else {
+            sortHitters()
+        }
         sortPitchers()
         refreshGame(false)
     }
@@ -184,4 +191,30 @@ class KBOGameStatsStore @AssistedInject constructor(
             emitToParent(KBOGameStatsDelegate.RefreshGame(dataModel))
         }
     }
+
+    private fun sortByBattingOrder() {
+        _teamHitters.update { it.toMutableList().apply { sortBy { it.battingNumber } } }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

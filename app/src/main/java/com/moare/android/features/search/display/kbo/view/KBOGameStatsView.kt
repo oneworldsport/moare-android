@@ -154,6 +154,9 @@ fun KBOGameStatsView(
             teamCategoryButtonAction = { index ->
                 store.send(KBOGameStatsAction.SelectTeam(index))
             },
+            firstStatsTitleCategoryAction = {
+                store.send(KBOGameStatsAction.SortByBattingOrder)
+            },
             secondCategoryButtonAction = { index ->
                 store.send(KBOGameStatsAction.SelectFirstCategory(index))
             },

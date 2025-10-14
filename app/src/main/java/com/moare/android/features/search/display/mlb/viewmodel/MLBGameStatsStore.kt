@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.dp
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.features.search.display.common.store.BaseGameStatsStore
+import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.mlb.MLBGameBoxscoreTeamData
@@ -15,6 +16,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 sealed interface MLBGameStatsAction {
@@ -23,6 +25,7 @@ sealed interface MLBGameStatsAction {
     data class SelectSecondCategory(val index: Int) : MLBGameStatsAction
     data class SelectTeam(val index: Int) : MLBGameStatsAction
     data class RefreshGame(val shouldFetch: Boolean = true) : MLBGameStatsAction
+    data object SortByBattingOrder : MLBGameStatsAction
 }
 
 sealed interface MLBGameStatsDelegate {
@@ -60,8 +63,9 @@ class MLBGameStatsStore @AssistedInject constructor(
             is MLBGameStatsAction.InitData -> initData()
             is MLBGameStatsAction.SelectFirstCategory -> selectFirstCategory(action.index)
             is MLBGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
-            is MLBGameStatsAction.SelectTeam -> selectTeam(action.index)
+            is MLBGameStatsAction.SelectTeam -> selectTeam(false, action.index)
             is MLBGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
+            is MLBGameStatsAction.SortByBattingOrder -> sortByBattingOrder()
         }
     }
 
@@ -73,11 +77,11 @@ class MLBGameStatsStore @AssistedInject constructor(
         _teamHitters.value = emptyList()
         _teamPitchers.value = emptyList()
 
-        selectTeam(0)
+        selectTeam(true, 0)
     }
 
-    override fun selectTeam(index: Int) {
-        super.selectTeam(index)
+    override fun selectTeam(isInit: Boolean, index: Int) {
+        super.selectTeam(isInit, index)
 
         // set selected team's players stats
         _teamBoxScore.value = if (index == 0) {
@@ -94,7 +98,11 @@ class MLBGameStatsStore @AssistedInject constructor(
             it.value.position?.abbreviation == "P" && it.value.allPositions.isNotEmpty()
         }?.map { (it.key to it.value) } ?: emptyList()
 
-        sortHitters()
+        if (isInit) {
+            sortByBattingOrder()
+        } else {
+            sortHitters()
+        }
         sortPitchers()
         refreshGame(false)
     }
@@ -178,5 +186,9 @@ class MLBGameStatsStore @AssistedInject constructor(
 
             emitToParent(MLBGameStatsDelegate.RefreshGame(dataModel))
         }
+    }
+
+    private fun sortByBattingOrder() {
+        _teamHitters.update { it.toMutableList().apply { sortBy { it.second.battingOrder.take(1).toIntOrNull() ?: 0 } } }
     }
 }

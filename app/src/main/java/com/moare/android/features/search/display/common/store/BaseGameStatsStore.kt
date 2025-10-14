@@ -102,7 +102,7 @@ abstract class BaseGameStatsStore<A, T: SportDisplayModel>(
         _secondCategorySelectedIndex.value = index
     }
 
-    open fun selectTeam(index: Int) {
+    open fun selectTeam(isInit: Boolean, index: Int) {
         _teamCategorySelectedIndex.value = index
     }
 

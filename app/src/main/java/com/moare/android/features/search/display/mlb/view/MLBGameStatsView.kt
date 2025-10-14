@@ -43,6 +43,7 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
+import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
@@ -170,6 +171,9 @@ fun MLBGameStatsView(
         actions = GameStatsContainerActions(
             teamCategoryButtonAction = { index ->
                 store.send(MLBGameStatsAction.SelectTeam(index))
+            },
+            firstStatsTitleCategoryAction = {
+                store.send(MLBGameStatsAction.SortByBattingOrder)
             },
             secondCategoryButtonAction = { index ->
                 store.send(MLBGameStatsAction.SelectFirstCategory(index))

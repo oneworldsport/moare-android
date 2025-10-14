@@ -80,7 +80,7 @@ class FBGameStatsStore @AssistedInject constructor(
         when (action) {
             is FBGameStatsAction.InitData -> initData()
             is FBGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
-            is FBGameStatsAction.SelectTeam -> selectTeam(action.index)
+            is FBGameStatsAction.SelectTeam -> selectTeam(false, action.index)
             is FBGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
         }
     }
@@ -94,7 +94,7 @@ class FBGameStatsStore @AssistedInject constructor(
         _lineups.value = null
         _coach.value = null
 
-        selectTeam(0)
+        selectTeam(false, 0)
     }
 
     override fun selectSecondCategory(index: Int) {
@@ -103,8 +103,8 @@ class FBGameStatsStore @AssistedInject constructor(
         sortPlayers()
     }
 
-    override fun selectTeam(index: Int) {
-        super.selectTeam(index)
+    override fun selectTeam(isInit: Boolean, index: Int) {
+        super.selectTeam(isInit, index)
 
         // set selected team's players stats
         val teamId = when (index) {

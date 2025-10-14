@@ -78,7 +78,7 @@ class NBAGameStatsStore @AssistedInject constructor(
         when (action) {
             is NBAGameStatsAction.InitData -> initData()
             is NBAGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
-            is NBAGameStatsAction.SelectTeam -> selectTeam(action.index)
+            is NBAGameStatsAction.SelectTeam -> selectTeam(false, action.index)
             is NBAGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
         }
     }
@@ -109,7 +109,7 @@ class NBAGameStatsStore @AssistedInject constructor(
 
         displayModel.value.game.boxScoreTraditional?.let {
             // set current(home) team's players stats
-            selectTeam(0)
+            selectTeam(false, 0)
         }
     }
 
@@ -128,8 +128,8 @@ class NBAGameStatsStore @AssistedInject constructor(
         sortPlayers()
     }
 
-    override fun selectTeam(index: Int) {
-        super.selectTeam(index)
+    override fun selectTeam(isInit: Boolean, index: Int) {
+        super.selectTeam(isInit, index)
 
         // set selected team's players stats
         _playersStats.value = if (index == 0) {

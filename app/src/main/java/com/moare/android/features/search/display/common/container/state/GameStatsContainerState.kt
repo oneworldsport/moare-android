@@ -41,7 +41,9 @@ data class GameStatsCoachState(
 )
 
 data class GameStatsContainerActions(
+    // TODO: 이름에서 Button 빼도 될 듯?
     val teamCategoryButtonAction: ((Int) -> Unit)? = null,
+    var firstStatsTitleCategoryAction: (() -> Unit)? = null,
     val firstCategoryButtonAction: ((Int) -> Unit)? = null,
     val secondCategoryButtonAction: (Int) -> Unit,
     val refreshButtonAction: () -> Unit,
