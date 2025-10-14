@@ -185,6 +185,7 @@ fun MLBTeamStandingsDataList(
                                 MLBTeamStandingsDataListItem(
                                     store = store,
                                     data = data,
+                                    standings = standings,
                                     index = index
                                 )
                             }
@@ -200,10 +201,11 @@ fun MLBTeamStandingsDataList(
 fun MLBTeamStandingsDataListItem(
     store: MLBTeamStandingsStore,
     data: MLBTeamStandingsDisplay,
+    standings: List<MLBTeamStandingsDisplay>,
     index: Int
 ) {
     val dataText = when (index) {
-        0 -> data.stats.recordData?.gamesBack
+        0 -> if (MLBUtil.calculateGamesBack(data.stats, standings) == 0.0) "-" else MLBUtil.calculateGamesBack(data.stats, standings).toString()
         1 -> data.stats.recordData?.winningPercentage
         2 -> data.stats.recordData?.wins.toString()
         3 -> data.stats.recordData?.losses.toString()

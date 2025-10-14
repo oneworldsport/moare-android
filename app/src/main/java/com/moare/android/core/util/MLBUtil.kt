@@ -1,6 +1,8 @@
 package com.moare.android.core.util
 
 import com.moare.android.core.constants.Constants
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
+import com.moare.android.features.search.models.models.mlb.MLBTeamStats
 import com.moare.android.features.search.models.models.nba.NBAGameSummary
 
 object MLBUtil {
@@ -39,5 +41,19 @@ object MLBUtil {
         val matchResult = regex.find(input.trim())
         val (feet, inches) = matchResult?.destructured ?: return 0
         return toCm(feet.toInt(), inches.toInt()).toInt()
+    }
+
+    // NOTE: divisionGamesBack(게임차) 값이 이상해서 만듬
+    fun calculateGamesBack(team: MLBTeamStats, standings: List<MLBTeamStandingsDisplay>): Double {
+        val leader = standings.maxByOrNull {
+            it.stats.recordData?.winningPercentage?.toDoubleOrNull() ?: 0.0
+        } ?: return 0.0
+
+        val leaderRecord = leader.stats.recordData ?: return 0.0
+        val teamRecord = team.recordData ?: return 0.0
+
+        val gamesBack = ((leaderRecord.wins - teamRecord.wins) + (teamRecord.losses - leaderRecord.losses)).toDouble() / 2.0
+
+        return gamesBack
     }
 }
