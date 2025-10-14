@@ -15,8 +15,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.FBUtil
 import com.moare.android.core.util.MatchDescriptionConverter
+import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.common.container.state.GameStatsCoachState
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -117,8 +119,11 @@ fun FBGameStatsView(
         }
     }
     val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 60.dp, 50.dp, 80.dp, 70.dp, 70.dp, 80.dp, 60.dp, 60.dp, 60.dp, 50.dp, 50.dp, 50.dp, 80.dp, 50.dp)
-    val gameDetailTitle = "심판: "
-    val gameDetailContent = game.fixture.referee
+    val gameDetailTitle = "장소: \n심판: "
+    val gameDetailContent = buildString {
+        append("${teamNameDic["venue_${game.teams.home.id}"] ?: ""}\n")
+        append(game.fixture.referee)
+    }
 
     // TODO: 나중에 다른 GameStatsView도 playersTotalStats 작업이 되면 StandingsRankItem 수정한 후 아래 주석 추가.
 //    playersTotalStats?.let { totalStats ->
