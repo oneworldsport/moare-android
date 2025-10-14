@@ -132,6 +132,12 @@ fun AnimatingSearchBar(
         }
     }
 
+    LaunchedEffect(Unit) {
+        // NOTE: 로고가 사라지면서 검색 아이콘이 나타나는 시간 1초 + 추가 0.2 wait
+        delay(1200)
+        searchStore.send(SearchAction.BarFirstOpen)
+    }
+
     /* ---------------------
        ui
        --------------------- */
