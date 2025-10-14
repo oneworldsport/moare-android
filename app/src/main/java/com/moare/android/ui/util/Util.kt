@@ -122,12 +122,14 @@ fun rememberKeyboardVisibility(): State<Boolean> {
 
 @Composable
 fun CenterRow(
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Center,
+    verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = horizontalArrangement,
+        verticalAlignment = verticalAlignment,
         modifier = modifier,
         content = content
     )

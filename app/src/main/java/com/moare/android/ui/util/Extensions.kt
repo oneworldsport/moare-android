@@ -61,6 +61,10 @@ fun Modifier.nullableMaxHeight(height: Dp?): Modifier {
     return height?.let { this.height(height) } ?: this.fillMaxHeight()
 }
 
+fun Modifier.nullableHeight(height: Dp?): Modifier {
+    return height?.let { this.height(height) } ?: this
+}
+
 fun Modifier.optionalClickable(apply: Boolean, onClick: (() -> Unit)): Modifier {
     return if (apply) this.clickable(onClick = onClick) else this
 }

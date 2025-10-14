@@ -11,6 +11,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -19,9 +20,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -35,15 +38,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.moare.android.R
-import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.mvi.AppViewModel
 import com.moare.android.core.mvi.StackItem
 import com.moare.android.features.search.display.football.view.FBGameStatsView
@@ -106,7 +108,17 @@ fun SearchView(
        --------------------- */
     var isNoticeVisible by remember { mutableStateOf(false) }
     var isNoticeOpened by remember { mutableStateOf(false) }
+    var isSearchExampleVisible by remember { mutableStateOf(false) }
+    var isSearchExampleOpened by remember { mutableStateOf(false) }
+    var noticeBoxHeight by remember { mutableStateOf(0.dp) }
+    var searchExampleBoxHeight by remember { mutableStateOf(0.dp) }
     var isSearchBarOpened by remember { mutableStateOf(false) }
+
+    // notice 아이콘 y 위치
+    // y: (전체 컨텐츠 높이(박스 높이(boxHeight) + 아이콘 높이(20) + padding(6))) / 2 + (검색창 높이(50) + 트렌딩 키워드 높이(40)) / 2 + 추가 패딩 8
+    // searchExampleBoxHeight가 noticeBoxHeight보다 높은 경우는 전체 컨텐츠 높이를 계산할때 searchExampleBoxHeight를 기준으로 해야함
+    val boxHeight = if (searchExampleBoxHeight > noticeBoxHeight) searchExampleBoxHeight else noticeBoxHeight
+    val noticeYOffset = ((boxHeight + 20.dp + 6.dp) / 2) + (((50.dp + 40.dp) / 2) + 8.dp)
 
     /* ---------------------
        viewmodel state
@@ -120,18 +132,24 @@ fun SearchView(
     val searchState by searchStore.searchState.collectAsState()
     val barFirstOpened by searchStore.barFirstOpened.collectAsState()
     val focusState by searchStore.focusState.collectAsState()
-    val notice by searchStore.noticeData.collectAsState()
+    val noticeList by searchStore.noticeList.collectAsState()
+    val searchExample by searchStore.searchExample.collectAsState()
 
-    val query by searchStore.query.collectAsState()
     val autoCompleteList by searchStore.autoCompleteList.collectAsState()
     val autoCompleteListVisibleState by searchStore.autoCompleteListVisibleState.collectAsState()
 
     /* ---------------------
        animation
        --------------------- */
-    val dataContainerCenter = remember { mutableStateOf(Offset.Zero) }
     val noticeAlpha by animateFloatAsState(
         targetValue = if (isNoticeOpened) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = LinearOutSlowInEasing
+        )
+    )
+    val searchExampleAlpha by animateFloatAsState(
+        targetValue = if (isSearchExampleOpened) 1f else 0f,
         animationSpec = tween(
             durationMillis = 500,
             easing = LinearOutSlowInEasing
@@ -155,19 +173,25 @@ fun SearchView(
     }
 
     LaunchedEffect(searchState, autoCompleteList) {
-        isNoticeVisible = if (searchState) {
+        if (searchState) {
             isNoticeOpened = false
-            false
+            isNoticeVisible = false
+            isSearchExampleOpened = false
+            isSearchExampleVisible = false
         } else {
             if (barFirstOpened) {
                 if (autoCompleteList.isEmpty()) {
-                    true
+                    isNoticeVisible = true
+                    isSearchExampleVisible = true
                 } else {
                     isNoticeOpened = false
-                    false
+                    isNoticeVisible = false
+                    isSearchExampleOpened = false
+                    isSearchExampleVisible = false
                 }
             } else {
-                false
+                isNoticeVisible = false
+                isSearchExampleVisible = false
             }
         }
     }
@@ -177,6 +201,7 @@ fun SearchView(
             delay(1000)
             isSearchBarOpened = true
             isNoticeVisible = true
+            isSearchExampleVisible = true
         }
     }
 
@@ -226,35 +251,75 @@ fun SearchView(
         }
 
         /* ---------------------
-           notice
-           - info about providing data
+           notice, search example
            --------------------- */
-        AnimatedVisibility(
-            visible = isNoticeVisible,
+        Row(
+            verticalAlignment = Alignment.Bottom,
             modifier = Modifier
                 .zIndex(1f)
-                .offset(x = (-12).dp, y = (-113).dp), // y: 전체 박스 높이(100 + 20 + 4) / 2 + (검색창 높이(50) + 트렌딩 키워드 높이(40)) / 2 + 추가 패딩 6,
-            enter = fadeIn(),
-            exit = fadeOut()
+                .padding(horizontal = 12.dp)
+                .offset(x = 0.dp, y = -(noticeYOffset))
         ) {
-            Row {
-                Spacer(Modifier.weight(1f))
+            AnimatedVisibility(
+                visible = isSearchExampleVisible,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    SearchExampleBox(
+                        text = searchExample,
+                        modifier = Modifier.alpha(searchExampleAlpha)
+                    ) { height ->
+                        searchExampleBoxHeight = height
+                    }
 
+                    Box(
+                        contentAlignment = Alignment.BottomCenter,
+                        modifier = Modifier
+                            .padding(top = 6.dp)
+                            .height(20.dp)
+                            .alpha(0.7f)
+                            .clickable {
+                                isSearchExampleOpened = !isSearchExampleOpened
+                            }
+                    ) {
+                        Text(
+                            text = "검색 예시",
+                            fontSize = 13.sp,
+                            color = Color.Gray,
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            AnimatedVisibility(
+                visible = isNoticeVisible,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 Column(
                     horizontalAlignment = Alignment.End
                 ) {
                     NoticeBox(
-                        notice = notice,
+                        noticeList = noticeList,
+                        height = noticeBoxHeight,
                         modifier = Modifier.alpha(noticeAlpha)
-                    )
+                    ) { height ->
+                        noticeBoxHeight = height
+                    }
 
                     Icon(
                         painter = painterResource(id = R.drawable.ic_rounded_info_24),
                         contentDescription = null,
                         tint = Color.Gray,
                         modifier = Modifier
-                            .padding(top = UIConstants.Padding.DEFAULT_V_PADDING)
+                            .padding(top = 6.dp)
                             .size(20.dp)
+                            .alpha(0.7f)
                             .clickable {
                                 isNoticeOpened = !isNoticeOpened
                             }
@@ -271,8 +336,9 @@ fun SearchView(
                     interactionSource = noRippleInteractionSource,
                     indication = null,
                     onClick = {
-                        if (isNoticeOpened) {
+                        if (isNoticeOpened || isSearchExampleOpened) {
                             isNoticeOpened = false
+                            isSearchExampleOpened = false
                         } else {
                             searchStore.send(SearchAction.ToggleFocusState(false))
                         }

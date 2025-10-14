@@ -21,6 +21,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import java.io.File
 
 object AWSUtils {
@@ -115,6 +116,12 @@ object AWSUtils {
             val jsonString = withContext(Dispatchers.IO) {
                 File(context.filesDir, s3Key.substringAfter("/")).readText()
             }
+
+            // test
+//            val inputStream = context.assets.open("main_notice_test.json")
+//            val jsonString = inputStream.bufferedReader().use { it.readText() }
+            // test
+
             val jsonElement = Json.parseToJsonElement(jsonString)
             val list: List<NoticeModel> = Json.decodeFromJsonElement(jsonElement)
             noticeDeferred.complete(list)

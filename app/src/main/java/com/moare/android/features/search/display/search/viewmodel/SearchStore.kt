@@ -1,51 +1,18 @@
 package com.moare.android.features.search.display.search.viewmodel
 
-import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import com.moare.android.core.constants.Constants
-import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.mvi.StackItem
 import com.moare.android.core.util.Trie
 import com.moare.android.features.search.display.search.viewmodel.SearchStore.SearchType
-import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.KeywordInfo
-import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.NoticeModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.TrendingKeywords
-import com.moare.android.features.search.models.displaymodels.SportDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.models.football.FBGame
-import com.moare.android.features.search.models.models.football.FBGameForSchedule
-import com.moare.android.features.search.models.models.kbo.KBOGame
-import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
-import com.moare.android.features.search.models.models.mlb.MLBGame
-import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
 import com.moare.android.features.search.models.models.nba.NBAGame
-import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
-import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
-import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
-import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
-import com.moare.android.features.search.models.responsemodels.football.ScheduleType
-import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
-import com.moare.android.features.search.models.responsemodels.kbo.KBOTeamInfoResponseModel
-import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
-import com.moare.android.features.search.models.responsemodels.mlb.MLBTeamInfoResponseModel
-import com.moare.android.features.search.models.responsemodels.nba.NBAGameScheduleResponseModel
-import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
-import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
-import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
 import com.moare.android.features.search.networking.KeywordsClient
 import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
@@ -102,8 +69,11 @@ class SearchStore @AssistedInject constructor(
     private val _trendingKeywordList = MutableStateFlow<List<String>>(emptyList())
     val trendingKeywordList: StateFlow<List<String>> = _trendingKeywordList
 
-    private val _noticeData = MutableStateFlow<List<NoticeModel>>(emptyList())
-    val noticeData: StateFlow<List<NoticeModel>> = _noticeData
+    private val _noticeList = MutableStateFlow<List<NoticeModel>>(emptyList())
+    val noticeList: StateFlow<List<NoticeModel>> = _noticeList
+
+    private val _searchExample = MutableStateFlow("")
+    val searchExample: StateFlow<String> = _searchExample
 
     /* ---------------------
        ui state
@@ -159,7 +129,9 @@ class SearchStore @AssistedInject constructor(
             trendingKeywords = trendingKeywordsDeferred.await().keywords.associateBy { it.keyword }
             _trendingKeywordList.emit(trendingKeywords.keys.toList())
 
-            _noticeData.emit(noticeDeferred.await())
+            val noticeData = noticeDeferred.await()
+            _searchExample.value = noticeData.find { it.title == "검색 예시" }?.content ?: ""
+            _noticeList.value = noticeData.filter { it.title != "검색 예시" }
         }
     }
 
