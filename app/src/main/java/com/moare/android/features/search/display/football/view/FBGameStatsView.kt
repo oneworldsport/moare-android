@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.football.view
 
+import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Row
@@ -27,7 +28,8 @@ import com.moare.android.features.search.display.football.viewmodel.FBGameStatsA
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.ModelConverter
-import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.FBLeagueTitle
+import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
 
 @Composable
 fun FBGameStatsView(
@@ -214,20 +216,12 @@ fun FBGameStatsView(
             }
         ),
         titleContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                LeagueTitle(
-                    url = game.league.logo,
-                    leagueName = game.league.name,
-                    leagueSeason = game.league.season
-                )
-
-                Text(
-                    text = " - " + MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = game.league.round),
-                    fontSize = 14.sp
-                )
-            }
+            FBLeagueTitleForGameStats(
+                url = game.league.logo,
+                leagueName = game.league.name,
+                leagueSeason = game.league.season,
+                description = game.league.round
+            )
         },
         gameContent = {
             FBLeagueScheduleListItem(

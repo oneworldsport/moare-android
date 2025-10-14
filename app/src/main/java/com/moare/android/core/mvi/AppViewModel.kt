@@ -551,8 +551,11 @@ class AppViewModel @Inject constructor(
                 val store = fbGameStatsFactory.create(delegate.model.displayModel) { delegate ->
                     onFBGameStatsDelegate(id, delegate)
                 }
-                store.send(FBGameStatsAction.InitData)
+                // NOTE: 원래는 store.send()를 먼저하고 _stack.update{}를 해주었는데, FBGameStatsAction.InitData에서 FBGameStatsDelegate.RefreshGame을 실행해주고 있어,
+                // _stack.update{}가 되기 이전에 onFBGameStatsDelegate의 FBGameStatsDelegate.RefreshGame이 실행되어서 문제가 있어, store.send()가 먼저 실행되게 순서를 바꿔줌.
+                // TODO: 그냥 이 순서대로 하는게 나을수도 있어 다른곳도 다 이렇게 바꾸는거 고려.
                 _stack.update { it + StackItem.FBGameStats(id, store) }
+                store.send(FBGameStatsAction.InitData)
             }
         }
     }
@@ -560,9 +563,6 @@ class AppViewModel @Inject constructor(
     private fun onFBGameStatsDelegate(id: ViewId, delegate: FBGameStatsDelegate) {
         when (delegate) {
             is FBGameStatsDelegate.RefreshGame -> {
-                _didPop.value = false
-                _includesPreviousView.value = false
-
                 // 현재 화면인 FBGameStats의 이전 화면인 FBLeagueSchedule을 찾아서 해당 Store에서 필요한 state를 업데이트 시킨다.
                 val idx = stack.value.indexOfFirst { it.id == id }
                 if (idx > 0) {
@@ -656,9 +656,6 @@ class AppViewModel @Inject constructor(
         // TODO: 파라미터 id와 새로생성한 ViewId() 구분해 사용해야함.
         when (delegate) {
             is NBAGameStatsDelegate.RefreshGame -> {
-                _didPop.value = false
-                _includesPreviousView.value = false
-
                 val idx = stack.value.indexOfFirst { it.id == id }
                 if (idx > 0) {
                     for (prev in stack.value.subList(0, idx).asReversed()) {
@@ -757,9 +754,6 @@ class AppViewModel @Inject constructor(
     private fun onMLBGameStatsDelegate(id: ViewId, delegate: MLBGameStatsDelegate) {
         when (delegate) {
             is MLBGameStatsDelegate.RefreshGame -> {
-                _didPop.value = false
-                _includesPreviousView.value = false
-
                 val idx = stack.value.indexOfFirst { it.id == id }
                 if (idx > 0) {
                     for (prev in stack.value.subList(0, idx).asReversed()) {
@@ -858,9 +852,6 @@ class AppViewModel @Inject constructor(
     private fun onKBOGameStatsDelegate(id: ViewId, delegate: KBOGameStatsDelegate) {
         when (delegate) {
             is KBOGameStatsDelegate.RefreshGame -> {
-                _didPop.value = false
-                _includesPreviousView.value = false
-
                 val idx = stack.value.indexOfFirst { it.id == id }
                 if (idx > 0) {
                     for (prev in stack.value.subList(0, idx).asReversed()) {

@@ -21,9 +21,8 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsAction
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
-import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.FBLeagueTitle
 import com.moare.android.ui.util.convertDpToPx
 import kotlinx.coroutines.delay
 
@@ -136,7 +135,7 @@ fun FBPlayerStandingsView(
         ),
         verticalScrollState = verticalScrollState,
         titleContent = {
-            LeagueTitle(
+            FBLeagueTitle(
                 url = league.logo,
                 leagueName = league.name,
                 leagueSeason = league.season,

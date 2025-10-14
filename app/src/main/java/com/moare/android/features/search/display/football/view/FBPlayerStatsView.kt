@@ -42,7 +42,7 @@ import com.moare.android.features.search.display.common.components.FBStatDataIte
 import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.football.FBPlayerStats
-import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.FBLeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.util.CenterColumn
@@ -295,7 +295,7 @@ fun FBPlayerStatsItem(
             modifier = Modifier
                 .padding(bottom = 4.dp)
         ) {
-            LeagueTitle(
+            FBLeagueTitle(
                 url = data.league.logo,
                 leagueName = data.league.name,
                 leagueSeason = data.league.season

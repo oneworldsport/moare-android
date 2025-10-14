@@ -14,9 +14,8 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
-import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.FBLeagueTitle
 
 @Composable
 fun FBTeamStandingsView(
@@ -85,7 +84,7 @@ fun FBTeamStandingsView(
         ),
         titleContent = {
             league?.let {
-                LeagueTitle(
+                FBLeagueTitle(
                     url = league.logo,
                     leagueName = league.name,
                     leagueSeason = league.season,

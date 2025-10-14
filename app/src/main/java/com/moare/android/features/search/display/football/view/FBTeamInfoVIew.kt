@@ -35,12 +35,10 @@ import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
-import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.FBLeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.util.CenterRow
@@ -383,7 +381,7 @@ fun FBTeamInfoFourthItem(
         }
     ) {
         league?.let {
-            LeagueTitle(
+            FBLeagueTitle(
                 url = league.logo,
                 leagueName = league.name,
                 leagueSeason = league.season,
