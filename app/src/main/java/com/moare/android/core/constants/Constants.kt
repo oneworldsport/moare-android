@@ -241,16 +241,6 @@ object Constants {
             isResultOpened: Boolean = true
         ): String {
             return when (leagueId) {
-                in Ids.FOOTBALL_ALL -> {
-                    when (status) {
-                        Football.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
-                        Football.FIRST_HALF -> StringConstants.Football.GAME_FIRST_HALF_STR
-                        Football.HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
-                        Football.SECOND_HALF -> StringConstants.Football.GAME_SECOND_HALF_STR
-                        in Football.FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
-                        else -> ""
-                    }
-                }
                 Ids.NBA -> ""
                 Ids.KBO -> {
                     when (status) {
@@ -261,6 +251,33 @@ object Constants {
                         else -> ""
                     }
                 }
+                else -> ""
+            }
+        }
+
+        fun fbGameStatusText(
+            status: String,
+            elapsed: Int?,
+            isResultOpened: Boolean = true
+        ): String {
+            return when (status) {
+                Football.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
+                Football.FIRST_HALF -> {
+                    if (elapsed != null) {
+                        "전반$elapsed'"
+                    } else {
+                        StringConstants.Football.GAME_FIRST_HALF_STR
+                    }
+                }
+                Football.HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
+                Football.SECOND_HALF -> {
+                    if (elapsed != null) {
+                        "후반$elapsed'"
+                    } else {
+                        StringConstants.Football.GAME_SECOND_HALF_STR
+                    }
+                }
+                in Football.FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
                 else -> ""
             }
         }

@@ -20,6 +20,7 @@ data class KBOGameInfo(
     @SerialName("homeTeamId") private val _homeTeamId: Int? = null,
     @SerialName("remark") private val _remark: String? = null,
     @SerialName("gameStatus") private val _gameStatus: String? = null,
+    @SerialName("seriesDescription") private val _seriesDescription: String? = null,
 ) {
     val awayTeamId: Int get() = _awayTeamId ?: 0
     val date: String get() = _date ?: ""
@@ -27,6 +28,7 @@ data class KBOGameInfo(
     val homeTeamId: Int get() = _homeTeamId ?: 0
     val remark: String get() = _remark ?: ""
     val gameStatus: String get() = _gameStatus ?: ""
+    val seriesDescription: String get() = _seriesDescription ?: ""
 }
 
 @Serializable
@@ -190,9 +192,30 @@ data class KBOGamePitcherStats(
 
 @Serializable
 data class KBOGameInfoForSchedule(
-    @SerialName("currentInning") private val _currentInning: String? = null
+    @SerialName("currentInning") private val _currentInning: String? = null,
+    @SerialName("seriesDescription") private val _seriesDescription: String? = null
 ) {
     val currentInning: String get() = _currentInning ?: StringConstants.GAME_LIVE_STR
+    val seriesDescription: String get() = _seriesDescription ?: ""
 }
 
 typealias KBOGameForSchedule = GameForSchedule<KBOGameInfoForSchedule>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

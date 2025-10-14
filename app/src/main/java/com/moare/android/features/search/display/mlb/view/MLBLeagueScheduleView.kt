@@ -147,23 +147,6 @@ fun MLBLeagueScheduleListItem(
     val displayModel by store.displayModel.collectAsState()
 
     /* ---------------------
-       constants
-       --------------------- */
-    val gameStatusText = when (gameStatus) {
-        StringConstants.MLB.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.MLB.GAME_LIVE -> data.gameInfo?.currentInning ?: StringConstants.GAME_LIVE_STR
-        StringConstants.MLB.GAME_POSTPONED -> StringConstants.GAME_POSTPONED_STR
-        in StringConstants.MLB.GAME_FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
-        else -> ""
-    }
-
-    val gameStatusColor = if (gameStatus == StringConstants.MLB.GAME_LIVE) {
-        MaterialTheme.colors.primary
-    } else {
-        Color.Gray
-    }
-
-    /* ---------------------
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
@@ -183,18 +166,15 @@ fun MLBLeagueScheduleListItem(
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
-//            isClickEnabled = gameStatus != Constants, // 연기된 경기는 클릭 안되게
-            homeTeamLogo = MLBUtil.teamLogoUrl(homeTeamId),
-            homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
-            homeTeamScore = data.homeTeamScore,
-            awayTeamLogo = MLBUtil.teamLogoUrl(awayTeamId),
-            awayTeamName = teamNameDic["short_${awayTeamId}"] ?: "",
-            awayTeamScore = data.awayTeamScore,
+            leagueId = Constants.Ids.MLB,
+            game = data,
+            teamNameDic = teamNameDic,
+            isClickEnabled = gameStatus != Constants.GameStatus.MLB.POSTPONED, // 연기된 경기는 클릭 안되게
             isResultOpened = isResultOpened,
-            gameStatusText = gameStatusText,
-            gameStatusColor = gameStatusColor,
+            gameStatusText = Constants.GameStatus.mlbGameStatusText(status = gameStatus, currentInning = data.gameInfo?.currentInning, isResultOpened = isResultOpened),
+            gameStatusColor = Constants.GameStatus.gameStatusColor(Constants.Ids.MLB, gameStatus),
             isCapsuleButtonDisabled = !StringConstants.MLB.GAME_FINISHED_LIST.contains(gameStatus),
-            date = data.date,
+            gameType = data.gameInfo?.seriesDescription,
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
         ),
         actions = ScheduleGameItemActions(
@@ -207,3 +187,16 @@ fun MLBLeagueScheduleListItem(
         )
     )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

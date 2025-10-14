@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
@@ -195,17 +196,13 @@ fun NBALeagueScheduleListItem(
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
-            homeTeamLogo = NBAUtil.teamLogoUrl(homeTeamId),
-            homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
-            homeTeamScore = data.homeTeamScore,
-            awayTeamLogo = NBAUtil.teamLogoUrl(awayTeamId),
-            awayTeamName = teamNameDic["short_${awayTeamId}"] ?: "",
-            awayTeamScore = data.awayTeamScore,
+            leagueId = Constants.Ids.NBA,
+            game = data,
+            teamNameDic = teamNameDic,
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
             isCapsuleButtonDisabled = gameStatus != StringConstants.NBA.GAME_FINAL,
-            date = data.date,
 //            gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
         ),

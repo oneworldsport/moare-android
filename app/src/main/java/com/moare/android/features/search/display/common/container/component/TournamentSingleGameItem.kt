@@ -19,6 +19,7 @@ import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.Util
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
+import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.URLImage
@@ -38,8 +39,8 @@ fun <T> TournamentSingleGameItem(
     val awayTeamId = game.awayTeamId
     val homeTeamScore = game.homeTeamScore
     val awayTeamScore = game.awayTeamScore
-    val homeTeamPenaltyScore = (game as? FBGameForSchedule)?.gameInfo?.homeTeamPenaltyScore
-    val awayTeamPenaltyScore = (game as? FBGameForSchedule)?.gameInfo?.awayTeamPenaltyScore
+    val homeTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
+    val awayTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
     val gameStatusText = Constants.GameStatus.gameStatusText(leagueId, game.gameStatus)
     val shouldShowScore = !Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
     val isFinished = gameStatusText == StringConstants.GAME_FINISHED_STR

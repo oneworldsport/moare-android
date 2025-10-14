@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.FBUtil
 import com.moare.android.core.util.MatchDescriptionConverter
@@ -34,6 +35,7 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
+import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
 import com.moare.android.ui.common.components.LeagueTitle
 
 @Composable
@@ -135,6 +137,7 @@ fun FBLeagueScheduleList(
        --------------------- */
     val filteredGames by store.filteredGames.collectAsState()
     val selectedDayIndex by store.selectedDayIndex.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
 
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
@@ -145,6 +148,7 @@ fun FBLeagueScheduleList(
                 searchStore = searchStore,
                 store = store,
                 data = item,
+                leagueId = displayModel.leagueId,
                 teamNameDic = teamNameDic
             )
         }
@@ -158,14 +162,12 @@ fun FBLeagueScheduleList(
 fun FBLeagueScheduleListItem(
     searchStore: SearchStore,
     store: FBLeagueScheduleStore?,
+    leagueId: Int,
     // FBLeagueScheduleViewModel이 한번도 초기화 된적 없이 FBGameStatsView에서 함수가 호출될때 teamNameDictionary를 store에서 가져올수가 없어 추가.
-    // TODO: 그러면 결국 store는 nullable이어도 된다는건데..?
     teamNameDic: Map<String, String>,
     data: FBGameForSchedule,
 ) {
     val gameId = data.gameId
-    val homeTeamId = data.homeTeamId
-    val awayTeamId = data.awayTeamId
     val gameStatus = data.gameStatus
     val gameInfo = data.gameInfo
 
@@ -184,77 +186,41 @@ fun FBLeagueScheduleListItem(
     val isFromSchedule = store != null
 
     /* ---------------------
-       constants
-       --------------------- */
-    val gameStatusText = when (gameStatus) {
-        StringConstants.Football.GAME_NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.Football.GAME_FIRST_HALF -> {
-            if (gameInfo != null) {
-                "전반${gameInfo.elapsed}'"
-            } else {
-                StringConstants.Football.GAME_FIRST_HALF_STR
-            }
-        }
-        StringConstants.Football.GAME_HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
-        StringConstants.Football.GAME_SECOND_HALF -> {
-            if (gameInfo != null) {
-                "후반${gameInfo.elapsed}'"
-            } else {
-                StringConstants.Football.GAME_SECOND_HALF_STR
-            }
-        }
-        in StringConstants.Football.GAME_FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
-        else -> ""
-    }
-
-    val gameStatusColor = when (gameStatus) {
-        in StringConstants.Football.GAME_LIVE_LIST -> MaterialTheme.colors.primary
-        else -> Color.Gray
-    }
-
-    /* ---------------------
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus)) {
-            gameResultOpenedStateList?.let {
-                isResultOpened = gameResultOpenedStateList[gameId] ?: false
-            }
-        } else if (gameStatus == StringConstants.Football.GAME_NOT_STARTED) {
-            isResultOpened = false
-        } else {
+        if (store == null) {
             isResultOpened = true
+        } else {
+            if (Constants.GameStatus.Football.FINISHED_LIST.contains(gameStatus)) {
+                gameResultOpenedStateList?.let {
+                    isResultOpened = gameResultOpenedStateList[gameId] ?: false
+                }
+            } else if (gameStatus == Constants.GameStatus.Football.NOT_STARTED) {
+                isResultOpened = false
+            } else {
+                isResultOpened = true
+            }
         }
     }
     LaunchedEffect(gameResultOpenedStateList) {
         gameResultOpenedStateList?.let {
-            if (StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus)) {
+            if (Constants.GameStatus.Football.FINISHED_LIST.contains(gameStatus)) {
                 isResultOpened = gameResultOpenedStateList[gameId] ?: false
             }
         }
     }
-//    LaunchedEffect(fbGameStatsModel) {
-//        fbGameStatsModel?.let {
-//            if (gameStatus != StringConstants.Football.GAME_NOT_STARTED) {
-//                isResultOpened = true
-//            }
-//        }
-//    }
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
+            leagueId = leagueId,
+            game = data,
+            teamNameDic = teamNameDic,
             isClickEnabled = if (isFromSchedule) selectedGame == null else false,
-            homeTeamLogo = FBUtil.teamLogoUrl(homeTeamId),
-            homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
-            homeTeamScore = data.homeTeamScore,
-            awayTeamLogo = FBUtil.teamLogoUrl(awayTeamId),
-            awayTeamName = teamNameDic["short_${awayTeamId}"] ?: "",
-            awayTeamScore = data.awayTeamScore,
             isResultOpened = isResultOpened,
-            gameStatusText = gameStatusText,
-            gameStatusColor = gameStatusColor,
+            gameStatusText = Constants.GameStatus.fbGameStatusText(data.gameStatus, gameInfo?.elapsed, isResultOpened),
+            gameStatusColor = Constants.GameStatus.gameStatusColor(leagueId, data.gameStatus),
             isCapsuleButtonDisabled = (if (isFromSchedule) selectedGame != null else true) || !StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus),
-            date = data.date,
             gameType = MatchDescriptionConverter.convert(input = data.gameInfo?.round ?: ""),
             shouldShowOnlyDateTime = if (isFromSchedule) selectedGame == null else false,
             shouldShowGameType = if (isFromSchedule) selectedGame == null else false,

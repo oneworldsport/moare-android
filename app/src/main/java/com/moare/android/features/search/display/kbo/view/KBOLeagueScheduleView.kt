@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.KBOUtil
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
@@ -179,18 +180,15 @@ fun KBOLeagueScheduleListItem(
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
-//            isClickEnabled = kboGameStatsModel == null, // 취소된 경기는 클릭 안되게
-            homeTeamLogo = KBOUtil.teamLogoUrl(homeTeamId),
-            homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
-            homeTeamScore = data.homeTeamScore,
-            awayTeamLogo = KBOUtil.teamLogoUrl(awayTeamId),
-            awayTeamName = teamNameDic["short_${awayTeamId}"] ?: "",
-            awayTeamScore = data.awayTeamScore,
+            leagueId = Constants.Ids.KBO,
+            game = data,
+            teamNameDic = teamNameDic,
+            isClickEnabled = data.gameStatus != Constants.GameStatus.KBO.CANCELED, // 취소된 경기는 클릭 안되게
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
             isCapsuleButtonDisabled = gameStatus != StringConstants.KBO.GAME_FINAL,
-            date = data.date,
+            gameType = data.gameInfo?.seriesDescription,
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
         ),
         actions = ScheduleGameItemActions(
