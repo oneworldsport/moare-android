@@ -104,6 +104,15 @@ class MLBLeagueScheduleStore @AssistedInject constructor(
 
                 setDays(true)
             }
+            ScheduleType.TEAM_FLAT -> {
+                // filteredGames 초기화
+                _filteredGames.value = mapOf(0 to displayModel.value.games)
+
+                // gameResultOpenedStateList 초기화
+                _gameResultOpenedStateList.update {
+                    displayModel.value.games.associate { (it.gameId) to false }
+                }
+            }
             else -> {}
         }
     }

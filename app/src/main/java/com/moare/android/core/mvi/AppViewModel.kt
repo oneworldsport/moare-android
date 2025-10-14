@@ -45,6 +45,9 @@ import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsD
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsStore
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTournamentAction
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTournamentDelegate
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTournamentStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsDelegate
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsStore
@@ -64,6 +67,9 @@ import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsD
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsStore
+import com.moare.android.features.search.display.mlb.viewmodel.MLBTournamentAction
+import com.moare.android.features.search.display.mlb.viewmodel.MLBTournamentDelegate
+import com.moare.android.features.search.display.mlb.viewmodel.MLBTournamentStore
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsDelegate
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsStore
@@ -132,6 +138,7 @@ sealed interface StackItem {
     data class MLBTeamStandings(override val id: ViewId, val store: MLBTeamStandingsStore) : StackItem
     data class MLBLeagueSchedule(override val id: ViewId, val store: MLBLeagueScheduleStore) : StackItem
     data class MLBGameStats(override val id: ViewId, val store: MLBGameStatsStore) : StackItem
+    data class MLBTournament(override val id: ViewId, val store: MLBTournamentStore) : StackItem
 
     data class KBOPlayerInfo(override val id: ViewId, val store: KBOPlayerInfoStore) : StackItem
     data class KBOPlayerStats(override val id: ViewId, val store: KBOPlayerStatsStore) : StackItem
@@ -140,6 +147,7 @@ sealed interface StackItem {
     data class KBOTeamStandings(override val id: ViewId, val store: KBOTeamStandingsStore) : StackItem
     data class KBOLeagueSchedule(override val id: ViewId, val store: KBOLeagueScheduleStore) : StackItem
     data class KBOGameStats(override val id: ViewId, val store: KBOGameStatsStore) : StackItem
+    data class KBOTournament(override val id: ViewId, val store: KBOTournamentStore) : StackItem
 }
 
 @HiltViewModel
@@ -172,6 +180,7 @@ class AppViewModel @Inject constructor(
     private val mlbTeamStandingsFactory: MLBTeamStandingsStore.Factory,
     private val mlbLeagueScheduleFactory: MLBLeagueScheduleStore.Factory,
     private val mlbGameStatsFactory: MLBGameStatsStore.Factory,
+    private val mlbTournamentFactory: MLBTournamentStore.Factory,
 
     private val kboPlayerInfoFactory: KBOPlayerInfoStore.Factory,
     private val kboPlayerStatsFactory: KBOPlayerStatsStore.Factory,
@@ -179,7 +188,8 @@ class AppViewModel @Inject constructor(
     private val kboTeamStatsFactory: KBOTeamStatsStore.Factory,
     private val kboTeamStandingsFactory: KBOTeamStandingsStore.Factory,
     private val kboLeagueScheduleFactory: KBOLeagueScheduleStore.Factory,
-    private val kboGameStatsFactory: KBOGameStatsStore.Factory
+    private val kboGameStatsFactory: KBOGameStatsStore.Factory,
+    private val kboTournamentFactory: KBOTournamentStore.Factory
 ) : ViewModel() {
     private val _stack = MutableStateFlow<List<StackItem>>(emptyList())
     val stack: StateFlow<List<StackItem>> = _stack
@@ -400,6 +410,13 @@ class AppViewModel @Inject constructor(
                         store.send(MLBGameStatsAction.InitData)
                         _stack.update { it + StackItem.MLBGameStats(id, store) }
                     }
+                    is SportDecodableModel.MLBTournament -> {
+                        val store = mlbTournamentFactory.create(model.displayModel) { delegate ->
+                            onMLBTournamentDelegate(delegate)
+                        }
+                        store.send(MLBTournamentAction.InitData)
+                        _stack.update { it + StackItem.MLBTournament(id, store) }
+                    }
 
                     is SportDecodableModel.KBOPlayerInfo -> {
                         val store = kboPlayerInfoFactory.create(model) { delegate ->
@@ -445,6 +462,13 @@ class AppViewModel @Inject constructor(
                         }
                         store.send(KBOGameStatsAction.InitData)
                         _stack.update { it + StackItem.KBOGameStats(id, store) }
+                    }
+                    is SportDecodableModel.KBOTournament -> {
+                        val store = kboTournamentFactory.create(model.displayModel) { delegate ->
+                            onKBOTournamentDelegate(delegate)
+                        }
+                        store.send(KBOTournamentAction.InitData)
+                        _stack.update { it + StackItem.KBOTournament(id, store) }
                     }
                     else -> null
                 }
@@ -629,6 +653,7 @@ class AppViewModel @Inject constructor(
     }
 
     private fun onNBAGameStatsDelegate(id: ViewId, delegate: NBAGameStatsDelegate) {
+        // TODO: 파라미터 id와 새로생성한 ViewId() 구분해 사용해야함.
         when (delegate) {
             is NBAGameStatsDelegate.RefreshGame -> {
                 _didPop.value = false
@@ -748,6 +773,23 @@ class AppViewModel @Inject constructor(
         }
     }
 
+    private fun onMLBTournamentDelegate(delegate: MLBTournamentDelegate) {
+        val id = ViewId()
+
+        when (delegate) {
+            is MLBTournamentDelegate.ShowLeagueSchedule -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = mlbLeagueScheduleFactory.create(delegate.model.displayModel) { delegate ->
+                    onMLBLeagueScheduleDelegate(delegate)
+                }
+                store.send(MLBLeagueScheduleAction.InitData)
+                _stack.update { it + StackItem.MLBLeagueSchedule(id, store) }
+            }
+        }
+    }
+
     private fun onKBOPlayerInfoDelegate(delegate: KBOPlayerInfoDelegate) {
         val id = ViewId()
 
@@ -832,6 +874,23 @@ class AppViewModel @Inject constructor(
         }
     }
 
+    private fun onKBOTournamentDelegate(delegate: KBOTournamentDelegate) {
+        val id = ViewId()
+
+        when (delegate) {
+            is KBOTournamentDelegate.ShowLeagueSchedule -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = kboLeagueScheduleFactory.create(delegate.model.displayModel) { delegate ->
+                    onKBOLeagueScheduleDelegate(delegate)
+                }
+                store.send(KBOLeagueScheduleAction.InitData)
+                _stack.update { it + StackItem.KBOLeagueSchedule(id, store) }
+            }
+        }
+    }
+
     private fun dispose(item: StackItem) {
         when (item) {
             is StackItem.FBPlayerInfo -> item.store.dispose()
@@ -861,6 +920,7 @@ class AppViewModel @Inject constructor(
             is StackItem.MLBTeamStandings -> item.store.dispose()
             is StackItem.MLBLeagueSchedule -> item.store.dispose()
             is StackItem.MLBGameStats -> item.store.dispose()
+            is StackItem.MLBTournament -> item.store.dispose()
 
             is StackItem.KBOPlayerInfo -> item.store.dispose()
             is StackItem.KBOPlayerStats -> item.store.dispose()
@@ -869,6 +929,7 @@ class AppViewModel @Inject constructor(
             is StackItem.KBOTeamStandings -> item.store.dispose()
             is StackItem.KBOLeagueSchedule -> item.store.dispose()
             is StackItem.KBOGameStats -> item.store.dispose()
+            is StackItem.KBOTournament -> item.store.dispose()
         }
     }
 }

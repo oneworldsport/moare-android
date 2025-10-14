@@ -106,10 +106,13 @@ class NBALeagueScheduleStore @AssistedInject constructor(
             }
             ScheduleType.TEAM_FLAT -> {
                 // In TEAM_FLAT type, selectedDayIndex is always 0
+                // filteredGames 초기화
                 _filteredGames.value = mapOf(0 to displayModel.value.games)
 
-                val gameResultOpenedStateList = displayModel.value.games.associate { (it.gameId) to false }
-                _gameResultOpenedStateList.value = gameResultOpenedStateList
+                // gameResultOpenedStateList 초기화
+                _gameResultOpenedStateList.update {
+                    displayModel.value.games.associate { (it.gameId) to false }
+                }
             }
             else -> {}
         }

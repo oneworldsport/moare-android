@@ -24,6 +24,7 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDis
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTournamentDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
@@ -34,6 +35,7 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDis
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTournamentDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
@@ -600,7 +602,7 @@ object ModelConverter {
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
-            scheduleType = response.scheduleType,
+            scheduleType = response.scheduleType ?: ScheduleType.LEAGUE,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -613,6 +615,17 @@ object ModelConverter {
             entityInfo = entityInfo,
             season = season,
             game = response.game!!
+        )
+    }
+
+    fun kboTournamentConverter(response: KBOGameScheduleResponseModel): KBOTournamentDisplayModel {
+        return KBOTournamentDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType ?: ScheduleType.TOURNAMENT_BRACKET,
+            games = response.schedule
         )
     }
 
@@ -772,7 +785,7 @@ object ModelConverter {
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
-            scheduleType = response.scheduleType,
+            scheduleType = response.scheduleType ?: ScheduleType.LEAGUE,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -785,6 +798,17 @@ object ModelConverter {
             entityInfo = entityInfo,
             season = season,
             game = response.game!!
+        )
+    }
+
+    fun mlbTournamentConverter(response: MLBGameScheduleResponseModel): MLBTournamentDisplayModel {
+        return MLBTournamentDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.MLB,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType ?: ScheduleType.TOURNAMENT_BRACKET,
+            games = response.schedule
         )
     }
 

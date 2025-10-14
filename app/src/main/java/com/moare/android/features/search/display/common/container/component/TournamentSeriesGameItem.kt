@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.common.container.component
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,7 +70,6 @@ fun <T> TournamentSeriesLeftGameItem(
 
     var itemHeight by remember { mutableStateOf(0.dp) }
     var isScoreOpened by remember { mutableStateOf(false) }
-    var initialItemHeight by remember { mutableStateOf(0.dp) }
 
     // function
     fun h(r: Int, s: Int): Dp {
@@ -329,11 +330,7 @@ fun <T> TournamentSeriesLeftGameItem(
         }
     } else {
         // NOTE: MLB의 경우 첫번째 라운드에 시리즈가 없는 경우가 있어, 해당 경우 비워놔야해서 추가.
-        Box(
-            modifier = modifier
-                .height(initialItemHeight)
-                .onGloballyPositioned { initialItemHeight = h(1, 1) }
-        )
+        Box(modifier = modifier)
     }
 }
 
@@ -357,7 +354,6 @@ fun <T> TournamentSeriesRightGameItem(
 
     var itemHeight by remember { mutableStateOf(0.dp) }
     var isScoreOpened by remember { mutableStateOf(false) }
-    var initialItemHeight by remember { mutableStateOf(0.dp) }
 
     // function
     fun h(r: Int, s: Int): Dp {
@@ -616,11 +612,7 @@ fun <T> TournamentSeriesRightGameItem(
         }
     } else {
         // NOTE: MLB의 경우 첫번째 라운드에 시리즈가 없는 경우가 있어, 해당 경우 비워놔야해서 추가.
-        Box(
-            modifier = modifier
-                .height(initialItemHeight)
-                .onGloballyPositioned { initialItemHeight = h(7, 1) }
-        )
+        Box(modifier = modifier)
     }
 }
 

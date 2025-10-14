@@ -18,6 +18,7 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerStats
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTournamentDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
@@ -26,6 +27,7 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerStats
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTournamentDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
@@ -441,6 +443,19 @@ data class DataModel(
                         SportDecodableModel.NoResult
                     }
                 }
+                "baseball_league_tournament" -> {
+                    if (leagueId == Constants.Ids.KBO) {
+                        val responseModel: KBOGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                        val displayModel = ModelConverter.kboTournamentConverter(responseModel)
+                        SportDecodableModel.KBOTournament(responseModel, displayModel)
+                    } else if (leagueId == Constants.Ids.MLB) {
+                        val responseModel: MLBGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                        val displayModel = ModelConverter.mlbTournamentConverter(responseModel)
+                        SportDecodableModel.MLBTournament(responseModel, displayModel)
+                    } else {
+                        SportDecodableModel.NoResult
+                    }
+                }
 
                 else -> SportDecodableModel.NoResult
             }
@@ -641,6 +656,12 @@ sealed class SportDecodableModel {
         val displayModel: KBOGameStatsDisplayModel
     ) : SportDecodableModel()
 
+    @Serializable
+    data class KBOTournament(
+        val responseModel: KBOGameScheduleResponseModel,
+        var displayModel: KBOTournamentDisplayModel
+    ) : SportDecodableModel()
+
     // mlb
     @Serializable
     data class MLBPlayerInfo(
@@ -688,6 +709,12 @@ sealed class SportDecodableModel {
     data class MLBGameStats(
         val responseModel: MLBGameStatsResponseModel,
         val displayModel: MLBGameStatsDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class MLBTournament(
+        val responseModel: MLBGameScheduleResponseModel,
+        var displayModel: MLBTournamentDisplayModel
     ) : SportDecodableModel()
 
     @Serializable

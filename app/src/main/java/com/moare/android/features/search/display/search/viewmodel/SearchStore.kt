@@ -261,10 +261,10 @@ class SearchStore @AssistedInject constructor(
                 is SportDecodableModel.NBATeamStandings, is SportDecodableModel.NBALeagueSchedule, is SportDecodableModel.NBAGameStats,
                 is SportDecodableModel.NBATournament, is SportDecodableModel.KBOPlayerInfo, is SportDecodableModel.KBOPlayerStats,
                 is SportDecodableModel.KBOPlayerStandings, is SportDecodableModel.KBOTeamInfo, is SportDecodableModel.KBOTeamStats,
-                is SportDecodableModel.KBOTeamStandings, is SportDecodableModel.KBOLeagueSchedule, is SportDecodableModel.KBOGameStats,
+                is SportDecodableModel.KBOTeamStandings, is SportDecodableModel.KBOLeagueSchedule, is SportDecodableModel.KBOGameStats, is SportDecodableModel.KBOTournament,
                 is SportDecodableModel.MLBPlayerInfo, is SportDecodableModel.MLBPlayerStats, is SportDecodableModel.MLBPlayerStandings,
                 is SportDecodableModel.MLBTeamInfo, is SportDecodableModel.MLBTeamStats, is SportDecodableModel.MLBTeamStandings,
-                is SportDecodableModel.MLBLeagueSchedule, is SportDecodableModel.MLBGameStats -> null
+                is SportDecodableModel.MLBLeagueSchedule, is SportDecodableModel.MLBGameStats, is SportDecodableModel.MLBTournament -> null
                 else -> {
                     throw IllegalArgumentException("Unknown data type")
                 }

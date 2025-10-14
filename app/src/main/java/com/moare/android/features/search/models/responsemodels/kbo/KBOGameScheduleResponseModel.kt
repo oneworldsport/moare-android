@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class KBOGameScheduleResponseModel(
-    @SerialName("scheduleType") val scheduleType: ScheduleType = ScheduleType.LEAGUE,
+    @SerialName("scheduleType") val scheduleType: ScheduleType? = null,
     @SerialName("scheduledMonths") val scheduledMonths: List<String> = emptyList(),
     val schedule: List<KBOGameForSchedule> = emptyList()
 )

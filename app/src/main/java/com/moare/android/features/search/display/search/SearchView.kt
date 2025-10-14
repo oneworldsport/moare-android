@@ -62,6 +62,7 @@ import com.moare.android.features.search.display.kbo.view.KBOPlayerStatsView
 import com.moare.android.features.search.display.kbo.view.KBOTeamInfoView
 import com.moare.android.features.search.display.kbo.view.KBOTeamStandingsView
 import com.moare.android.features.search.display.kbo.view.KBOTeamStatsView
+import com.moare.android.features.search.display.kbo.view.KBOTournamentView
 import com.moare.android.features.search.display.mlb.view.MLBGameStatsView
 import com.moare.android.features.search.display.mlb.view.MLBLeagueScheduleView
 import com.moare.android.features.search.display.mlb.view.MLBPlayerInfoView
@@ -69,6 +70,7 @@ import com.moare.android.features.search.display.mlb.view.MLBPlayerStatsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamInfoView
 import com.moare.android.features.search.display.mlb.view.MLBTeamStandingsView
 import com.moare.android.features.search.display.mlb.view.MLBTeamStatsView
+import com.moare.android.features.search.display.mlb.view.MLBTournamentView
 import com.moare.android.features.search.display.nba.view.NBAGameStatsView
 import com.moare.android.features.search.display.nba.view.NBALeagueScheduleView
 import com.moare.android.features.search.display.nba.view.NBAPlayerInfoView
@@ -425,6 +427,7 @@ fun StackItemView(
         is StackItem.MLBTeamStandings -> MLBTeamStandingsView(searchStore, item.store)
         is StackItem.MLBLeagueSchedule -> MLBLeagueScheduleView(searchStore, item.store, didPop)
         is StackItem.MLBGameStats -> MLBGameStatsView(searchStore, item.store)
+        is StackItem.MLBTournament -> MLBTournamentView(searchStore, item.store)
 
         is StackItem.KBOPlayerInfo -> KBOPlayerInfoView(searchStore, item.store)
         is StackItem.KBOPlayerStats -> KBOPlayerStatsView(searchStore, item.store)
@@ -439,6 +442,7 @@ fun StackItemView(
         is StackItem.KBOTeamStandings -> KBOTeamStandingsView(searchStore, item.store)
         is StackItem.KBOLeagueSchedule -> KBOLeagueScheduleView(searchStore, item.store, didPop)
         is StackItem.KBOGameStats -> KBOGameStatsView(searchStore, item.store)
+        is StackItem.KBOTournament -> KBOTournamentView(searchStore, item.store)
     }
 }
 

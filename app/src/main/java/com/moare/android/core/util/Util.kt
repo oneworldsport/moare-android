@@ -20,7 +20,7 @@ object Util {
         pairs: List<List<Int?>>,
         games: MutableList<GameForSchedule<T>>,
         allowPartial: Boolean = true
-    ): Pair<List<Pair<Int?, Int?>>, List<List<GameForSchedule<T>>>> {
+    ): Pair<List<Pair<Int?, Int?>>, List<List<GameForSchedule<T>>?>> {
 
         fun matches(g: GameForSchedule<T>, pair: List<Int?>): Boolean {
             val a = pair.getOrNull(0)
