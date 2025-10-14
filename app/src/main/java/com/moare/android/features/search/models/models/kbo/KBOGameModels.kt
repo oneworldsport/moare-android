@@ -1,6 +1,7 @@
 package com.moare.android.features.search.models.models.kbo
 
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.rounded
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -176,7 +177,7 @@ data class KBOGamePitcherStats(
     val er: String get() = _er ?: "0" // 자책
     val h: String get() = _h ?: "0" // 피안타
     val hr: String get() = _hr ?: "0" // 피홈런
-    val ip: String get() = _ip ?: "0.0" // 이닝
+    val ip: String get() = _ip ?: "0" // 이닝 - "1 1/3" 방식 표기
     val np: String get() = _np ?: "0" // 투구수
     val name: String get() = _name ?: ""
     val r: String get() = _r ?: "0" // 실점
@@ -188,6 +189,33 @@ data class KBOGamePitcherStats(
     val l: String get() = _l ?: "0" // 패
     val sv: String get() = _sv ?: "0" // 세이브
     val era: String get() = _era ?: "0.0" // 평균자책점
+
+    val inningsPitched: Double get() = parseInningString(ip)
+
+    private fun parseInningString(text: String): Double {
+        val parts = text.split(" ")
+        val first = parts.getOrNull(0) ?: return 0.0
+
+        // 토큰이 하나일 때: ex) "1/3" or "2"
+        if (parts.size == 1) {
+            return when (first) {
+                "1/3" -> 0.1
+                "2/3" -> 0.2
+                else -> first.toIntOrNull()?.toDouble() ?: 0.0
+            }
+        }
+
+        // 토큰이 두 개 이상일 때: "2 1/3"
+        val whole = first.toIntOrNull() ?: return 0.0
+        val fraction = parts[1]
+        val fractionValue = when (fraction) {
+            "1/3" -> 0.1
+            "2/3" -> 0.2
+            else -> 0.0
+        }
+
+        return whole + fractionValue
+    }
 }
 
 @Serializable

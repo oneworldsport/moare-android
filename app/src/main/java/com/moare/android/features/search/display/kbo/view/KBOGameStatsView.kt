@@ -115,7 +115,7 @@ fun KBOGameStatsView(
             imageUrl = KBOUtil.playerPhotoUrl(it.id),
             name = it.name,
             dataList = listOf(
-                it.ip, it.r, it.er, it.bb, it.so, it.h
+                it.inningsPitched.toString(), it.r, it.er, it.bb, it.so, it.h
             )
         )
     }
