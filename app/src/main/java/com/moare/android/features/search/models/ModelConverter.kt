@@ -637,7 +637,7 @@ object ModelConverter {
 
         val stats = info.statistics.find { it.type == "season" }
         val teamId: Int? = when {
-            stats?.hitting != null -> stats.hitting.team.id
+            stats?.hitting != null -> stats.hitting.team?.id
             stats?.fielding != null -> stats.fielding.team.id
             stats?.catching != null -> stats.catching.team.id
             stats?.pitching != null -> stats.pitching.team.id
@@ -671,7 +671,7 @@ object ModelConverter {
 
         val stats = info.statistics.find { it.type == "season" }
         val teamId: Int? = when {
-            stats?.hitting != null -> stats.hitting.team.id
+            stats?.hitting != null -> stats.hitting.team?.id
             stats?.fielding != null -> stats.fielding.team.id
             stats?.catching != null -> stats.catching.team.id
             stats?.pitching != null -> stats.pitching.team.id

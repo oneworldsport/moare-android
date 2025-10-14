@@ -154,11 +154,11 @@ data class MLBPlayerFieldingStats(
 @Serializable
 data class MLBPlayerHittingData(
     @SerialName("gameType") private val _gameType: String? = null,
-    val league: MLBNameObj,
+    val league: MLBNameObj? = null,
     @SerialName("season") private val _season: String? = null,
     val sport: MLBAbbreviationIdObj,
     val stat: MLBPlayerHittingStats,
-    val team: MLBNameObj
+    val team: MLBNameObj? = null
 ) {
     val gameType: String get() = _gameType ?: ""
     val season: String get() = _season ?: ""
