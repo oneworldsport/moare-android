@@ -30,6 +30,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -124,7 +125,7 @@ fun <T> TournamentSeriesLeftGameItem(
                 } else if (game.awayTeamScore > game.homeTeamScore) {
                     bottom += 1
                 }
-            } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == bottomSeedTeamId) {
+            } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == topSeedTeamId) {
                 // 홈팀이 bottomSeed인경우
                 if (game.awayTeamScore > game.homeTeamScore) {
                     top += 1
@@ -140,12 +141,16 @@ fun <T> TournamentSeriesLeftGameItem(
             modifier = modifier.width(170.dp)
         ) {
             if (itemPosition.round > 1) {
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    modifier = Modifier.padding(top = topPadding())
-                ) {
-                    TournamentHBar(75.dp)
-                    TournamentVBar(topHeight())
+                Row {
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        modifier = Modifier.padding(top = topPadding())
+                    ) {
+                        TournamentHBar(75.dp)
+                        TournamentVBar(topHeight())
+                    }
+
+                    Spacer(Modifier.weight(1f))
                 }
             }
 
@@ -213,6 +218,7 @@ fun <T> TournamentSeriesLeftGameItem(
                                             text = if (isBeforeGame) "-" else topSeedScore.toString(),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
+                                            textAlign = TextAlign.Center,
                                             modifier = Modifier.width(30.dp),
                                             color = if (isBeforeGame) {
                                                 Color.Black
@@ -227,6 +233,7 @@ fun <T> TournamentSeriesLeftGameItem(
                                             text = if (isBeforeGame) "-" else bottomSeedScore.toString(),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
+                                            textAlign = TextAlign.Center,
                                             modifier = Modifier.width(30.dp),
                                             color = if (isBeforeGame) {
                                                 Color.Black
@@ -296,23 +303,27 @@ fun <T> TournamentSeriesLeftGameItem(
                 // bar
                 Column(
                     horizontalAlignment = Alignment.End,
-                    modifier = Modifier.padding(vertical = 15.dp).height(itemHeight)
+                    modifier = Modifier.height(itemHeight).padding(vertical = 15.dp)
                 ) {
                     TournamentHBar()
-                    TournamentVBar()
+                    TournamentVBar(modifier = Modifier.weight(1f))
                     TournamentHBar()
                 }
             }
 
             if (itemPosition.round == 2 || itemPosition.round == 3) {
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    modifier = Modifier.padding(bottom = bottomPadding())
-                ) {
-                    TournamentVBar(bottomHeight())
-                    if (!shouldRemoveBar) {
-                        TournamentHBar(75.dp)
+                Row {
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        modifier = Modifier.padding(bottom = bottomPadding())
+                    ) {
+                        TournamentVBar(bottomHeight())
+                        if (!shouldRemoveBar) {
+                            TournamentHBar(75.dp)
+                        }
                     }
+
+                    Spacer(Modifier.weight(1f))
                 }
             }
         }
@@ -401,7 +412,7 @@ fun <T> TournamentSeriesRightGameItem(
                 } else if (game.awayTeamScore > game.homeTeamScore) {
                     bottom += 1
                 }
-            } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == bottomSeedTeamId) {
+            } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == topSeedTeamId) {
                 // 홈팀이 bottomSeed인경우
                 if (game.awayTeamScore > game.homeTeamScore) {
                     top += 1
@@ -434,10 +445,10 @@ fun <T> TournamentSeriesRightGameItem(
                 // bar
                 Column(
                     horizontalAlignment = Alignment.Start,
-                    modifier = Modifier.padding(vertical = 15.dp).height(itemHeight)
+                    modifier = Modifier.height(itemHeight).padding(vertical = 15.dp)
                 ) {
                     TournamentHBar()
-                    TournamentVBar()
+                    TournamentVBar(modifier = Modifier.weight(1f))
                     TournamentHBar()
                 }
 
@@ -504,6 +515,7 @@ fun <T> TournamentSeriesRightGameItem(
                                             text = if (isBeforeGame) "-" else topSeedScore.toString(),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
+                                            textAlign = TextAlign.Center,
                                             modifier = Modifier.width(30.dp),
                                             color = if (isBeforeGame) {
                                                 Color.Black
@@ -518,6 +530,7 @@ fun <T> TournamentSeriesRightGameItem(
                                             text = if (isBeforeGame) "-" else bottomSeedScore.toString(),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
+                                            textAlign = TextAlign.Center,
                                             modifier = Modifier.width(30.dp),
                                             color = if (isBeforeGame) {
                                                 Color.Black
@@ -637,7 +650,7 @@ fun <T> TournamentSeriesFinalGameItem(
             } else if (game.awayTeamScore > game.homeTeamScore) {
                 bottom += 1
             }
-        } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == bottomSeedTeamId) {
+        } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == topSeedTeamId) {
             // 홈팀이 bottomSeed인경우
             if (game.awayTeamScore > game.homeTeamScore) {
                 top += 1
@@ -656,144 +669,143 @@ fun <T> TournamentSeriesFinalGameItem(
 
     // ui
     CenterColumn(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
-            .padding(vertical = 6.dp, horizontal = 8.dp)
-            .border(BorderStroke(1.dp, Moare), RoundedCornerShape(10.dp))
             .padding(top = 200.dp)
             .padding(horizontal = 8.dp)
+            .border(BorderStroke(1.dp, Moare), RoundedCornerShape(10.dp))
+            .padding(vertical = 6.dp, horizontal = 8.dp)
     ) {
-        CenterRow {
+        CenterRow(
+            modifier = Modifier.padding(bottom = 2.dp)
+        ) {
             CenterColumn(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
-                    .width(150.dp)
+                modifier = Modifier.width(100.dp)
             ) {
-                CenterRow(
-                    modifier = Modifier.padding(bottom = 2.dp)
-                ) {
-                    CenterColumn(
-                        modifier = Modifier.width(100.dp)
-                    ) {
-                        URLImage(
-                            url = Util.teamLogoUrl(leagueId, topSeedTeamId),
-                            size = URLImageSize.SMALL
-                        )
+                URLImage(
+                    url = Util.teamLogoUrl(leagueId, topSeedTeamId),
+                    size = URLImageSize.SMALL
+                )
 
+                Text(
+                    text = if (topSeedTeamId == null) "미정" else teamNameDic["short_${topSeedTeamId}"] ?: "",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Text(
+                text = if (isSeriesStarted) topSeedTeamSeriesScore.toString() else "-",
+                color = if (isSeriesStarted) {
+                    if (topSeedTeamSeriesScore >= bottomSeedTeamSeriesScore) Moare else Color.Black
+                } else {
+                    Color.Black
+                },
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(20.dp)
+            )
+
+            Text("-")
+
+            Text(
+                text = if (isSeriesStarted) bottomSeedTeamSeriesScore.toString() else "-",
+                color = if (isSeriesStarted) {
+                    if (bottomSeedTeamSeriesScore >= topSeedTeamSeriesScore) Moare else Color.Black
+                } else {
+                    Color.Black
+                },
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(20.dp)
+            )
+
+            CenterColumn(
+                modifier = Modifier.width(100.dp)
+            ) {
+                URLImage(
+                    url = Util.teamLogoUrl(leagueId, bottomSeedTeamId),
+                    size = URLImageSize.SMALL
+                )
+
+                Text(
+                    text = if (bottomSeedTeamId == null) "미정" else teamNameDic["short_${bottomSeedTeamId}"] ?: "",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        if (isScoreOpened) {
+            CenterColumn(
+                modifier = Modifier.clickable { selectSeries?.let { it(games) } }
+            ) {
+                games.forEachIndexed { index, game ->
+                    val topSeedScore = if (game.homeTeamId == topSeedTeamId) game.homeTeamScore else game.awayTeamScore
+                    val bottomSeedScore = if (game.homeTeamId == bottomSeedTeamId) game.homeTeamScore else game.awayTeamScore
+                    val isBeforeGame = Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
+
+                    CenterColumn {
                         Text(
-                            text = if (topSeedTeamId == null) "미정" else teamNameDic["short_${topSeedTeamId}"] ?: "",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    Text(
-                        text = if (isSeriesStarted) topSeedTeamSeriesScore.toString() else "-",
-                        color = if (isSeriesStarted) {
-                            if (topSeedTeamSeriesScore >= bottomSeedTeamSeriesScore) Moare else Color.Black
-                        } else {
-                            Color.Black
-                        }
-                    )
-
-                    Text("-")
-
-                    Text(
-                        text = if (isSeriesStarted) bottomSeedTeamSeriesScore.toString() else "-",
-                        color = if (isSeriesStarted) {
-                            if (bottomSeedTeamSeriesScore >= topSeedTeamSeriesScore) Moare else Color.Black
-                        } else {
-                            Color.Black
-                        }
-                    )
-
-                    CenterColumn(
-                        modifier = Modifier.width(100.dp)
-                    ) {
-                        URLImage(
-                            url = Util.teamLogoUrl(leagueId, bottomSeedTeamId),
-                            size = URLImageSize.SMALL
+                            text = "Game ${index + 1} - ${CalendarUtil.formatDate(game.date).split(" ").firstOrNull() ?: ""}",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Light,
+                            modifier = Modifier.padding(top = 4.dp)
                         )
 
-                        Text(
-                            text = if (bottomSeedTeamId == null) "미정" else teamNameDic["short_${bottomSeedTeamId}"] ?: "",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-
-                if (isScoreOpened) {
-                    CenterColumn(
-                        modifier = Modifier.clickable { selectSeries?.let { it(games) } }
-                    ) {
-                        games.forEachIndexed { index, game ->
-                            val topSeedScore = if (game.homeTeamId == topSeedTeamId) game.homeTeamScore else game.awayTeamScore
-                            val bottomSeedScore = if (game.homeTeamId == bottomSeedTeamId) game.homeTeamScore else game.awayTeamScore
-                            val isBeforeGame = Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
-
-                            CenterColumn {
-                                Text(
-                                    text = "Game ${index + 1} - ${CalendarUtil.formatDate(game.date).split(" ").firstOrNull() ?: ""}",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Light,
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
-
-                                CenterRow {
-                                    Text(
-                                        text = if (isBeforeGame) "-" else topSeedScore.toString(),
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        modifier = Modifier.width(30.dp),
-                                        color = if (isBeforeGame) {
-                                            Color.Black
-                                        } else {
-                                            if (topSeedScore >= bottomSeedScore) Moare else Color.Black
-                                        }
-                                    )
-
-                                    Text("-")
-
-                                    Text(
-                                        text = if (isBeforeGame) "-" else bottomSeedScore.toString(),
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        modifier = Modifier.width(30.dp),
-                                        color = if (isBeforeGame) {
-                                            Color.Black
-                                        } else {
-                                            if (bottomSeedScore >= topSeedScore) Moare else Color.Black
-                                        }
-                                    )
+                        CenterRow {
+                            Text(
+                                text = if (isBeforeGame) "-" else topSeedScore.toString(),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.width(30.dp),
+                                color = if (isBeforeGame) {
+                                    Color.Black
+                                } else {
+                                    if (topSeedScore >= bottomSeedScore) Moare else Color.Black
                                 }
-                            }
+                            )
+
+                            Text("-")
+
+                            Text(
+                                text = if (isBeforeGame) "-" else bottomSeedScore.toString(),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.width(30.dp),
+                                color = if (isBeforeGame) {
+                                    Color.Black
+                                } else {
+                                    if (bottomSeedScore >= topSeedScore) Moare else Color.Black
+                                }
+                            )
                         }
                     }
                 }
+            }
+        }
 
-                CenterRow(
-                    modifier = Modifier
-                        .alpha(0.7f)
-                        .clickable { isScoreOpened = !isScoreOpened }
-                ) {
-                    Text(
-                        text = if (isScoreOpened) "경기결과 숨기기" else "경기결과 보기",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
+        CenterRow(
+            modifier = Modifier
+                .alpha(0.7f)
+                .clickable { isScoreOpened = !isScoreOpened }
+        ) {
+            Text(
+                text = if (isScoreOpened) "경기결과 숨기기" else "경기결과 보기",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
 
-                    Box(
-                        Modifier
-                            .padding(start = 3.dp)
-                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
-                    ) {
-                        Icon(
-                            painter = painterResource(id = if (isScoreOpened) R.drawable.ic_round_arrow_drop_up_24 else R.drawable.ic_round_arrow_drop_down_24),
-                            contentDescription = null,
-                            tint = Color.Gray
-                        )
-                    }
-                }
+            Box(
+                Modifier
+                    .padding(start = 3.dp)
+                    .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
+            ) {
+                Icon(
+                    painter = painterResource(id = if (isScoreOpened) R.drawable.ic_round_arrow_drop_up_24 else R.drawable.ic_round_arrow_drop_down_24),
+                    contentDescription = null,
+                    tint = Color.Gray
+                )
             }
         }
     }
@@ -810,9 +822,9 @@ fun TournamentHBar(width: Dp = 20.dp) {
 }
 
 @Composable
-fun TournamentVBar(height: Dp? = null) {
+fun TournamentVBar(height: Dp? = null, modifier: Modifier = Modifier) {
     Box(
-        Modifier
+        modifier
             .width(1.dp)
             .nullableMaxHeight(height)
             .background(Color.Gray)

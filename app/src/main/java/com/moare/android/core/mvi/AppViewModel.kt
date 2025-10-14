@@ -86,6 +86,9 @@ import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsD
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsStore
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsAction
 import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsStore
+import com.moare.android.features.search.display.nba.viewmodel.NBATournamentAction
+import com.moare.android.features.search.display.nba.viewmodel.NBATournamentDelegate
+import com.moare.android.features.search.display.nba.viewmodel.NBATournamentStore
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchDelegate
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
@@ -120,6 +123,7 @@ sealed interface StackItem {
     data class NBATeamStandings(override val id: ViewId, val store: NBATeamStandingsStore) : StackItem
     data class NBALeagueSchedule(override val id: ViewId, val store: NBALeagueScheduleStore) : StackItem
     data class NBAGameStats(override val id: ViewId, val store: NBAGameStatsStore) : StackItem
+    data class NBATournament(override val id: ViewId, val store: NBATournamentStore) : StackItem
 
     data class MLBPlayerInfo(override val id: ViewId, val store: MLBPlayerInfoStore) : StackItem
     data class MLBPlayerStats(override val id: ViewId, val store: MLBPlayerStatsStore) : StackItem
@@ -159,6 +163,7 @@ class AppViewModel @Inject constructor(
     private val nbaTeamStandingsFactory: NBATeamStandingsStore.Factory,
     private val nbaLeagueScheduleFactory: NBALeagueScheduleStore.Factory,
     private val nbaGameStatsFactory: NBAGameStatsStore.Factory,
+    private val nbaTournamentFactory: NBATournamentStore.Factory,
 
     private val mlbPlayerInfoFactory: MLBPlayerInfoStore.Factory,
     private val mlbPlayerStatsFactory: MLBPlayerStatsStore.Factory,
@@ -341,6 +346,13 @@ class AppViewModel @Inject constructor(
                         }
                         store.send(NBAGameStatsAction.InitData)
                         _stack.update { it + StackItem.NBAGameStats(id, store) }
+                    }
+                    is SportDecodableModel.NBATournament -> {
+                        val store = nbaTournamentFactory.create(model.displayModel) { delegate ->
+                            onNBATournamentDelegate(delegate)
+                        }
+                        store.send(NBATournamentAction.InitData)
+                        _stack.update { it + StackItem.NBATournament(id, store) }
                     }
 
                     is SportDecodableModel.MLBPlayerInfo -> {
@@ -635,6 +647,23 @@ class AppViewModel @Inject constructor(
         }
     }
 
+    private fun onNBATournamentDelegate(delegate: NBATournamentDelegate) {
+        val id = ViewId()
+
+        when (delegate) {
+            is NBATournamentDelegate.ShowLeagueSchedule -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = nbaLeagueScheduleFactory.create(delegate.model.displayModel) { delegate ->
+                    onNBALeagueScheduleDelegate(delegate)
+                }
+                store.send(NBALeagueScheduleAction.InitData)
+                _stack.update { it + StackItem.NBALeagueSchedule(id, store) }
+            }
+        }
+    }
+
     private fun onMLBPlayerInfoDelegate(delegate: MLBPlayerInfoDelegate) {
         val id = ViewId()
 
@@ -823,6 +852,7 @@ class AppViewModel @Inject constructor(
             is StackItem.NBATeamStandings -> item.store.dispose()
             is StackItem.NBALeagueSchedule -> item.store.dispose()
             is StackItem.NBAGameStats -> item.store.dispose()
+            is StackItem.NBATournament -> item.store.dispose()
 
             is StackItem.MLBPlayerInfo -> item.store.dispose()
             is StackItem.MLBPlayerStats -> item.store.dispose()

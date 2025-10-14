@@ -424,7 +424,7 @@ object ModelConverter {
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
-            scheduleType = response.scheduleType,
+            scheduleType = response.scheduleType ?: ScheduleType.LEAGUE,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -440,13 +440,13 @@ object ModelConverter {
         )
     }
 
-    fun nbaLeagueTournamentConverter(response: NBAGameListResponseModel): NBATournamentDisplayModel {
+    fun nbaTournamentConverter(response: NBAGameScheduleResponseModel): NBATournamentDisplayModel {
         return NBATournamentDisplayModel(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
-            yearMonthList = emptyList(),
+            scheduleType = response.scheduleType ?: ScheduleType.TOURNAMENT_BRACKET,
             games = response.schedule
         )
     }

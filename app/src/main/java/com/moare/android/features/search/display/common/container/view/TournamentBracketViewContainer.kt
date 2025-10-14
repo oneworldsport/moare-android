@@ -2,12 +2,14 @@ package com.moare.android.features.search.display.common.container.view
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,8 +42,8 @@ fun <T> TournamentBracketViewContainer(
     val finalBracketTitles = listOf("NBA", "월드")
     val mlbBracketTitles = listOf("NL", "AL")
 
-    var leftItemHeights by remember { mutableStateOf<MutableMap<RoundSeriesKey, Dp>>(mutableMapOf()) }
-    var rightItemHeights by remember { mutableStateOf<MutableMap<RoundSeriesKey, Dp>>(mutableMapOf()) }
+    var leftItemHeights = remember { mutableStateMapOf<RoundSeriesKey, Dp>() }
+    val rightItemHeights = remember { mutableStateMapOf<RoundSeriesKey, Dp>() }
 
     // function
     fun h(r: Int, s: Int, isLeft: Boolean): Dp {
@@ -74,7 +76,7 @@ fun <T> TournamentBracketViewContainer(
     }
 
     // ui
-    Column(
+    Row(
         modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .verticalScroll(rememberScrollState())
@@ -102,6 +104,8 @@ fun <T> TournamentBracketViewContainer(
                         val seriesIndexForPosition = seriesIndex + 1
 
                         if (state.isSeries) {
+                            val bottom = bottomPadding(roundIndexForPosition, seriesIndexForPosition, true)
+
                             TournamentSeriesLeftGameItem(
                                 leagueId = state.leagueId,
                                 teamNameDic = state.teamNameDic,
@@ -110,7 +114,7 @@ fun <T> TournamentBracketViewContainer(
                                 itemPosition = RoundSeriesKey(roundIndexForPosition, seriesIndexForPosition),
                                 shouldRemoveBar = isKBO || (isMLB && roundIndexForPosition == 2), // mlb 2라운드, kbo
                                 itemHeights = leftItemHeights,
-                                modifier = Modifier.padding(bottom = bottomPadding(roundIndexForPosition, seriesIndexForPosition, true)),
+                                modifier = Modifier.padding(bottom = bottom),
                                 onItemHeightChange = { key, height ->
                                     leftItemHeights[key] = height
                                 },
@@ -128,15 +132,25 @@ fun <T> TournamentBracketViewContainer(
             if (state.isConference) {
                 // final
                 if (finalBracketTitles.contains(title.split(" ").firstOrNull() ?: "")) {
-                    gameList.firstOrNull()?.let { games ->
-                        TournamentSeriesFinalGameItem(
-                            leagueId = state.leagueId,
-                            teamNameDic = state.teamNameDic,
-                            games = games,
-                            seedIdPair = state.seedIdPairList[roundIndex][0],
-                            itemHeights = leftItemHeights,
-                            selectSeries = action.selectSeries
+                    CenterColumn {
+                        Text(
+                            text = title,
+                            fontWeight = FontWeight.Medium
                         )
+                        HCapsuleBar(
+                            modifier = Modifier.padding(top = 6.dp, bottom = 12.dp)
+                        )
+
+                        gameList.firstOrNull()?.let { games ->
+                            TournamentSeriesFinalGameItem(
+                                leagueId = state.leagueId,
+                                teamNameDic = state.teamNameDic,
+                                games = games,
+                                seedIdPair = state.seedIdPairList[roundIndex][0],
+                                itemHeights = leftItemHeights,
+                                selectSeries = action.selectSeries
+                            )
+                        }
                     }
                 }
 
@@ -155,6 +169,8 @@ fun <T> TournamentBracketViewContainer(
                             val seriesIndexForPosition = seriesIndex + 1
 
                             if (state.isSeries) {
+                                val bottom = bottomPadding(roundIndexForPosition, seriesIndexForPosition, false)
+
                                 TournamentSeriesRightGameItem(
                                     leagueId = state.leagueId,
                                     teamNameDic = state.teamNameDic,
@@ -163,7 +179,7 @@ fun <T> TournamentBracketViewContainer(
                                     itemPosition = RoundSeriesKey(roundIndexForPosition, seriesIndexForPosition),
                                     shouldRemoveBar = isMLB && roundIndexForPosition == 6, // mlb 2라운드만
                                     itemHeights = rightItemHeights,
-                                    modifier = Modifier.padding(bottom = bottomPadding(roundIndexForPosition, seriesIndexForPosition, false)),
+                                    modifier = Modifier.padding(bottom = bottom),
                                     onItemHeightChange = { key, height ->
                                         rightItemHeights[key] = height
                                     },

@@ -1,6 +1,7 @@
 package com.moare.android.features.search.display.common.container.component
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
@@ -8,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.Constants
@@ -50,6 +52,7 @@ fun <T> TournamentSingleGameItem(
 
     CenterRow(modifier = modifier) {
         CenterColumn(
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier
                 .width(80.dp)
                 .alpha(if (isFinished && !isHomeWinner) 0.3f else 1f)
@@ -71,7 +74,9 @@ fun <T> TournamentSingleGameItem(
         }
 
         if (shouldShowScore) {
-            CenterColumn {
+            CenterColumn(
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
                 // 축구 패널티킥 경기는 일반 스코어 검정색
                 val scoreColor = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
                     Color.Black
@@ -82,6 +87,7 @@ fun <T> TournamentSingleGameItem(
                 Text(
                     text = homeTeamScore.toString(),
                     color = scoreColor,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.width(30.dp)
                 )
 
@@ -119,7 +125,9 @@ fun <T> TournamentSingleGameItem(
         }
 
         if (shouldShowScore) {
-            CenterColumn {
+            CenterColumn(
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
                 // 축구 패널티킥 경기는 일반 스코어 검정색
                 val scoreColor = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
                     Color.Black
@@ -130,6 +138,7 @@ fun <T> TournamentSingleGameItem(
                 Text(
                     text = awayTeamScore.toString(),
                     color = scoreColor,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.width(30.dp)
                 )
 
@@ -144,6 +153,7 @@ fun <T> TournamentSingleGameItem(
         }
 
         CenterColumn(
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier
                 .width(80.dp)
                 .alpha(if (isFinished && isHomeWinner) 0.3f else 1f)

@@ -4,10 +4,7 @@ import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.Util
 import com.moare.android.features.search.display.common.container.state.GameListEntry
 import com.moare.android.features.search.display.common.store.BaseTournamentStore
-import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTournamentDisplayModel
-import com.moare.android.features.search.models.models.common.GameForSchedule
-import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -27,7 +24,7 @@ class FBTournamentStore @AssistedInject constructor(
 ) : BaseTournamentStore<FBTournamentAction, FBTournamentDisplayModel>(
     model, nameProvider, tournamentTeamsDeferred
 ) {
-    protected val _gameListTuple = MutableStateFlow<List<GameListEntry<FBGameInfoForSchedule>>>(emptyList())
+    private val _gameListTuple = MutableStateFlow<List<GameListEntry<FBGameInfoForSchedule>>>(emptyList())
     val gameListTuple: StateFlow<List<GameListEntry<FBGameInfoForSchedule>>> = _gameListTuple
 
     @AssistedFactory
@@ -54,19 +51,19 @@ class FBTournamentStore @AssistedInject constructor(
         val fourthRoundTeams = tournamentTeams["${leagueId}_${season}_4"] ?: emptyList()
         val fifthRoundTeams = tournamentTeams["${leagueId}_${season}_2"] ?: emptyList()
 
-        val firstRoundPairedTeamIds = firstRoundTeams.chunked(2)
-        val secondRoundPairedTeamIds = secondRoundTeams.chunked(2)
-        val thirdRoundPairedTeamIds = thirdRoundTeams.chunked(2)
-        val fourthRoundPairedTeamIds = fourthRoundTeams.chunked(2)
-        val fifthRoundPairedTeamIds = fifthRoundTeams.chunked(2)
+        val firstRoundPairedTeams = firstRoundTeams.chunked(2)
+        val secondRoundPairedTeams = secondRoundTeams.chunked(2)
+        val thirdRoundPairedTeams = thirdRoundTeams.chunked(2)
+        val fourthRoundPairedTeams = fourthRoundTeams.chunked(2)
+        val fifthRoundPairedTeams = fifthRoundTeams.chunked(2)
 
-        var games = displayModel.games.toMutableList()
+        val games = displayModel.games.toMutableList()
 
-        val (_, firstRound) = Util.collectRound(firstRoundPairedTeamIds, games)
-        val (_, secondRound) = Util.collectRound(secondRoundPairedTeamIds, games)
-        val (_, thirdRound) = Util.collectRound(thirdRoundPairedTeamIds, games)
-        val (_, fourthRound) = Util.collectRound(fourthRoundPairedTeamIds, games)
-        val (_, fifthRound) = Util.collectRound(fifthRoundPairedTeamIds, games)
+        val (_, firstRound) = Util.collectRound(firstRoundPairedTeams, games)
+        val (_, secondRound) = Util.collectRound(secondRoundPairedTeams, games)
+        val (_, thirdRound) = Util.collectRound(thirdRoundPairedTeams, games)
+        val (_, fourthRound) = Util.collectRound(fourthRoundPairedTeams, games)
+        val (_, fifthRound) = Util.collectRound(fifthRoundPairedTeams, games)
 
         val rounds: List<GameListEntry<FBGameInfoForSchedule>> = listOf(
             GameListEntry(title = "32강", gameList = firstRound),

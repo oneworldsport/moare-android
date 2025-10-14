@@ -77,6 +77,7 @@ import com.moare.android.features.search.display.nba.view.NBAPlayerStatsView
 import com.moare.android.features.search.display.nba.view.NBATeamInfoView
 import com.moare.android.features.search.display.nba.view.NBATeamStandingsView
 import com.moare.android.features.search.display.nba.view.NBATeamStatsView
+import com.moare.android.features.search.display.nba.view.NBATournamentView
 import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.ApiFetchState
@@ -409,6 +410,7 @@ fun StackItemView(
         is StackItem.NBATeamStandings -> NBATeamStandingsView(searchStore, item.store)
         is StackItem.NBALeagueSchedule -> NBALeagueScheduleView(searchStore, item.store, didPop)
         is StackItem.NBAGameStats -> NBAGameStatsView(searchStore, item.store)
+        is StackItem.NBATournament -> NBATournamentView(searchStore, item.store)
 
         is StackItem.MLBPlayerInfo -> MLBPlayerInfoView(searchStore, item.store)
         is StackItem.MLBPlayerStats -> MLBPlayerStatsView(searchStore, item.store)

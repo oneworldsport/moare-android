@@ -259,7 +259,7 @@ class SearchStore @AssistedInject constructor(
                 is SportDecodableModel.FBGameStats, is SportDecodableModel.FBTournament, is SportDecodableModel.NBAPlayerInfo, is SportDecodableModel.NBAPlayerStats,
                 is SportDecodableModel.NBAPlayerStandings, is SportDecodableModel.NBATeamInfo, is SportDecodableModel.NBATeamStats,
                 is SportDecodableModel.NBATeamStandings, is SportDecodableModel.NBALeagueSchedule, is SportDecodableModel.NBAGameStats,
-                is SportDecodableModel.NBALeagueTournament, is SportDecodableModel.KBOPlayerInfo, is SportDecodableModel.KBOPlayerStats,
+                is SportDecodableModel.NBATournament, is SportDecodableModel.KBOPlayerInfo, is SportDecodableModel.KBOPlayerStats,
                 is SportDecodableModel.KBOPlayerStandings, is SportDecodableModel.KBOTeamInfo, is SportDecodableModel.KBOTeamStats,
                 is SportDecodableModel.KBOTeamStandings, is SportDecodableModel.KBOLeagueSchedule, is SportDecodableModel.KBOGameStats,
                 is SportDecodableModel.MLBPlayerInfo, is SportDecodableModel.MLBPlayerStats, is SportDecodableModel.MLBPlayerStandings,
