@@ -114,3 +114,65 @@ data class FBTeamStatsPenaltyPercentage(
 //    val yellow: Map<String, FBTeamPercentageStats>?,
 //    val red: Map<String, FBTeamPercentageStats>?
 //)
+
+// football api response로 오는 standings 전용 모델들
+@Serializable
+data class FBTeamForStandings(
+    // NOTE: 일단은 필요한 프로퍼티만 만들어놓음.
+    val team: FBTeamInfo,
+    val league: FBLeague? = null,
+    val all: FBTeamStandingsGameStats,
+    val home: FBTeamStandingsGameStats,
+    val away: FBTeamStandingsGameStats,
+    @SerialName("update") private val _update: String? = null
+) {
+    val update: String get() = _update ?: ""
+}
+
+@Serializable
+data class FBTeamStandingsGameStats(
+    @SerialName("played") private val _played: Int? = null,
+    @SerialName("win") private val _win: Int? = null,
+    @SerialName("draw") private val _draw: Int? = null,
+    @SerialName("lose") private val _lose: Int? = null,
+    val goals: FBTeamStandingsGoalStats,
+) {
+    val played: Int get() = _played ?: 0
+    val win: Int get() = _win ?: 0
+    val draw: Int get() = _draw ?: 0
+    val lose: Int get() = _lose ?: 0
+}
+
+@Serializable
+data class FBTeamStandingsGoalStats(
+    @SerialName("for") private val _for: Int? = null,
+    @SerialName("against") private val _against: Int? = null,
+) {
+    val goalsFor: Int get() = _for ?: 0
+    val goalsAgainst: Int get() = _against ?: 0
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

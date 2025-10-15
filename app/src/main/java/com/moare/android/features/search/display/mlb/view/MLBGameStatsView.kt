@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,10 +33,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.FormatSeriesResult
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -45,14 +45,14 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsIntent
-import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsViewModel
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.ModelConverter
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
+import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
+import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsAction
+import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsStore
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBGameLineScoreInning
 import com.moare.android.ui.common.components.BaseballLeagueTitle
+import com.moare.android.ui.common.components.BaseballLeagueTitleForGameStats
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
@@ -63,9 +63,8 @@ import com.moare.android.ui.util.CenterColumn
 
 @Composable
 fun MLBGameStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    mlbGameStatsViewModel: MLBGameStatsViewModel = hiltViewModel(),
-    data: MLBGameStatsDisplayModel
+    searchStore: SearchStore,
+    store: MLBGameStatsStore
 ) {
     /* ---------------------
        ui state
@@ -75,21 +74,19 @@ fun MLBGameStatsView(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by mlbGameStatsViewModel.displayModel.collectAsState()
-    val firstCategorySelectedIndex by mlbGameStatsViewModel.firstCategorySelectedIndex.collectAsState()
-    val secondCategorySelectedIndex by mlbGameStatsViewModel.secondCategorySelectedIndex.collectAsState()
-    val selectedTeamIndex by mlbGameStatsViewModel.selectedTeamIndex.collectAsState()
-    val teamHitters by mlbGameStatsViewModel.teamHitters.collectAsState()
-    val teamPitchers by mlbGameStatsViewModel.teamPitchers.collectAsState()
-    val playerNameDic = mlbGameStatsViewModel.playerNameDictionary
-    val teamNameDic = mlbGameStatsViewModel.teamNameDictionary
+    val displayModel by store.displayModel.collectAsState()
+    val firstCategorySelectedIndex by store.firstCategorySelectedIndex.collectAsState()
+    val secondCategorySelectedIndex by store.secondCategorySelectedIndex.collectAsState()
+    val selectedTeamIndex by store.teamCategorySelectedIndex.collectAsState()
+    val teamHitters by store.teamHitters.collectAsState()
+    val teamPitchers by store.teamPitchers.collectAsState()
+    val playerNameDic by store.playerNameDic.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    val game = displayModel?.game
-    val season = game?.game?.season?.toIntOrNull()
+    val game = displayModel.game
+    val season = game.game.season.toIntOrNull()
 
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    val teamIds = listOf(displayModel?.game?.teams?.home?.id, displayModel?.game?.teams?.away?.id)
+    val teamIds = listOf(displayModel.game.teams.home.id, displayModel.game.teams.away.id)
     val teamCategories = teamIds.map {
         GameStatsTeamState(
             name = teamNameDic["short_${it}"] ?: "",
@@ -140,13 +137,13 @@ fun MLBGameStatsView(
 
     val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp)
     val secondStatsColumnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp)
-    val officials = displayModel?.game?.boxscore?.officials ?: emptyList()
+    val officials = displayModel.game.boxscore?.officials ?: emptyList()
     val gameDetailTitle = "날짜: \n\n장소: \n관중수: \n심판: "
     val gameDetailContent = buildString {
-        append("${CalendarUtil.formatDate(displayModel?.game?.gameInfo?.gameDate).split(" ").firstOrNull() ?: ""}\n")
-        append("${CalendarUtil.formatDate(displayModel?.game?.gameInfo?.gameDate, TimeFormatType.AMPM)}\n")
-        append("${teamNameDic["venue_${displayModel?.game?.teams?.home?.id}"] ?: ""}\n")
-        append("${displayModel?.game?.gameInfo?.attendance ?: 0}\n")
+        append("${CalendarUtil.formatDate(displayModel.game.gameInfo.gameDate).split(" ").firstOrNull() ?: ""}\n")
+        append("${CalendarUtil.formatDate(displayModel.game.gameInfo.gameDate, TimeFormatType.AMPM)}\n")
+        append("${teamNameDic["venue_${displayModel.game.teams.home.id}"] ?: ""}\n")
+        append("${displayModel.game.gameInfo.attendance}\n")
         officials.forEachIndexed { index, official ->
             append("• ${official.official.fullName}")
             if (index != officials.lastIndex) {
@@ -155,19 +152,10 @@ fun MLBGameStatsView(
         }
     }
 
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.MLBGameStats) {
-            mlbGameStatsViewModel.send(MLBGameStatsIntent.InitData(data))
-        }
-    }
-
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowStats = game?.status?.detailedState != StringConstants.MLB.GAME_SCHEDULED,
-            shouldShowRefreshButton = game?.status?.detailedState == StringConstants.MLB.GAME_LIVE,
+            shouldShowStats = game.status.detailedState != StringConstants.MLB.GAME_SCHEDULED,
+            shouldShowRefreshButton = game.status.detailedState == StringConstants.MLB.GAME_LIVE,
             teamCategories = teamCategories,
             secondCategories = StringConstants.MLB.GAME_STATS_HITTING_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,
@@ -185,50 +173,58 @@ fun MLBGameStatsView(
         ),
         actions = GameStatsContainerActions(
             teamCategoryButtonAction = { index ->
-                mlbGameStatsViewModel.send(MLBGameStatsIntent.SelectTeam(index))
+                store.send(MLBGameStatsAction.SelectTeam(index))
+            },
+            firstStatsTitleCategoryAction = {
+                store.send(MLBGameStatsAction.SortByBattingOrder)
             },
             secondCategoryButtonAction = { index ->
-                mlbGameStatsViewModel.send(MLBGameStatsIntent.SelectFirstCategory(index))
+                store.send(MLBGameStatsAction.SelectFirstCategory(index))
             },
             refreshButtonAction = {
-                displayModel?.let {
-                    searchViewModel.send(SearchViewModel.Intent.RefreshGame(season = it.season, category = "baseball"))
-                }
+                store.send(MLBGameStatsAction.RefreshGame())
             },
             secondStatsCategoryButtonAction = { index ->
-                mlbGameStatsViewModel.send(MLBGameStatsIntent.SelectSecondCategory(index))
+                store.send(MLBGameStatsAction.SelectSecondCategory(index))
             }
         ),
         titleContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
-            ) {
-                BaseballLeagueTitle(
+            Column {
+                BaseballLeagueTitleForGameStats(
                     url = MLBUtil.mlbLogoUrl,
-                    leagueName = "MLB",
-                    leagueSeason = season
+                    name = "MLB",
+                    leagueSeason = game.game.season.toIntOrNull(),
+                    seriesDescription = game.game.seriesDescription
                 )
 
-                Spacer(Modifier.weight(1f))
+                if (game.game.seriesStatus.isNotEmpty()) {
+                    FormatSeriesResult(
+                        seriesStatus = game.game.seriesStatus,
+                        homeTeamId = game.teams.home.id,
+                        awayTeamId = game.teams.away.id,
+                        teamNameDic = teamNameDic
+                    )
+                }
             }
         },
         gameContent = {
-            if (game?.status?.detailedState == StringConstants.MLB.GAME_SCHEDULED) {
-                MLBLeagueScheduleListItem(
-                    data = ModelConverter().mlbGameToGameScheduleConverter(game),
-                    teamNameDic = teamNameDic
-                )
-            } else {
-                MLBGameStatsScoreInfoItem()
-            }
+//            if (game.status.detailedState == StringConstants.MLB.GAME_SCHEDULED) {
+//                MLBLeagueScheduleListItem(
+//                    searchStore = searchStore,
+//                    data = ModelConverter().mlbGameToGameScheduleConverter(game),
+//                    teamNameDic = teamNameDic
+//                )
+//            } else {
+//
+//            }
+            MLBGameStatsScoreInfoItem(store)
         }
     )
 }
 
 @Composable
 fun MLBGameStatsScoreInfoItem(
-    mlbGameStatsViewModel: MLBGameStatsViewModel = hiltViewModel()
+    store: MLBGameStatsStore
 ) {
     val density = LocalDensity.current
     var borderTextWidth by remember { mutableStateOf(0.dp) }
@@ -236,12 +232,12 @@ fun MLBGameStatsScoreInfoItem(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by mlbGameStatsViewModel.displayModel.collectAsState()
-    val game = displayModel?.game
-    val homeTeamId = game?.teams?.home?.id
-    val awayTeamId = game?.teams?.away?.id
-    val gameStatus = game?.status?.detailedState
-    val teamNameDic = mlbGameStatsViewModel.teamNameDictionary
+    val displayModel by store.displayModel.collectAsState()
+    val game = displayModel.game
+    val homeTeamId = Constants.Ids.checkTeamId(Constants.Ids.MLB, game.teams.home.id)
+    val awayTeamId = Constants.Ids.checkTeamId(Constants.Ids.MLB, game.teams.away.id)
+    val gameStatus = game.status.detailedState
+    val teamNameDic by store.teamNameDic.collectAsState()
 
     /* ---------------------
        constants
@@ -292,11 +288,10 @@ fun MLBGameStatsScoreInfoItem(
                 )
                 URLImage(
                     url = MLBUtil.teamLogoUrl(awayTeamId),
-                    size = URLImageSize.SMALL,
-                    isSvg = true
+                    size = URLImageSize.SMALL
                 )
                 Text(
-                    text = teamNameDic["short_$awayTeamId"] ?: "",
+                    text = if (awayTeamId == null) "미정" else teamNameDic["short_$awayTeamId"] ?: "",
                     fontSize = 13.sp,
                     maxLines = 2
                 )
@@ -326,128 +321,133 @@ fun MLBGameStatsScoreInfoItem(
                 }
                 URLImage(
                     url = MLBUtil.teamLogoUrl(homeTeamId),
-                    size = URLImageSize.SMALL,
-                    isSvg = true
+                    size = URLImageSize.SMALL
                 )
                 Text(
-                    text = teamNameDic["short_$homeTeamId"] ?: "",
+                    text = if (homeTeamId == null) "미정" else teamNameDic["short_$homeTeamId"] ?: "",
                     fontSize = 13.sp,
                     maxLines = 2
                 )
             }
         }
 
-        MLBGameStatsLineScoreContainer()
+        MLBGameStatsLineScoreContainer(store)
     }
 }
 
 @Composable
 fun RowScope.MLBGameStatsLineScoreContainer(
-    mlbGameStatsViewModel: MLBGameStatsViewModel = hiltViewModel()
+    store: MLBGameStatsStore
 ) {
-    val displayModel by mlbGameStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
 
-    displayModel?.let {
-        val game = it.game
-        val isGameScheduled = game.status.detailedState == StringConstants.MLB.GAME_SCHEDULED
-        val lineScore = game.linescore
-        val homeTeamLineScore = lineScore?.teams?.home?.runs ?: 0
-        val awayTeamLineScore = lineScore?.teams?.away?.runs ?: 0
+    val game = displayModel.game
+    val isGameScheduled = game.status.detailedState == StringConstants.MLB.GAME_SCHEDULED
+    val lineScore = game.linescore
+    val homeTeamLineScore = lineScore?.teams?.home?.runs ?: 0
+    val awayTeamLineScore = lineScore?.teams?.away?.runs ?: 0
 
-        Row(
-            modifier = Modifier
-                .height(127.dp) // 25 + 1 + 50 + 1 + 50
-                .weight(1f)
+    Row(
+        modifier = Modifier
+            .height(127.dp) // 25 + 1 + 50 + 1 + 50
+            .weight(1f)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier.fillMaxHeight()
         ) {
-            Column(
-                verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                if (!isGameScheduled) {
-                    Text(
-                        text = awayTeamLineScore.toString(),
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 50.sp,
-                        modifier = Modifier
-                            .padding(start = 4.dp, end = 8.dp)
-                            .width(30.dp),
-                        color = if (awayTeamLineScore >= homeTeamLineScore) MaterialTheme.colors.primary else Color.Black
-                    )
-                } else {
-                    Text(
-                        text = "-",
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 50.sp,
-                        modifier = Modifier
-                            .padding(start = 4.dp, end = 8.dp)
-                            .width(30.dp),
-                        color = Color.Black
-                    )
-                }
-
-                Box(
-                    Modifier
-                        .width(42.dp) // 30 + 8 + 4
-                        .height(1.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.Gray)
-                        .alpha(0.5f)
+            if (!isGameScheduled) {
+                Text(
+                    text = awayTeamLineScore.toString(),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 50.sp,
+                    modifier = Modifier
+                        .padding(start = 4.dp, end = 8.dp)
+                        .width(30.dp),
+                    color = if (awayTeamLineScore >= homeTeamLineScore) MaterialTheme.colors.primary else Color.Black
                 )
-
-                if (!isGameScheduled) {
-                    Text(
-                        text = homeTeamLineScore.toString(),
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 50.sp,
-                        modifier = Modifier
-                            .padding(start = 4.dp, end = 8.dp)
-                            .width(30.dp),
-                        color = if (homeTeamLineScore >= awayTeamLineScore) MaterialTheme.colors.primary else Color.Black
-                    )
-                } else {
-                    Text(
-                        text = "-",
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 50.sp,
-                        modifier = Modifier
-                            .padding(start = 4.dp, end = 8.dp)
-                            .width(30.dp),
-                        color = Color.Black
-                    )
-                }
+            } else {
+                Text(
+                    text = "-",
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 50.sp,
+                    modifier = Modifier
+                        .padding(start = 4.dp, end = 8.dp)
+                        .width(30.dp),
+                    color = Color.Black
+                )
             }
 
-            Column(
-                Modifier.weight(1f)
-            ) {
-                MLBGameStatsLineScoreTitle(lineScore?.innings ?: emptyList())
+            Box(
+                Modifier
+                    .width(42.dp) // 30 + 8 + 4
+                    .height(1.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.Gray)
+                    .alpha(0.5f)
+            )
 
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.Gray)
-                        .alpha(0.5f)
+            if (!isGameScheduled) {
+                Text(
+                    text = homeTeamLineScore.toString(),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 50.sp,
+                    modifier = Modifier
+                        .padding(start = 4.dp, end = 8.dp)
+                        .width(30.dp),
+                    color = if (homeTeamLineScore >= awayTeamLineScore) MaterialTheme.colors.primary else Color.Black
                 )
-
-                MLBGameStatsLineScoreItem(isHome = false, lineScoreInnings = lineScore?.innings ?: emptyList())
-
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.Gray)
-                        .alpha(0.5f)
+            } else {
+                Text(
+                    text = "-",
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 50.sp,
+                    modifier = Modifier
+                        .padding(start = 4.dp, end = 8.dp)
+                        .width(30.dp),
+                    color = Color.Black
                 )
-
-                MLBGameStatsLineScoreItem(isHome = true, lineScoreInnings = lineScore?.innings ?: emptyList())
             }
+        }
+
+        Column(
+            Modifier.weight(1f)
+        ) {
+            MLBGameStatsLineScoreTitle(lineScore?.innings ?: emptyList())
+
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.Gray)
+                    .alpha(0.5f)
+            )
+
+            MLBGameStatsLineScoreItem(
+                store = store,
+                isHome = false,
+                lineScoreInnings = lineScore?.innings ?: emptyList()
+            )
+
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.Gray)
+                    .alpha(0.5f)
+            )
+
+            MLBGameStatsLineScoreItem(
+                store = store,
+                isHome = true,
+                lineScoreInnings = lineScore?.innings ?: emptyList()
+            )
         }
     }
 }
@@ -478,7 +478,7 @@ fun MLBGameStatsLineScoreTitle(
 
 @Composable
 fun MLBGameStatsLineScoreItem(
-    mlbGameStatsViewModel: MLBGameStatsViewModel = hiltViewModel(),
+    store: MLBGameStatsStore,
     isHome: Boolean,
     lineScoreInnings: List<MLBGameLineScoreInning>
 ) {
@@ -487,7 +487,7 @@ fun MLBGameStatsLineScoreItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(mlbGameStatsViewModel.lineScoreItemHeight)
+            .height(store.lineScoreItemHeight)
     ) {
         if (lineScoreInnings.isNotEmpty()) {
             for ((_, item) in lineScoreInnings.withIndex()) {

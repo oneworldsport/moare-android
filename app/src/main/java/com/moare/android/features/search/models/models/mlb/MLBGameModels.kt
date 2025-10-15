@@ -145,6 +145,8 @@ data class MLBGameData(
     @SerialName("seasonDisplay") private val _seasonDisplay: String? = null,
     @SerialName("tiebreaker") private val _tiebreaker: String? = null,
     @SerialName("type") private val _type: String? = null,
+    @SerialName("seriesDescription") private val _seriesDescription: String? = null,
+    @SerialName("seriesStatus") private val _seriesStatus: String? = null
 ) {
     val calendarEventID: String get() = _calendarEventID ?: ""
     val doubleHeader: String get() = _doubleHeader ?: ""
@@ -156,6 +158,8 @@ data class MLBGameData(
     val seasonDisplay: String get() = _seasonDisplay ?: ""
     val tiebreaker: String get() = _tiebreaker ?: ""
     val type: String get() = _type ?: ""
+    val seriesDescription: String get() = _seriesDescription ?: ""
+    val seriesStatus: String get() = _seriesStatus ?: ""
 }
 
 @Serializable
@@ -387,9 +391,13 @@ data class MLBGameWeather(
 
 @Serializable
 data class MLBGameInfoForSchedule(
-    @SerialName("currentInning") private val _currentInning: String? = null
+    @SerialName("currentInning") private val _currentInning: String? = null,
+    @SerialName("seriesDescription") private val _seriesDescription: String? = null,
+    @SerialName("seriesStatus") private val _seriesStatus: String? = null
 ) {
     val currentInning: String get() = _currentInning ?: StringConstants.GAME_LIVE_STR
+    val seriesDescription: String get() = _seriesDescription ?: ""
+    val seriesStatus: String get() = _seriesStatus ?: ""
 }
 
 typealias MLBGameForSchedule = GameForSchedule<MLBGameInfoForSchedule>

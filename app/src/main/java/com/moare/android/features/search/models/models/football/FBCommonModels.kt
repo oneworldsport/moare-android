@@ -126,8 +126,8 @@ data class FBLeague(
 
 @Serializable
 data class FBHomeAwayIntStats(
-    @SerialName("home") private val _home: Int? = null,
-    @SerialName("away") private val _away: Int? = null,
+    @SerialName("home") val _home: Int? = null,
+    @SerialName("away") val _away: Int? = null,
     @SerialName("total") private val _total: Int? = null
 ) {
     val home: Int

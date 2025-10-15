@@ -15,18 +15,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.util.nullableOptionalClickable
+import com.moare.android.ui.util.optionalClickable
 
 @Composable
 fun StandingsFirstCategoryItem(
     text: String = StringConstants.STANDINGS_FIRST_CATEGORY,
     width: Dp? = null,
-    height: Dp = 44.dp
+    height: Dp = 44.dp,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .width(width ?: 132.dp)
             .height(height)
+            .nullableOptionalClickable(onClick = onClick)
     ) {
         Text(
             text = text,

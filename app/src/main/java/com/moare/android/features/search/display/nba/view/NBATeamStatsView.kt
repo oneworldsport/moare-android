@@ -1,32 +1,21 @@
 package com.moare.android.features.search.display.nba.view
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateOffsetAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,80 +25,54 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
-import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.football.view.FBTeamStatsList
-import com.moare.android.features.search.display.football.view.FBTeamStatsTeamInfoItem
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsViewModel
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsIntent
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsViewModel
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
-import com.moare.android.features.search.models.models.nba.NBAPlayerStats
+import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsStore
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.nba.NBATeamStats
-import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HDivider
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow
-import kotlinx.coroutines.delay
-import kotlin.math.roundToInt
 
 @Composable
 fun NBATeamStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    nbaTeamStatsViewModel: NBATeamStatsViewModel = hiltViewModel(),
-    data: NBATeamStatsDisplayModel
+    searchStore: SearchStore,
+    store: NBATeamStatsStore
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by nbaTeamStatsViewModel.displayModel.collectAsState()
-    val statsList = displayModel?.stats
-
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.NBATeamStats) {
-            nbaTeamStatsViewModel.send(NBATeamStatsIntent.InitData(data))
-        }
-    }
+    val displayModel by store.displayModel.collectAsState()
+    val statsList = displayModel.stats
 
     InfoViewContainer(
-        itemCount = (statsList?.size ?: 0) + 1,
+        searchStore = searchStore,
+        itemCount = statsList.size + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier,
 //            .verticalScroll(rememberScrollState()),
         measureContent = {
-            NBATeamStatsTeamInfoItem { index, coordinates ->
+            NBATeamStatsTeamInfoItem(store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            NBATeamStatsList { index, coordinates ->
+            NBATeamStatsList(store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
         }, displayContent = {
             NBATeamStatsTeamInfoItem(
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
@@ -119,6 +82,7 @@ fun NBATeamStatsView(
             )
 
             NBATeamStatsList(
+                store = store,
                 isAniItem = true,
                 itemSizes = itemSizes,
                 itemPositions = itemPositions,
@@ -133,7 +97,7 @@ fun NBATeamStatsView(
 // team info
 @Composable
 fun NBATeamStatsTeamInfoItem(
-    nbaTeamStatsViewModel: NBATeamStatsViewModel = hiltViewModel(),
+    store: NBATeamStatsStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -143,114 +107,112 @@ fun NBATeamStatsTeamInfoItem(
     measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by nbaTeamStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    displayModel?.let {
-        val team = it.team
-        val venue = it.venue
+    val team = displayModel.team
+    val venue = displayModel.venue
 
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(0, coordinates) }
-            },
-            modifier = containerModifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(0, coordinates) }
+        },
+        modifier = containerModifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .alpha(contentsAlpha)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .alpha(contentsAlpha)
+            URLImage(
+                url = NBAUtil.teamLogoUrl(team.id)
+            )
+
+            // name, state and city
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(start = 6.dp)
             ) {
-                URLImage(
-                    url = NBAUtil.teamLogoUrl(team.id),
-                    isSvg = true
+                Text(
+                    text = teamNameDic["full_${team.id}"] ?: team.fullName,
+                    fontWeight = FontWeight.Medium
                 )
 
-                // name, state and city
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 6.dp)
+                Text(
+                    text = team.fullName,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Light,
+                    maxLines = 2
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = nbaTeamStatsViewModel.teamNameDictionary["full_${team.id}"] ?: team.fullName,
+                        text = "연고지: ",
+                        fontSize = 15.sp
+                    )
+
+                    Text(
+                        text = team.state,
                         fontWeight = FontWeight.Medium
                     )
+                }
+            }
 
+            // venue, conference, division
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(start = 8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = team.fullName,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Light,
-                        maxLines = 2
+                        text = "홈구장: ",
+                        fontSize = 15.sp
                     )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "연고지: ",
-                            fontSize = 15.sp
-                        )
-
-                        Text(
-                            text = team.state,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    Text(
+                        text = teamNameDic["venue_${team.id}"] ?: venue.name,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
 
-                // venue, conference, division
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 8.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "홈구장: ",
-                            fontSize = 15.sp
-                        )
+                    Text(
+                        text = "컨퍼런스: ",
+                        fontSize = 15.sp
+                    )
 
-                        Text(
-                            text = nbaTeamStatsViewModel.teamNameDictionary["venue_${team.id}"] ?: venue.name,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    Text(
+                        text = NBAUtil.translateEastWest(team.teamConference),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "컨퍼런스: ",
-                            fontSize = 15.sp
-                        )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "디비전: ",
+                        fontSize = 15.sp
+                    )
 
-                        Text(
-                            text = NBAUtil.translateEastWest(team.teamConference),
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "디비전: ",
-                            fontSize = 15.sp
-                        )
-
-                        Text(
-                            text = team.teamDivision,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    Text(
+                        text = team.teamDivision,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
@@ -260,7 +222,7 @@ fun NBATeamStatsTeamInfoItem(
 // stats list
 @Composable
 fun NBATeamStatsList(
-    nbaTeamStatsViewModel: NBATeamStatsViewModel = hiltViewModel(),
+    store: NBATeamStatsStore,
     isAniItem: Boolean = false,
     itemSizes: Map<Int, DpSize>? = null,
     itemPositions: Map<Int, Offset>? = null,
@@ -270,33 +232,32 @@ fun NBATeamStatsList(
     measureContentAlpha: Float = 0f,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by nbaTeamStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val statsList = displayModel.stats
 
-    displayModel?.let {
-        val statsList = it.stats
-
-        /* ---------------------
-           ui
-           --------------------- */
-        for ((index, value) in statsList.withIndex()) {
-            NBATeamStatsListItem(
-                index = index,
-                data = value,
-                isAniItem = isAniItem,
-                itemSizes = itemSizes,
-                itemPositions = itemPositions,
-                aniPosition = aniPosition,
-                contentsAlpha = contentsAlpha,
-                containerModifier = containerModifier,
-                updateItemPosition = updateItemPosition,
-                measureContentAlpha = measureContentAlpha
-            )
-        }
+    /* ---------------------
+       ui
+       --------------------- */
+    for ((index, value) in statsList.withIndex()) {
+        NBATeamStatsListItem(
+            store = store,
+            index = index,
+            data = value,
+            isAniItem = isAniItem,
+            itemSizes = itemSizes,
+            itemPositions = itemPositions,
+            aniPosition = aniPosition,
+            contentsAlpha = contentsAlpha,
+            containerModifier = containerModifier,
+            updateItemPosition = updateItemPosition,
+            measureContentAlpha = measureContentAlpha
+        )
     }
 }
 
 @Composable
 fun NBATeamStatsListItem(
+    store: NBATeamStatsStore,
     index: Int,
     data: NBATeamStats,
     isAniItem: Boolean,
@@ -323,6 +284,7 @@ fun NBATeamStatsListItem(
             .fillMaxWidth()
     ) {
         NBATeamStatsItem(
+            store = store,
             data = data,
             contentsAlpha = contentsAlpha,
             measureContentAlpha = measureContentAlpha
@@ -332,7 +294,7 @@ fun NBATeamStatsListItem(
 
 @Composable
 fun NBATeamStatsItem(
-    nbaTeamStatsViewModel: NBATeamStatsViewModel = hiltViewModel(),
+    store: NBATeamStatsStore,
     data: NBATeamStats,
     contentsAlpha: Float,
     measureContentAlpha: Float,
@@ -343,8 +305,8 @@ fun NBATeamStatsItem(
     var penaltyStatsOpenState by remember { mutableStateOf(false) }
     var etcStatsOpenState by remember { mutableStateOf(false) }
 
-    val displayModel by nbaTeamStatsViewModel.displayModel.collectAsState()
-    val team = displayModel?.team
+    val displayModel by store.displayModel.collectAsState()
+    val team = displayModel.team
 
     /* ---------------------
        ui
@@ -383,8 +345,8 @@ fun NBATeamStatsItem(
         ) {
             CenterRow {
                 FBStatDataItem(
-                    category = "${NBAUtil.translateEastWest(team?.teamConference ?: "")}컨퍼런스 순위",
-                    data = (team?.confRank ?: 0).toString(),
+                    category = "${NBAUtil.translateEastWest(team.teamConference)}컨퍼런스 순위",
+                    data = team.confRank.toString(),
                     customCategoryFontSize = 11,
                     customCategoryHeight = 30.dp,
                     modifier = Modifier.weight(1f)

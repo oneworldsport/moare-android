@@ -3,8 +3,6 @@ package com.moare.android.features.search.display.nba.view
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
@@ -51,12 +48,10 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsIntent
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsViewModel
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.ModelConverter
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
+import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
+import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsStore
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.nba.NBALineScore
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.NBATitle
@@ -70,9 +65,8 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun NBAGameStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel(),
-    data: NBAGameStatsDisplayModel
+    searchStore: SearchStore,
+    store: NBAGameStatsStore
 ) {
     /* ---------------------
        ui state
@@ -82,18 +76,16 @@ fun NBAGameStatsView(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by nbaGameStatsViewModel.displayModel.collectAsState()
-    val firstSelectedIndex by nbaGameStatsViewModel.firstCategorySelectedIndex.collectAsState()
-    val secondCategorySelectedIndex by nbaGameStatsViewModel.secondCategorySelectedIndex.collectAsState()
-    val selectedTeamIndex by nbaGameStatsViewModel.selectedTeamIndex.collectAsState()
-    val playerStats by nbaGameStatsViewModel.playerStats.collectAsState()
-    val season = displayModel?.game?.gameSummary?.season
-    val teamNameDic = nbaGameStatsViewModel.teamNameDictionary
-    val playerNameDic = nbaGameStatsViewModel.playerNameDictionary
+    val displayModel by store.displayModel.collectAsState()
+    val firstSelectedIndex by store.firstCategorySelectedIndex.collectAsState()
+    val secondCategorySelectedIndex by store.secondCategorySelectedIndex.collectAsState()
+    val selectedTeamIndex by store.teamCategorySelectedIndex.collectAsState()
+    val playerStats by store.playerStats.collectAsState()
+    val season = displayModel.game.gameSummary?.season
+    val teamNameDic by store.teamNameDic.collectAsState()
+    val playerNameDic by store.playerNameDic.collectAsState()
 
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    val teamIds = listOf(displayModel?.game?.gameSummary?.homeTeamId, displayModel?.game?.gameSummary?.visitorTeamId)
+    val teamIds = listOf(displayModel.game.gameSummary?.homeTeamId, displayModel.game.gameSummary?.visitorTeamId)
     val teamCategories = teamIds.map {
         GameStatsTeamState(
             name = teamNameDic["short_${it}"] ?: "",
@@ -137,13 +129,13 @@ fun NBAGameStatsView(
         )
     }
     val columnWidthList = listOf(50.dp, 50.dp, 80.dp, 70.dp, 70.dp, 80.dp, 70.dp, 70.dp, 80.dp, 80.dp, 80.dp, 100.dp, 80.dp, 50.dp, 50.dp, 70.dp, 50.dp, 50.dp, 70.dp, 70.dp)
-    val officials = displayModel?.game?.officials ?: emptyList()
+    val officials = displayModel.game.officials
     val gameDetailTitle = "날짜: \n\n장소: \n관중수: \n심판: "
     val gameDetailContent = buildString {
-        append("${CalendarUtil.formatDate(displayModel?.game?.gameSummary?.date).split(" ").firstOrNull() ?: ""}\n")
-        append("${CalendarUtil.formatDate(displayModel?.game?.gameSummary?.date, TimeFormatType.AMPM)}\n")
-        append("${nbaGameStatsViewModel.teamNameDictionary["venue_${displayModel?.game?.gameSummary?.homeTeamId}"] ?: ""}\n")
-        append("${displayModel?.game?.gameInfo?.attendance ?: 0}\n")
+        append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.date).split(" ").firstOrNull() ?: ""}\n")
+        append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.date, TimeFormatType.AMPM)}\n")
+        append("${teamNameDic["venue_${displayModel.game.gameSummary?.homeTeamId}"] ?: ""}\n")
+        append("${displayModel.game.gameInfo?.attendance ?: 0}\n")
         officials.forEachIndexed { index, official ->
             append("• ${official.firstName + official.lastName}")
             if (index != officials.lastIndex) {
@@ -160,27 +152,18 @@ fun NBAGameStatsView(
         val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
 
         if (secondCategorySelectedIndex in 0 until attackCategoriesSize) {
-            (nbaGameStatsViewModel.itemWidth * secondCategorySelectedIndex).toPx()
+            (store.itemWidth * secondCategorySelectedIndex).toPx()
         } else if (secondCategorySelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
-            ((nbaGameStatsViewModel.itemWidth * secondCategorySelectedIndex) + nbaGameStatsViewModel.barWidth).toPx()
+            ((store.itemWidth * secondCategorySelectedIndex) + store.barWidth).toPx()
         } else {
-            ((nbaGameStatsViewModel.itemWidth * secondCategorySelectedIndex) + (nbaGameStatsViewModel.barWidth * 2)).toPx()
+            ((store.itemWidth * secondCategorySelectedIndex) + (store.barWidth * 2)).toPx()
         }
     }.toInt()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.NBAGameStats) {
-            nbaGameStatsViewModel.send(NBAGameStatsIntent.InitData(data))
-        }
-    }
 
     // scroll to category that matches with the keyword,
     // and when first category list's item is selected by click
     LaunchedEffect(firstSelectedIndex) {
-        if (nbaGameStatsViewModel.shouldScrollCategory) {
+        if (store.shouldScrollCategory) {
             horizontalScrollState.animateScrollTo(
                 value = secondSelectedCategoryPosition,
                 animationSpec = tween(
@@ -193,8 +176,8 @@ fun NBAGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowStats = displayModel?.game?.gameSummary?.gameStatusId != Constants.NBAGameStatus.NOT_STARTED,
-            shouldShowRefreshButton = displayModel?.game?.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE,
+            shouldShowStats = displayModel.game.gameSummary?.gameStatusId != Constants.GameStatus.NBA.NOT_STARTED,
+            shouldShowRefreshButton = displayModel.game.gameSummary?.gameStatusId == Constants.GameStatus.NBA.LIVE,
             teamCategories = teamCategories,
             secondCategories = StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,
@@ -206,15 +189,13 @@ fun NBAGameStatsView(
         ),
         actions = GameStatsContainerActions(
             teamCategoryButtonAction = { index ->
-                nbaGameStatsViewModel.send(NBAGameStatsIntent.SelectTeam(index))
+                store.send(NBAGameStatsAction.SelectTeam(index))
             },
             secondCategoryButtonAction = { index ->
-                nbaGameStatsViewModel.send(NBAGameStatsIntent.SelectSecondCategory(index))
+                store.send(NBAGameStatsAction.SelectSecondCategory(index))
             },
             refreshButtonAction = {
-                displayModel?.let {
-                    searchViewModel.send(SearchViewModel.Intent.RefreshGame(season = it.season, category = "basketball"))
-                }
+                store.send(NBAGameStatsAction.RefreshGame())
             }
         ),
         titleContent = {
@@ -231,7 +212,7 @@ fun NBAGameStatsView(
                 )
 
                 Text(
-                    text = " | ${NBAUtil.gameType(displayModel?.game?.gameSummary)}",
+                    text = " | ${NBAUtil.gameType(displayModel.game.gameSummary)}",
                     fontSize = 14.sp
                 )
 
@@ -241,26 +222,27 @@ fun NBAGameStatsView(
             /* ---------------------
                playoffs series text
                --------------------- */
-            if (displayModel?.game?.gameSummary?.seriesGameNumber?.isNotEmpty() == true) {
-                NBAGameStatsPlayoffsSeriesTextContainer()
+            if (displayModel.game.gameSummary?.seriesGameNumber?.isNotEmpty() == true) {
+                NBAGameStatsPlayoffsSeriesTextContainer(store)
             }
         },
         gameContent = {
-            if (displayModel?.game?.gameSummary?.gameStatusId == StringConstants.NBA.GAME_SCHEDULED) {
-                NBALeagueScheduleListItem(
-                    data = ModelConverter().nbaGameToGameScheduleConverter(displayModel!!.game),
-                    teamNameDic = teamNameDic
-                )
-            } else {
-                NBAGameStatsScoreInfoItem()
-            }
+//            if (displayModel.game.gameSummary?.gameStatusId == StringConstants.NBA.GAME_SCHEDULED) {
+//                NBALeagueScheduleListItem(
+//                    searchStore = searchStore,
+//                    data = ModelConverter().nbaGameToGameScheduleConverter(displayModel!!.game),
+//                    teamNameDic = teamNameDic
+//                )
+//            } else {
+//            }
+            NBAGameStatsScoreInfoItem(store)
         }
     )
 }
 
 @Composable
 fun NBAGameStatsScoreInfoItem(
-    nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel()
+    store: NBAGameStatsStore
 ) {
     val density = LocalDensity.current
     var borderTextWidth by remember { mutableStateOf(0.dp) }
@@ -268,20 +250,21 @@ fun NBAGameStatsScoreInfoItem(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by nbaGameStatsViewModel.displayModel.collectAsState()
-    val homeTeamLineScore by nbaGameStatsViewModel.homeTeamLineScore.collectAsState()
-    val awayTeamLineScore by nbaGameStatsViewModel.awayTeamLineScore.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
+    val homeTeamLineScore by store.homeTeamLineScore.collectAsState()
+    val awayTeamLineScore by store.awayTeamLineScore.collectAsState()
 
-    val game = displayModel?.game
-    val homeTeamId = game?.gameSummary?.homeTeamId
-    val awayTeamId = game?.gameSummary?.visitorTeamId
+    val game = displayModel.game
+    val homeTeamId = game.gameSummary?.homeTeamId
+    val awayTeamId = game.gameSummary?.visitorTeamId
 
     /* ---------------------
        constants
        --------------------- */
-    val gameStatusText = when (game?.gameSummary?.gameStatusId) {
-        Constants.NBAGameStatus.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
-        Constants.NBAGameStatus.LIVE -> if (homeTeamLineScore?.ptsOt3 != null) {
+    val gameStatusText = when (game.gameSummary?.gameStatusId) {
+        Constants.GameStatus.NBA.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
+        Constants.GameStatus.NBA.LIVE -> if (homeTeamLineScore?.ptsOt3 != null) {
             StringConstants.NBA.GAME_OT_3
         } else if (homeTeamLineScore?.ptsOt2 != null) {
             StringConstants.NBA.GAME_OT_2
@@ -298,11 +281,11 @@ fun NBAGameStatsScoreInfoItem(
         } else {
             ""
         }
-        Constants.NBAGameStatus.FINISHED -> StringConstants.GAME_FINISHED_STR
+        Constants.GameStatus.NBA.FINISHED -> StringConstants.GAME_FINISHED_STR
         else -> ""
     }
 
-    val gameStatusColor = if (game?.gameSummary?.gameStatusId == Constants.NBAGameStatus.LIVE) {
+    val gameStatusColor = if (game.gameSummary?.gameStatusId == Constants.GameStatus.NBA.LIVE) {
         MaterialTheme.colors.primary
     } else {
         Color.Gray
@@ -338,11 +321,10 @@ fun NBAGameStatsScoreInfoItem(
                 }
                 URLImage(
                     url = NBAUtil.teamLogoUrl(homeTeamId),
-                    size = URLImageSize.SMALL,
-                    isSvg = true
+                    size = URLImageSize.SMALL
                 )
                 Text(
-                    text = nbaGameStatsViewModel.teamNameDictionary["short_$homeTeamId"] ?: "",
+                    text = teamNameDic["short_$homeTeamId"] ?: "",
                     fontSize = 13.sp,
                     maxLines = 2
                 )
@@ -375,11 +357,10 @@ fun NBAGameStatsScoreInfoItem(
                 )
                 URLImage(
                     url = NBAUtil.teamLogoUrl(awayTeamId),
-                    size = URLImageSize.SMALL,
-                    isSvg = true
+                    size = URLImageSize.SMALL
                 )
                 Text(
-                    text = nbaGameStatsViewModel.teamNameDictionary["short_$awayTeamId"] ?: "",
+                    text = teamNameDic["short_$awayTeamId"] ?: "",
                     fontSize = 13.sp,
                     maxLines = 2
                 )
@@ -389,6 +370,7 @@ fun NBAGameStatsScoreInfoItem(
         homeTeamLineScore?.let { home ->
             awayTeamLineScore?.let { away ->
                 NBAGameStatsLineScoreContainer(
+                    store = store,
                     homeTeamLineScore = home,
                     awayTeamLineScore = away
                 )
@@ -399,7 +381,7 @@ fun NBAGameStatsScoreInfoItem(
 
 @Composable
 fun RowScope.NBAGameStatsLineScoreContainer(
-    nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel(),
+    store: NBAGameStatsStore,
     homeTeamLineScore: NBALineScore,
     awayTeamLineScore: NBALineScore
 ) {
@@ -466,7 +448,7 @@ fun RowScope.NBAGameStatsLineScoreContainer(
                     .alpha(0.5f)
             )
 
-            NBAGameStatsLineScoreItem(lineScore = homeTeamLineScore)
+            NBAGameStatsLineScoreItem(store = store, lineScore = homeTeamLineScore)
 
             Box(
                 Modifier
@@ -477,7 +459,7 @@ fun RowScope.NBAGameStatsLineScoreContainer(
                     .alpha(0.5f)
             )
 
-            NBAGameStatsLineScoreItem(lineScore = awayTeamLineScore)
+            NBAGameStatsLineScoreItem(store = store, lineScore = awayTeamLineScore)
         }
     }
 }
@@ -539,7 +521,7 @@ fun NBAGameStatsLineScoreTitle(
 
 @Composable
 fun NBAGameStatsLineScoreItem(
-    nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel(),
+    store: NBAGameStatsStore,
     lineScore: NBALineScore
 ) {
     Row(
@@ -547,7 +529,7 @@ fun NBAGameStatsLineScoreItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(nbaGameStatsViewModel.lineScoreItemHeight)
+            .height(store.lineScoreItemHeight)
     ) {
         VCapsuleBar(modifier = Modifier.alpha(0.5f))
         Text(
@@ -613,11 +595,12 @@ fun NBAGameStatsLineScoreItem(
 
 @Composable
 fun NBAGameStatsPlayoffsSeriesTextContainer(
-    nbaGameStatsViewModel: NBAGameStatsViewModel = hiltViewModel()
+    store: NBAGameStatsStore
 ) {
-    val displayModel by nbaGameStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    displayModel?.game?.seasonSeries?.let {
+    displayModel.game.seasonSeries?.let {
         CenterRow(
             modifier = Modifier.padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
         ) {
@@ -628,7 +611,7 @@ fun NBAGameStatsPlayoffsSeriesTextContainer(
             )
 
             Text(
-                text = nbaGameStatsViewModel.teamNameDictionary["short_${it.homeTeamId}"] ?: "",
+                text = teamNameDic["short_${it.homeTeamId}"] ?: "",
                 fontSize = 14.sp
             )
 
@@ -648,7 +631,7 @@ fun NBAGameStatsPlayoffsSeriesTextContainer(
             )
 
             Text(
-                text = nbaGameStatsViewModel.teamNameDictionary["short_${it.visitorTeamId}"] ?: "",
+                text = teamNameDic["short_${it.visitorTeamId}"] ?: "",
                 fontSize = 14.sp
             )
 

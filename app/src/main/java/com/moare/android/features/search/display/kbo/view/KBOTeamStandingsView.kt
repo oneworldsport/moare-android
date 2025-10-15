@@ -1,33 +1,27 @@
 package com.moare.android.features.search.display.kbo.view
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.KBOUtil
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsIntent
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsViewModel
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
+import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsAction
+import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsStore
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 
 @Composable
 fun KBOTeamStandingsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    kboTeamStandingsViewModel: KBOTeamStandingsViewModel = hiltViewModel(),
-    data: KBOTeamStandingsDisplayModel
+    searchStore: SearchStore,
+    store: KBOTeamStandingsStore
 ) {
     /* ---------------------
        ui state
@@ -37,14 +31,12 @@ fun KBOTeamStandingsView(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val displayModel by kboTeamStandingsViewModel.displayModel.collectAsState()
-    val selectedCategoryIndex by kboTeamStandingsViewModel.selectedCategoryIndex.collectAsState()
-    val standings by kboTeamStandingsViewModel.standings.collectAsState()
-    val teamNameDic = kboTeamStandingsViewModel.teamNameDictionary
+    val displayModel by store.displayModel.collectAsState()
+    val selectedCategoryIndex by store.categorySelectedIndex.collectAsState()
+    val standings by store.standings.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    val season = displayModel?.standings?.firstOrNull()?.stats?.season
-
-    val poppedView by searchViewModel.poppedView.collectAsState()
+    val season = displayModel.standings.firstOrNull()?.stats?.season
 
     val teamStandings: List<StandingsItemState> = standings.map {
         val rankData = it.stats.rankData
@@ -77,15 +69,6 @@ fun KBOTeamStandingsView(
     }
     val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 60.dp, 60.dp, 50.dp, 50.dp, 50.dp, 70.dp)
 
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.KBOTeamStandings) {
-            kboTeamStandingsViewModel.send(KBOTeamStandingsIntent.InitData(data))
-        }
-    }
-
     StandingsViewContainer(
         state = NewStandingsContainerState(
             secondCategories = StringConstants.KBO.TEAM_STANDINGS_CATEGORIES,
@@ -96,10 +79,10 @@ fun KBOTeamStandingsView(
         ),
         actions = StandingsContainerActions(
             secondCategoryButtonAction = { index, _ ->
-                kboTeamStandingsViewModel.send(KBOTeamStandingsIntent.SelectCategory(index))
+                store.send(KBOTeamStandingsAction.SelectCategory(index))
             },
             itemButtonAction = { id ->
-                searchViewModel.send(SearchViewModel.Intent.ShowTeamStats(teamId = id))
+                store.send(KBOTeamStandingsAction.ShowTeamStats(id))
             }
         ),
         titleContent = {

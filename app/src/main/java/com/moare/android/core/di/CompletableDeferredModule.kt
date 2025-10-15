@@ -34,6 +34,12 @@ object CompletableDeferredModule {
     fun provideTrendingKeywords(): CompletableDeferred<TrendingKeywords> {
         return CompletableDeferred()
     }
+
+    @Provides
+    @Singleton
+    fun provideTournamentTeams(): CompletableDeferred<Map<String, List<Int?>>> {
+        return CompletableDeferred()
+    }
 }
 
 // Return type 같을때 사용

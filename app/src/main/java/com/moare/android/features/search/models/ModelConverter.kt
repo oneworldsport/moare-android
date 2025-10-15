@@ -13,6 +13,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamInf
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.football.FBTournamentDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOPlayerInfoDisplayModel
@@ -23,6 +24,7 @@ import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamInfoDis
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.kbo.KBOTournamentDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBPlayerInfoDisplayModel
@@ -33,6 +35,7 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamInfoDis
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.mlb.MLBTournamentDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerInfoDisplayModel
@@ -47,7 +50,9 @@ import com.moare.android.features.search.models.displaymodels.nba.NBATournamentD
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
+import com.moare.android.features.search.models.models.football.FBHomeAwayIntStats
 import com.moare.android.features.search.models.models.football.FBLeague
+import com.moare.android.features.search.models.models.football.FBTeamStatsFixtures
 import com.moare.android.features.search.models.models.kbo.KBOGame
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
@@ -70,6 +75,8 @@ import com.moare.android.features.search.models.responsemodels.football.FBPlayer
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsSource
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerInfoResponseModel
@@ -90,12 +97,29 @@ import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerStan
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamStandingsResponseModel
 
-class ModelConverter(
-    val keywords: List<Keyword> = emptyList(),
-    val entityInfo: List<EntityInfo> = emptyList(),
-    val season: Int = CalendarUtil.currentYear
-) {
-    val leagueId = entityInfo.firstOrNull()?.leagueId
+object ModelConverter {
+    var keywords: List<Keyword> = emptyList()
+        private set
+
+    var entityInfo: List<EntityInfo> = emptyList()
+        private set
+
+    var leagueId: Int? = null
+        private set
+
+    var season: Int = CalendarUtil.currentYear
+        private set
+
+    fun configure(
+        keywords: List<Keyword>,
+        entityInfo: List<EntityInfo>,
+        season: Int
+    ) {
+        this.keywords = keywords
+        this.entityInfo = entityInfo
+        this.leagueId = ModelConverter.entityInfo.firstOrNull()?.leagueId
+        this.season = season
+    }
 
     /* ---------------------
        football
@@ -197,27 +221,51 @@ class ModelConverter(
 
     fun fbTeamStandingsConverter(response: FBTeamStandingsResponseModel): FBTeamStandingsDisplayModel {
         var league: FBLeague? = null
+        var standingsDisplay: List<FBTeamStandingsDisplay> = emptyList()
 
-        val standings: List<FBTeamStandingsDisplay> = response.standings.mapNotNull { teamInfo ->
-            val stats = teamInfo.statistics
+        if (response.standings is FBTeamStandingsSource.Db) {
+            standingsDisplay = response.standings.teams.mapNotNull { teamInfo ->
+                val stats = teamInfo.statistics
 
-            for (item in stats) {
-                if (item.league.id == leagueId) {
-                    // NOTE: Doesn't have league in the FBTeamStandingsDisplay. So add league independently
-                    if (league == null) {
-                        league = item.league
+                for (item in stats) {
+                    if (item.league.id == leagueId) {
+                        // NOTE: Doesn't have league in the FBTeamStandingsDisplay. So add league independently
+                        if (league == null) {
+                            league = item.league
+                        }
+
+                        return@mapNotNull FBTeamStandingsDisplay(
+                            team = item.team,
+                            homeAwayStats = item.fixtures,
+                            goalsFor = item.goals.teamGoalsFor.total,
+                            goalsAgainst = item.goals.teamGoalsAgainst.total
+                        )
                     }
-
-                    return@mapNotNull FBTeamStandingsDisplay(
-                        team = item.team,
-                        homeAwayStats = item.fixtures,
-                        goalsFor = item.goals.teamGoalsFor.total,
-                        goalsAgainst = item.goals.teamGoalsAgainst.total
-                    )
                 }
-            }
 
-            null
+                null
+            }
+        } else if (response.standings is FBTeamStandingsSource.External) {
+            league = response.standings.teams.firstOrNull()?.league
+
+            standingsDisplay = response.standings.teams.mapNotNull { teamInfo ->
+                val all = teamInfo.all
+                val home = teamInfo.home
+                val away = teamInfo.away
+                val homeAwayStats = FBTeamStatsFixtures(
+                    played = FBHomeAwayIntStats(home.played, away.played, all.played),
+                    wins = FBHomeAwayIntStats(home.win, away.win, all.win),
+                    draws = FBHomeAwayIntStats(home.draw, away.draw, all.draw),
+                    loses = FBHomeAwayIntStats(home.lose, away.lose, all.lose)
+                )
+
+                return@mapNotNull FBTeamStandingsDisplay(
+                    team = teamInfo.team,
+                    homeAwayStats = homeAwayStats,
+                    goalsFor = FBHomeAwayIntStats(home.goals.goalsFor, away.goals.goalsFor, all.goals.goalsFor),
+                    goalsAgainst = FBHomeAwayIntStats(home.goals.goalsAgainst, away.goals.goalsAgainst, all.goals.goalsAgainst)
+                )
+            }
         }
 
         return FBTeamStandingsDisplayModel(
@@ -226,7 +274,7 @@ class ModelConverter(
             entityInfo = entityInfo,
             season = season,
             league = league,
-            standings = standings
+            standings = standingsDisplay
         )
     }
 
@@ -255,6 +303,17 @@ class ModelConverter(
             entityInfo = entityInfo,
             season = season,
             game = game
+        )
+    }
+
+    fun fbTournamentConverter(response: FBGameScheduleResponseModel): FBTournamentDisplayModel {
+        return FBTournamentDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.EPL,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType ?: ScheduleType.TOURNAMENT_DRAW,
+            games = response.schedule
         )
     }
 
@@ -394,7 +453,7 @@ class ModelConverter(
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
-            scheduleType = response.scheduleType,
+            scheduleType = response.scheduleType ?: ScheduleType.LEAGUE,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -410,13 +469,13 @@ class ModelConverter(
         )
     }
 
-    fun nbaLeagueTournamentConverter(response: NBAGameListResponseModel): NBATournamentDisplayModel {
+    fun nbaTournamentConverter(response: NBAGameScheduleResponseModel): NBATournamentDisplayModel {
         return NBATournamentDisplayModel(
             leagueId = leagueId ?: Constants.Ids.NBA,
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
-            yearMonthList = emptyList(),
+            scheduleType = response.scheduleType ?: ScheduleType.TOURNAMENT_BRACKET,
             games = response.schedule
         )
     }
@@ -534,16 +593,16 @@ class ModelConverter(
     }
 
     fun kboTeamStandingsConverter(response: KBOTeamStandingsResponseModel): KBOTeamStandingsDisplayModel {
-        val standings: List<KBOTeamStandingsDisplay> = response.standings.mapNotNull { teamInfo ->
+        val standings: List<KBOTeamStandingsDisplay> = response.standings.map { teamInfo ->
 //            val statsList = teamInfo.statistics
             val stats = teamInfo.statistics.firstOrNull()
 
 //            for (item in statsList) {
 //                if (item.seasonType == "Regular Season") {
-                    return@mapNotNull KBOTeamStandingsDisplay(
-                        team = teamInfo.team,
-                        stats = stats!!
-                    )
+            return@map KBOTeamStandingsDisplay(
+                team = teamInfo.team,
+                stats = stats!!
+            )
 //                }
 //            }
 
@@ -570,7 +629,7 @@ class ModelConverter(
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
-            scheduleType = response.scheduleType,
+            scheduleType = response.scheduleType ?: ScheduleType.LEAGUE,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -586,6 +645,17 @@ class ModelConverter(
         )
     }
 
+    fun kboTournamentConverter(response: KBOGameScheduleResponseModel): KBOTournamentDisplayModel {
+        return KBOTournamentDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.KBO,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType ?: ScheduleType.TOURNAMENT_BRACKET,
+            games = response.schedule
+        )
+    }
+
     /* ---------------------
        mlb
        --------------------- */
@@ -594,7 +664,7 @@ class ModelConverter(
 
         val stats = info.statistics.find { it.type == "season" }
         val teamId: Int? = when {
-            stats?.hitting != null -> stats.hitting.team.id
+            stats?.hitting?.team != null -> stats.hitting.team.id
             stats?.fielding != null -> stats.fielding.team.id
             stats?.catching != null -> stats.catching.team.id
             stats?.pitching != null -> stats.pitching.team.id
@@ -628,7 +698,7 @@ class ModelConverter(
 
         val stats = info.statistics.find { it.type == "season" }
         val teamId: Int? = when {
-            stats?.hitting != null -> stats.hitting.team.id
+            stats?.hitting != null -> stats.hitting.team?.id
             stats?.fielding != null -> stats.fielding.team.id
             stats?.catching != null -> stats.catching.team.id
             stats?.pitching != null -> stats.pitching.team.id
@@ -742,7 +812,7 @@ class ModelConverter(
             keywords = keywords,
             entityInfo = entityInfo,
             season = season,
-            scheduleType = response.scheduleType,
+            scheduleType = response.scheduleType ?: ScheduleType.LEAGUE,
             yearMonthList = yearMonthList,
             games = response.schedule,
         )
@@ -758,6 +828,17 @@ class ModelConverter(
         )
     }
 
+    fun mlbTournamentConverter(response: MLBGameScheduleResponseModel): MLBTournamentDisplayModel {
+        return MLBTournamentDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.MLB,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType ?: ScheduleType.TOURNAMENT_BRACKET,
+            games = response.schedule
+        )
+    }
+
     // Not used in DataModel
     fun fbGameToGameScheduleConverter(game: FBGame): FBGameForSchedule {
         val date = game.fixture.date.split("+").firstOrNull()
@@ -765,7 +846,12 @@ class ModelConverter(
         val awayTeamId = game.teams.away.id
         val homeTeamScore = game.goals.home
         val awayTeamScore = game.goals.away
-        val gameInfo = FBGameInfoForSchedule(_round = game.league.round, status = game.fixture.status)
+        val gameInfo = FBGameInfoForSchedule(
+            _round = game.league.round,
+            _elapsed = game.fixture.status.elapsed,
+            _homeTeamPenaltyScore = game.score.penalty._home, // TODO: Optional이 필요해서 임시로 _home, _away 사용. 추후 개선 필요.
+            _awayTeamPenaltyScore = game.score.penalty._away
+        )
 
         return FBGameForSchedule(
             _itemKey = if (date != null) "${date}#${game.fixture.id}" else "",
@@ -776,6 +862,22 @@ class ModelConverter(
             _gameStatus = game.fixture.status.short,
             gameInfo = gameInfo
         )
+    }
+
+    fun fbGameDisplayToLeagueScheduleDisplayConverter(
+        gameStatsDisplayModel: FBGameStatsDisplayModel,
+        leagueScheduleDisplayModel: FBLeagueScheduleDisplayModel
+    ): FBLeagueScheduleDisplayModel {
+        val game = gameStatsDisplayModel.game
+        val newGames = leagueScheduleDisplayModel.games.map {
+            if (it.gameId == game.fixture.id.toString()) {
+                fbGameToGameScheduleConverter(game)
+            } else {
+                it
+            }
+        }
+
+        return leagueScheduleDisplayModel.copy(games = newGames)
     }
 
     fun nbaGameListToGameScheduleListConverter(gameList: List<NBAGame>): List<NBAGameForSchedule> {
@@ -801,6 +903,22 @@ class ModelConverter(
             _gameStatus = gameSummary?.gameStatusId?.toString(),
             gameInfo = gameSummary
         )
+    }
+
+    fun nbaGameDisplayToLeagueScheduleDisplayConverter(
+        gameStatsDisplayModel: NBAGameStatsDisplayModel,
+        leagueScheduleDisplayModel: NBALeagueScheduleDisplayModel
+    ): NBALeagueScheduleDisplayModel {
+        val game = gameStatsDisplayModel.game
+        val newGames = leagueScheduleDisplayModel.games.map {
+            if (it.gameId == game.gameSummary?.gameId) {
+                nbaGameToGameScheduleConverter(game)
+            } else {
+                it
+            }
+        }
+
+        return leagueScheduleDisplayModel.copy(games = newGames)
     }
 
     fun mlbGameToGameScheduleConverter(game: MLBGame): MLBGameForSchedule {
@@ -836,13 +954,29 @@ class ModelConverter(
         )
     }
 
+    fun mlbGameDisplayToLeagueScheduleDisplayConverter(
+        gameStatsDisplayModel: MLBGameStatsDisplayModel,
+        leagueScheduleDisplayModel: MLBLeagueScheduleDisplayModel
+    ): MLBLeagueScheduleDisplayModel {
+        val game = gameStatsDisplayModel.game
+        val newGames = leagueScheduleDisplayModel.games.map {
+            if (it.gameId == game.game.pk.toString()) {
+                mlbGameToGameScheduleConverter(game)
+            } else {
+                it
+            }
+        }
+
+        return leagueScheduleDisplayModel.copy(games = newGames)
+    }
+
     fun kboGameToGameScheduleConverter(game: KBOGame): KBOGameForSchedule {
         val date = game.gameInfo?.date?.split("+")?.firstOrNull()
         val homeTeamId = game.gameInfo?.homeTeamId ?: 0
         val awayTeamId = game.gameInfo?.awayTeamId ?: 0
         val homeTeamScore = game.lineScore?.home?.r ?: "0"
         val awayTeamScore = game.lineScore?.away?.r ?: "0"
-        val gameInfo = KBOGameInfoForSchedule(_currentInning = game.lineScore?.currentInning)
+        val gameInfo = KBOGameInfoForSchedule(_currentInning = game.lineScore?.currentInning, _seriesDescription = game.gameInfo?.seriesDescription)
 
         return KBOGameForSchedule(
             _itemKey = if (date != null) "${date}#${game.gameInfo.gameId}" else "",
@@ -867,6 +1001,23 @@ class ModelConverter(
             lineScore = null,
             lineup = null
         )
+    }
+
+    fun kboGameDisplayToLeagueScheduleDisplayConverter(
+        gameStatsDisplayModel: KBOGameStatsDisplayModel,
+        leagueScheduleDisplayModel: KBOLeagueScheduleDisplayModel
+    ): KBOLeagueScheduleDisplayModel {
+        val game = gameStatsDisplayModel.game
+        val itemKey = "${game.gameInfo?.date?.split("+")?.firstOrNull() ?: ""}#${game.gameInfo?.gameId ?: ""}"
+        val newGames = leagueScheduleDisplayModel.games.map {
+            if (it.itemKey == itemKey) {
+                kboGameToGameScheduleConverter(game)
+            } else {
+                it
+            }
+        }
+
+        return leagueScheduleDisplayModel.copy(games = newGames)
     }
 }
 
