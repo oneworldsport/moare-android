@@ -1,12 +1,10 @@
 package com.moare.android.features.search.display.football.view
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,22 +33,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
 import com.moare.android.core.util.EnNameTranslationUtils
 import com.moare.android.core.util.TranslationType
-import com.moare.android.features.search.display.common.components.EmptyStatDataItem
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsIntent
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsViewModel
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.football.FBPlayerStatsDisplayModel
+import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsStore
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.football.FBPlayerStats
-import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.FBLeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.util.CenterColumn
@@ -58,42 +50,28 @@ import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun FBPlayerStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
-    data: FBPlayerStatsDisplayModel
+    searchStore: SearchStore,
+    store: FBPlayerStatsStore
 ) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val displayModel by fbPlayerStatsViewModel.displayModel.collectAsState()
-    val statsList = displayModel?.stats
-
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.FBPlayerStats) {
-            fbPlayerStatsViewModel.send(FBPlayerStatsIntent.InitData(data))
-        }
-    }
+    val statsList by store.statsList.collectAsState()
 
     InfoViewContainer(
-        itemCount = (statsList?.size ?: 0) + 1,
+        searchStore = searchStore,
+        itemCount = statsList.size + 1,
         shouldShowMeasureContent = true,
         modifier = Modifier
             .verticalScroll(rememberScrollState()),
         measureContent = {
-            FBPlayerStatsPlayerInfoItem { index, coordinates ->
+            FBPlayerStatsPlayerInfoItem(store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
 
-            FBPlayerStatsList { index, coordinates ->
+            FBPlayerStatsList(store) { index, coordinates ->
                 updateItemPosition(index, coordinates)
             }
         }, displayContent = {
             FBPlayerStatsPlayerInfoItem(
+                store = store,
                 isAniItem = true,
                 itemSize = itemSizes[0],
                 itemPosition = itemPositions[0],
@@ -103,6 +81,7 @@ fun FBPlayerStatsView(
             )
 
             FBPlayerStatsList(
+                store = store,
                 isAniItem = true,
                 itemSizes = itemSizes,
                 itemPositions = itemPositions,
@@ -117,7 +96,7 @@ fun FBPlayerStatsView(
 // player info
 @Composable
 fun FBPlayerStatsPlayerInfoItem(
-    fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
+    store: FBPlayerStatsStore,
     isAniItem: Boolean = false,
     itemSize: DpSize? = null,
     itemPosition: Offset? = null,
@@ -127,95 +106,95 @@ fun FBPlayerStatsPlayerInfoItem(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val displayModel by fbPlayerStatsViewModel.displayModel.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val playerNameDic by store.playerNameDic.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
-    displayModel?.let {
-        val player = it.player
-        val team = it.team
+    val player = displayModel.player
+    val team = displayModel.team
 
-        var nationalityKrName by remember { mutableStateOf("") }
+    var nationalityKrName by remember { mutableStateOf("") }
 
-        LaunchedEffect(displayModel) {
-            nationalityKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, input = player.nationality)
-        }
+    LaunchedEffect(displayModel) {
+        nationalityKrName = EnNameTranslationUtils.translateByDic(TranslationType.COUNTRY, input = player.nationality)
+    }
 
-        // TODO: startPosition 설정 필요
-        MovingCapsuleItemContainer(
-            isAniItem = isAniItem,
-            itemSize = itemSize,
-            itemPosition = itemPosition,
-            startPosition = startPosition,
-            aniPosition = aniPosition,
-            updateItemPosition = { coordinates ->
-                updateItemPosition?.let { it(0, coordinates) }
-            },
-            modifier = containerModifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+    // TODO: startPosition 설정 필요
+    MovingCapsuleItemContainer(
+        isAniItem = isAniItem,
+        itemSize = itemSize,
+        itemPosition = itemPosition,
+        startPosition = startPosition,
+        aniPosition = aniPosition,
+        updateItemPosition = { coordinates ->
+            updateItemPosition?.let { it(0, coordinates) }
+        },
+        modifier = containerModifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .alpha(contentsAlpha)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .alpha(contentsAlpha)
-            ) {
-                URLImage(url = player.photo)
+            URLImage(url = player.photo)
 
-                // name
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 6.dp)
-                ) {
+            // name
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(start = 6.dp)
+            ) {
+                Text(
+                    text = playerNameDic["${player.id}"] ?: player.name,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Text(
+                    text = player.name,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Light,
+                    maxLines = 2
+                )
+            }
+
+            // nationality / team
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(start = 8.dp)
+            ) {
+                Row { // TODO: 가운데 정렬
+                    // TODO: 나라 국기..?
                     Text(
-                        text = fbPlayerStatsViewModel.playerNameDictionary["${player.id}"] ?: player.name,
-                        fontWeight = FontWeight.Medium
+                        text = "국적: ",
+                        fontSize = 15.sp
                     )
 
                     Text(
-                        text = player.name,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Light,
-                        maxLines = 2
+                        text = nationalityKrName,
+                        fontWeight = FontWeight.Medium
                     )
                 }
 
-                // nationality / team
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    Row { // TODO: 가운데 정렬
-                        // TODO: 나라 국기..?
+                team?.let {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = "국적: ",
+                            text = "소속팀: ",
                             fontSize = 15.sp
                         )
 
+                        URLImage(
+                            url = team.logo,
+                            customSize = 24.dp
+                        )
+
                         Text(
-                            text = nationalityKrName,
+                            text = teamNameDic["full_${team.id}"] ?: team.name,
                             fontWeight = FontWeight.Medium
                         )
-                    }
-
-                    team?.let {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "소속팀: ",
-                                fontSize = 15.sp
-                            )
-
-                            URLImage(
-                                url = team.logo,
-                                customSize = 24.dp
-                            )
-
-                            Text(
-                                text = fbPlayerStatsViewModel.teamNameDictionary["full_${team.id}"] ?: team.name,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
                     }
                 }
             }
@@ -226,7 +205,7 @@ fun FBPlayerStatsPlayerInfoItem(
 // stats list
 @Composable
 fun FBPlayerStatsList(
-    fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
+    store: FBPlayerStatsStore,
     isAniItem: Boolean = false,
     itemSizes: Map<Int, DpSize>? = null,
     itemPositions: Map<Int, Offset>? = null,
@@ -236,10 +215,11 @@ fun FBPlayerStatsList(
     containerModifier: Modifier = Modifier,
     updateItemPosition: ((Int, LayoutCoordinates) -> Unit)? = null
 ) {
-    val statsList by fbPlayerStatsViewModel.statsList.collectAsState()
+    val statsList by store.statsList.collectAsState()
 
     for ((index, value) in statsList.withIndex()) {
         FBPlayerStatsListItem(
+            store = store,
             index = index,
             data = value,
             isAniItem = isAniItem,
@@ -256,6 +236,7 @@ fun FBPlayerStatsList(
 
 @Composable
 fun FBPlayerStatsListItem(
+    store: FBPlayerStatsStore,
     index: Int,
     data: FBPlayerStats,
     isAniItem: Boolean,
@@ -283,6 +264,7 @@ fun FBPlayerStatsListItem(
             .fillMaxWidth()
     ) {
         FBPlayerStatsItem(
+            store = store,
             data = data,
             contentsAlpha = contentsAlpha
         )
@@ -291,10 +273,12 @@ fun FBPlayerStatsListItem(
 
 @Composable
 fun FBPlayerStatsItem(
-    fbPlayerStatsViewModel: FBPlayerStatsViewModel = hiltViewModel(),
+    store: FBPlayerStatsStore,
     data: FBPlayerStats,
     contentsAlpha: Float
 ) {
+    val teamNameDic by store.teamNameDic.collectAsState()
+
     var attackStatsOpenState by remember { mutableStateOf(true) }
     var defendStatsOpenState by remember { mutableStateOf(false) }
     var commonStatsOpenState by remember { mutableStateOf(false) }
@@ -311,7 +295,7 @@ fun FBPlayerStatsItem(
             modifier = Modifier
                 .padding(bottom = 4.dp)
         ) {
-            LeagueTitle(
+            FBLeagueTitle(
                 url = data.league.logo,
                 leagueName = data.league.name,
                 leagueSeason = data.league.season
@@ -328,7 +312,7 @@ fun FBPlayerStatsItem(
             )
 
             Text(
-                text = fbPlayerStatsViewModel.teamNameDictionary["short_${data.team.id}"] ?: data.team.name,
+                text = teamNameDic["short_${data.team.id}"] ?: data.team.name,
                 fontWeight = FontWeight.Medium
             )
         }

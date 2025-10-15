@@ -4,7 +4,7 @@ import androidx.compose.ui.unit.Dp
 
 data class GameStatsContainerState(
     val shouldShowTitle: Boolean = true,
-    val shouldShowGameItem: Boolean = true,
+    val shouldShowGameContent: Boolean = true,
     val shouldShowStats: Boolean = true,
     val shouldShowCoach: Boolean = false,
     val shouldShowRefreshButton: Boolean = false,
@@ -41,7 +41,9 @@ data class GameStatsCoachState(
 )
 
 data class GameStatsContainerActions(
+    // TODO: 이름에서 Button 빼도 될 듯?
     val teamCategoryButtonAction: ((Int) -> Unit)? = null,
+    var firstStatsTitleCategoryAction: (() -> Unit)? = null,
     val firstCategoryButtonAction: ((Int) -> Unit)? = null,
     val secondCategoryButtonAction: (Int) -> Unit,
     val refreshButtonAction: () -> Unit,

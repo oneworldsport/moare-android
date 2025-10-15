@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,13 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerActions
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerState
-import com.moare.android.features.search.display.football.view.FBLeagueScheduleList
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleIntent
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.ui.common.components.CalendarList
 import com.moare.android.ui.common.components.CalendarType
@@ -72,8 +67,20 @@ fun ScheduleViewContainer(
 
         // all result open button
         if (state.shouldShowAllResultToggleButton) {
-            Row {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
                 Spacer(Modifier.weight(1f))
+
+                if (state.shouldShowTournamentButton) {
+                    CapsuleButton(
+                        text = StringConstants.tournamentButtonText(state.leagueId),
+                        color = Color.Gray
+                    ) {
+                        actions.tournamentButtonAction?.let { it() }
+                    }
+                }
 
                 CapsuleButton(
                     text = if (state.isAllResultOpened) {
@@ -81,8 +88,7 @@ fun ScheduleViewContainer(
                     } else {
                         StringConstants.RESULT_OPEN
                     },
-                    color = Color.Gray,
-                    modifier = Modifier.padding(end = 8.dp)
+                    color = Color.Gray
                 ) {
                     actions.allResultButtonAction()
                 }

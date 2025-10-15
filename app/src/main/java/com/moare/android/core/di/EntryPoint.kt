@@ -31,4 +31,5 @@ interface EntryPoint {
     fun getTrieDeferred(): CompletableDeferred<Pair<Trie, List<KeywordInfo>>>
     fun getNotice(): CompletableDeferred<List<NoticeModel>>
     fun getTrendingKeywords(): CompletableDeferred<TrendingKeywords>
+    fun getTournamentTeamsDeferred(): CompletableDeferred<Map<String, List<Int?>>>
 }

@@ -29,8 +29,7 @@ fun URLImage(
     url: String?,
     modifier: Modifier = Modifier,
     size: URLImageSize = URLImageSize.MEDIUM,
-    customSize: Dp? = null,
-    isSvg: Boolean = false
+    customSize: Dp? = null
 ) {
     val imageLoader = EntryPointAccessors.fromApplication(
         LocalContext.current,

@@ -45,9 +45,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.search.viewmodel.SearchAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.animation.components.RoundedRectPath
 import com.moare.android.ui.animation.components.RoundedRectWithPathAni
 import com.moare.android.ui.util.convertDpToPx
@@ -57,7 +57,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun AnimatingSearchBar(
-    searchViewModel: SearchViewModel = hiltViewModel(),
+    searchStore: SearchStore,
     modifier: Modifier
 ) {
     /* ---------------------
@@ -85,12 +85,12 @@ fun AnimatingSearchBar(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val barFirstOpened by searchViewModel.barFirstOpened.collectAsState()
-    val focusState by searchViewModel.focusState.collectAsState()
-    val query by searchViewModel.query.collectAsState()
-    val searchState by searchViewModel.searchState.collectAsState()
-    val trendingKeywordList by searchViewModel.trendingKeywordList.collectAsState()
-    val autoCompleteList by searchViewModel.autoCompleteList.collectAsState()
+    val barFirstOpened by searchStore.barFirstOpened.collectAsState()
+    val focusState by searchStore.focusState.collectAsState()
+    val query by searchStore.query.collectAsState()
+    val searchState by searchStore.searchState.collectAsState()
+    val trendingKeywordList by searchStore.trendingKeywordList.collectAsState()
+    val autoCompleteList by searchStore.autoCompleteList.collectAsState()
 
     /* ---------------------
        animation
@@ -119,7 +119,7 @@ fun AnimatingSearchBar(
         if (barFirstOpened) {
             delay(1000)
 
-            searchViewModel.send(SearchViewModel.Intent.ToggleFocusState(true))
+            searchStore.send(SearchAction.ToggleFocusState(true))
             aniBarVisibleState = false
         }
     }
@@ -130,6 +130,12 @@ fun AnimatingSearchBar(
         } else {
             focusManager.clearFocus()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        // NOTE: 로고가 사라지면서 검색 아이콘이 나타나는 시간 1초 + 추가 0.2 wait
+        delay(1200)
+        searchStore.send(SearchAction.BarFirstOpen)
     }
 
     /* ---------------------
@@ -182,7 +188,7 @@ fun AnimatingSearchBar(
                     value = query,
                     onValueChange = { newValue ->
                         if (newValue.text != query.text) { // prevents unnecessary triggers due to an unexpected behavior
-                            searchViewModel.send(SearchViewModel.Intent.UpdateTextField(newValue))
+                            searchStore.send(SearchAction.UpdateTextField(newValue))
                         }
                     },
                     singleLine = true,
@@ -199,11 +205,11 @@ fun AnimatingSearchBar(
                     keyboardActions = KeyboardActions(
                         onSearch = {
                             if (searchState) {
-                                searchViewModel.send(SearchViewModel.Intent.ToggleSearchBar)
+                                searchStore.send(SearchAction.ToggleSearchBar)
                             } else {
-                                searchViewModel.send(SearchViewModel.Intent.ToggleAutoCompleteListVisibleState)
-                                searchViewModel.send(
-                                    SearchViewModel.Intent.PerformSearch(
+                                searchStore.send(SearchAction.ToggleAutoCompleteListVisibleState)
+                                searchStore.send(
+                                    SearchAction.PerformSearch(
                                         aniDuration = 1000
                                     )
                                 )
@@ -215,7 +221,7 @@ fun AnimatingSearchBar(
                         .focusRequester(focusRequester)
                         .onFocusChanged { state ->
                             if (focusState != state.isFocused) {
-                                searchViewModel.send(SearchViewModel.Intent.ToggleFocusState(state.isFocused))
+                                searchStore.send(SearchAction.ToggleFocusState(state.isFocused))
                             }
                         }
                 )
@@ -244,14 +250,14 @@ fun AnimatingSearchBar(
                     .size(24.dp)
                     .clickable {
                         if (!barFirstOpened) {
-                            searchViewModel.send(SearchViewModel.Intent.BarFirstOpen)
+                            searchStore.send(SearchAction.BarFirstOpen)
                         } else {
                             if (searchState) {
-                                searchViewModel.send(SearchViewModel.Intent.ToggleSearchBar)
+                                searchStore.send(SearchAction.ToggleSearchBar)
                             } else {
-                                searchViewModel.send(SearchViewModel.Intent.ToggleAutoCompleteListVisibleState)
-                                searchViewModel.send(
-                                    SearchViewModel.Intent.PerformSearch(
+                                searchStore.send(SearchAction.ToggleAutoCompleteListVisibleState)
+                                searchStore.send(
+                                    SearchAction.PerformSearch(
                                         aniDuration = 1000
                                     )
                                 )
