@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.kbo.viewmodel
 
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.Util
 import com.moare.android.features.search.display.common.container.state.GameListEntry
@@ -74,9 +75,9 @@ class KBOTournamentStore @AssistedInject constructor(
             secondRoundTeams.size == 2 &&
             thirdRoundTeams.size == 2 &&
             fourthRoundTeams.size == 2) {
-            val games = displayModel.games.toMutableList()
+            val games = displayModel.games.filter { it.gameStatus != Constants.GameStatus.KBO.CANCELED }.toMutableList()
 
-            var (firstRoundSeedTuple, firstRound) = Util.collectRound(listOf(firstRoundTeams), games)
+            val (firstRoundSeedTuple, firstRound) = Util.collectRound(listOf(firstRoundTeams), games)
             val (secondRoundSeedTuple, secondRound) = Util.collectRound(listOf(secondRoundTeams), games)
             val (thirdRoundSeedTuple, thirdRound) = Util.collectRound(listOf(thirdRoundTeams), games)
             val (fourthRoundSeedTuple, fourthRound) = Util.collectRound(listOf(fourthRoundTeams), games)

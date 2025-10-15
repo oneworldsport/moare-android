@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.mlb.viewmodel
 
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.Util
 import com.moare.android.features.search.display.common.container.state.GameListEntry
@@ -87,7 +88,7 @@ class MLBTournamentStore @AssistedInject constructor(
         val alThirdRoundPairedTeams = alThirdRoundTeams.chunked(2)
         val fourthRoundPairedTeams = fourthRoundTeams.chunked(2)
 
-        val games = displayModel.games.toMutableList()
+        val games = displayModel.games.filter { it.gameStatus != Constants.GameStatus.MLB.POSTPONED }.toMutableList()
 
         var (nlFirstRoundSeedTuple, nlFirstRound) = Util.collectRound(nlFirstRoundPairedTeams, games)
         var (alFirstRoundSeedTuple, alFirstRound) = Util.collectRound(alFirstRoundPairedTeams, games)
