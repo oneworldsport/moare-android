@@ -50,7 +50,9 @@ import com.moare.android.features.search.models.displaymodels.nba.NBATournamentD
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
+import com.moare.android.features.search.models.models.football.FBHomeAwayIntStats
 import com.moare.android.features.search.models.models.football.FBLeague
+import com.moare.android.features.search.models.models.football.FBTeamStatsFixtures
 import com.moare.android.features.search.models.models.kbo.KBOGame
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
@@ -73,6 +75,7 @@ import com.moare.android.features.search.models.responsemodels.football.FBPlayer
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsSource
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
@@ -218,27 +221,51 @@ object ModelConverter {
 
     fun fbTeamStandingsConverter(response: FBTeamStandingsResponseModel): FBTeamStandingsDisplayModel {
         var league: FBLeague? = null
+        var standingsDisplay: List<FBTeamStandingsDisplay> = emptyList()
 
-        val standings: List<FBTeamStandingsDisplay> = response.standings.mapNotNull { teamInfo ->
-            val stats = teamInfo.statistics
+        if (response.standings is FBTeamStandingsSource.Db) {
+            standingsDisplay = response.standings.teams.mapNotNull { teamInfo ->
+                val stats = teamInfo.statistics
 
-            for (item in stats) {
-                if (item.league.id == leagueId) {
-                    // NOTE: Doesn't have league in the FBTeamStandingsDisplay. So add league independently
-                    if (league == null) {
-                        league = item.league
+                for (item in stats) {
+                    if (item.league.id == leagueId) {
+                        // NOTE: Doesn't have league in the FBTeamStandingsDisplay. So add league independently
+                        if (league == null) {
+                            league = item.league
+                        }
+
+                        return@mapNotNull FBTeamStandingsDisplay(
+                            team = item.team,
+                            homeAwayStats = item.fixtures,
+                            goalsFor = item.goals.teamGoalsFor.total,
+                            goalsAgainst = item.goals.teamGoalsAgainst.total
+                        )
                     }
-
-                    return@mapNotNull FBTeamStandingsDisplay(
-                        team = item.team,
-                        homeAwayStats = item.fixtures,
-                        goalsFor = item.goals.teamGoalsFor.total,
-                        goalsAgainst = item.goals.teamGoalsAgainst.total
-                    )
                 }
-            }
 
-            null
+                null
+            }
+        } else if (response.standings is FBTeamStandingsSource.External) {
+            league = response.standings.teams.firstOrNull()?.league
+
+            standingsDisplay = response.standings.teams.mapNotNull { teamInfo ->
+                val all = teamInfo.all
+                val home = teamInfo.home
+                val away = teamInfo.away
+                val homeAwayStats = FBTeamStatsFixtures(
+                    played = FBHomeAwayIntStats(home.played, away.played, all.played),
+                    wins = FBHomeAwayIntStats(home.win, away.win, all.win),
+                    draws = FBHomeAwayIntStats(home.draw, away.draw, all.draw),
+                    loses = FBHomeAwayIntStats(home.lose, away.lose, all.lose)
+                )
+
+                return@mapNotNull FBTeamStandingsDisplay(
+                    team = teamInfo.team,
+                    homeAwayStats = homeAwayStats,
+                    goalsFor = FBHomeAwayIntStats(home.goals.goalsFor, away.goals.goalsFor, all.goals.goalsFor),
+                    goalsAgainst = FBHomeAwayIntStats(home.goals.goalsAgainst, away.goals.goalsAgainst, all.goals.goalsAgainst)
+                )
+            }
         }
 
         return FBTeamStandingsDisplayModel(
@@ -247,7 +274,7 @@ object ModelConverter {
             entityInfo = entityInfo,
             season = season,
             league = league,
-            standings = standings
+            standings = standingsDisplay
         )
     }
 
@@ -566,16 +593,16 @@ object ModelConverter {
     }
 
     fun kboTeamStandingsConverter(response: KBOTeamStandingsResponseModel): KBOTeamStandingsDisplayModel {
-        val standings: List<KBOTeamStandingsDisplay> = response.standings.mapNotNull { teamInfo ->
+        val standings: List<KBOTeamStandingsDisplay> = response.standings.map { teamInfo ->
 //            val statsList = teamInfo.statistics
             val stats = teamInfo.statistics.firstOrNull()
 
 //            for (item in statsList) {
 //                if (item.seasonType == "Regular Season") {
-                    return@mapNotNull KBOTeamStandingsDisplay(
-                        team = teamInfo.team,
-                        stats = stats!!
-                    )
+            return@map KBOTeamStandingsDisplay(
+                team = teamInfo.team,
+                stats = stats!!
+            )
 //                }
 //            }
 

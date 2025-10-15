@@ -79,6 +79,7 @@ fun FBTeamStandingsView(
                 store.send(FBTeamStandingsAction.SelectCategory(index))
             },
             itemButtonAction = { id ->
+                // TODO: UEFA 리그는 showTeamStats가 안돼서 Button disabled 처리 해야함.
                 store.send(FBTeamStandingsAction.ShowTeamStats(id))
             }
         ),

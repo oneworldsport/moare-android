@@ -43,6 +43,7 @@ import com.moare.android.features.search.models.responsemodels.football.FBPlayer
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.football.isEmpty
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.kbo.KBOPlayerInfoResponseModel
@@ -157,7 +158,7 @@ data class DataModel(
                 "football_team_standings" -> {
                     val responseModel: FBTeamStandingsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
 
-                    if (responseModel.standings.isEmpty()) {
+                    if (responseModel.standings.isEmpty) {
                         SportDecodableModel.NoResult
                     } else {
                         val displayModel = ModelConverter.fbTeamStandingsConverter(responseModel)

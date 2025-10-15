@@ -13,6 +13,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBTeamSta
 import com.moare.android.features.search.models.models.football.FBTeamStatsFixtures
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsSource
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -151,17 +152,19 @@ class FBTeamStandingsStore @AssistedInject constructor(
     }
 
     private fun showTeamStats(id: Int) {
-        val team = responseModel.standings.find { team ->
-            team.team.id == id
+        if (responseModel.standings is FBTeamStandingsSource.Db) {
+            val team = responseModel.standings.teams.find { team ->
+                team.team.id == id
+            }
+            val responseModel = FBTeamInfoResponseModel(info = team)
+
+            val dataModel = SportDecodableModel.FBTeamStats(
+                responseModel = responseModel,
+                displayModel = ModelConverter.fbTeamStatsConverter(responseModel)
+            )
+
+            emitToParent(FBTeamStandingsDelegate.ShowTeamStats(dataModel))
         }
-        val responseModel = FBTeamInfoResponseModel(info = team)
-
-        val dataModel = SportDecodableModel.FBTeamStats(
-            responseModel = responseModel,
-            displayModel = ModelConverter.fbTeamStatsConverter(responseModel)
-        )
-
-        emitToParent(FBTeamStandingsDelegate.ShowTeamStats(dataModel))
     }
 
     // TODO: Should move to util or make it as intent(mvi)

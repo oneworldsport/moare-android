@@ -53,10 +53,9 @@ abstract class BaseTeamStandingsStore<A, R, D: SportDisplayModel>(
     }
 
     private fun loadDictionaries(leagueId: Int) {
+        _teamNameDic.value = nameProvider.getDictionary(Constants.Keys.FOOTBALL_TEAM_DIC)
+
         when (leagueId) {
-            in Constants.Ids.FOOTBALL_LEAGUES -> {
-                _teamNameDic.value = nameProvider.getDictionary(Constants.Keys.FOOTBALL_TEAM_DIC)
-            }
             Constants.Ids.NBA -> {
                 _teamNameDic.value = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)
             }
