@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 data class NoticeModel(
     val title: String,
     val sports: List<SportSection>? = null,
-    val content: String? = null
+    val content: String? = null,
+    val test: String
 )
 
 @Serializable
