@@ -182,10 +182,10 @@ object Constants {
 
         fun checkTeamId(leagueId: Int, teamId: Int?): Int? {
             return when (leagueId) {
-                in Ids.FOOTBALL_ALL -> teamId
-                Ids.NBA -> if (Ids.NBATeam.all.contains(teamId)) teamId else null
-                Ids.MLB -> if (Ids.MLBTeam.all.contains(teamId)) teamId else null
-                Ids.KBO -> if (Ids.KBOTeam.all.contains(teamId)) teamId else null
+                in FOOTBALL_ALL -> teamId
+                NBA -> if (NBATeam.all.contains(teamId)) teamId else null
+                MLB -> if (MLBTeam.all.contains(teamId)) teamId else null
+                KBO -> if (KBOTeam.all.contains(teamId)) teamId else null
                 else -> null
             }
         }

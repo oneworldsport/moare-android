@@ -141,6 +141,42 @@ fun BaseballLeagueTitle(
 }
 
 @Composable
+fun BaseballLeagueTitleForGameStats(
+    url: String,
+    name: String,
+    leagueSeason: Int?,
+    seriesDescription: String = "",
+    modifier: Modifier = Modifier
+) {
+    val season = leagueSeason ?: CalendarUtil.currentYear
+
+    CenterRow(
+        modifier = modifier.padding(horizontal = 8.dp)
+    ) {
+        URLImage(
+            url = url,
+            customSize = 25.dp,
+            modifier = Modifier.padding(end = 4.dp)
+        )
+
+        Text(
+            text = "$name $season",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
+
+        if (seriesDescription.isNotEmpty()) {
+            Text(
+                text = " - $seriesDescription",
+                fontSize = 14.sp
+            )
+        }
+
+        Spacer(Modifier.weight(1f))
+    }
+}
+
+@Composable
 fun RoundedBorderText(
     text: String,
     modifier: Modifier = Modifier,

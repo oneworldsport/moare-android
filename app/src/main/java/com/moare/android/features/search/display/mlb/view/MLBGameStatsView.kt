@@ -33,9 +33,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.FormatSeriesResult
 import com.moare.android.core.util.MLBUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -50,6 +52,7 @@ import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBGameLineScoreInning
 import com.moare.android.ui.common.components.BaseballLeagueTitle
+import com.moare.android.ui.common.components.BaseballLeagueTitleForGameStats
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
@@ -186,17 +189,22 @@ fun MLBGameStatsView(
             }
         ),
         titleContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
-            ) {
-                BaseballLeagueTitle(
+            Column {
+                BaseballLeagueTitleForGameStats(
                     url = MLBUtil.mlbLogoUrl,
-                    leagueName = "MLB",
-                    leagueSeason = season
+                    name = "MLB",
+                    leagueSeason = game.game.season.toIntOrNull(),
+                    seriesDescription = game.game.seriesDescription
                 )
 
-                Spacer(Modifier.weight(1f))
+                if (game.game.seriesStatus.isNotEmpty()) {
+                    FormatSeriesResult(
+                        seriesStatus = game.game.seriesStatus,
+                        homeTeamId = game.teams.home.id,
+                        awayTeamId = game.teams.away.id,
+                        teamNameDic = teamNameDic
+                    )
+                }
             }
         },
         gameContent = {
@@ -226,8 +234,8 @@ fun MLBGameStatsScoreInfoItem(
        --------------------- */
     val displayModel by store.displayModel.collectAsState()
     val game = displayModel.game
-    val homeTeamId = game.teams.home.id
-    val awayTeamId = game.teams.away.id
+    val homeTeamId = Constants.Ids.checkTeamId(Constants.Ids.MLB, game.teams.home.id)
+    val awayTeamId = Constants.Ids.checkTeamId(Constants.Ids.MLB, game.teams.away.id)
     val gameStatus = game.status.detailedState
     val teamNameDic by store.teamNameDic.collectAsState()
 
@@ -283,7 +291,7 @@ fun MLBGameStatsScoreInfoItem(
                     size = URLImageSize.SMALL
                 )
                 Text(
-                    text = teamNameDic["short_$awayTeamId"] ?: "",
+                    text = if (awayTeamId == null) "미정" else teamNameDic["short_$awayTeamId"] ?: "",
                     fontSize = 13.sp,
                     maxLines = 2
                 )
@@ -316,7 +324,7 @@ fun MLBGameStatsScoreInfoItem(
                     size = URLImageSize.SMALL
                 )
                 Text(
-                    text = teamNameDic["short_$homeTeamId"] ?: "",
+                    text = if (homeTeamId == null) "미정" else teamNameDic["short_$homeTeamId"] ?: "",
                     fontSize = 13.sp,
                     maxLines = 2
                 )

@@ -33,10 +33,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.KBOUtil
+import com.moare.android.core.util.MLBUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
@@ -49,6 +51,7 @@ import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.kbo.KBOGameLineScore
 import com.moare.android.ui.common.components.BaseballLeagueTitle
+import com.moare.android.ui.common.components.BaseballLeagueTitleForGameStats
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
@@ -168,17 +171,13 @@ fun KBOGameStatsView(
             }
         ),
         titleContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
-            ) {
-                BaseballLeagueTitle(
+            Column {
+                BaseballLeagueTitleForGameStats(
                     url = KBOUtil.kboLogoUrl,
-                    leagueName = "KBO",
-                    leagueSeason = displayModel.season
+                    name = "KBO",
+                    leagueSeason = displayModel.season,
+                    seriesDescription = game.gameInfo?.seriesDescription ?: ""
                 )
-
-                Spacer(Modifier.weight(1f))
             }
         },
         gameContent = {
@@ -211,8 +210,8 @@ fun KBOGameStatsScoreInfoItem(
        --------------------- */
     val displayModel by store.displayModel.collectAsState()
     val game = displayModel.game
-    val homeTeamId = game.gameInfo?.homeTeamId
-    val awayTeamId = game.gameInfo?.awayTeamId
+    val homeTeamId = Constants.Ids.checkTeamId(Constants.Ids.KBO, game.gameInfo?.homeTeamId)
+    val awayTeamId = Constants.Ids.checkTeamId(Constants.Ids.KBO, game.gameInfo?.awayTeamId)
     val gameStatus = game.gameInfo?.gameStatus?.toIntOrNull() ?: 0
     val teamNameDic by store.teamNameDic.collectAsState()
 
@@ -268,7 +267,7 @@ fun KBOGameStatsScoreInfoItem(
                     size = URLImageSize.SMALL
                 )
                 Text(
-                    text = teamNameDic["short_$awayTeamId"] ?: "",
+                    text = if (awayTeamId == null) "미정" else teamNameDic["short_$awayTeamId"] ?: "",
                     fontSize = 13.sp,
                     maxLines = 2
                 )
@@ -301,7 +300,7 @@ fun KBOGameStatsScoreInfoItem(
                     size = URLImageSize.SMALL
                 )
                 Text(
-                    text = teamNameDic["short_$homeTeamId"] ?: "",
+                    text = if (homeTeamId == null) "미정" else teamNameDic["short_$homeTeamId"] ?: "",
                     fontSize = 13.sp,
                     maxLines = 2
                 )

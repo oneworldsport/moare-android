@@ -949,7 +949,7 @@ object ModelConverter {
         val awayTeamId = game.gameInfo?.awayTeamId ?: 0
         val homeTeamScore = game.lineScore?.home?.r ?: "0"
         val awayTeamScore = game.lineScore?.away?.r ?: "0"
-        val gameInfo = KBOGameInfoForSchedule(_currentInning = game.lineScore?.currentInning)
+        val gameInfo = KBOGameInfoForSchedule(_currentInning = game.lineScore?.currentInning, _seriesDescription = game.gameInfo?.seriesDescription)
 
         return KBOGameForSchedule(
             _itemKey = if (date != null) "${date}#${game.gameInfo.gameId}" else "",
