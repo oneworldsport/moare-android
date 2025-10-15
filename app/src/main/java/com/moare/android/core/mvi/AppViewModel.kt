@@ -649,6 +649,16 @@ class AppViewModel @Inject constructor(
                 store.send(NBAGameStatsAction.InitData)
                 _stack.update { it + StackItem.NBAGameStats(id, store) }
             }
+            is NBALeagueScheduleDelegate.ShowTournament -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = nbaTournamentFactory.create(delegate.model.displayModel) { delegate ->
+                    onNBATournamentDelegate(delegate)
+                }
+                store.send(NBATournamentAction.InitData)
+                _stack.update { it + StackItem.NBATournament(id, store) }
+            }
         }
     }
 
@@ -748,6 +758,16 @@ class AppViewModel @Inject constructor(
                 store.send(MLBGameStatsAction.InitData)
                 _stack.update { it + StackItem.MLBGameStats(id, store) }
             }
+            is MLBLeagueScheduleDelegate.ShowTournament -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = mlbTournamentFactory.create(delegate.model.displayModel) { delegate ->
+                    onMLBTournamentDelegate(delegate)
+                }
+                store.send(MLBTournamentAction.InitData)
+                _stack.update { it + StackItem.MLBTournament(id, store) }
+            }
         }
     }
 
@@ -845,6 +865,16 @@ class AppViewModel @Inject constructor(
                 }
                 store.send(KBOGameStatsAction.InitData)
                 _stack.update { it + StackItem.KBOGameStats(id, store) }
+            }
+            is KBOLeagueScheduleDelegate.ShowTournament -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = kboTournamentFactory.create(delegate.model.displayModel) { delegate ->
+                    onKBOTournamentDelegate(delegate)
+                }
+                store.send(KBOTournamentAction.InitData)
+                _stack.update { it + StackItem.KBOTournament(id, store) }
             }
         }
     }

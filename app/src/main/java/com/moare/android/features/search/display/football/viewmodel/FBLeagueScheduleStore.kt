@@ -71,7 +71,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
     override fun send(action: FBLeagueScheduleAction) {
         when (action) {
             is FBLeagueScheduleAction.InitData -> initData()
-            is FBLeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex)
+            is FBLeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex, false)
             is FBLeagueScheduleAction.SelectDay -> selectDay(action.day, action.selectedIndex)
             is FBLeagueScheduleAction.ToggleAllResult -> toggleAllResult()
             is FBLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.gameId, action.isOpened)
@@ -101,7 +101,8 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                     setDefaultYearMonth(it)
                 }
 
-                setDays(true)
+                // TODO: selectYearMonth에서 setDays를 실행해주는데 예외는 없는지 확인해 봐야함.
+//                setDays(true)
             }
             ScheduleType.TEAM -> {
                 val upcomingGame = displayModel.value.games.firstOrNull { game ->
@@ -116,20 +117,23 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                     }
                 }
 
-                setDays(true)
+//                setDays(true)
             }
             else -> {}
         }
     }
 
-    private fun selectYearMonth(yearMonth: String, selectedIndex: Int) {
-        _selectedYearMonth.value = yearMonth
-        _selectedYearMonthIndex.value = selectedIndex
+    override fun selectYearMonth(yearMonth: String, selectedIndex: Int, isInit: Boolean) {
+        super.selectYearMonth(yearMonth, selectedIndex, isInit)
 
-        when (displayModel.value.scheduleType) {
-            ScheduleType.LEAGUE -> { fetchGames() }
-            ScheduleType.TEAM -> { setDays() }
-            else -> {}
+        if (isInit) {
+            setDays(isInit)
+        } else {
+            when (displayModel.value.scheduleType) {
+                ScheduleType.LEAGUE -> { fetchGames() }
+                ScheduleType.TEAM -> { setDays() }
+                else -> {}
+            }
         }
     }
 

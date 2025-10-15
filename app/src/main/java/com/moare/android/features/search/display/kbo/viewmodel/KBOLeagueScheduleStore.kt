@@ -1,12 +1,15 @@
 package com.moare.android.features.search.display.kbo.viewmodel
 
 import android.util.Log
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.features.search.display.common.store.BaseScheduleStore
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
+import com.moare.android.features.search.models.Keyword
+import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
@@ -30,12 +33,14 @@ sealed interface KBOLeagueScheduleAction {
     data class UpdateResultOpenedState(val itemKey: String, val isOpened: Boolean) : KBOLeagueScheduleAction // NOTE: 더블헤더가 있는 날에 취소된 경기가 있으면 gameId가 같은 경우가 있어 gameId 대신에 itemKey를 사용
     data class SelectGame(val game: KBOGameForSchedule) : KBOLeagueScheduleAction
     data object UpdateFilteredGames : KBOLeagueScheduleAction
+    data object ShowTournament : KBOLeagueScheduleAction
 
     data class UpdateStateByRefreshGame(val model: SportDecodableModel.KBOGameStats) : KBOLeagueScheduleAction
 }
 
 sealed interface KBOLeagueScheduleDelegate {
     data class ShowGameStats(val model: SportDecodableModel.KBOGameStats) : KBOLeagueScheduleDelegate
+    data class ShowTournament(val model: SportDecodableModel.KBOTournament) : KBOLeagueScheduleDelegate
 }
 
 class KBOLeagueScheduleStore @AssistedInject constructor(
@@ -61,13 +66,14 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
     override fun send(action: KBOLeagueScheduleAction) {
         when (action) {
             is KBOLeagueScheduleAction.InitData -> initData()
-            is KBOLeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex)
+            is KBOLeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex, false)
             is KBOLeagueScheduleAction.SelectDay -> selectDay(action.day, action.selectedIndex)
             is KBOLeagueScheduleAction.ToggleAllResult -> toggleAllResult()
             is KBOLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.itemKey, action.isOpened)
             is KBOLeagueScheduleAction.SelectGame -> selectGame(action.game)
             is KBOLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
             is KBOLeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
+            is KBOLeagueScheduleAction.ShowTournament -> showTournament()
         }
     }
 
@@ -87,7 +93,7 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
                     setDefaultYearMonth(it)
                 }
 
-                setDays(true)
+//                setDays(true)
             }
             ScheduleType.TEAM -> {
                 val upcomingGame = displayModel.value.games.firstOrNull { game ->
@@ -102,7 +108,7 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
                     }
                 }
 
-                setDays(true)
+//                setDays(true)
             }
             ScheduleType.TEAM_FLAT -> {
                 // filteredGames 초기화
@@ -117,17 +123,17 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
         }
     }
 
-    /* ---------------------
-       implements
-       --------------------- */
-    private fun selectYearMonth(yearMonth: String, selectedIndex: Int) {
-        _selectedYearMonth.value = yearMonth
-        _selectedYearMonthIndex.value = selectedIndex
+    override fun selectYearMonth(yearMonth: String, selectedIndex: Int, isInit: Boolean) {
+        super.selectYearMonth(yearMonth, selectedIndex, isInit)
 
-        when (displayModel.value.scheduleType) {
-            ScheduleType.LEAGUE -> { fetchGames() }
-            ScheduleType.TEAM -> { setDays() }
-            else -> {}
+        if (isInit) {
+            setDays(isInit)
+        } else {
+            when (displayModel.value.scheduleType) {
+                ScheduleType.LEAGUE -> { fetchGames() }
+                ScheduleType.TEAM -> { setDays() }
+                else -> {}
+            }
         }
     }
 
@@ -285,5 +291,30 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
             gameStatsDisplayModel = model.displayModel,
             leagueScheduleDisplayModel = displayModel.value
         )
+    }
+
+    private fun showTournament() {
+        scope.launch {
+            val keywordInfo = KeywordInfo(
+                keyword = "KBO 가을야구",
+                weight = 100,
+                keywords = listOf(Keyword(keyword = "가을야구", id = "tournament", priority = 2)),
+                entities = listOf(
+                    EntityInfo(
+                        entityId = Constants.Ids.KBO,
+                        entityName = "KBO",
+                        category = "baseball",
+                        entityType = "league",
+                        leagueId = Constants.Ids.KBO
+                    )
+                )
+            )
+
+            val result = searchClient.fetchDataByKeyword(keywordInfo)
+
+            if (result.data is SportDecodableModel.KBOTournament) {
+                emitToParent(KBOLeagueScheduleDelegate.ShowTournament(result.data))
+            }
+        }
     }
 }

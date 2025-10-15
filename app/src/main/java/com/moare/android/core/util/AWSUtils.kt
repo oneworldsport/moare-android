@@ -121,13 +121,13 @@ object AWSUtils {
                 .first()
 
             if (newETag == currentETag) {
-//            val jsonString = withContext(Dispatchers.IO) {
-//                File(context.filesDir, s3Key.substringAfter("/")).readText()
-//            }
+            val jsonString = withContext(Dispatchers.IO) {
+                File(context.filesDir, s3Key.substringAfter("/")).readText()
+            }
 
                 // test
-                val inputStream = context.assets.open("main_notice_test.json")
-                val jsonString = inputStream.bufferedReader().use { it.readText() }
+//                val inputStream = context.assets.open("main_notice_test.json")
+//                val jsonString = inputStream.bufferedReader().use { it.readText() }
                 // test
 
                 val jsonElement = Json.parseToJsonElement(jsonString)

@@ -43,6 +43,7 @@ fun NBALeagueScheduleView(
        --------------------- */
     val displayModel by store.displayModel.collectAsState()
     val yearMonthList by store.yearMonthList.collectAsState()
+    val selectedMonth by store.selectedMonth.collectAsState()
     val days by store.days.collectAsState()
     val selectedYearMonthIndex by store.selectedYearMonthIndex.collectAsState()
     val selectedDayIndex by store.selectedDayIndex.collectAsState()
@@ -61,6 +62,7 @@ fun NBALeagueScheduleView(
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
+            leagueId = displayModel.leagueId,
             shouldShowCalendar = displayModel.scheduleType != ScheduleType.TEAM_FLAT,
             shouldFetchSchedule = displayModel.scheduleType == ScheduleType.LEAGUE,
             displayDataState = displayDataState,
@@ -72,7 +74,8 @@ fun NBALeagueScheduleView(
                 yearMonthCalendarScrollTrigger,
                 dayCalendarScrollTrigger
             ),
-            isAllResultOpened = isAllResultOpened
+            isAllResultOpened = isAllResultOpened,
+            shouldShowTournamentButton = selectedMonth in 4..6
         ),
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
@@ -85,6 +88,9 @@ fun NBALeagueScheduleView(
             ),
             allResultButtonAction = {
                 store.send(NBALeagueScheduleAction.ToggleAllResult)
+            },
+            tournamentButtonAction = {
+                store.send(NBALeagueScheduleAction.ShowTournament)
             }
         ),
         titleContent = {},

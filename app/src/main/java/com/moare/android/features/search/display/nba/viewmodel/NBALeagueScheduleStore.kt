@@ -1,12 +1,17 @@
 package com.moare.android.features.search.display.nba.viewmodel
 
 import android.util.Log
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.features.search.display.common.store.BaseScheduleStore
+import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
+import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleDelegate
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
+import com.moare.android.features.search.models.Keyword
+import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
@@ -30,12 +35,14 @@ sealed interface NBALeagueScheduleAction {
     data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : NBALeagueScheduleAction
     data class SelectGame(val game: NBAGameForSchedule) : NBALeagueScheduleAction
     data object UpdateFilteredGames : NBALeagueScheduleAction
+    data object ShowTournament : NBALeagueScheduleAction
 
     data class UpdateStateByRefreshGame(val model: SportDecodableModel.NBAGameStats) : NBALeagueScheduleAction
 }
 
 sealed interface NBALeagueScheduleDelegate {
     data class ShowGameStats(val model: SportDecodableModel.NBAGameStats) : NBALeagueScheduleDelegate
+    data class ShowTournament(val model: SportDecodableModel.NBATournament) : NBALeagueScheduleDelegate
 }
 
 class NBALeagueScheduleStore @AssistedInject constructor(
@@ -61,13 +68,14 @@ class NBALeagueScheduleStore @AssistedInject constructor(
     override fun send(action: NBALeagueScheduleAction) {
         when (action) {
             is NBALeagueScheduleAction.InitData -> initData()
-            is NBALeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex)
+            is NBALeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex, false)
             is NBALeagueScheduleAction.SelectDay -> selectDay(action.day, action.selectedIndex)
             is NBALeagueScheduleAction.ToggleAllResult -> toggleAllResult()
             is NBALeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.gameId, action.isOpened)
             is NBALeagueScheduleAction.SelectGame -> selectGame(action.game)
             is NBALeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
             is NBALeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
+            is NBALeagueScheduleAction.ShowTournament -> showTournament()
         }
     }
 
@@ -87,7 +95,7 @@ class NBALeagueScheduleStore @AssistedInject constructor(
                     setDefaultYearMonth(it)
                 }
 
-                setDays(true)
+//                setDays(true)
             }
             ScheduleType.TEAM -> {
                 val upcomingGame = displayModel.value.games.firstOrNull { game ->
@@ -102,7 +110,7 @@ class NBALeagueScheduleStore @AssistedInject constructor(
                     }
                 }
 
-                setDays(true)
+//                setDays(true)
             }
             ScheduleType.TEAM_FLAT -> {
                 // In TEAM_FLAT type, selectedDayIndex is always 0
@@ -118,17 +126,17 @@ class NBALeagueScheduleStore @AssistedInject constructor(
         }
     }
 
-    /* ---------------------
-       implements
-       --------------------- */
-    private fun selectYearMonth(yearMonth: String, selectedIndex: Int) {
-        _selectedYearMonth.value = yearMonth
-        _selectedYearMonthIndex.value = selectedIndex
+    override fun selectYearMonth(yearMonth: String, selectedIndex: Int, isInit: Boolean) {
+        super.selectYearMonth(yearMonth, selectedIndex, isInit)
 
-        when (displayModel.value.scheduleType) {
-            ScheduleType.LEAGUE -> { fetchGames() }
-            ScheduleType.TEAM -> { setDays() }
-            else -> {}
+        if (isInit) {
+            setDays(isInit)
+        } else {
+            when (displayModel.value.scheduleType) {
+                ScheduleType.LEAGUE -> { fetchGames() }
+                ScheduleType.TEAM -> { setDays() }
+                else -> {}
+            }
         }
     }
 
@@ -285,6 +293,31 @@ class NBALeagueScheduleStore @AssistedInject constructor(
             gameStatsDisplayModel = model.displayModel,
             leagueScheduleDisplayModel = displayModel.value
         )
+    }
+
+    private fun showTournament() {
+        scope.launch {
+            val keywordInfo = KeywordInfo(
+                keyword = "NBA 플레이오프",
+                weight = 100,
+                keywords = listOf(Keyword(keyword = "플레이오프", id = "tournament", priority = 2)),
+                entities = listOf(
+                    EntityInfo(
+                        entityId = Constants.Ids.NBA,
+                        entityName = "NBA",
+                        category = "basketball",
+                        entityType = "league",
+                        leagueId = Constants.Ids.NBA
+                    )
+                )
+            )
+
+            val result = searchClient.fetchDataByKeyword(keywordInfo)
+
+            if (result.data is SportDecodableModel.NBATournament) {
+                emitToParent(NBALeagueScheduleDelegate.ShowTournament(result.data))
+            }
+        }
     }
 }
 

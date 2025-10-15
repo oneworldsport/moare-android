@@ -1,12 +1,17 @@
 package com.moare.android.features.search.display.mlb.viewmodel
 
 import android.util.Log
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.features.search.display.common.store.BaseScheduleStore
+import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleAction
+import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleDelegate
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
+import com.moare.android.features.search.models.Keyword
+import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.mlb.MLBLeagueScheduleDisplayModel
@@ -30,12 +35,14 @@ sealed interface MLBLeagueScheduleAction {
     data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : MLBLeagueScheduleAction
     data class SelectGame(val game: MLBGameForSchedule) : MLBLeagueScheduleAction
     data object UpdateFilteredGames : MLBLeagueScheduleAction
+    data object ShowTournament : MLBLeagueScheduleAction
 
     data class UpdateStateByRefreshGame(val model: SportDecodableModel.MLBGameStats) : MLBLeagueScheduleAction
 }
 
 sealed interface MLBLeagueScheduleDelegate {
     data class ShowGameStats(val model: SportDecodableModel.MLBGameStats) : MLBLeagueScheduleDelegate
+    data class ShowTournament(val model: SportDecodableModel.MLBTournament) : MLBLeagueScheduleDelegate
 }
 
 class MLBLeagueScheduleStore @AssistedInject constructor(
@@ -61,13 +68,14 @@ class MLBLeagueScheduleStore @AssistedInject constructor(
     override fun send(action: MLBLeagueScheduleAction) {
         when (action) {
             is MLBLeagueScheduleAction.InitData -> initData()
-            is MLBLeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex)
+            is MLBLeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex, false)
             is MLBLeagueScheduleAction.SelectDay -> selectDay(action.day, action.selectedIndex)
             is MLBLeagueScheduleAction.ToggleAllResult -> toggleAllResult()
             is MLBLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.gameId, action.isOpened)
             is MLBLeagueScheduleAction.SelectGame -> selectGame(action.game)
             is MLBLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
             is MLBLeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
+            is MLBLeagueScheduleAction.ShowTournament -> showTournament()
         }
     }
 
@@ -87,7 +95,7 @@ class MLBLeagueScheduleStore @AssistedInject constructor(
                     setDefaultYearMonth(it)
                 }
 
-                setDays(true)
+//                setDays(true)
             }
             ScheduleType.TEAM -> {
                 val upcomingGame = displayModel.value.games.firstOrNull { game ->
@@ -102,7 +110,7 @@ class MLBLeagueScheduleStore @AssistedInject constructor(
                     }
                 }
 
-                setDays(true)
+//                setDays(true)
             }
             ScheduleType.TEAM_FLAT -> {
                 // filteredGames 초기화
@@ -117,14 +125,17 @@ class MLBLeagueScheduleStore @AssistedInject constructor(
         }
     }
 
-    private fun selectYearMonth(yearMonth: String, selectedIndex: Int) {
-        _selectedYearMonth.value = yearMonth
-        _selectedYearMonthIndex.value = selectedIndex
+    override fun selectYearMonth(yearMonth: String, selectedIndex: Int, isInit: Boolean) {
+        super.selectYearMonth(yearMonth, selectedIndex, isInit)
 
-        when (displayModel.value.scheduleType) {
-            ScheduleType.LEAGUE -> { fetchGames() }
-            ScheduleType.TEAM -> { setDays() }
-            else -> {}
+        if (isInit) {
+            setDays(isInit)
+        } else {
+            when (displayModel.value.scheduleType) {
+                ScheduleType.LEAGUE -> { fetchGames() }
+                ScheduleType.TEAM -> { setDays() }
+                else -> {}
+            }
         }
     }
 
@@ -281,5 +292,30 @@ class MLBLeagueScheduleStore @AssistedInject constructor(
             gameStatsDisplayModel = model.displayModel,
             leagueScheduleDisplayModel = displayModel.value
         )
+    }
+
+    private fun showTournament() {
+        scope.launch {
+            val keywordInfo = KeywordInfo(
+                keyword = "MLB 포스트시즌",
+                weight = 100,
+                keywords = listOf(Keyword(keyword = "포스트시즌", id = "tournament", priority = 2)),
+                entities = listOf(
+                    EntityInfo(
+                        entityId = Constants.Ids.MLB,
+                        entityName = "MLB",
+                        category = "baseball",
+                        entityType = "league",
+                        leagueId = Constants.Ids.MLB
+                    )
+                )
+            )
+
+            val result = searchClient.fetchDataByKeyword(keywordInfo)
+
+            if (result.data is SportDecodableModel.MLBTournament) {
+                emitToParent(MLBLeagueScheduleDelegate.ShowTournament(result.data))
+            }
+        }
     }
 }

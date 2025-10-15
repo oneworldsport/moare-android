@@ -43,6 +43,7 @@ fun FBLeagueScheduleView(
     /* ---------------------
        viewmodel state
        --------------------- */
+    val displayModel by store.displayModel.collectAsState()
     val yearMonthList by store.yearMonthList.collectAsState()
     val days by store.days.collectAsState()
     val selectedYearMonthIndex by store.selectedYearMonthIndex.collectAsState()
@@ -64,6 +65,7 @@ fun FBLeagueScheduleView(
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
+            leagueId = displayModel.leagueId,
             shouldShowCalendar = selectedGame == null,
             shouldShowAllResultToggleButton = selectedGame == null,
             displayDataState = displayDataState,

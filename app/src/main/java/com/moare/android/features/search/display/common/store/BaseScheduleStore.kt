@@ -39,6 +39,9 @@ abstract class BaseScheduleStore<A, T: SportDisplayModel>(
     protected val _selectedYearMonth = MutableStateFlow("")
     val selectedYearMonth: StateFlow<String> = _selectedYearMonth
 
+    protected val _selectedMonth = MutableStateFlow(0)
+    val selectedMonth: StateFlow<Int> = _selectedMonth
+
     protected val _selectedDay = MutableStateFlow<DayInfo?>(null)
     val selectedDay: StateFlow<DayInfo?> = _selectedDay
 
@@ -66,6 +69,7 @@ abstract class BaseScheduleStore<A, T: SportDisplayModel>(
         _days.value = emptyList()
 
         _selectedYearMonth.value = ""
+        _selectedMonth.value = 0
         _selectedDay.value = null
         _selectedYearMonthIndex.value = 0
         _selectedDayIndex.value = 0
@@ -99,11 +103,20 @@ abstract class BaseScheduleStore<A, T: SportDisplayModel>(
 
     open fun setDays(isInit: Boolean = false) {}
 
+    open fun selectYearMonth(yearMonth: String, selectedIndex: Int, isInit: Boolean) {
+        _selectedYearMonth.value = yearMonth
+        _selectedYearMonthIndex.value = selectedIndex
+
+        val monthStr = yearMonth.split("/").lastOrNull()
+        _selectedMonth.value = monthStr?.toIntOrNull() ?: 0
+    }
+
     open fun setDefaultYearMonth(date: String) {
         val defaultYearMonth = CalendarUtil.formatDate(date, TimeFormatType.YEAR_MONTH)
-        val defaultYearMonthIndex = yearMonthList.value.withIndex().first{ (_, value) -> value == defaultYearMonth }
-        _selectedYearMonth.value = defaultYearMonth
-        _selectedYearMonthIndex.value = defaultYearMonthIndex.index
+        val defaultYearMonthIndex = yearMonthList.value.withIndex().first{ (_, value) -> value == defaultYearMonth }.index
+
+        selectYearMonth(defaultYearMonth, defaultYearMonthIndex, true)
+
         _yearMonthCalendarScrollTrigger.value = UUID.randomUUID().toString()
     }
 

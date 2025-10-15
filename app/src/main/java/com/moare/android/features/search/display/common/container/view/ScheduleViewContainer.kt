@@ -67,8 +67,20 @@ fun ScheduleViewContainer(
 
         // all result open button
         if (state.shouldShowAllResultToggleButton) {
-            Row {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
                 Spacer(Modifier.weight(1f))
+
+                if (state.shouldShowTournamentButton) {
+                    CapsuleButton(
+                        text = StringConstants.tournamentButtonText(state.leagueId),
+                        color = Color.Gray
+                    ) {
+                        actions.tournamentButtonAction?.let { it() }
+                    }
+                }
 
                 CapsuleButton(
                     text = if (state.isAllResultOpened) {
@@ -76,8 +88,7 @@ fun ScheduleViewContainer(
                     } else {
                         StringConstants.RESULT_OPEN
                     },
-                    color = Color.Gray,
-                    modifier = Modifier.padding(end = 8.dp)
+                    color = Color.Gray
                 ) {
                     actions.allResultButtonAction()
                 }

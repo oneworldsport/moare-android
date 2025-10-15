@@ -63,6 +63,7 @@ class NBATournamentStore @AssistedInject constructor(
         val displayModel = displayModel.value
         val leagueId = displayModel.leagueId
         val season = displayModel.season
+//        val season = 2024
 
         // 시드 순서를 유지해야해서 다음과 같은 로직 적용
         val firstRoundTeams = tournamentTeams["${leagueId}_${season}_16"] ?: emptyList()
