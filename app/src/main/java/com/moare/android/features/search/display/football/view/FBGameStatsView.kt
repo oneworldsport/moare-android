@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.football.view
 
+import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Row
@@ -13,10 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.FBUtil
 import com.moare.android.core.util.MatchDescriptionConverter
+import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.common.container.state.GameStatsCoachState
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -24,50 +26,35 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsIntent
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsViewModel
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
+import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.ModelConverter
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
-import com.moare.android.ui.common.components.LeagueTitle
+import com.moare.android.ui.common.components.FBLeagueTitle
+import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
 
 @Composable
 fun FBGameStatsView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    fbGameStatsViewModel: FBGameStatsViewModel = hiltViewModel(),
-    data: FBGameStatsDisplayModel
+    searchStore: SearchStore,
+    store: FBGameStatsStore,
+    isCombinedView: Boolean = false
 ) {
-    /* ---------------------
-       constants
-       --------------------- */
-
-    /* ---------------------
-       ui state
-       --------------------- */
     val horizontalScrollState = rememberScrollState()
 
-    /* ---------------------
-       viewmodel state
-       --------------------- */
-    val displayModel by fbGameStatsViewModel.displayModel.collectAsState()
-    val coach by fbGameStatsViewModel.coach.collectAsState()
-    val firstSelectedIndex by fbGameStatsViewModel.firstCategorySelectedIndex.collectAsState()
-    val secondCategorySelectedIndex by fbGameStatsViewModel.secondCategorySelectedIndex.collectAsState()
-    val selectedTeamIndex by fbGameStatsViewModel.selectedTeamIndex.collectAsState()
-    val playerStats by fbGameStatsViewModel.playerStats.collectAsState()
-    val lineups by fbGameStatsViewModel.lineups.collectAsState()
-    val playersTotalStats by fbGameStatsViewModel.playersTotalStats.collectAsState()
-    val teamNameDic = fbGameStatsViewModel.teamNameDictionary
-    val playerNameDic = fbGameStatsViewModel.playerNameDictionary
+    val displayModel by store.displayModel.collectAsState()
+    val coach by store.coach.collectAsState()
+    val firstSelectedIndex by store.firstCategorySelectedIndex.collectAsState()
+    val secondCategorySelectedIndex by store.secondCategorySelectedIndex.collectAsState()
+    val selectedTeamIndex by store.teamCategorySelectedIndex.collectAsState()
+    val playerStats by store.playerStats.collectAsState()
+    val lineups by store.lineups.collectAsState()
+    val playersTotalStats by store.playersTotalStats.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
+    val playerNameDic by store.playerNameDic.collectAsState()
 
-    val displayModels by searchViewModel.displayModels.collectAsState()
-    val poppedView by searchViewModel.poppedView.collectAsState()
-    val fbLeagueScheduleModel = displayModels[SportDisplayType.FB_LEAGUE_SCHEDULE] as? FBLeagueScheduleDisplayModel
+    val game = displayModel.game
 
-    val teamIds = listOf(displayModel?.game?.teams?.home?.id, displayModel?.game?.teams?.away?.id)
+    val teamIds = listOf(game.teams.home.id, game.teams.away.id)
     val teamCategories = teamIds.map {
         GameStatsTeamState(
             name = teamNameDic["short_${it}"] ?: "",
@@ -75,7 +62,7 @@ fun FBGameStatsView(
         )
     }
 
-    var playerList = playerStats.mapNotNull { player ->
+    val playerList = playerStats.mapNotNull { player ->
         val stats = player.statistics.firstOrNull()
         val playerId = player.player.id
 
@@ -132,8 +119,11 @@ fun FBGameStatsView(
         }
     }
     val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 60.dp, 50.dp, 80.dp, 70.dp, 70.dp, 80.dp, 60.dp, 60.dp, 60.dp, 50.dp, 50.dp, 50.dp, 80.dp, 50.dp)
-    val gameDetailTitle = "심판: "
-    val gameDetailContent = "${displayModel?.game?.fixture?.referee}"
+    val gameDetailTitle = "장소: \n심판: "
+    val gameDetailContent = buildString {
+        append("${teamNameDic["venue_${game.teams.home.id}"] ?: ""}\n")
+        append(game.fixture.referee)
+    }
 
     // TODO: 나중에 다른 GameStatsView도 playersTotalStats 작업이 되면 StandingsRankItem 수정한 후 아래 주석 추가.
 //    playersTotalStats?.let { totalStats ->
@@ -177,27 +167,18 @@ fun FBGameStatsView(
         val defendCategoriesSize = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES.size
 
         if (secondCategorySelectedIndex in 0 until attackCategoriesSize) {
-            (fbGameStatsViewModel.itemWidth * secondCategorySelectedIndex).toPx()
+            (store.itemWidth * secondCategorySelectedIndex).toPx()
         } else if (secondCategorySelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
-            ((fbGameStatsViewModel.itemWidth * secondCategorySelectedIndex) + fbGameStatsViewModel.barWidth).toPx()
+            ((store.itemWidth * secondCategorySelectedIndex) + store.barWidth).toPx()
         } else {
-            ((fbGameStatsViewModel.itemWidth * secondCategorySelectedIndex) + (fbGameStatsViewModel.barWidth * 2)).toPx()
+            ((store.itemWidth * secondCategorySelectedIndex) + (store.barWidth * 2)).toPx()
         }
     }.toInt()
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.FBGameStats) {
-            fbGameStatsViewModel.send(FBGameStatsIntent.InitData(data))
-        }
-    }
 
     // scroll to category that matches with the keyword,
     // and when first category list's item is selected by click
     LaunchedEffect(firstSelectedIndex) {
-        if (fbGameStatsViewModel.shouldScrollCategory) {
+        if (store.shouldScrollCategory) {
             horizontalScrollState.animateScrollTo(
                 value = secondSelectedCategoryPosition,
                 animationSpec = tween(
@@ -210,11 +191,11 @@ fun FBGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowTitle = fbLeagueScheduleModel == null,
-            shouldShowGameItem = fbLeagueScheduleModel == null,
-            shouldShowStats = displayModel?.game?.fixture?.status?.short != StringConstants.Football.GAME_NOT_STARTED,
+            shouldShowTitle = !isCombinedView,
+            shouldShowGameContent = !isCombinedView,
+            shouldShowStats = game.fixture.status.short != StringConstants.Football.GAME_NOT_STARTED,
             shouldShowCoach = true,
-            shouldShowRefreshButton = StringConstants.Football.GAME_LIVE_LIST.contains(displayModel?.game?.fixture?.status?.short),
+            shouldShowRefreshButton = StringConstants.Football.GAME_LIVE_LIST.contains(game.fixture.status.short),
             teamCategories = teamCategories,
             secondCategories = StringConstants.Football.GAME_STATS_SECOND_CATEGORIES,
             coachState = GameStatsCoachState(
@@ -230,42 +211,31 @@ fun FBGameStatsView(
         ),
         actions = GameStatsContainerActions(
             teamCategoryButtonAction = { index ->
-                fbGameStatsViewModel.send(FBGameStatsIntent.SelectTeam(index))
+                store.send(FBGameStatsAction.SelectTeam(index))
             },
             secondCategoryButtonAction = { index ->
-                fbGameStatsViewModel.send(FBGameStatsIntent.SelectSecondCategory(index))
+                store.send(FBGameStatsAction.SelectSecondCategory(index))
             },
             refreshButtonAction = {
-                displayModel?.let {
-                    searchViewModel.send(SearchViewModel.Intent.RefreshGame(season = it.season, category = "football"))
-                }
+                store.send(FBGameStatsAction.RefreshGame())
             }
         ),
         titleContent = {
-            displayModel?.game?.let { game ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    LeagueTitle(
-                        url = game.league.logo,
-                        leagueName = game.league.name,
-                        leagueSeason = game.league.season
-                    )
-
-                    Text(
-                        text = " - " + MatchDescriptionConverter.convert(descriptionType = MatchDescriptionConverter.DescriptionType.ROUND_WITHOUT_DASH, input = game.league.round),
-                        fontSize = 14.sp
-                    )
-                }
-            }
+            FBLeagueTitleForGameStats(
+                url = game.league.logo,
+                leagueName = game.league.name,
+                leagueSeason = game.league.season,
+                description = game.league.round
+            )
         },
         gameContent = {
-            displayModel?.game?.let { game ->
-                FBLeagueScheduleListItem(
-                    data = ModelConverter().fbGameToGameScheduleConverter(game),
-                    teamNameDic = teamNameDic
-                )
-            }
+            FBLeagueScheduleListItem(
+                searchStore = searchStore,
+                store = null,
+                data = ModelConverter.fbGameToGameScheduleConverter(game),
+                leagueId = displayModel.leagueId,
+                teamNameDic = teamNameDic
+            )
         }
     )
 }
@@ -276,7 +246,7 @@ fun FBGameStatsView(
 //            horizontalArrangement = Arrangement.Center,
 //            modifier = Modifier
 //                .width(132.dp)
-//                .height(fbGameStatsViewModel.dataItemHeight)
+//                .height(store.dataItemHeight)
 //        ) {
 //            Text(
 //                text = "합계(팀 기록)",

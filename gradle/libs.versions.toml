@@ -23,8 +23,8 @@ firebase = "33.16.0"
 accompanist = "0.37.3"
 navigation-compose = "2.9.2"
 
-app-version-code = "12" # Should be start from 1
-app-version-name = "1.0.6"
+app-version-code = "13" # Should be start from 1
+app-version-name = "1.0.7"
 ui-text = "1.9.1"
 
 [plugins]

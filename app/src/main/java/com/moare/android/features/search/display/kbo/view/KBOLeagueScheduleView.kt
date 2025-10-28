@@ -11,7 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.KBOUtil
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
@@ -22,67 +22,49 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
-import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleIntent
-import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleViewModel
-import com.moare.android.features.search.display.search.viewmodel.SearchViewModel
+import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleAction
+import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleStore
+import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
+import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
-import com.moare.android.features.search.models.displaymodels.kbo.KBOLeagueScheduleDisplayModel
-import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 
 @Composable
 fun KBOLeagueScheduleView(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    kboLeagueScheduleViewModel: KBOLeagueScheduleViewModel = hiltViewModel(),
-    data: KBOLeagueScheduleDisplayModel
+    searchStore: SearchStore,
+    store: KBOLeagueScheduleStore,
+    didPop: Boolean,
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
-    val yearMonthList by kboLeagueScheduleViewModel.yearMonthList.collectAsState()
-    val days by kboLeagueScheduleViewModel.days.collectAsState()
-    val selectedYearMonthIndex by kboLeagueScheduleViewModel.selectedYearMonthIndex.collectAsState()
-    val selectedDayIndex by kboLeagueScheduleViewModel.selectedDayIndex.collectAsState()
-    val yearMonthCalendarScrollTrigger by kboLeagueScheduleViewModel.yearMonthCalendarScrollTrigger.collectAsState()
-    val dayCalendarScrollTrigger by kboLeagueScheduleViewModel.dayCalendarScrollTrigger.collectAsState()
-    val isAllResultOpened by kboLeagueScheduleViewModel.isAllResultOpened.collectAsState()
-    val displayDataState by kboLeagueScheduleViewModel.displayDataState.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
+    val yearMonthList by store.yearMonthList.collectAsState()
+    val selectedMonth by store.selectedMonth.collectAsState()
+    val days by store.days.collectAsState()
+    val selectedYearMonthIndex by store.selectedYearMonthIndex.collectAsState()
+    val selectedDayIndex by store.selectedDayIndex.collectAsState()
+    val yearMonthCalendarScrollTrigger by store.yearMonthCalendarScrollTrigger.collectAsState()
+    val dayCalendarScrollTrigger by store.dayCalendarScrollTrigger.collectAsState()
+    val isAllResultOpened by store.isAllResultOpened.collectAsState()
+    val displayDataState by store.displayDataState.collectAsState()
 
-    val viewStack by searchViewModel.viewStack.collectAsState()
-    val poppedView by searchViewModel.poppedView.collectAsState()
-
-    /* ---------------------
-       etc
-       --------------------- */
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(data) {
-        if (poppedView == null || poppedView is SportDecodableModel.KBOLeagueSchedule) {
-            kboLeagueScheduleViewModel.send(KBOLeagueScheduleIntent.InitData(data))
-        }
-    }
-
-    LaunchedEffect(viewStack) {
-        // update games data after refreshing in KBOGameStatsView
-        if (viewStack.isNotEmpty() && viewStack.last() is SportDecodableModel.KBOLeagueSchedule) {
-            val kboLeagueSchedule = viewStack.last() as SportDecodableModel.KBOLeagueSchedule
-
-            poppedView?.let {
-                if (it is SportDecodableModel.KBOGameStats) {
-                    kboLeagueScheduleViewModel.send(KBOLeagueScheduleIntent.UpdateGamesData(kboLeagueSchedule, it) { data ->
-                        searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
-                    })
-                }
-            }
+    LaunchedEffect(didPop) {
+        // 뒤로가서 일정화면으로 돌아왔을때 filteredGames update
+        if (didPop) {
+            // TODO: KBOGameStatsView에서 뒤로왔을때만 실행하게 개선 필요
+            store.send(KBOLeagueScheduleAction.UpdateFilteredGames)
         }
     }
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
+            leagueId = displayModel.leagueId,
+            shouldShowCalendar = displayModel.scheduleType != ScheduleType.TEAM_FLAT,
+            shouldFetchSchedule = displayModel.scheduleType == ScheduleType.LEAGUE,
             displayDataState = displayDataState,
             calendarUiState = CalendarUiState(
                 yearMonthList,
@@ -92,55 +74,62 @@ fun KBOLeagueScheduleView(
                 yearMonthCalendarScrollTrigger,
                 dayCalendarScrollTrigger
             ),
-            isAllResultOpened = isAllResultOpened
+            isAllResultOpened = isAllResultOpened,
+            shouldShowTournamentButton = selectedMonth >= 10
         ),
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
                 onSelectYearMonth = { yearMonth, index ->
-                    kboLeagueScheduleViewModel.send(KBOLeagueScheduleIntent.SelectYearMonth(yearMonth, index) { data ->
-                        searchViewModel.send(SearchViewModel.Intent.UpdateLastViewStack(data))
-                    })
+                    store.send(KBOLeagueScheduleAction.SelectYearMonth(yearMonth, index))
                 },
                 onSelectDay = { day, index ->
-                    kboLeagueScheduleViewModel.send(KBOLeagueScheduleIntent.SelectDay(day, index))
+                    store.send(KBOLeagueScheduleAction.SelectDay(day, index))
                 }
             ),
             allResultButtonAction = {
-                kboLeagueScheduleViewModel.send(KBOLeagueScheduleIntent.ToggleAllResult)
+                store.send(KBOLeagueScheduleAction.ToggleAllResult)
+            },
+            tournamentButtonAction = {
+                store.send(KBOLeagueScheduleAction.ShowTournament)
             }
         ),
         titleContent = {},
         gameListContent = {
-            KBOLeagueScheduleList()
+            KBOLeagueScheduleList(searchStore = searchStore, store = store)
         }
     )
 }
 
 @Composable
 fun KBOLeagueScheduleList(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    kboLeagueScheduleViewModel: KBOLeagueScheduleViewModel = hiltViewModel()
+    searchStore: SearchStore,
+    store: KBOLeagueScheduleStore
 ) {
     /* ---------------------
        viewmodel state
        --------------------- */
-    val filteredGames by kboLeagueScheduleViewModel.filteredGames.collectAsState()
-    val selectedDayIndex by kboLeagueScheduleViewModel.selectedDayIndex.collectAsState()
-    val teamNameDic = kboLeagueScheduleViewModel.teamNameDictionary
+    val filteredGames by store.filteredGames.collectAsState()
+    val selectedDayIndex by store.selectedDayIndex.collectAsState()
+    val teamNameDic by store.teamNameDic.collectAsState()
 
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
 
     LazyColumn {
         items(gameListToDisplay) { item ->
-            KBOLeagueScheduleListItem(data = item, teamNameDic = teamNameDic)
+            KBOLeagueScheduleListItem(
+                searchStore = searchStore,
+                store = store,
+                data = item,
+                teamNameDic = teamNameDic
+            )
         }
     }
 }
 
 @Composable
 fun KBOLeagueScheduleListItem(
-    searchViewModel: SearchViewModel = hiltViewModel(),
-    kboLeagueScheduleViewModel: KBOLeagueScheduleViewModel = hiltViewModel(),
+    searchStore: SearchStore,
+    store: KBOLeagueScheduleStore,
     teamNameDic: Map<String, String>,
     data: KBOGameForSchedule,
 ) {
@@ -157,11 +146,8 @@ fun KBOLeagueScheduleListItem(
     /* ---------------------
        viewmodel state
        --------------------- */
-    val gameResultOpenedStateList by kboLeagueScheduleViewModel.gameResultOpenedStateList.collectAsState()
-    val displayModel by kboLeagueScheduleViewModel.displayModel.collectAsState()
-
-    val displayModels by searchViewModel.displayModels.collectAsState()
-    val kboGameStatsModel = displayModels[SportDisplayType.KBO_GAME_STATS] as? KBOGameStatsDisplayModel
+    val gameResultOpenedStateList by store.gameResultOpenedStateList.collectAsState()
+    val displayModel by store.displayModel.collectAsState()
 
     /* ---------------------
        constants
@@ -197,45 +183,26 @@ fun KBOLeagueScheduleListItem(
             isResultOpened = gameResultOpenedStateList[itemKey] ?: false
         }
     }
-    LaunchedEffect(kboGameStatsModel) {
-        kboGameStatsModel?.let {
-            if (gameStatus == StringConstants.KBO.GAME_LIVE || gameStatus == StringConstants.KBO.GAME_FINAL) {
-                isResultOpened = true
-            }
-        }
-    }
 
     ScheduleGameItem(
         state = ScheduleGameItemState(
-            isClickEnabled = kboGameStatsModel == null,
-            homeTeamLogo = KBOUtil.teamLogoUrl(homeTeamId),
-            homeTeamName = teamNameDic["short_${homeTeamId}"] ?: "",
-            homeTeamScore = data.homeTeamScore,
-            awayTeamLogo = KBOUtil.teamLogoUrl(awayTeamId),
-            awayTeamName = teamNameDic["short_${awayTeamId}"] ?: "",
-            awayTeamScore = data.awayTeamScore,
+            leagueId = Constants.Ids.KBO,
+            game = data,
+            teamNameDic = teamNameDic,
+            isClickEnabled = data.gameStatus != Constants.GameStatus.KBO.CANCELED, // 취소된 경기는 클릭 안되게
             isResultOpened = isResultOpened,
             gameStatusText = gameStatusText,
             gameStatusColor = gameStatusColor,
-            isCapsuleButtonDisabled = kboGameStatsModel != null || gameStatus != StringConstants.KBO.GAME_FINAL,
-            date = data.date,
-            venue = teamNameDic["venue_${homeTeamId}"] ?: "",
-            shouldShowOnlyDateTime = kboGameStatsModel == null,
-            shouldShowVenue = kboGameStatsModel != null,
-            shouldShowHomeLabel = kboGameStatsModel != null,
-            shouldShowAwayLabel = kboGameStatsModel != null,
+            isCapsuleButtonDisabled = gameStatus != StringConstants.KBO.GAME_FINAL,
+            gameType = data.gameInfo?.seriesDescription,
+            shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
         ),
         actions = ScheduleGameItemActions(
             onGameItemClick = {
-                displayModel?.let {
-                    searchViewModel.send(SearchViewModel.Intent.SelectKBOGame(data, it.season))
-                }
-
-                // set selected game's isOpened true
-                kboLeagueScheduleViewModel.send(KBOLeagueScheduleIntent.UpdateResultOpenedState(itemKey, true))
+                store.send(KBOLeagueScheduleAction.SelectGame(data))
             },
             onCapsuleButtonClick = {
-                kboLeagueScheduleViewModel.send(KBOLeagueScheduleIntent.UpdateResultOpenedState(itemKey, !isResultOpened))
+                store.send(KBOLeagueScheduleAction.UpdateResultOpenedState(itemKey, !isResultOpened))
             }
         )
     )

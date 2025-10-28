@@ -141,6 +141,16 @@ object StringConstants {
     fun viewPreparingAdviseText(type: String): String {
         return "${type} 화면은 더 나은 서비스 제공을 위해 현재 개선 작업 중입니다. 이용에 불편을 드려 죄송합니다."
     }
+
+    fun tournamentButtonText(leagueId: Int): String {
+        return when (leagueId) {
+            in Constants.Ids.FOOTBALL_ALL -> ""
+            Constants.Ids.NBA -> "플레이오프 대진표"
+            Constants.Ids.MLB -> "포스트시즌 대진표"
+            Constants.Ids.KBO -> "가을야구 대진표"
+            else -> ""
+        }
+    }
 }
 
 

@@ -143,8 +143,8 @@ fun SplashView(
 //    }
 
     var visible by remember { mutableStateOf(false) }
-    val fadeInDuration = 500
-    val fadeOutDuration = 700
+    val fadeInDuration = 300
+    val fadeOutDuration = 500
 
     LaunchedEffect(Unit) {
         visible = true

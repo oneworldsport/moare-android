@@ -146,7 +146,7 @@ fun GameStatsViewContainer(
             this.titleContent()
         }
 
-        if (state.shouldShowGameItem) {
+        if (state.shouldShowGameContent) {
             this.gameContent()
         }
 
@@ -330,7 +330,7 @@ fun GameStatsViewContainer(
                         Row(
                             modifier = Modifier.background(Color.White)
                         ) {
-                            StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY, width = state.firstColumnWidth)
+                            StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY, width = state.firstColumnWidth, onClick = actions.firstStatsTitleCategoryAction)
 
                             Row(
                                 Modifier.horizontalScroll(horizontalScrollState)

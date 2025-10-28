@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.moare.android.core.mvi.AppViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -55,60 +57,36 @@ class MainActivity : ComponentActivity() {
             val items = listOf(Screen.Search, Screen.Moat, Screen.Profile)
 
             MoareAndroidTheme {
-                Surface(
-                    modifier = Modifier
-                        .systemBarsPadding()
-                        .fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    if (viewForTest != null) {
-                        SearchView(viewForTest = viewForTest)
-                    } else {
-                        Scaffold(
-                            bottomBar = {
-                                BottomNavigation(
-                                    backgroundColor = Color.White,
-                                ) {
-                                    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
-                                    items.forEach { screen ->
-                                        val showLabel = screen == Screen.Moat
+                AppRoot()
+            }
+        }
+    }
+}
 
-                                        BottomNavigationItem(
-                                            icon = { Icon(screen.icon, contentDescription = screen.label) },
-                                            label = if (showLabel) {
-                                                { Text(screen.label) }
-                                            } else {
-                                                null
-                                            },
-                                            selected = currentDestination == screen.route,
-                                            selectedContentColor = Moare,
-                                            unselectedContentColor = Color.Gray,
-                                            onClick = {
-                                                navController.navigate(screen.route) {
-                                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                                    launchSingleTop = true
-                                                    restoreState = true
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        ) { innerPadding ->
-                            NavHost(
-                                navController = navController,
-                                startDestination = Screen.Moat.route,
-                                modifier = Modifier.padding(innerPadding)
-                            ) {
-                                composable(Screen.Search.route) { SearchView() }
-                                composable(Screen.Moat.route) {
-                                    MoatTimelineView()
-                                }
-                                composable(Screen.Profile.route) {
-                                    UserProfileView()
-                                }
-                            }
-                        }
+@Composable
+fun AppRoot(viewModel: AppViewModel = hiltViewModel()) {
+    var isSplashFinished by remember { mutableStateOf(false) }
+
+//    val viewForTest: SportDisplayType? = SportDisplayType.KBO_GAME_STATS
+    val viewForTest: SportDisplayType? = null
+
+    Surface(
+        modifier = Modifier
+            .systemBarsPadding()
+            .fillMaxSize(),
+        color = MaterialTheme.colors.background
+    ) {
+        if (viewForTest != null) {
+            SearchView(
+                viewModel = viewModel,
+                searchStore = viewModel.searchStore,
+                viewForTest = viewForTest
+            )
+        } else {
+            SearchView(
+                viewModel = viewModel,
+                searchStore = viewModel.searchStore
+            )
 
                         if (!isSplashFinished) {
                             SplashView {
