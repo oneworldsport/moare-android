@@ -48,14 +48,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            var isSplashFinished by remember { mutableStateOf(false) }
-
-//            val viewForTest: SportDisplayType = SportDisplayType.KBO_PLAYER_INFO
-            val viewForTest: SportDisplayType? = null
-
-            val navController = rememberNavController()
-            val items = listOf(Screen.Search, Screen.Moat, Screen.Profile)
-
             MoareAndroidTheme {
                 AppRoot()
             }
@@ -70,6 +62,9 @@ fun AppRoot(viewModel: AppViewModel = hiltViewModel()) {
 //    val viewForTest: SportDisplayType? = SportDisplayType.KBO_GAME_STATS
     val viewForTest: SportDisplayType? = null
 
+    val navController = rememberNavController()
+    val items = listOf(Screen.Search, Screen.Moat, Screen.Profile)
+
     Surface(
         modifier = Modifier
             .systemBarsPadding()
@@ -83,17 +78,60 @@ fun AppRoot(viewModel: AppViewModel = hiltViewModel()) {
                 viewForTest = viewForTest
             )
         } else {
-            SearchView(
-                viewModel = viewModel,
-                searchStore = viewModel.searchStore
-            )
+            Scaffold(
+                bottomBar = {
+                    BottomNavigation(
+                        backgroundColor = Color.White,
+                    ) {
+                        val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+                        items.forEach { screen ->
+                            val showLabel = screen == Screen.Moat
 
-                        if (!isSplashFinished) {
-                            SplashView {
-                                isSplashFinished = true
-                            }
+                            BottomNavigationItem(
+                                icon = { Icon(screen.icon, contentDescription = screen.label) },
+                                label = if (showLabel) {
+                                    { Text(screen.label) }
+                                } else {
+                                    null
+                                },
+                                selected = currentDestination == screen.route,
+                                selectedContentColor = Moare,
+                                unselectedContentColor = Color.Gray,
+                                onClick = {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            )
                         }
                     }
+                }
+            ) { innerPadding ->
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Moat.route,
+                    modifier = Modifier.padding(innerPadding)
+                ) {
+                    composable(Screen.Search.route) {
+                        SearchView(
+                            viewModel = viewModel,
+                            searchStore = viewModel.searchStore
+                        )
+                    }
+                    composable(Screen.Moat.route) {
+                        MoatTimelineView()
+                    }
+                    composable(Screen.Profile.route) {
+                        UserProfileView()
+                    }
+                }
+            }
+
+            if (!isSplashFinished) {
+                SplashView {
+                    isSplashFinished = true
                 }
             }
         }
