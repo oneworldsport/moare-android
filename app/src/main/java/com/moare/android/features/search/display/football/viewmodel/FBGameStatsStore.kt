@@ -94,7 +94,7 @@ class FBGameStatsStore @AssistedInject constructor(
         _lineups.value = null
         _coach.value = null
 
-        selectTeam(false, 0)
+        selectTeam(true, 0)
     }
 
     override fun selectSecondCategory(index: Int) {
@@ -123,7 +123,9 @@ class FBGameStatsStore @AssistedInject constructor(
         _coach.value = lineups?.coach
 
         sortPlayers()
-        refreshGame(false) // NOTE: 이걸 안해주면 새로고침 누르기 전에는 FBLeagueSchedule 데이터가 업데이트 안됨.
+        if (isInit) {
+            refreshGame(false) // NOTE: 이걸 안해주면 새로고침 누르기 전에는 FBLeagueSchedule 데이터가 업데이트 안됨.
+        }
     }
 
     override fun sortPlayers() {

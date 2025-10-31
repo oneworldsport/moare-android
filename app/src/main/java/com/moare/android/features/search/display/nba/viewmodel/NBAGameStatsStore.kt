@@ -109,7 +109,7 @@ class NBAGameStatsStore @AssistedInject constructor(
 
         displayModel.value.game.boxScoreTraditional?.let {
             // set current(home) team's players stats
-            selectTeam(false, 0)
+            selectTeam(true, 0)
         }
     }
 
@@ -140,7 +140,9 @@ class NBAGameStatsStore @AssistedInject constructor(
 
         setPlayersTotalStats()
         sortPlayers()
-        refreshGame(false)
+        if (isInit) {
+            refreshGame(false)
+        }
     }
 
     override fun sortPlayers() {
