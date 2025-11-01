@@ -9,10 +9,10 @@ data class NBAGame(
     val boxScoreTraditional: NBABoxScoreTraditional? = null,
     val gameInfo: NBAGameInfo? = null,
     val gameSummary: NBAGameSummary? = null,
-    val inativePlayers: List<NBAPlayerForInactive> = emptyList(),
+    val inativePlayers: List<NBAPlayerForInactive>? = null,
     val lastMeeting: NBALastMeeting? = null,
-    val lineScore: List<NBALineScore> = emptyList(),
-    val officials: List<NBAOfficial> = emptyList(),
+    val lineScore: List<NBALineScore>? = null,
+    val officials: List<NBAOfficial>? = null,
     val otherStats: List<NBAOtherStats>? = null,
     val seasonSeries: NBASeasonSeries? = null
 )
@@ -136,38 +136,42 @@ data class NBAGameInfo(
 @Serializable
 data class NBAGameSummary(
     @SerialName("gameId") private val _gameId: String? = null,
-    @SerialName("date") private val _date: String? = null,
-    @SerialName("weekNumber") private val _weekNumber: String? = null,
+    @SerialName("gameDate") private val _gameDate: String? = null,
+    @SerialName("homeTeamId") private val _homeTeamId: Int? = null,
+    @SerialName("awayTeamId") private val _awayTeamId: Int? = null,
+    @SerialName("gameStatus") private val _gameStatus: Int? = null,
+    @SerialName("weekNumber") private val _weekNumber: Int? = null,
     @SerialName("weekName") private val _weekName: String? = null,
     @SerialName("seriesGameNumber") private val _seriesGameNumber: String? = null,
     @SerialName("gameLabel") private val _gameLabel: String? = null,
     @SerialName("gameSubLabel") private val _gameSubLabel: String? = null,
     @SerialName("seriesText") private val _seriesText: String? = null,
-    @SerialName("gamecode") private val _gameCode: String? = null,
-    @SerialName("gameStatusId") private val _gameStatusId: Int? = null,
+    @SerialName("duration") private val _duration: Int? = null,
+    @SerialName("gameCode") private val _gameCode: String? = null,
     @SerialName("gameStatusText") private val _gameStatusText: String? = null,
-    @SerialName("homeTeamId") private val _homeTeamId: Int? = null,
-    @SerialName("livePeriod") private val _livePeriod: Int? = null,
-    @SerialName("season") private val _season: String? = null,
-    @SerialName("visitorTeamId") private val _visitorTeamId: Int? = null,
-    @SerialName("whStatus") private val _whStatus: Int? = null,
+    @SerialName("regulationPeriods") private val _regulationPeriods: Int? = null,
+    @SerialName("period") private val _period: Int? = null,
+    @SerialName("gameClock") private val _gameClock: String? = null,
+    @SerialName("attendance") private val _attendance: Int? = null,
 ) {
     val gameId: String get() = _gameId ?: ""
-    val date: String get() = _date ?: ""
-    val weekNumber: String get() = _weekNumber ?: ""
+    val gameDate: String get() = _gameDate ?: ""
+    val homeTeamId: Int get() = _homeTeamId ?: 0
+    val awayTeamId: Int get() = _awayTeamId ?: 0
+    val gameStatus: Int get() = _gameStatus ?: 0
+    val weekNumber: Int get() = _weekNumber ?: 0
     val weekName: String get() = _weekName ?: ""
     val seriesGameNumber: String get() = _seriesGameNumber ?: ""
     val gameLabel: String get() = _gameLabel ?: ""
     val gameSubLabel: String get() = _gameSubLabel ?: ""
     val seriesText: String get() = _seriesText ?: ""
+    val duration: Int get() = _duration ?: 0
     val gameCode: String get() = _gameCode ?: ""
-    val gameStatusId: Int get() = _gameStatusId ?: 0
     val gameStatusText: String get() = _gameStatusText ?: ""
-    val homeTeamId: Int get() = _homeTeamId ?: 0
-    val livePeriod: Int get() = _livePeriod ?: 0
-    val season: String get() = _season ?: ""
-    val visitorTeamId: Int get() = _visitorTeamId ?: 0
-    val whStatus: Int get() = _whStatus ?: 0
+    val regulationPeriods: Int get() = _regulationPeriods ?: 0
+    val period: Int get() = _period ?: 0
+    val gameClock: String get() = _gameClock ?: ""
+    val attendance: Int get() = _attendance ?: 0
 }
 
 @Serializable
@@ -267,15 +271,15 @@ data class NBALineScore(
 
 @Serializable
 data class NBAOfficial(
-    @SerialName("firstName") private val _firstName: String? = null,
+    @SerialName("personId") private val _personId: Int? = null,
+    @SerialName("name") private val _name: String? = null,
     @SerialName("jerseyNum") private val _jerseyNum: String? = null,
-    @SerialName("lastName") private val _lastName: String? = null,
-    @SerialName("officialId") private val _officialId: Int? = null,
+    @SerialName("assignment") private val _assignment: String? = null,
 ) {
-    val firstName: String get() = _firstName ?: ""
-    val jerseyNum: String get() = _jerseyNum?.trim() ?: "" // jerseyNum 데이터에 공백값이 들어가 있음
-    val lastName: String get() = _lastName ?: ""
-    val officialId: Int get() = _officialId ?: 0
+    val personId: Int get() = _personId ?: 0
+    val name: String get() = _name ?: ""
+    val jerseyNum: String get() = _jerseyNum ?: ""
+    val assignment: String get() = _assignment ?: ""
 }
 
 @Serializable

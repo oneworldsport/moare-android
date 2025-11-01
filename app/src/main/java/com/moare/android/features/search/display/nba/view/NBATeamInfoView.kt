@@ -480,8 +480,8 @@ fun NBATeamInfoFifthItem(
         lastGame?.let {
             val homeTeam = lastGame.boxScoreTraditional?.homeTeam
             val awayTeam = lastGame.boxScoreTraditional?.awayTeam
-            val homeTeamScore = lastGame.lineScore.find { it.teamId == homeTeam?.teamId }?.pts ?: 0
-            val awayTeamScore = lastGame.lineScore.find { it.teamId == awayTeam?.teamId }?.pts ?: 0
+            val homeTeamScore = lastGame.lineScore?.find { it.teamId == homeTeam?.teamId }?.pts ?: 0
+            val awayTeamScore = lastGame.lineScore?.find { it.teamId == awayTeam?.teamId }?.pts ?: 0
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -536,7 +536,7 @@ fun NBATeamInfoFifthItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(lastGame.gameSummary?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                text = CalendarUtil.formatDate(lastGame.gameSummary?.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )
@@ -584,7 +584,8 @@ fun NBATeamInfoSixthItem(
         )
 
         if (nextGame != null) {
-            val lastMeeting = nextGame.lastMeeting
+            val homeTeamId = nextGame.gameSummary?.homeTeamId
+            val awayTeamId = nextGame.gameSummary?.awayTeamId
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -592,7 +593,7 @@ fun NBATeamInfoSixthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = if (lastMeeting?.lastGameHomeTeamId == null) "" else teamNameDic["short_${lastMeeting.lastGameHomeTeamId}"] ?: lastMeeting.lastGameHomeTeamCity,
+                    text = if (homeTeamId == null) "" else teamNameDic["short_${homeTeamId}"] ?: "",
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -609,7 +610,7 @@ fun NBATeamInfoSixthItem(
                 )
 
                 Text(
-                    text = if (lastMeeting?.lastGameVisitorTeamId == null) "" else teamNameDic["short_${lastMeeting.lastGameVisitorTeamId}"] ?: lastMeeting.lastGameVisitorTeamCity,
+                    text = if (awayTeamId == null) "" else teamNameDic["short_${awayTeamId}"] ?: "",
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -619,7 +620,7 @@ fun NBATeamInfoSixthItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(nextGame.gameSummary?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                text = CalendarUtil.formatDate(nextGame.gameSummary?.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )

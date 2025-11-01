@@ -43,6 +43,7 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.Util
 import com.moare.android.features.search.display.common.container.view.RoundSeriesKey
 import com.moare.android.features.search.models.models.common.GameForSchedule
+import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.theme.Moare
@@ -119,19 +120,37 @@ fun <T> TournamentSeriesLeftGameItem(
         val (topSeedTeamSeriesScore, bottomSeedTeamSeriesScore) = games.fold(0 to 0) { partial, game ->
             var (top, bottom) = partial
 
+            val homeTeamScore = game.homeTeamScore
+            val awayTeamScore = game.awayTeamScore
+            val homeTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
+            val awayTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
+
+            val isHomeWinner = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+                // 축구경기에서 승부차기로 끝난경우
+                homeTeamPenaltyScore > awayTeamPenaltyScore
+            } else {
+                homeTeamScore > awayTeamScore
+            }
+            val isAwayWinner = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+                // 축구경기에서 승부차기로 끝난경우
+                awayTeamPenaltyScore > homeTeamPenaltyScore
+            } else {
+                awayTeamScore > homeTeamScore
+            }
+
             if (game.homeTeamId == topSeedTeamId && game.awayTeamId == bottomSeedTeamId) {
                 // 홈팀이 topSeed인경우
-                if (game.homeTeamScore > game.awayTeamScore) {
+                if (isHomeWinner) {
                     top += 1
-                } else if (game.awayTeamScore > game.homeTeamScore) {
+                } else if (isAwayWinner) {
                     bottom += 1
                 }
             } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == topSeedTeamId) {
                 // 홈팀이 bottomSeed인경우
-                if (game.awayTeamScore > game.homeTeamScore) {
-                    top += 1
-                } else if (game.homeTeamScore > game.awayTeamScore) {
+                if (isHomeWinner) {
                     bottom += 1
+                } else if (isAwayWinner) {
+                    top += 1
                 }
             }
 
@@ -178,7 +197,8 @@ fun <T> TournamentSeriesLeftGameItem(
                             Text(
                                 text = if (topSeedTeamId == null) "미정" else teamNameDic["short_${topSeedTeamId}"] ?: "",
                                 fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(end = 4.dp)
                             )
 
                             URLImage(
@@ -281,7 +301,8 @@ fun <T> TournamentSeriesLeftGameItem(
                             Text(
                                 text = if (bottomSeedTeamId == null) "미정" else teamNameDic["short_${bottomSeedTeamId}"] ?: "",
                                 fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(end = 4.dp)
                             )
 
                             URLImage(
@@ -401,19 +422,37 @@ fun <T> TournamentSeriesRightGameItem(
         val (topSeedTeamSeriesScore, bottomSeedTeamSeriesScore) = games.fold(0 to 0) { partial, game ->
             var (top, bottom) = partial
 
+            val homeTeamScore = game.homeTeamScore
+            val awayTeamScore = game.awayTeamScore
+            val homeTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
+            val awayTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
+
+            val isHomeWinner = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+                // 축구경기에서 승부차기로 끝난경우
+                homeTeamPenaltyScore > awayTeamPenaltyScore
+            } else {
+                homeTeamScore > awayTeamScore
+            }
+            val isAwayWinner = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+                // 축구경기에서 승부차기로 끝난경우
+                awayTeamPenaltyScore > homeTeamPenaltyScore
+            } else {
+                awayTeamScore > homeTeamScore
+            }
+
             if (game.homeTeamId == topSeedTeamId && game.awayTeamId == bottomSeedTeamId) {
                 // 홈팀이 topSeed인경우
-                if (game.homeTeamScore > game.awayTeamScore) {
+                if (isHomeWinner) {
                     top += 1
-                } else if (game.awayTeamScore > game.homeTeamScore) {
+                } else if (isAwayWinner) {
                     bottom += 1
                 }
             } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == topSeedTeamId) {
                 // 홈팀이 bottomSeed인경우
-                if (game.awayTeamScore > game.homeTeamScore) {
-                    top += 1
-                } else if (game.homeTeamScore > game.awayTeamScore) {
+                if (isHomeWinner) {
                     bottom += 1
+                } else if (isAwayWinner) {
+                    top += 1
                 }
             }
 
@@ -464,21 +503,6 @@ fun <T> TournamentSeriesRightGameItem(
                     CenterRow(
                         modifier = Modifier.padding(bottom = 2.dp)
                     ) {
-                        CenterRow(
-                            modifier = Modifier.width(130.dp)
-                        ) {
-                            Text(
-                                text = if (topSeedTeamId == null) "미정" else teamNameDic["short_${topSeedTeamId}"] ?: "",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-
-                            URLImage(
-                                url = Util.teamLogoUrl(leagueId, topSeedTeamId),
-                                size = URLImageSize.SMALL
-                            )
-                        }
-
                         Text(
                             text = if (isSeriesStarted) topSeedTeamSeriesScore.toString() else "-",
                             color = if (isSeriesStarted) {
@@ -487,6 +511,22 @@ fun <T> TournamentSeriesRightGameItem(
                                 Color.Black
                             }
                         )
+
+                        CenterRow(
+                            modifier = Modifier.width(130.dp)
+                        ) {
+                            Text(
+                                text = if (topSeedTeamId == null) "미정" else teamNameDic["short_${topSeedTeamId}"] ?: "",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+
+                            URLImage(
+                                url = Util.teamLogoUrl(leagueId, topSeedTeamId),
+                                size = URLImageSize.SMALL
+                            )
+                        }
                     }
 
                     if (isScoreOpened) {
@@ -567,21 +607,6 @@ fun <T> TournamentSeriesRightGameItem(
                     CenterRow(
                         modifier = Modifier.padding(top = 2.dp)
                     ) {
-                        CenterRow(
-                            modifier = Modifier.width(130.dp)
-                        ) {
-                            Text(
-                                text = if (bottomSeedTeamId == null) "미정" else teamNameDic["short_${bottomSeedTeamId}"] ?: "",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-
-                            URLImage(
-                                url = Util.teamLogoUrl(leagueId, bottomSeedTeamId),
-                                size = URLImageSize.SMALL
-                            )
-                        }
-
                         Text(
                             text = if (isSeriesStarted) bottomSeedTeamSeriesScore.toString() else "-",
                             color = if (isSeriesStarted) {
@@ -590,6 +615,22 @@ fun <T> TournamentSeriesRightGameItem(
                                 Color.Black
                             }
                         )
+
+                        CenterRow(
+                            modifier = Modifier.width(130.dp)
+                        ) {
+                            Text(
+                                text = if (bottomSeedTeamId == null) "미정" else teamNameDic["short_${bottomSeedTeamId}"] ?: "",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+
+                            URLImage(
+                                url = Util.teamLogoUrl(leagueId, bottomSeedTeamId),
+                                size = URLImageSize.SMALL
+                            )
+                        }
                     }
                 }
             }
@@ -635,19 +676,37 @@ fun <T> TournamentSeriesFinalGameItem(
     val (topSeedTeamSeriesScore, bottomSeedTeamSeriesScore) = games.fold(0 to 0) { partial, game ->
         var (top, bottom) = partial
 
+        val homeTeamScore = game.homeTeamScore
+        val awayTeamScore = game.awayTeamScore
+        val homeTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
+        val awayTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
+
+        val isHomeWinner = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+            // 축구경기에서 승부차기로 끝난경우
+            homeTeamPenaltyScore > awayTeamPenaltyScore
+        } else {
+            homeTeamScore > awayTeamScore
+        }
+        val isAwayWinner = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+            // 축구경기에서 승부차기로 끝난경우
+            awayTeamPenaltyScore > homeTeamPenaltyScore
+        } else {
+            awayTeamScore > homeTeamScore
+        }
+
         if (game.homeTeamId == topSeedTeamId && game.awayTeamId == bottomSeedTeamId) {
             // 홈팀이 topSeed인경우
-            if (game.homeTeamScore > game.awayTeamScore) {
+            if (isHomeWinner) {
                 top += 1
-            } else if (game.awayTeamScore > game.homeTeamScore) {
+            } else if (isAwayWinner) {
                 bottom += 1
             }
         } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == topSeedTeamId) {
             // 홈팀이 bottomSeed인경우
-            if (game.awayTeamScore > game.homeTeamScore) {
-                top += 1
-            } else if (game.homeTeamScore > game.awayTeamScore) {
+            if (isHomeWinner) {
                 bottom += 1
+            } else if (isAwayWinner) {
+                top += 1
             }
         }
 

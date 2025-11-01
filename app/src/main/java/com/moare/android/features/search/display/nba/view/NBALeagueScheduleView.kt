@@ -134,8 +134,6 @@ fun NBALeagueScheduleListItem(
     data: NBAGameForSchedule,
 ) {
     val gameId = data.gameId
-    val homeTeamId = data.homeTeamId
-    val awayTeamId = data.awayTeamId
     val gameStatus = data.gameStatus.toIntOrNull() ?: 0
 
     /* ---------------------
@@ -148,39 +146,6 @@ fun NBALeagueScheduleListItem(
        --------------------- */
     val gameResultOpenedStateList by store.gameResultOpenedStateList.collectAsState()
     val displayModel by store.displayModel.collectAsState()
-
-    /* ---------------------
-       constants
-       --------------------- */
-    val gameStatusText = when (gameStatus) {
-        StringConstants.NBA.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.NBA.GAME_LIVE -> StringConstants.GAME_LIVE_STR
-//            if (data.lineScore.firstOrNull()?.ptsOt3 != null) {
-//            StringConstants.NBA.GAME_OT_3
-//        } else if (data.lineScore.firstOrNull()?.ptsOt2 != null) {
-//            StringConstants.NBA.GAME_OT_2
-//        } else if (data.lineScore.firstOrNull()?.ptsOt1 != null) {
-//            StringConstants.NBA.GAME_OT_1
-//        } else if (data.lineScore.firstOrNull()?.ptsQtr4 != null) {
-//            StringConstants.NBA.GAME_QTR_4
-//        } else if (data.lineScore.firstOrNull()?.ptsQtr3 != null) {
-//            StringConstants.NBA.GAME_QTR_3
-//        } else if (data.lineScore.firstOrNull()?.ptsQtr2 != null) {
-//            StringConstants.NBA.GAME_QTR_2
-//        } else if (data.lineScore.firstOrNull()?.ptsQtr1 != null) {
-//            StringConstants.NBA.GAME_QTR_1
-//        } else {
-//            ""
-//        }
-        StringConstants.NBA.GAME_FINAL -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
-        else -> ""
-    }
-
-    val gameStatusColor = if (gameStatus == StringConstants.NBA.GAME_LIVE) {
-        MaterialTheme.colors.primary
-    } else {
-        Color.Gray
-    }
 
     /* ---------------------
        LaunchedEffect
@@ -206,10 +171,10 @@ fun NBALeagueScheduleListItem(
             game = data,
             teamNameDic = teamNameDic,
             isResultOpened = isResultOpened,
-            gameStatusText = gameStatusText,
-            gameStatusColor = gameStatusColor,
+            gameStatusText = Constants.GameStatus.nbaGameStatusText(data.gameStatus, data.gameInfo?.period, isResultOpened),
+            gameStatusColor = Constants.GameStatus.gameStatusColor(Constants.Ids.NBA, data.gameStatus),
             isCapsuleButtonDisabled = gameStatus != StringConstants.NBA.GAME_FINAL,
-//            gameType = "", // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
+            gameType = NBAUtil.gameType(data.gameInfo), // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
         ),
         actions = ScheduleGameItemActions(

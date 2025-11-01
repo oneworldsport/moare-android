@@ -282,6 +282,26 @@ object Constants {
             }
         }
 
+        fun nbaGameStatusText(
+            status: String,
+            period: Int? = null,
+            isResultOpened: Boolean = true
+        ): String {
+            val insStatus = status.toIntOrNull()
+            return when (insStatus) {
+                NBA.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
+                NBA.LIVE -> {
+                    if (period != null) {
+                        "${period}쿼터"
+                    } else {
+                        StringConstants.GAME_LIVE_STR
+                    }
+                }
+                NBA.FINISHED -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
+                else -> ""
+            }
+        }
+
         fun mlbGameStatusText(
             status: String,
             currentInning: String? = null,
@@ -307,7 +327,7 @@ object Constants {
         fun isLive(leagueId: Int, status: String): Boolean {
             return when (leagueId) {
                 in Ids.FOOTBALL_ALL -> Football.LIVE_LIST.contains(status)
-                Ids.NBA -> false
+                Ids.NBA -> status == NBA.LIVE.toString()
                 Ids.MLB -> status == MLB.LIVE
                 Ids.KBO -> status == KBO.LIVE
                 else -> false
