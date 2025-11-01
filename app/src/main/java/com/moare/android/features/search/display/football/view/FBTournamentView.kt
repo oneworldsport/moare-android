@@ -3,9 +3,14 @@ package com.moare.android.features.search.display.football.view
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.moare.android.features.search.display.common.container.state.TournamentBracketContainerState
+import com.moare.android.features.search.display.common.container.state.TournamentContainerAction
 import com.moare.android.features.search.display.common.container.state.TournamentDrawContainerState
+import com.moare.android.features.search.display.common.container.view.TournamentBracketViewContainer
 import com.moare.android.features.search.display.common.container.view.TournamentDrawViewContainer
+import com.moare.android.features.search.display.football.viewmodel.FBTournamentAction
 import com.moare.android.features.search.display.football.viewmodel.FBTournamentStore
+import com.moare.android.features.search.display.nba.viewmodel.NBATournamentAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 
@@ -17,9 +22,27 @@ fun FBTournamentView(
     val displayModel by store.displayModel.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
     val gameListTuple by store.gameListTuple.collectAsState()
+    val seedIdPairList by store.seedIdPairList.collectAsState()
 
     if (displayModel.scheduleType == ScheduleType.TOURNAMENT_BRACKET) {
-        // TODO: 축구에서 Bracket생기면 작업
+        TournamentBracketViewContainer(
+            state = TournamentBracketContainerState(
+                leagueId = displayModel.leagueId,
+                teamNameDic = teamNameDic,
+                gameListTuple = gameListTuple,
+                seedIdPairList = seedIdPairList,
+                isConference = true,
+                isSeries = false
+            ),
+            action = TournamentContainerAction(
+                selectSeries = { gameList ->
+                    store.send(FBTournamentAction.SelectSeries(gameList))
+                },
+                selectGame = { game ->
+                    store.send(FBTournamentAction.SelectGame(game))
+                }
+            )
+        )
     } else {
         TournamentDrawViewContainer(
             state = TournamentDrawContainerState(
