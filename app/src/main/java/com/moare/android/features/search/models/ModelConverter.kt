@@ -888,11 +888,11 @@ object ModelConverter {
 
     fun nbaGameToGameScheduleConverter(game: NBAGame): NBAGameForSchedule {
         val gameSummary = game.gameSummary
-        val date = gameSummary?.date?.split("+")?.firstOrNull()
+        val date = gameSummary?.gameDate?.split("+")?.firstOrNull()
         val homeTeamId = gameSummary?.homeTeamId
-        val awayTeamId = gameSummary?.visitorTeamId
-        val homeTeamScore = game.lineScore.firstOrNull { it.teamId == homeTeamId }?.pts ?: 0
-        val awayTeamScore = game.lineScore.firstOrNull { it.teamId == awayTeamId }?.pts ?: 0
+        val awayTeamId = gameSummary?.awayTeamId
+        val homeTeamScore = game.lineScore?.firstOrNull { it.teamId == homeTeamId }?.pts ?: 0
+        val awayTeamScore = game.lineScore?.firstOrNull { it.teamId == awayTeamId }?.pts ?: 0
 
         return NBAGameForSchedule(
             _itemKey = if (date != null) "${date}#${gameSummary.gameId}" else "",
@@ -900,7 +900,7 @@ object ModelConverter {
             _awayTeamId = awayTeamId,
             _homeTeamScore = homeTeamScore,
             _awayTeamScore = awayTeamScore,
-            _gameStatus = gameSummary?.gameStatusId?.toString(),
+            _gameStatus = gameSummary?.gameStatus?.toString(),
             gameInfo = gameSummary
         )
     }

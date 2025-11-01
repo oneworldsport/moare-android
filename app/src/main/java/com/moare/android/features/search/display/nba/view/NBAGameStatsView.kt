@@ -81,11 +81,10 @@ fun NBAGameStatsView(
     val secondCategorySelectedIndex by store.secondCategorySelectedIndex.collectAsState()
     val selectedTeamIndex by store.teamCategorySelectedIndex.collectAsState()
     val playerStats by store.playerStats.collectAsState()
-    val season = displayModel.game.gameSummary?.season
     val teamNameDic by store.teamNameDic.collectAsState()
     val playerNameDic by store.playerNameDic.collectAsState()
 
-    val teamIds = listOf(displayModel.game.gameSummary?.homeTeamId, displayModel.game.gameSummary?.visitorTeamId)
+    val teamIds = listOf(displayModel.game.gameSummary?.homeTeamId, displayModel.game.gameSummary?.awayTeamId)
     val teamCategories = teamIds.map {
         GameStatsTeamState(
             name = teamNameDic["short_${it}"] ?: "",
@@ -132,12 +131,13 @@ fun NBAGameStatsView(
     val officials = displayModel.game.officials
     val gameDetailTitle = "날짜: \n\n장소: \n관중수: \n심판: "
     val gameDetailContent = buildString {
-        append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.date).split(" ").firstOrNull() ?: ""}\n")
-        append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.date, TimeFormatType.AMPM)}\n")
+        append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.gameDate).split(" ").firstOrNull() ?: ""}\n")
+        append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.gameDate, TimeFormatType.AMPM)}\n")
         append("${teamNameDic["venue_${displayModel.game.gameSummary?.homeTeamId}"] ?: ""}\n")
-        append("${displayModel.game.gameInfo?.attendance ?: 0}\n")
-        officials.forEachIndexed { index, official ->
-            append("• ${official.firstName + official.lastName}")
+        append("${displayModel.game.gameSummary?.attendance ?: 0}\n")
+        officials?.forEachIndexed { index, official ->
+//            append("• ${official.firstName + official.lastName}")
+            append("• ${official.name}")
             if (index != officials.lastIndex) {
                 append("\n")
             }
@@ -176,8 +176,8 @@ fun NBAGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowStats = displayModel.game.gameSummary?.gameStatusId != Constants.GameStatus.NBA.NOT_STARTED,
-            shouldShowRefreshButton = displayModel.game.gameSummary?.gameStatusId == Constants.GameStatus.NBA.LIVE,
+            shouldShowStats = displayModel.game.gameSummary?.gameStatus != Constants.GameStatus.NBA.NOT_STARTED,
+            shouldShowRefreshButton = displayModel.game.gameSummary?.gameStatus == Constants.GameStatus.NBA.LIVE,
             teamCategories = teamCategories,
             secondCategories = StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,
@@ -208,7 +208,7 @@ fun NBAGameStatsView(
             ) {
                 NBATitle(
                     leagueName = "NBA",
-                    leagueSeason = season?.split("-")?.firstOrNull()?.toIntOrNull() ?: CalendarUtil.currentYear
+                    leagueSeason = displayModel.season
                 )
 
                 Text(
@@ -257,39 +257,7 @@ fun NBAGameStatsScoreInfoItem(
 
     val game = displayModel.game
     val homeTeamId = game.gameSummary?.homeTeamId
-    val awayTeamId = game.gameSummary?.visitorTeamId
-
-    /* ---------------------
-       constants
-       --------------------- */
-    val gameStatusText = when (game.gameSummary?.gameStatusId) {
-        Constants.GameStatus.NBA.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
-        Constants.GameStatus.NBA.LIVE -> if (homeTeamLineScore?.ptsOt3 != null) {
-            StringConstants.NBA.GAME_OT_3
-        } else if (homeTeamLineScore?.ptsOt2 != null) {
-            StringConstants.NBA.GAME_OT_2
-        } else if (homeTeamLineScore?.ptsOt1 != null) {
-            StringConstants.NBA.GAME_OT_1
-        } else if (homeTeamLineScore?.ptsQtr4 != null) {
-            StringConstants.NBA.GAME_QTR_4
-        } else if (homeTeamLineScore?.ptsQtr3 != null) {
-            StringConstants.NBA.GAME_QTR_3
-        } else if (homeTeamLineScore?.ptsQtr2 != null) {
-            StringConstants.NBA.GAME_QTR_2
-        } else if (homeTeamLineScore?.ptsQtr1 != null) {
-            StringConstants.NBA.GAME_QTR_1
-        } else {
-            ""
-        }
-        Constants.GameStatus.NBA.FINISHED -> StringConstants.GAME_FINISHED_STR
-        else -> ""
-    }
-
-    val gameStatusColor = if (game.gameSummary?.gameStatusId == Constants.GameStatus.NBA.LIVE) {
-        MaterialTheme.colors.primary
-    } else {
-        Color.Gray
-    }
+    val awayTeamId = game.gameSummary?.awayTeamId
 
     /* ---------------------
        ui
@@ -332,8 +300,8 @@ fun NBAGameStatsScoreInfoItem(
 
             // game status
             CapsuleButton(
-                text = gameStatusText,
-                color = gameStatusColor,
+                text = Constants.GameStatus.nbaGameStatusText(game.gameSummary?.gameStatus.toString(), game.gameSummary?.period),
+                color = Constants.GameStatus.gameStatusColor(Constants.Ids.NBA, game.gameSummary?.gameStatus.toString()),
                 isDisabled = true,
                 modifier = Modifier.padding(vertical = 4.dp)
             ) {}
