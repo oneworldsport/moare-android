@@ -24,5 +24,6 @@ data class GameListEntry<T>(
 )
 
 data class TournamentContainerAction<T>(
-    val selectSeries: ((List<GameForSchedule<T>>) -> Unit)? = null
+    val selectSeries: ((List<GameForSchedule<T>>) -> Unit)? = null,
+    val selectGame: ((GameForSchedule<T>) -> Unit)? = null
 )

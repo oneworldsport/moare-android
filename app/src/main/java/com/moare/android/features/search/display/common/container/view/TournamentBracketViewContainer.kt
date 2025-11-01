@@ -40,7 +40,7 @@ fun <T> TournamentBracketViewContainer(
 ) {
     val leftBracketTitles = listOf("서부", "NL", "와일드카드", "준플레이오프", "플레이오프", "한국시리즈")
     val rightBracketTitles = listOf("동부", "AL")
-    val finalBracketTitles = listOf("NBA", "월드")
+    val finalBracketTitles = listOf("NBA", "월드", "MLS")
     val mlbBracketTitles = listOf("NL", "AL")
 
     var leftItemHeights = remember { mutableStateMapOf<RoundSeriesKey, Dp>() }
@@ -89,6 +89,9 @@ fun <T> TournamentBracketViewContainer(
             val shouldShow = if (state.isConference) leftBracketTitles.contains(title.split(" ").firstOrNull() ?: "") else true
             val isMLB = state.leagueId == Constants.Ids.MLB
             val isKBO = state.leagueId == Constants.Ids.KBO
+            val isSeries = if (state.leagueId == Constants.Ids.MLS) {
+                roundIndex == 0 || roundIndex == 6
+            } else state.isSeries
 
             // default or left
             if (shouldShow) {
@@ -103,10 +106,9 @@ fun <T> TournamentBracketViewContainer(
 
                     gameList.forEachIndexed { seriesIndex, games ->
                         val seriesIndexForPosition = seriesIndex + 1
+                        val bottom = bottomPadding(roundIndexForPosition, seriesIndexForPosition, true)
 
-                        if (state.isSeries) {
-                            val bottom = bottomPadding(roundIndexForPosition, seriesIndexForPosition, true)
-
+                        if (isSeries) {
                             TournamentSeriesLeftGameItem(
                                 leagueId = state.leagueId,
                                 teamNameDic = state.teamNameDic,
@@ -122,9 +124,19 @@ fun <T> TournamentBracketViewContainer(
                                 selectSeries = action.selectSeries
                             )
                         } else {
-                            games?.firstOrNull()?.let {
-                                // TODO: Barcket인데 단판인 경우 생기면 작업
-                            }
+                            TournamentBracketSingleLeftGameItem(
+                                leagueId = state.leagueId,
+                                teamNameDic = state.teamNameDic,
+                                game = games?.firstOrNull(),
+                                seedIdPair = state.seedIdPairList[roundIndex][seriesIndex],
+                                itemPosition = RoundSeriesKey(roundIndexForPosition, seriesIndexForPosition),
+                                itemHeights = leftItemHeights,
+                                modifier = Modifier.padding(bottom = bottom),
+                                onItemHeightChange = { key, height ->
+                                    leftItemHeights[key] = height
+                                },
+                                selectGame = action.selectGame
+                            )
                         }
                     }
                 }
@@ -143,14 +155,25 @@ fun <T> TournamentBracketViewContainer(
                         )
 
                         gameList.firstOrNull()?.let { games ->
-                            TournamentSeriesFinalGameItem(
-                                leagueId = state.leagueId,
-                                teamNameDic = state.teamNameDic,
-                                games = games,
-                                seedIdPair = state.seedIdPairList[roundIndex][0],
-                                itemHeights = leftItemHeights,
-                                selectSeries = action.selectSeries
-                            )
+                            if (isSeries) {
+                                TournamentSeriesFinalGameItem(
+                                    leagueId = state.leagueId,
+                                    teamNameDic = state.teamNameDic,
+                                    games = games,
+                                    seedIdPair = state.seedIdPairList[roundIndex][0],
+                                    itemHeights = leftItemHeights,
+                                    selectSeries = action.selectSeries
+                                )
+                            } else {
+                                TournamentBracketSingleFinalGameItem(
+                                    leagueId = state.leagueId,
+                                    teamNameDic = state.teamNameDic,
+                                    game = games.firstOrNull(),
+                                    seedIdPair = state.seedIdPairList[roundIndex][0],
+                                    itemHeights = leftItemHeights,
+                                    selectGame = action.selectGame
+                                )
+                            }
                         }
                     }
                 }
@@ -168,10 +191,9 @@ fun <T> TournamentBracketViewContainer(
 
                         gameList.forEachIndexed { seriesIndex, games ->
                             val seriesIndexForPosition = seriesIndex + 1
+                            val bottom = bottomPadding(roundIndexForPosition, seriesIndexForPosition, false)
 
-                            if (state.isSeries) {
-                                val bottom = bottomPadding(roundIndexForPosition, seriesIndexForPosition, false)
-
+                            if (isSeries) {
                                 TournamentSeriesRightGameItem(
                                     leagueId = state.leagueId,
                                     teamNameDic = state.teamNameDic,
@@ -187,9 +209,19 @@ fun <T> TournamentBracketViewContainer(
                                     selectSeries = action.selectSeries
                                 )
                             } else {
-                                games?.firstOrNull()?.let {
-                                    // TODO: Barcket인데 단판인 경우 생기면 작업
-                                }
+                                TournamentBracketSingleRightGameItem(
+                                    leagueId = state.leagueId,
+                                    teamNameDic = state.teamNameDic,
+                                    game = games?.firstOrNull(),
+                                    seedIdPair = state.seedIdPairList[roundIndex][seriesIndex],
+                                    itemPosition = RoundSeriesKey(roundIndexForPosition, seriesIndexForPosition),
+                                    itemHeights = rightItemHeights,
+                                    modifier = Modifier.padding(bottom = bottom),
+                                    onItemHeightChange = { key, height ->
+                                        rightItemHeights[key] = height
+                                    },
+                                    selectGame = action.selectGame
+                                )
                             }
                         }
                     }

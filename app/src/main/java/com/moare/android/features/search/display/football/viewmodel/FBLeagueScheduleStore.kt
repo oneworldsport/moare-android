@@ -1,12 +1,16 @@
 package com.moare.android.features.search.display.football.viewmodel
 
 import android.util.Log
+import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.features.search.display.common.store.BaseScheduleStore
+import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleDelegate
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
+import com.moare.android.features.search.models.Keyword
+import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBLeagueScheduleDisplayModel
@@ -30,6 +34,7 @@ sealed interface FBLeagueScheduleAction {
     data object ToggleAllResult : FBLeagueScheduleAction
     data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : FBLeagueScheduleAction
     data class SelectGame(val game: FBGameForSchedule) : FBLeagueScheduleAction
+    data object ShowTournament : FBLeagueScheduleAction
     data object UpdateSelectedGame : FBLeagueScheduleAction
     data object UpdateFilteredGames : FBLeagueScheduleAction
 
@@ -38,6 +43,7 @@ sealed interface FBLeagueScheduleAction {
 
 sealed interface FBLeagueScheduleDelegate {
     data class ShowGameStats(val model: SportDecodableModel.FBGameStats) : FBLeagueScheduleDelegate
+    data class ShowTournament(val model: SportDecodableModel.FBTournament) : FBLeagueScheduleDelegate
 }
 
 class FBLeagueScheduleStore @AssistedInject constructor(
@@ -76,6 +82,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
             is FBLeagueScheduleAction.ToggleAllResult -> toggleAllResult()
             is FBLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.gameId, action.isOpened)
             is FBLeagueScheduleAction.SelectGame -> selectGame(action.game)
+            is FBLeagueScheduleAction.ShowTournament -> showTournament()
             is FBLeagueScheduleAction.UpdateSelectedGame -> updateSelectedGame()
             is FBLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
             is FBLeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
@@ -118,6 +125,15 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                 }
 
 //                setDays(true)
+            }
+            ScheduleType.TEAM_FLAT -> {
+                // filteredGames 초기화
+                _filteredGames.value = mapOf(0 to displayModel.value.games)
+
+                // gameResultOpenedStateList 초기화
+                _gameResultOpenedStateList.update {
+                    displayModel.value.games.associate { (it.gameId) to false }
+                }
             }
             else -> {}
         }
@@ -287,10 +303,18 @@ class FBLeagueScheduleStore @AssistedInject constructor(
     }
 
     private fun updateFilteredGames() {
-        _filteredGames.update { currentMap ->
-            currentMap.toMutableMap().apply {
-                this[selectedDayIndex.value] = displayModel.value.games.filter { game ->
-                    CalendarUtil.isSameDate(game.date, selectedYearMonth.value, selectedDayIndex.value + 1)
+        if (displayModel.value.scheduleType == ScheduleType.TEAM_FLAT) {
+            _filteredGames.update { currentMap ->
+                currentMap.toMutableMap().apply {
+                    this[0] = displayModel.value.games
+                }
+            }
+        } else {
+            _filteredGames.update { currentMap ->
+                currentMap.toMutableMap().apply {
+                    this[selectedDayIndex.value] = displayModel.value.games.filter { game ->
+                        CalendarUtil.isSameDate(game.date, selectedYearMonth.value, selectedDayIndex.value + 1)
+                    }
                 }
             }
         }
@@ -305,6 +329,31 @@ class FBLeagueScheduleStore @AssistedInject constructor(
             leagueScheduleDisplayModel = displayModel.value
         )
         _league.value = model.displayModel.game.league
+    }
+
+    private fun showTournament() {
+        scope.launch {
+            val keywordInfo = KeywordInfo(
+                keyword = "MLS 플레이오프",
+                weight = 100,
+                keywords = listOf(Keyword(keyword = "플레이오프", id = "tournament", priority = 2)),
+                entities = listOf(
+                    EntityInfo(
+                        entityId = Constants.Ids.MLS,
+                        entityName = "MLS",
+                        category = "football",
+                        entityType = "league",
+                        leagueId = Constants.Ids.MLS
+                    )
+                )
+            )
+
+            val result = searchClient.fetchDataByKeyword(keywordInfo)
+
+            if (result.data is SportDecodableModel.FBTournament) {
+                emitToParent(FBLeagueScheduleDelegate.ShowTournament(result.data))
+            }
+        }
     }
 }
 

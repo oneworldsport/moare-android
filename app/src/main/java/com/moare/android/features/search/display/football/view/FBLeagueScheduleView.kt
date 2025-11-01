@@ -28,6 +28,7 @@ import com.moare.android.features.search.display.football.viewmodel.FBLeagueSche
 import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleStore
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
+import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.ui.common.components.FBLeagueTitle
 import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
 
@@ -53,7 +54,9 @@ fun FBLeagueScheduleView(
     val isAllResultOpened by store.isAllResultOpened.collectAsState()
     val displayDataState by store.displayDataState.collectAsState()
     val selectedGame by store.selectedGame.collectAsState()
+    val selectedMonth by store.selectedMonth.collectAsState()
     val league by store.league.collectAsState()
+    val leagueId = displayModel.leagueId
 
     LaunchedEffect(didPop) {
         // 뒤로가서 일정화면으로 돌아왔을때 filteredGames update
@@ -65,9 +68,10 @@ fun FBLeagueScheduleView(
 
     ScheduleViewContainer(
         state = ScheduleContainerState(
-            leagueId = displayModel.leagueId,
-            shouldShowCalendar = selectedGame == null,
+            leagueId = leagueId,
+            shouldShowCalendar = (displayModel.scheduleType != ScheduleType.TEAM_FLAT) && ( selectedGame == null),
             shouldShowAllResultToggleButton = selectedGame == null,
+            shouldFetchSchedule = displayModel.scheduleType == ScheduleType.LEAGUE,
             displayDataState = displayDataState,
             shouldFillBelow = selectedGame == null,
             calendarUiState = CalendarUiState(
@@ -79,7 +83,8 @@ fun FBLeagueScheduleView(
                 dayCalendarScrollTrigger,
                 shouldAnimateScroll
             ),
-            isAllResultOpened = isAllResultOpened
+            isAllResultOpened = isAllResultOpened,
+            shouldShowTournamentButton = (leagueId == Constants.Ids.MLS) && (selectedMonth >= 10),
         ),
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
@@ -94,6 +99,9 @@ fun FBLeagueScheduleView(
             ),
             allResultButtonAction = {
                 store.send(FBLeagueScheduleAction.ToggleAllResult)
+            },
+            tournamentButtonAction = {
+                store.send(FBLeagueScheduleAction.ShowTournament)
             }
         ),
         titleContent = {
@@ -207,9 +215,11 @@ fun FBLeagueScheduleListItem(
             isResultOpened = isResultOpened,
             gameStatusText = Constants.GameStatus.fbGameStatusText(data.gameStatus, gameInfo?.elapsed, isResultOpened),
             gameStatusColor = Constants.GameStatus.gameStatusColor(leagueId, data.gameStatus),
-            isCapsuleButtonDisabled = (if (isFromSchedule) selectedGame != null else true) || !StringConstants.Football.GAME_FINISHED_LIST.contains(gameStatus),
+            isCapsuleButtonDisabled = (if (isFromSchedule) selectedGame != null else true) || !Constants.GameStatus.Football.FINISHED_LIST.contains(gameStatus),
             gameType = MatchDescriptionConverter.convert(input = data.gameInfo?.round ?: ""),
-            shouldShowOnlyDateTime = if (isFromSchedule) selectedGame == null else false,
+            shouldShowOnlyDateTime = if (isFromSchedule) {
+                (displayModel?.scheduleType != ScheduleType.TEAM_FLAT) && (selectedGame == null)
+            } else false,
             shouldShowGameType = if (isFromSchedule) selectedGame == null else false,
             shouldShowHomeLabel = if (isFromSchedule) selectedGame != null else true,
             shouldShowAwayLabel = if (isFromSchedule) selectedGame != null else true

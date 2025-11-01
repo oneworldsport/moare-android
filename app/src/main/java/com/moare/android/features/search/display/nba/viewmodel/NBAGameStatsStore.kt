@@ -100,16 +100,16 @@ class NBAGameStatsStore @AssistedInject constructor(
 
         displayModel.value.game.gameSummary?.let {
             homeTeamId = it.homeTeamId
-            awayTeamId = it.visitorTeamId
+            awayTeamId = it.awayTeamId
         }
 
         // set lineScore
-        _homeTeamLineScore.value = displayModel.value.game.lineScore.find { it.teamId == homeTeamId }
-        _awayTeamLineScore.value = displayModel.value.game.lineScore.find { it.teamId == awayTeamId }
+        _homeTeamLineScore.value = displayModel.value.game.lineScore?.find { it.teamId == homeTeamId }
+        _awayTeamLineScore.value = displayModel.value.game.lineScore?.find { it.teamId == awayTeamId }
 
         displayModel.value.game.boxScoreTraditional?.let {
             // set current(home) team's players stats
-            selectTeam(false, 0)
+            selectTeam(true, 0)
         }
     }
 
@@ -140,7 +140,9 @@ class NBAGameStatsStore @AssistedInject constructor(
 
         setPlayersTotalStats()
         sortPlayers()
-        refreshGame(false)
+        if (isInit) {
+            refreshGame(false)
+        }
     }
 
     override fun sortPlayers() {
@@ -229,7 +231,7 @@ class NBAGameStatsStore @AssistedInject constructor(
                         val result = searchClient.fetchById(
                             season = displayModel.value.season,
                             category = "basketball",
-                            date = gameSummary.date,
+                            date = gameSummary.gameDate,
                             dataType = "basketball_game_stats",
                             leagueId = Constants.Ids.NBA,
                             id = boxScoreTraditional.gameId

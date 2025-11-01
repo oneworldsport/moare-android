@@ -25,6 +25,7 @@ import com.moare.android.features.search.display.football.viewmodel.FBTeamStandi
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsAction
 import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsStore
 import com.moare.android.features.search.display.football.viewmodel.FBTournamentAction
+import com.moare.android.features.search.display.football.viewmodel.FBTournamentDelegate
 import com.moare.android.features.search.display.football.viewmodel.FBTournamentStore
 import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsDelegate
@@ -300,7 +301,9 @@ class AppViewModel @Inject constructor(
                         _stack.update { it + StackItem.FBGameStats(id, store) }
                     }
                     is SportDecodableModel.FBTournament -> {
-                        val store = fbTournamentFactory.create(model.displayModel)
+                        val store = fbTournamentFactory.create(model.displayModel) { delegate ->
+                            onFBTournamentDelegate(delegate)
+                        }
                         store.send(FBTournamentAction.InitData)
                         _stack.update { it + StackItem.FBTournament(id, store) }
                     }
@@ -557,6 +560,16 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.FBGameStats(id, store) }
                 store.send(FBGameStatsAction.InitData)
             }
+            is FBLeagueScheduleDelegate.ShowTournament -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = fbTournamentFactory.create(delegate.model.displayModel) { delegate ->
+                    onFBTournamentDelegate(delegate)
+                }
+                store.send(FBTournamentAction.InitData)
+                _stack.update { it + StackItem.FBTournament(id, store) }
+            }
         }
     }
 
@@ -573,6 +586,39 @@ class AppViewModel @Inject constructor(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun onFBTournamentDelegate(delegate: FBTournamentDelegate) {
+        val id = ViewId()
+
+        when (delegate) {
+            is FBTournamentDelegate.ShowLeagueSchedule -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = fbLeagueScheduleFactory.create(delegate.model.displayModel) { delegate ->
+                    onFBLeagueScheduleDelegate(delegate)
+                }
+                store.send(FBLeagueScheduleAction.InitData)
+                _stack.update { it + StackItem.FBLeagueSchedule(id, store) }
+            }
+            is FBTournamentDelegate.ShowGameStats -> {
+                _didPop.value = false
+                // FBLeagueScheduleView에서 아이템 클릭으로 FBGameStatsView보여줄때 _includesPreviousView = true로 설정해 줘야 함.
+                val lastItem = stack.value.lastOrNull()
+                if (lastItem != null) {
+                    if (lastItem is StackItem.FBLeagueSchedule) {
+                        _includesPreviousView.value = true
+                    }
+                }
+
+                val store = fbGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onFBGameStatsDelegate(id, delegate)
+                }
+                _stack.update { it + StackItem.FBGameStats(id, store) }
+                store.send(FBGameStatsAction.InitData)
             }
         }
     }

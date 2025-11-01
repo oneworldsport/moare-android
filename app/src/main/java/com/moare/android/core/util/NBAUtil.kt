@@ -27,7 +27,7 @@ object NBAUtil {
         if (gameSummary == null) return ""
 
         return if (gameSummary.seriesGameNumber.isEmpty()) {
-            "정규시즌"
+            gameSummary.weekName
         } else if (gameSummary.gameLabel.lowercase().contains("play-in")) {
             "플레이인 토너먼트"
         } else if (gameSummary.seriesGameNumber.isNotEmpty()) {
@@ -46,10 +46,10 @@ object NBAUtil {
                     if (isShort) "플레이오프-${conference} 결승 ${subLabel}" else "플레이오프 - ${conference} 컨퍼런스 결승 ${subLabel}"
                 }
             } else {
-                "정규시즌"
+                gameSummary.weekName
             }
         } else {
-            "정규시즌"
+            gameSummary.weekName
         }
     }
 }

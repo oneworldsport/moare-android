@@ -144,7 +144,7 @@ object StringConstants {
 
     fun tournamentButtonText(leagueId: Int): String {
         return when (leagueId) {
-            in Constants.Ids.FOOTBALL_ALL -> ""
+            Constants.Ids.MLS -> "플레이오프 대진표"
             Constants.Ids.NBA -> "플레이오프 대진표"
             Constants.Ids.MLB -> "포스트시즌 대진표"
             Constants.Ids.KBO -> "가을야구 대진표"

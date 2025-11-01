@@ -100,11 +100,11 @@ class MLBGameStatsStore @AssistedInject constructor(
 
         if (isInit) {
             sortByBattingOrder()
+            refreshGame(false)
         } else {
             sortHitters()
         }
         sortPitchers()
-        refreshGame(false)
     }
 
     override fun selectFirstCategory(index: Int) {
