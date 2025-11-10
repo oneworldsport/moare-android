@@ -1,7 +1,10 @@
 package com.moare.android.features.moat.display.components
 
+import android.util.Log
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.ui.theme.Moare
+import com.moare.android.ui.util.optionalClickable
 
 enum class MoatType {
     TIMELINE, DETAIL, COMMENT, USER_PROFILE
@@ -50,9 +55,10 @@ fun MoatItem(
     hashtagList: List<String>? = null,
     fireCount: Int,
     commentCount: Int,
-    nickname: String,
+    userHandle: String,
     createdAt: String,
     timeAgo: String = CalendarUtil.timeAgoString(createdAt),
+    settingTapped: () -> Unit,
     action: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -60,7 +66,7 @@ fun MoatItem(
     val titleFontSize: TextUnit
     val contentFontSize: TextUnit
     val profileImageSize: Dp
-    val nicknameFontSize: TextUnit
+    val userHandleFontSize: TextUnit
     val timeFontSize: TextUnit
     val iconSize: Dp
     val iconFontSize: TextUnit
@@ -74,7 +80,7 @@ fun MoatItem(
             titleFontSize = 18.sp
             contentFontSize = 18.sp
             profileImageSize = 25.dp
-            nicknameFontSize = 16.sp
+            userHandleFontSize = 16.sp
             timeFontSize = 15.sp
             iconSize = 17.dp
             iconFontSize = 17.sp
@@ -85,7 +91,7 @@ fun MoatItem(
             titleFontSize = 18.sp
             contentFontSize = 16.sp
             profileImageSize = 25.dp
-            nicknameFontSize = 16.sp
+            userHandleFontSize = 16.sp
             timeFontSize = 15.sp
             iconSize = 17.dp
             iconFontSize = 17.sp
@@ -96,7 +102,7 @@ fun MoatItem(
             titleFontSize = 18.sp
             contentFontSize = 16.sp
             profileImageSize = 20.dp
-            nicknameFontSize = 15.sp
+            userHandleFontSize = 15.sp
             timeFontSize = 14.sp
             iconSize = 16.dp
             iconFontSize = 16.sp
@@ -107,7 +113,7 @@ fun MoatItem(
             titleFontSize = 17.sp
             contentFontSize = 18.sp
             profileImageSize = 25.dp
-            nicknameFontSize = 16.sp
+            userHandleFontSize = 16.sp
             timeFontSize = 14.sp
             iconSize = 16.dp
             iconFontSize = 16.sp
@@ -119,10 +125,7 @@ fun MoatItem(
         modifier.height(height)
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
-            .clickable(
-                enabled = !isButtonDisabled,
-                onClick = action
-            )
+            .optionalClickable(moatType != MoatType.DETAIL, onClick = action)
     ) {
         Row(
             Modifier.fillMaxWidth(),
@@ -207,6 +210,22 @@ fun MoatItem(
                         Column(
                             horizontalAlignment =  Alignment.CenterHorizontally
                         ) {
+                            if (moatType == MoatType.DETAIL) {
+                                Text(
+                                    text = "⋮" ,
+                                    fontSize = iconFontSize,
+                                    modifier = Modifier
+                                        .clickable(
+                                            enabled = true,
+                                            onClick = {
+                                                settingTapped()
+                                                Log.d("click", "Tapped")
+                                            }
+                                        )
+                                )
+                                Spacer(Modifier.weight(1f))
+                            }
+
                             Column(
                                 Modifier.padding( bottom = if (moatType == MoatType.DETAIL) 8.dp else if (moatType == MoatType.COMMENT || moatType == MoatType.TIMELINE) 0.dp else 4.dp ),
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -258,9 +277,9 @@ fun MoatItem(
                         )
 
                         Text(
-                            text = nickname,
+                            text = userHandle,
                             Modifier.padding(start = 6.dp),
-                            fontSize = nicknameFontSize
+                            fontSize = userHandleFontSize
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
@@ -277,19 +296,19 @@ fun MoatItem(
     }
 }
 
-@Preview
-@Composable
-fun preview() {
-    MoatItem(
-        moatType = MoatType.DETAIL,
-        title = "만약에 한글이야 이게 엄청 길어 그러면?",
-        content = "이게 내용이야",
-        hashtagList = listOf("#축구","#dfdfdf"),
-        fireCount = 0,
-        commentCount = 0,
-        nickname = "test",
-        createdAt = "2025-08-16T20:10:00.666666",
-        action = {},
-        modifier = Modifier.fillMaxWidth()
-    )
-}
+//@Preview
+//@Composable
+//fun preview() {
+//    MoatItem(
+//        moatType = MoatType.DETAIL,
+//        title = "만약에 한글이야 이게 엄청 길어 그러면?",
+//        content = "이게 내용이야",
+//        hashtagList = listOf("#축구","#dfdfdf"),
+//        fireCount = 0,
+//        commentCount = 0,
+//        userHandle = "test",
+//        createdAt = "2025-08-16T20:10:00.666666",
+//        action = {},
+//        modifier = Modifier.fillMaxWidth()
+//    )
+//}

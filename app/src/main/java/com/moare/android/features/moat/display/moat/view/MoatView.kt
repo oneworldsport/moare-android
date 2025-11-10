@@ -1,5 +1,6 @@
 package com.moare.android.features.moat.display.moat.view
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,8 @@ import com.moare.android.R
 import com.moare.android.features.moat.display.components.CommentComposer
 import com.moare.android.features.moat.display.components.MoatItem
 import com.moare.android.features.moat.display.components.MoatType
+import com.moare.android.features.moat.display.components.SettingWindow
+import com.moare.android.features.moat.display.components.TextFieldAlert
 import com.moare.android.features.moat.display.form.view.FormView
 import com.moare.android.features.moat.display.moat.viewmodel.MoatIntent
 import com.moare.android.features.moat.display.moat.viewmodel.MoatViewModel
@@ -60,6 +63,8 @@ fun MoatTimelineView(
     val selectedMoat by moatViewModel.selectedMoat.collectAsState()
 
     var text by rememberSaveable { mutableStateOf("") }
+    var settingsShowing by rememberSaveable { mutableStateOf(false) }
+    var reportShowing by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(accessToken) {
         if (!accessToken.isNullOrEmpty()) {
@@ -127,8 +132,11 @@ fun MoatTimelineView(
                             hashtagList = moat.sportType,
                             fireCount = moat.fireCount,
                             commentCount = moat.commentCount,
-                            nickname = moat.nickname,
+                            userHandle = moat.userHandle,
                             createdAt = moat.createdAt,
+                            settingTapped = {
+                                settingsShowing = true
+                            },
                             action = {
                                 moatViewModel.send(MoatIntent.SelectMoat(moatId = moat.moatId))
                             }
@@ -148,8 +156,11 @@ fun MoatTimelineView(
                                 hashtagList = moat.sportType,
                                 fireCount = moat.fireCount,
                                 commentCount = moat.commentCount,
-                                nickname = moat.nickname,
+                                userHandle = moat.userHandle,
                                 createdAt = moat.createdAt,
+                                settingTapped = {
+
+                                },
                                 action = {
                                     moatViewModel.send(
                                         MoatIntent.SelectMoat(isComment = true, moatId = moat.moatId)
@@ -192,6 +203,30 @@ fun MoatTimelineView(
                             modifier = Modifier
                         )
                     }
+                }
+
+                if (settingsShowing) {
+                    Box(
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 50.dp, end = 25.dp)
+                    ) {
+                        SettingWindow(
+                            reportTapped = {
+                                settingsShowing = false
+                                reportShowing = true
+                            }
+                        )
+                    }
+                }
+
+                if (reportShowing) {
+                    TextFieldAlert(
+                        isPresent = reportShowing,
+                        onDismiss = {
+                            reportShowing = false
+                        }
+                    )
                 }
             }
         } else {
