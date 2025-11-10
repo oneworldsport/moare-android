@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserProfileUpdateRequest(
-    val nickname: String?,
+    val userHandle: String?,
     val profileImageUrl: String?,
     val bio: String?,
     val sportInterest: List<String>?

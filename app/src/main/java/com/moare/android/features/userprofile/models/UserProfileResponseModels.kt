@@ -6,7 +6,7 @@ import com.moare.android.features.moat.models.MoatListResponse
 @Serializable
 data class UserProfileResponse(
     val userId: String,
-    val nickname: String,
+    val userHandle: String,
     val profileImageUrl: String?,
     val bio: String?,
     val sportsInterests: List<String>?,
@@ -22,6 +22,6 @@ data class UserProfileWithMoatsResponse(
 @Serializable
 data class UserSummaryResponse(
     val userId: String,
-    val nickname: String,
+    val userHandle: String,
     val profileImageUrl: String?
 )

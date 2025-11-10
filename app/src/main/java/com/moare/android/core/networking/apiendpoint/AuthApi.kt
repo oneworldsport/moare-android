@@ -3,7 +3,7 @@ package com.moare.android.core.networking.apiendpoint
 import com.moare.android.features.sign.models.AuthResponse
 import com.moare.android.features.sign.models.AuthSessionResponse
 import com.moare.android.features.sign.models.ConfirmAuthRequest
-import com.moare.android.features.sign.models.NicknameReserveRequest
+import com.moare.android.features.sign.models.UserHandleReserveRequest
 import com.moare.android.features.sign.models.SignUpCompleteRequest
 import com.moare.android.features.sign.models.SignUpInitiateRequest
 import com.moare.android.features.sign.models.SignUpVerificationRequest
@@ -42,13 +42,13 @@ interface AuthApi {
         @Body body: SignUpCompleteRequest
     ) : Response<SimpleResponse>
 
-    @GET("auth/nickname/check")
-    suspend fun checkNickname(
-        @Query("nickname") nickname: String
+    @GET("auth/user-handle/check")
+    suspend fun checkUserHandle(
+        @Query("userHandle") userHandle: String
     ) : Response<SimpleResponse>
 
-    @PUT("auth/nickname/reserve")
-    suspend fun reserveNickname(
-        @Body body:NicknameReserveRequest
+    @PUT("auth/userHandle/reserve")
+    suspend fun reserveUserHandle(
+        @Body body:UserHandleReserveRequest
     ) : Response<SimpleResponse>
 }

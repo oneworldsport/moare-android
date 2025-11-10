@@ -46,13 +46,13 @@ data class SignUpCompleteRequest(
 // TODO: User 도메인으로 옮기기
 @Serializable
 data class UserProfileCreateRequest(
-    val nickname: String,
+    val userHandle: String,
     val profileImageUrl: String? = null,
     val bio: String? = null,
     val sportsInterests: List<String>? = null
 )
 
 @Serializable
-data class NicknameReserveRequest(
-    val nickname: String
+data class UserHandleReserveRequest(
+    val userHandle: String
 )

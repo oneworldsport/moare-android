@@ -20,6 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -29,6 +32,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.R
 import com.moare.android.features.moat.display.components.MoatItem
 import com.moare.android.features.moat.display.components.MoatType
+import com.moare.android.features.moat.display.components.SettingWindow
+import com.moare.android.features.moat.display.components.TextFieldAlert
 import com.moare.android.features.userprofile.display.viewmodel.UserProfileIntent
 import com.moare.android.features.userprofile.display.viewmodel.UserProfileViewModel
 import com.moare.android.ui.common.components.HDivider
@@ -41,6 +46,9 @@ fun UserProfileView(
     val userProfile by userProfileViewModel.userProfile.collectAsState()
     val userMoats by userProfileViewModel.userMoats.collectAsState()
     val selectedMoat by userProfileViewModel.selectedMoat.collectAsState()
+
+    var settingsShowing by rememberSaveable { mutableStateOf(false) }
+    var reportShowing by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         userProfileViewModel.send(UserProfileIntent.GetUserProfile)
@@ -96,7 +104,7 @@ fun UserProfileView(
                     Column {
                         Row {
                             Text(
-                                text = userProfile?.nickname ?: ""
+                                text = userProfile?.userHandle ?: ""
                             )
 
                             Spacer(modifier = Modifier.weight(1f))
@@ -141,8 +149,11 @@ fun UserProfileView(
                         hashtagList = userMoats[index].sportType,
                         fireCount = userMoats[index].fireCount,
                         commentCount = userMoats[index].commentCount,
-                        nickname = userMoats[index].nickname,
+                        userHandle = userMoats[index].userHandle,
                         createdAt = userMoats[index].createdAt,
+                        settingTapped = {
+                            settingsShowing = true
+                        },
                         action = {
                             userProfileViewModel.send(UserProfileIntent.SelectMoat(moatId = userMoats[index].moatId))
                         }
@@ -161,8 +172,11 @@ fun UserProfileView(
                             hashtagList = comments[index].sportType,
                             fireCount = comments[index].fireCount,
                             commentCount = comments[index].commentCount,
-                            nickname = comments[index].nickname,
+                            userHandle = comments[index].userHandle,
                             createdAt = comments[index].createdAt,
+                            settingTapped = {
+
+                            },
                             action = {
                                 userProfileViewModel.send(UserProfileIntent.SelectMoat(true, moatId = comments[index].moatId))
 
@@ -171,6 +185,30 @@ fun UserProfileView(
                     }
                 }
             }
+        }
+
+        if (settingsShowing) {
+            Box(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 50.dp, end = 25.dp)
+            ) {
+                SettingWindow(
+                    reportTapped = {
+                        settingsShowing = false
+                        reportShowing = true
+                    }
+                )
+            }
+        }
+
+        if (reportShowing) {
+            TextFieldAlert(
+                isPresent = reportShowing,
+                onDismiss = {
+                    reportShowing = false
+                }
+            )
         }
     }
 }

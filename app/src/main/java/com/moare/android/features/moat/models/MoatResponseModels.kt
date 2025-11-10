@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class MoatResponse(
     val moatId: String,
     val userId: String,
-    val nickname: String,
+    val userHandle: String,
     val profileImageUrl: String?,
     val content: String,
     val sportType: List<String>,

@@ -6,7 +6,7 @@ import com.moare.android.features.sign.models.AuthResponseType
 import com.moare.android.features.sign.models.AuthSessionResponse
 import com.moare.android.features.sign.models.AuthTokenData
 import com.moare.android.features.sign.models.ConfirmAuthRequest
-import com.moare.android.features.sign.models.NicknameReserveRequest
+import com.moare.android.features.sign.models.UserHandleReserveRequest
 import com.moare.android.features.sign.models.SignUpCompleteRequest
 import com.moare.android.features.sign.models.SignUpInitiateRequest
 import com.moare.android.features.sign.models.SignUpVerificationRequest
@@ -81,8 +81,8 @@ class SignClient(
         return null
     }
 
-    suspend fun checkNickname(nickname: String): SimpleResponse? {
-        val response = apiHelper.authApi.checkNickname(nickname)
+    suspend fun checkUserHandle(userHandle: String): SimpleResponse? {
+        val response = apiHelper.authApi.checkUserHandle(userHandle)
         if (response.isSuccessful) {
             return response.body()
         }
@@ -90,10 +90,10 @@ class SignClient(
         return null
     }
 
-    suspend fun reserveNickname(nickname: String): SimpleResponse? {
+    suspend fun reserveUserHandle(userHandle: String): SimpleResponse? {
         // TODO: request model은 어느 레이어에서 만드는게 나을까? 중간에 레이어가 하나 더 있어야하나?
-        val body = NicknameReserveRequest(nickname)
-        val response = apiHelper.authApi.reserveNickname(body)
+        val body = UserHandleReserveRequest(userHandle)
+        val response = apiHelper.authApi.reserveUserHandle(body)
         if (response.isSuccessful) {
             return response.body()
         }

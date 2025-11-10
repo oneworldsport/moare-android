@@ -31,12 +31,12 @@ sealed class SignIntent {
     data class UpdateText(val text: String) : SignIntent()
     data object Submit : SignIntent()
     data class UpdateSignFlow(val signFlow: SignFlow) : SignIntent()
-    data object CheckNickname : SignIntent()
+    data object CheckUserHandle : SignIntent()
 }
 
 enum class SignFlow {
     LOGIN_ID, LOGIN_OTP, LOGIN_OTP_RETRY, LOGIN_OTP_EXPIRED, LOGIN_OTP_LIMIT_EXCEEDED, LOGIN_SUCCESS,
-    SIGN_UP_ID, SIGN_UP_OTP, SIGN_UP_OTP_RETRY, SIGN_UP_OTP_EXPIRED, SIGN_UP_NICKNAME, SIGN_UP_SPORTS_INTERESTS, SIGN_UP_SUCCESS
+    SIGN_UP_ID, SIGN_UP_OTP, SIGN_UP_OTP_RETRY, SIGN_UP_OTP_EXPIRED, SIGN_UP_USER_HANDLE, SIGN_UP_SPORTS_INTERESTS, SIGN_UP_SUCCESS
 }
 
 @HiltViewModel
@@ -75,25 +75,25 @@ class SignViewModel @Inject constructor(
     private val _apiFetchState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
     val apiFetchState: StateFlow<ApiFetchState> = _apiFetchState
 
-    private val _isCheckingNickname = MutableStateFlow(false)
-    val isCheckingNickname: StateFlow<Boolean> = _isCheckingNickname
+    private val _isCheckingUserHandle = MutableStateFlow(false)
+    val isCheckingUserHandle: StateFlow<Boolean> = _isCheckingUserHandle
 
     private var id = ""
     private var session: String? = null
     private var otp = ""
-    private var nickname: String? = null
+    private var userHandle: String? = null
     private var sportsInterests: List<String>? = null
 
-    init {
-        // TODO: 테스트용 임시 코드
-        viewModelScope.launch {
-            dataStore.edit { preferences ->
-                preferences.remove(stringPreferencesKey("idToken"))
-                preferences.remove(stringPreferencesKey("accessToken"))
-                preferences.remove(stringPreferencesKey("refreshToken"))
-            }
-        }
-    }
+//    init {
+//        // TODO: 테스트용 임시 코드
+//        viewModelScope.launch {
+//            dataStore.edit { preferences ->
+//                preferences.remove(stringPreferencesKey("idToken"))
+//                preferences.remove(stringPreferencesKey("accessToken"))
+//                preferences.remove(stringPreferencesKey("refreshToken"))
+//            }
+//        }
+//    }
 
     fun send(intent: SignIntent) {
         viewModelScope.launch {
@@ -102,7 +102,7 @@ class SignViewModel @Inject constructor(
                 is SignIntent.UpdateText -> updateText(intent.text)
                 is SignIntent.Submit -> submit()
                 is SignIntent.UpdateSignFlow -> updateSignFlow(intent.signFlow)
-                is SignIntent.CheckNickname -> checkNickname()
+                is SignIntent.CheckUserHandle -> checkUserHandle()
             }
         }
     }
@@ -148,9 +148,9 @@ class SignViewModel @Inject constructor(
             SignFlow.SIGN_UP_OTP_EXPIRED -> {
 
             }
-            SignFlow.SIGN_UP_NICKNAME -> {
+            SignFlow.SIGN_UP_USER_HANDLE -> {
                 delay(2000)
-                checkNickname()
+                checkUserHandle()
             }
             SignFlow.SIGN_UP_SPORTS_INTERESTS -> {
 
@@ -184,9 +184,9 @@ class SignViewModel @Inject constructor(
                     confirmSignUpOtp()
                 }
             }
-            SignFlow.SIGN_UP_NICKNAME -> {
+            SignFlow.SIGN_UP_USER_HANDLE -> {
                 if (isValid.value) {
-                    reserveNickname()
+                    reserveUserHandle()
                 }
             }
             SignFlow.SIGN_UP_SPORTS_INTERESTS -> {
@@ -284,7 +284,7 @@ class SignViewModel @Inject constructor(
 
         result?.type?.let { type ->
             when (type) {
-                AuthResponseType.SUCCESS -> updateSignFlow(SignFlow.SIGN_UP_NICKNAME)
+                AuthResponseType.SUCCESS -> updateSignFlow(SignFlow.SIGN_UP_USER_HANDLE)
                 AuthResponseType.RETRY -> updateSignFlow(SignFlow.SIGN_UP_OTP_RETRY)
                 AuthResponseType.EXPIRED -> updateSignFlow(SignFlow.SIGN_UP_OTP_EXPIRED)
                 else -> {}
@@ -292,15 +292,15 @@ class SignViewModel @Inject constructor(
         }
     }
 
-    private suspend fun checkNickname() {
-        nickname = text.value
-        _isCheckingNickname.value = true
+    private suspend fun checkUserHandle() {
+        userHandle = text.value
+        _isCheckingUserHandle.value = true
         _isValid.value = false
 
-        if (!nickname.isNullOrBlank()) {
+        if (!userHandle.isNullOrBlank()) {
             // start loading
             _apiFetchState.value = ApiFetchState.Fetching
-            val result = signClient.checkNickname(nickname!!)
+            val result = signClient.checkUserHandle(userHandle!!)
 
             if (result?.success == true) {
                 _apiFetchState.value = ApiFetchState.Success
@@ -313,18 +313,18 @@ class SignViewModel @Inject constructor(
         }
 
         delay(100)
-        // STUDY: _isCheckingNickname와 다른 StateFlow(_apiFetchState)가 거의 동시에 실행되고,
+        // STUDY: _isCheckingUserHandle와 다른 StateFlow(_apiFetchState)가 거의 동시에 실행되고,
         // 이에 의해 Compose가 recomposition될때 한 프레임 내에서 함께 반영될 수 있다.
-        // 이때문에 LaunchedEffect(apiFetchState)에서 isCheckingNickname의 상태가 코드 순서대로 반영이 안되어서, delay를 줌.
-        // 다음 checkNickname()이 실행되기 까지 걸리는 최소 시간 까지는 delay를 줘도 문제가 안됨.
-        _isCheckingNickname.value = false
+        // 이때문에 LaunchedEffect(apiFetchState)에서 isCheckingUserHandle의 상태가 코드 순서대로 반영이 안되어서, delay를 줌.
+        // 다음 checkUserHandle()이 실행되기 까지 걸리는 최소 시간 까지는 delay를 줘도 문제가 안됨.
+        _isCheckingUserHandle.value = false
     }
 
-    private suspend fun reserveNickname() {
-        if (!nickname.isNullOrBlank()) {
+    private suspend fun reserveUserHandle() {
+        if (!userHandle.isNullOrBlank()) {
             // start loading
             _apiFetchState.value = ApiFetchState.Fetching
-            val result = signClient.reserveNickname(nickname!!)
+            val result = signClient.reserveUserHandle(userHandle!!)
 
             if (result?.success == true) {
                 updateSignFlow(SignFlow.SIGN_UP_SPORTS_INTERESTS)
@@ -339,7 +339,7 @@ class SignViewModel @Inject constructor(
             id = id,
             method = idType.value,
             profile = UserProfileCreateRequest(
-                nickname = nickname ?: "test"
+                userHandle = userHandle ?: "test"
             )
         )
 
@@ -421,7 +421,7 @@ class SignViewModel @Inject constructor(
                 _isValid.value = true
                 _errorText.value = "코드가 만료되었습니다. 코드를 재전송해 주세요."
             }
-            SignFlow.SIGN_UP_NICKNAME -> {
+            SignFlow.SIGN_UP_USER_HANDLE -> {
                 _apiFetchState.value = ApiFetchState.Success
                 _title.value = "닉네임"
                 _placeholder.value = " 닉네임 입력"

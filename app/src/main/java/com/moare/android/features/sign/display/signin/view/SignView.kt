@@ -72,7 +72,7 @@ fun SignView(
     val isValid by signViewModel.isValid.collectAsState()
     val errorText by signViewModel.errorText.collectAsState()
     val apiFetchState by signViewModel.apiFetchState.collectAsState()
-    val isCheckingNickname by signViewModel.isCheckingNickname.collectAsState()
+    val isCheckingUserHandle by signViewModel.isCheckingUserHandle.collectAsState()
 
     val isTextFieldEnabled = currentFlow != SignFlow.LOGIN_OTP_EXPIRED && currentFlow != SignFlow.LOGIN_OTP_LIMIT_EXCEEDED
     val barWidth = remember { Animatable(20.dp, Dp.VectorConverter) }
@@ -106,7 +106,7 @@ fun SignView(
     }
 
     LaunchedEffect(apiFetchState) {
-        if (isCheckingNickname) {
+        if (isCheckingUserHandle) {
             // NOTE: Nickname check할때는 fetching 할때 progress bar가 반대로 움직여야해서 해당 분기 추가
             // 성공 후에는 ApiFetchState.Success가 아니라 isValid를 통해 progress bar를 채운다.
             if (apiFetchState == ApiFetchState.Fetching) {
