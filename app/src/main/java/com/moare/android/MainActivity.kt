@@ -34,7 +34,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.moare.android.features.moat.display.moat.view.MoatTimelineView
+import com.moare.android.features.moat.display.moat.view.MoatTrendingView
 import com.moare.android.features.search.display.search.SearchView
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.userprofile.display.view.UserProfileView
@@ -121,7 +121,7 @@ fun AppRoot(viewModel: AppViewModel = hiltViewModel()) {
                         )
                     }
                     composable(Screen.Moat.route) {
-                        MoatTimelineView()
+                        MoatTrendingView()
                     }
                     composable(Screen.Profile.route) {
                         UserProfileView()

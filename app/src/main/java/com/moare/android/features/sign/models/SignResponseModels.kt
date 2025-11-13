@@ -16,7 +16,7 @@ enum class AuthResponseType {
 }
 
 @Serializable
-data class AuthTokenData(
+data class AuthTokenResponse(
     val idToken: String,
     val accessToken: String,
     val refreshToken: String
@@ -29,6 +29,6 @@ data class AuthSessionResponse(
 
 @Serializable
 data class SimpleResponse(
-    val success: Boolean,
+    val success: Boolean? = null, // 범용으로 쓰고 싶어서 수정함...
     val message: String
 )

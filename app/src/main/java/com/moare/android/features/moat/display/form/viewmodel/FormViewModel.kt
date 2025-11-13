@@ -31,7 +31,7 @@ class FormViewModel @Inject constructor(
     }
 
     private suspend fun createMoat(content: String) {
-        val moat = MoatCreateRequest(content = content, sportType = listOf("#축구"))
+        val moat = MoatCreateRequest(content = content, sportTags = listOf("#축구"))
 
         try {
             moatClient.createMoat(moat)

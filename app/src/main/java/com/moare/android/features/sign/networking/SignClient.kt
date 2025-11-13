@@ -4,7 +4,7 @@ import com.moare.android.core.networking.ApiHelper
 import com.moare.android.features.sign.models.AuthResponse
 import com.moare.android.features.sign.models.AuthResponseType
 import com.moare.android.features.sign.models.AuthSessionResponse
-import com.moare.android.features.sign.models.AuthTokenData
+import com.moare.android.features.sign.models.AuthTokenResponse
 import com.moare.android.features.sign.models.ConfirmAuthRequest
 import com.moare.android.features.sign.models.UserHandleReserveRequest
 import com.moare.android.features.sign.models.SignUpCompleteRequest
@@ -27,28 +27,10 @@ class SignClient(
         return null
     }
 
-    suspend fun confirmLoginAuth(body: ConfirmAuthRequest): Any? {
+    suspend fun confirmLoginAuth(body: ConfirmAuthRequest): AuthTokenResponse? {
         val response = apiHelper.authApi.confirmLoginAuth(body)
         if (response.isSuccessful) {
-            val responseBody = response.body()
-
-            responseBody?.type?.let { type ->
-                val json = responseBody.data
-
-                when (type) {
-                    AuthResponseType.SUCCESS -> {
-                        json?.let {
-                            return Json.decodeFromJsonElement<AuthTokenData>(json)
-                        }
-                    }
-                    AuthResponseType.RETRY -> {
-                        json?.let {
-                            return Json.decodeFromJsonElement<AuthSessionResponse>(json)
-                        }
-                    }
-                    else -> return type
-                }
-            }
+            return response.body()
         }
 
         return  null
@@ -63,7 +45,7 @@ class SignClient(
         return null
     }
 
-    suspend fun verifySignUpOtp(body: SignUpVerificationRequest): AuthResponse? {
+    suspend fun verifySignUpOtp(body: SignUpVerificationRequest): SimpleResponse? {
         val response = apiHelper.authApi.verifySignUpOtp(body)
         if (response.isSuccessful) {
             return response.body()

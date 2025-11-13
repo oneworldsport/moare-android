@@ -2,6 +2,7 @@ package com.moare.android.core.networking.apiendpoint
 
 import com.moare.android.features.sign.models.AuthResponse
 import com.moare.android.features.sign.models.AuthSessionResponse
+import com.moare.android.features.sign.models.AuthTokenResponse
 import com.moare.android.features.sign.models.ConfirmAuthRequest
 import com.moare.android.features.sign.models.UserHandleReserveRequest
 import com.moare.android.features.sign.models.SignUpCompleteRequest
@@ -25,7 +26,7 @@ interface AuthApi {
     @POST("auth/login/confirm")
     suspend fun confirmLoginAuth(
         @Body body: ConfirmAuthRequest
-    ) : Response<AuthResponse>
+    ) : Response<AuthTokenResponse>
 
     @POST("auth/signup/initiate")
     suspend fun initiateSignUp(
@@ -35,7 +36,7 @@ interface AuthApi {
     @POST("auth/signup/verify")
     suspend fun verifySignUpOtp(
         @Body body: SignUpVerificationRequest
-    ) : Response<AuthResponse>
+    ) : Response<SimpleResponse>
 
     @POST("auth/signup/complete")
     suspend fun completeSignUp(

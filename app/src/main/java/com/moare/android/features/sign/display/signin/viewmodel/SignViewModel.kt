@@ -11,7 +11,7 @@ import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.sign.models.AuthMethod
 import com.moare.android.features.sign.models.AuthResponseType
 import com.moare.android.features.sign.models.AuthSessionResponse
-import com.moare.android.features.sign.models.AuthTokenData
+import com.moare.android.features.sign.models.AuthTokenResponse
 import com.moare.android.features.sign.models.ConfirmAuthRequest
 import com.moare.android.features.sign.models.SignUpCompleteRequest
 import com.moare.android.features.sign.models.SignUpInitiateRequest
@@ -231,7 +231,7 @@ class SignViewModel @Inject constructor(
             _apiFetchState.value = ApiFetchState.Fetching
             val result = signClient.confirmLoginAuth(body)
 
-            if (result is AuthTokenData) {
+            if (result is AuthTokenResponse) {
                 dataStore.edit { preferences ->
                     preferences[stringPreferencesKey("idToken")] = result.idToken
                     preferences[stringPreferencesKey("accessToken")] = result.accessToken
@@ -239,15 +239,24 @@ class SignViewModel @Inject constructor(
                 }
 
                 updateSignFlow(SignFlow.LOGIN_SUCCESS)
-            } else if (result is AuthSessionResponse) {
-                session = result.session
-
-                updateSignFlow(SignFlow.LOGIN_OTP_RETRY)
-            } else if (result == AuthResponseType.EXPIRED) {
-                updateSignFlow(SignFlow.LOGIN_OTP_EXPIRED)
-            } else if (result == AuthResponseType.LIMIT_EXCEEDED) {
-                updateSignFlow(SignFlow.LOGIN_OTP_LIMIT_EXCEEDED)
             }
+//            if (result is AuthTokenResponse) {
+//                dataStore.edit { preferences ->
+//                    preferences[stringPreferencesKey("idToken")] = result.idToken
+//                    preferences[stringPreferencesKey("accessToken")] = result.accessToken
+//                    preferences[stringPreferencesKey("refreshToken")] = result.refreshToken
+//                }
+//
+//                updateSignFlow(SignFlow.LOGIN_SUCCESS)
+//            } else if (result is AuthSessionResponse) {
+//                session = result.session
+//
+//                updateSignFlow(SignFlow.LOGIN_OTP_RETRY)
+//            } else if (result == AuthResponseType.EXPIRED) {
+//                updateSignFlow(SignFlow.LOGIN_OTP_EXPIRED)
+//            } else if (result == AuthResponseType.LIMIT_EXCEEDED) {
+//                updateSignFlow(SignFlow.LOGIN_OTP_LIMIT_EXCEEDED)
+//            }
         }
     }
 
@@ -280,16 +289,16 @@ class SignViewModel @Inject constructor(
 
         // start loading
         _apiFetchState.value = ApiFetchState.Fetching
-        val result = signClient.verifySignUpOtp(body)
+        signClient.verifySignUpOtp(body)
 
-        result?.type?.let { type ->
-            when (type) {
-                AuthResponseType.SUCCESS -> updateSignFlow(SignFlow.SIGN_UP_USER_HANDLE)
-                AuthResponseType.RETRY -> updateSignFlow(SignFlow.SIGN_UP_OTP_RETRY)
-                AuthResponseType.EXPIRED -> updateSignFlow(SignFlow.SIGN_UP_OTP_EXPIRED)
-                else -> {}
-            }
-        }
+//        result?.type?.let { type ->
+//            when (type) {
+//                AuthResponseType.SUCCESS -> updateSignFlow(SignFlow.SIGN_UP_USER_HANDLE)
+//                AuthResponseType.RETRY -> updateSignFlow(SignFlow.SIGN_UP_OTP_RETRY)
+//                AuthResponseType.EXPIRED -> updateSignFlow(SignFlow.SIGN_UP_OTP_EXPIRED)
+//                else -> {}
+//            }
+//        }
     }
 
     private suspend fun checkUserHandle() {
