@@ -34,6 +34,7 @@ import com.moare.android.features.moat.display.components.MoatItem
 import com.moare.android.features.moat.display.components.MoatType
 import com.moare.android.features.moat.display.components.SettingWindow
 import com.moare.android.features.moat.display.components.TextFieldAlert
+import com.moare.android.features.moat.models.TargetType
 import com.moare.android.features.userprofile.display.viewmodel.UserProfileIntent
 import com.moare.android.features.userprofile.display.viewmodel.UserProfileViewModel
 import com.moare.android.ui.common.components.HDivider
@@ -46,6 +47,8 @@ fun UserProfileView(
     val userProfile by userProfileViewModel.userProfile.collectAsState()
     val userMoats by userProfileViewModel.userMoats.collectAsState()
     val selectedMoat by userProfileViewModel.selectedMoat.collectAsState()
+    val fireMap by userProfileViewModel.fireMap.collectAsState()
+    val fireCountMap by userProfileViewModel.fireCountMap.collectAsState()
 
     var settingsShowing by rememberSaveable { mutableStateOf(false) }
     var reportShowing by rememberSaveable { mutableStateOf(false) }
@@ -140,19 +143,29 @@ fun UserProfileView(
                     val lines = userMoats[index].content.split('\n')
                     val title = lines.firstOrNull() ?: ""
                     val body = lines.drop(1).joinToString("\n")
+                    val fired = fireMap[userMoats[index].moatId] ?: false
+                    val fireCount = fireCountMap[userMoats[index].moatId] ?: userMoats[index].fireCount
+
+                    LaunchedEffect(userMoats[index].moatId) {
+                        userProfileViewModel.send(UserProfileIntent.CheckFire(userMoats[index].moatId))
+                    }
 
                     MoatItem(
-                        moatType = if (selectedMoat != null) MoatType.DETAIL else MoatType.TIMELINE,
+                        moatType = if (selectedMoat != null) MoatType.DETAIL else MoatType.TRENDING,
                         isButtonDisabled = selectedMoat != null,
                         title = title,
                         content = body,
-                        hashtagList = userMoats[index].sportType,
-                        fireCount = userMoats[index].fireCount,
+                        hashtagList = userMoats[index].sportTags,
+                        fireCount = fireCount,
                         commentCount = userMoats[index].commentCount,
                         userHandle = userMoats[index].userHandle,
                         createdAt = userMoats[index].createdAt,
                         settingTapped = {
                             settingsShowing = true
+                        },
+                        fired = fired,
+                        fireTapped = { newValue ->
+                            userProfileViewModel.send(UserProfileIntent.ToggleFire(userMoats[index].moatId, targetType = TargetType.MOAT))
                         },
                         action = {
                             userProfileViewModel.send(UserProfileIntent.SelectMoat(moatId = userMoats[index].moatId))
@@ -166,16 +179,25 @@ fun UserProfileView(
 
                 LazyColumn {
                     items(comments.size) { index ->
+                        val fired = fireMap[comments[index].moatId] ?: false
+                        val fireCount = fireCountMap[comments[index].moatId] ?: comments[index].fireCount
+
+                        LaunchedEffect(comments[index]) {
+                            userProfileViewModel.send(UserProfileIntent.CheckFire(userMoats[index].moatId))
+                        }
+
                         MoatItem(
                             moatType = MoatType.COMMENT,
                             content = comments[index].content,
-                            hashtagList = comments[index].sportType,
-                            fireCount = comments[index].fireCount,
+                            hashtagList = comments[index].sportTags,
+                            fireCount = fireCount,
                             commentCount = comments[index].commentCount,
                             userHandle = comments[index].userHandle,
                             createdAt = comments[index].createdAt,
-                            settingTapped = {
-
+                            settingTapped = {},
+                            fired = fired,
+                            fireTapped = { newValue ->
+                                userProfileViewModel.send(UserProfileIntent.ToggleFire(userMoats[index].moatId, targetType = TargetType.COMMENT))
                             },
                             action = {
                                 userProfileViewModel.send(UserProfileIntent.SelectMoat(true, moatId = comments[index].moatId))

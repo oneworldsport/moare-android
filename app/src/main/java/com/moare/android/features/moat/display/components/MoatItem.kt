@@ -18,9 +18,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,7 +46,7 @@ import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.optionalClickable
 
 enum class MoatType {
-    TIMELINE, DETAIL, COMMENT, USER_PROFILE
+    TRENDING, DETAIL, COMMENT, USER_PROFILE
 }
 
 @Composable
@@ -59,6 +62,8 @@ fun MoatItem(
     createdAt: String,
     timeAgo: String = CalendarUtil.timeAgoString(createdAt),
     settingTapped: () -> Unit,
+    fired: Boolean,
+    fireTapped: (Boolean) -> Unit,
     action: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -75,8 +80,8 @@ fun MoatItem(
     var isSideBarShowing by remember { mutableStateOf(true) }
 
     when (moatType) {
-        MoatType.TIMELINE -> {
-            height = 100.dp
+        MoatType.TRENDING -> {
+            height = 110.dp // 댓글 숫자가 잘려서 조금 키움
             titleFontSize = 18.sp
             contentFontSize = 18.sp
             profileImageSize = 25.dp
@@ -98,7 +103,7 @@ fun MoatItem(
             iconCountFontSize = 12.sp
         }
         MoatType.COMMENT -> {
-            height = 80.dp
+            height = 100.dp // 댓글 숫자가 잘려서 조금 키움
             titleFontSize = 18.sp
             contentFontSize = 16.sp
             profileImageSize = 20.dp
@@ -227,22 +232,35 @@ fun MoatItem(
                             }
 
                             Column(
-                                Modifier.padding( bottom = if (moatType == MoatType.DETAIL) 8.dp else if (moatType == MoatType.COMMENT || moatType == MoatType.TIMELINE) 0.dp else 4.dp ),
+                                Modifier.padding( bottom = if (moatType == MoatType.DETAIL) 8.dp else if (moatType == MoatType.COMMENT || moatType == MoatType.TRENDING) 0.dp else 4.dp ),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Text(
-                                    text = "🔥",
-                                    Modifier.padding(bottom = 2.dp),
-                                    fontSize = iconFontSize,
-                                    textAlign = TextAlign.Center
-                                )
+                                IconButton(
+                                    onClick = { fireTapped(fired) },
+                                    modifier = Modifier.size(48.dp)       // 터치 타겟 48dp 권장
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                    ) {
+                                        Icon(
+                                            if (fired) {
+                                                Icons.Filled.LocalFireDepartment
+                                            } else {
+                                                Icons.Outlined.LocalFireDepartment
+                                            },
+                                            null,
+                                            Modifier.size(iconSize)
+                                        )
 
-                                Text(
-                                    text = fireCount.toString(),
-                                    fontSize = iconCountFontSize,
-                                    textAlign = TextAlign.Center
-                                )
+                                        Text(
+                                            text = fireCount.toString(),
+                                            fontSize = iconCountFontSize,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
                             }
 
                             Column(

@@ -40,12 +40,13 @@ import com.moare.android.features.moat.display.moat.viewmodel.MoatIntent
 import com.moare.android.features.moat.display.moat.viewmodel.MoatViewModel
 import com.moare.android.features.moat.display.moat.viewmodel.MoatViewType
 import com.moare.android.features.moat.models.MoatResponse
+import com.moare.android.features.moat.models.TargetType
 import com.moare.android.features.sign.display.signin.view.SignView
 import com.moare.android.ui.common.components.HDivider
 import com.moare.android.ui.theme.Moare
 
 @Composable
-fun MoatTimelineView(
+fun MoatTrendingView(
     moatViewModel: MoatViewModel = hiltViewModel()
 ) {
     val accessToken by moatViewModel.accessToken.collectAsState(initial = null)
@@ -58,9 +59,11 @@ fun MoatTimelineView(
     val viewStack by moatViewModel.viewStack.collectAsState()
     val poppedView by moatViewModel.poppedView.collectAsState()
     val moatListResponse by moatViewModel.moatListResponse.collectAsState()
-    val originalTimelineMoats by moatViewModel.originalTimelineMoats.collectAsState()
-    val timelineMoats by moatViewModel.timelineMoats.collectAsState()
+    val originalTrendingMoats by moatViewModel.originalTrendingMoats.collectAsState()
+    val trendingMoats by moatViewModel.trendingMoats.collectAsState()
     val selectedMoat by moatViewModel.selectedMoat.collectAsState()
+    val fireMap by moatViewModel.fireMap.collectAsState()
+    val fireCountMap by moatViewModel.fireCountMap.collectAsState()
 
     var text by rememberSaveable { mutableStateOf("") }
     var settingsShowing by rememberSaveable { mutableStateOf(false) }
@@ -68,7 +71,7 @@ fun MoatTimelineView(
 
     LaunchedEffect(accessToken) {
         if (!accessToken.isNullOrEmpty()) {
-            moatViewModel.send(MoatIntent.GetTimelineMoats)
+            moatViewModel.send(MoatIntent.GetTrendingMoats)
         }
     }
 
@@ -118,24 +121,34 @@ fun MoatTimelineView(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(top = 50.dp)
                 ) {
-                    items(timelineMoats.size) { index ->
-                        val moat = timelineMoats[index]
+                    items(trendingMoats.size) { index ->
+                        val moat = trendingMoats[index]
                         val lines = moat.content.split('\n')
                         val title = lines.firstOrNull().orEmpty()
                         val body  = lines.drop(1).joinToString("\n")
+                        val fired = fireMap[moat.moatId] ?: false
+                        val fireCount = fireCountMap[moat.moatId] ?: moat.fireCount
+
+                        LaunchedEffect(moat.moatId) {
+                            moatViewModel.send(MoatIntent.CheckFire(moat.moatId))
+                        }
 
                         MoatItem(
-                            moatType = if (selectedMoat != null) MoatType.DETAIL else MoatType.TIMELINE,
+                            moatType = if (selectedMoat != null) MoatType.DETAIL else MoatType.TRENDING,
                             isButtonDisabled = selectedMoat != null,
                             title = title,
                             content = body,
-                            hashtagList = moat.sportType,
-                            fireCount = moat.fireCount,
+                            hashtagList = moat.sportTags,
+                            fireCount = fireCount,
                             commentCount = moat.commentCount,
                             userHandle = moat.userHandle,
                             createdAt = moat.createdAt,
                             settingTapped = {
                                 settingsShowing = true
+                            },
+                            fired = fired,
+                            fireTapped = { newValue ->
+                                moatViewModel.send(MoatIntent.ToggleFire(moat.moatId, targetType = TargetType.MOAT))
                             },
                             action = {
                                 moatViewModel.send(MoatIntent.SelectMoat(moatId = moat.moatId))
@@ -150,16 +163,25 @@ fun MoatTimelineView(
 
                         items(comments.size) { index ->
                             val moat = comments[index]
+                            val fired = fireMap[moat.moatId] ?: false
+                            val fireCount = fireCountMap[moat.moatId] ?: moat.fireCount
+
+                            LaunchedEffect(moat.moatId) {
+                                moatViewModel.send(MoatIntent.CheckFire(moat.moatId))
+                            }
+
                             MoatItem(
                                 moatType = MoatType.COMMENT,
                                 content = moat.content,
-                                hashtagList = moat.sportType,
-                                fireCount = moat.fireCount,
+                                hashtagList = moat.sportTags,
+                                fireCount = fireCount,
                                 commentCount = moat.commentCount,
                                 userHandle = moat.userHandle,
                                 createdAt = moat.createdAt,
-                                settingTapped = {
-
+                                settingTapped = {},
+                                fired = fired,
+                                fireTapped = { newValue ->
+                                    moatViewModel.send(MoatIntent.ToggleFire(moat.moatId, targetType = TargetType.COMMENT))
                                 },
                                 action = {
                                     moatViewModel.send(
@@ -171,7 +193,7 @@ fun MoatTimelineView(
                     }
                 }
 
-                if (currentViewType == MoatViewType.TIMELINE) {
+                if (currentViewType == MoatViewType.TRENDING) {
                     FloatingActionButton(
                         onClick = { moatViewModel.send(MoatIntent.AddViewStack(moatViewType = MoatViewType.FORM)) },
                         modifier = Modifier

@@ -6,30 +6,37 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.moare.android.features.moat.models.FireCreateRequest
 import com.moare.android.features.moat.models.MoatCreateRequest
 import com.moare.android.features.moat.models.MoatDetailResponse
 import com.moare.android.features.moat.models.MoatListRequest
 import com.moare.android.features.moat.models.MoatListResponse
 import com.moare.android.features.moat.models.MoatResponse
+import com.moare.android.features.moat.models.TargetType
 import com.moare.android.features.moat.networking.MoatClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.max
+
 sealed class MoatIntent {
-    data object GetTimelineMoats : MoatIntent()
+    data object GetTrendingMoats : MoatIntent()
     data class SelectMoat(val isComment: Boolean = false, val moatId: String) : MoatIntent()
     data class CreateMoat(val content: String) : MoatIntent()
     data class AddViewStack(val moatViewType: MoatViewType) : MoatIntent()
     data object Goback : MoatIntent()
+    data class CheckFire(val targetId: String) : MoatIntent()
+    data class ToggleFire(val targetId: String, val targetType: TargetType) : MoatIntent()
 }
 
 enum class MoatViewType {
-    TIMELINE, DETAIL, FORM // CREATE_FORM, UPDATE_FORM
+    TRENDING, DETAIL, FORM // CREATE_FORM, UPDATE_FORM
 }
 
 @HiltViewModel
@@ -52,7 +59,7 @@ class MoatViewModel @Inject constructor(
         }
 
     // moat
-    private val _currentViewType = MutableStateFlow(MoatViewType.TIMELINE)
+    private val _currentViewType = MutableStateFlow(MoatViewType.TRENDING)
     val currentViewType: StateFlow<MoatViewType> = _currentViewType
 
     private val _viewStack = MutableStateFlow<List<MoatViewType>>(emptyList())
@@ -64,34 +71,42 @@ class MoatViewModel @Inject constructor(
     private val _moatListResponse = MutableStateFlow<MoatListResponse?>(null)
     val moatListResponse: StateFlow<MoatListResponse?> = _moatListResponse
 
-    private val _originalTimelineMoats = MutableStateFlow<List<MoatResponse>>(emptyList())
-    val originalTimelineMoats: StateFlow<List<MoatResponse>> = _originalTimelineMoats
+    private val _originalTrendingMoats = MutableStateFlow<List<MoatResponse>>(emptyList())
+    val originalTrendingMoats: StateFlow<List<MoatResponse>> = _originalTrendingMoats
 
-    private val _timelineMoats = MutableStateFlow<List<MoatResponse>>(emptyList())
-    val timelineMoats: StateFlow<List<MoatResponse>> = _timelineMoats
+    private val _trendingMoats = MutableStateFlow<List<MoatResponse>>(emptyList())
+    val trendingMoats: StateFlow<List<MoatResponse>> = _trendingMoats
 
     private val _selectedMoat = MutableStateFlow<MoatDetailResponse?>(null)
     val selectedMoat: StateFlow<MoatDetailResponse?> = _selectedMoat
 
+    private val _fireMap = MutableStateFlow<Map<String, Boolean>>(emptyMap())
+    val fireMap: StateFlow<Map<String, Boolean>> = _fireMap
+
+    private val _fireCountMap = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val fireCountMap: StateFlow<Map<String, Int>> = _fireCountMap
+
     fun send(intent: MoatIntent) {
         viewModelScope.launch {
             when (intent) {
-                is MoatIntent.GetTimelineMoats -> getTimelineMoats()
+                is MoatIntent.GetTrendingMoats -> getTrendingMoats()
                 is MoatIntent.SelectMoat -> selectMoat(intent.isComment, intent.moatId)
                 is MoatIntent.CreateMoat -> createMoat(intent.content)
                 is MoatIntent.AddViewStack -> addViewStack(intent.moatViewType)
                 is MoatIntent.Goback -> goback()
+                is MoatIntent.CheckFire -> checkFire(intent.targetId)
+                is MoatIntent.ToggleFire -> toggleFire(intent.targetId, intent.targetType)
             }
         }
     }
 
-    private suspend fun getTimelineMoats() {
+    private suspend fun getTrendingMoats() {
         val body = MoatListRequest(nextToken = moatListResponse.value?.nextToken)
 
         try {
-            val result = moatClient.fetchTimelineMoats(body)
+            val result = moatClient.fetchTrendingMoats(body)
 
-            updateTimelineMoats(result)
+            updateTrendingMoats(result)
         } catch (e: Exception) {
 
         }
@@ -114,7 +129,7 @@ class MoatViewModel @Inject constructor(
         val moat = _selectedMoat.value
         val currentViewType = _currentViewType.value
         val moatListResponse = _moatListResponse.value
-        val originalTimeLineMoats = _originalTimelineMoats.value
+        val originalTrendingMoats = _originalTrendingMoats.value
 
         if (currentViewType == MoatViewType.DETAIL && moat != null) {
             val moatRequest = MoatCreateRequest(content, listOf("#축구"), moat.moat.moatId)
@@ -147,13 +162,13 @@ class MoatViewModel @Inject constructor(
                 goback()
 
                 if (moatListResponse != null) {
-                    var timelineMoats = originalTimeLineMoats
-                    timelineMoats.toMutableList().apply { add(result) }
+                    var trendingMoats = originalTrendingMoats
+                    trendingMoats.toMutableList().apply { add(result) }
 
                     var moatList = moatListResponse
-                    moatList.moats = timelineMoats
+                    moatList.moats = trendingMoats
 
-                    updateTimelineMoats(moatList)
+                    updateTrendingMoats(moatList)
                 }
             } catch (e: Exception) {
 
@@ -161,19 +176,19 @@ class MoatViewModel @Inject constructor(
         }
     }
 
-    private fun updateTimelineMoats(moatListResponse: MoatListResponse) {
+    private fun updateTrendingMoats(moatListResponse: MoatListResponse) {
         _moatListResponse.value = moatListResponse
-        _originalTimelineMoats.value = moatListResponse.moats
-        _timelineMoats.value = moatListResponse.moats
+        _originalTrendingMoats.value = moatListResponse.moats
+        _trendingMoats.value = moatListResponse.moats
     }
 
     private fun updateSelectedMoat(isComment: Boolean, moatDetailResponse: MoatDetailResponse) {
         if (isComment) {
             _selectedMoat.value = moatDetailResponse
-            _timelineMoats.value = listOf(moatDetailResponse.moat)
+            _trendingMoats.value = listOf(moatDetailResponse.moat)
         } else {
             _selectedMoat.value = moatDetailResponse
-            _timelineMoats.value = _timelineMoats.value.filter {
+            _trendingMoats.value = _trendingMoats.value.filter {
                 it.moatId == moatDetailResponse.moat.moatId
             }
         }
@@ -210,10 +225,101 @@ class MoatViewModel @Inject constructor(
             }
         } else {
             // 뒤로갈 뷰가 없는 경우. 즉, 메인 화면으로 이동하는 경우.
-            _currentViewType.value = MoatViewType.TIMELINE
+            _currentViewType.value = MoatViewType.TRENDING
 
             _selectedMoat.value = null
-            _timelineMoats.value = _originalTimelineMoats.value
+            _trendingMoats.value = _originalTrendingMoats.value
+        }
+    }
+
+    private suspend fun checkFire(targetId: String) {
+        try {
+            val result = moatClient.checkFire(targetId)
+
+            setFireMap(targetId, result)
+        } catch (e: Exception) {
+
+        }
+    }
+
+    private fun setFireMap(targetId: String, result: Boolean) {
+        _fireMap.update { it ->
+            it + (targetId to result)
+        }
+    }
+
+    private suspend fun createFire(targetId: String, targetType: TargetType) {
+        val fireCreateRequest = FireCreateRequest(targetId = targetId, targetType = targetType)
+
+        try {
+            moatClient.createFire(fireCreateRequest)
+        } catch (e: Exception) {
+            // 파이어를 눌렀지만 서버로 전송이 안 된 경우
+            _fireMap.update { it ->
+                it + (targetId to false)
+            }
+
+            val firstFireCount = fireCountMap.value[targetId]
+                ?: trendingMoats.value.firstOrNull { it.moatId == targetId }?.fireCount
+                ?: 0
+
+            _fireCountMap.update { it ->
+                it + (targetId to max(0, firstFireCount - 1))
+            }
+        }
+    }
+
+    private suspend fun deleteFire(targetId: String) {
+        try {
+            moatClient.deleteFire(targetId)
+        } catch (e: Exception) {
+            // 파이어를 취소했지만 서버로 전송이 안 된 경우
+            _fireMap.update {
+                it + (targetId to true)
+            }
+
+            val firstFireCount = fireCountMap.value[targetId]
+                ?: trendingMoats.value.firstOrNull { it.moatId == targetId }?.fireCount
+                ?: 0
+
+            _fireCountMap.update {
+                it + (targetId to (firstFireCount + 1))
+            }
+        }
+    }
+
+    private suspend fun toggleFire(targetId: String, targetType: TargetType) {
+        val isFired = fireMap.value[targetId] ?: false
+        _fireMap.update {
+            it + (targetId to !isFired)
+        }
+
+        val firstFireCount = fireCountMap.value[targetId]
+            ?: trendingMoats.value.firstOrNull { it.moatId == targetId }?.fireCount
+            ?: 0
+
+        val updateFireCount = if (isFired) {
+            max(0, firstFireCount - 1)
+        } else {
+            firstFireCount + 1
+        }
+
+        _fireCountMap.update {
+            it + (targetId to updateFireCount)
+        }
+
+        if (isFired) {
+            _fireMap.update {
+                it + (targetId to false)
+            }
+
+            deleteFire(targetId)
+        } else {
+            _fireMap.update {
+                it + (targetId to true)
+            }
+
+            createFire(targetId, targetType)
         }
     }
 }

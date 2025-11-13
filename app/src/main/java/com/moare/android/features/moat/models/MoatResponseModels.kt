@@ -10,7 +10,7 @@ data class MoatResponse(
     val userHandle: String,
     val profileImageUrl: String?,
     val content: String,
-    val sportType: List<String>,
+    val sportTags: List<String>,
     val parentMoatId:String?,
     val targetType: String,
     val createdAt: String,
@@ -29,4 +29,12 @@ data class MoatDetailResponse(
 data class MoatListResponse(
     var moats: List<MoatResponse>,
     val nextToken:  Map<String, String>?
+)
+
+@Serializable
+data class FireResponse(
+    val targetId: String,
+    val userId: String,
+    val targetType: String,
+    val createdAt: String
 )
