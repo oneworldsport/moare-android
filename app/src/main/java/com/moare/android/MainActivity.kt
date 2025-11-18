@@ -29,6 +29,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.analytics
 import com.moare.android.core.mvi.AppViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -61,6 +64,8 @@ fun AppRoot(viewModel: AppViewModel = hiltViewModel()) {
 
 //    val viewForTest: SportDisplayType? = SportDisplayType.KBO_GAME_STATS
     val viewForTest: SportDisplayType? = null
+
+//    Firebase.analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, Bundle().apply { putString("fuuccckk", "fuckkkkk") })
 
     val navController = rememberNavController()
     val items = listOf(Screen.Search, Screen.Moat, Screen.Profile)

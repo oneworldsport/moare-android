@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.search
 
+import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -45,6 +46,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.analytics
+import com.google.firebase.analytics.logEvent
 import com.moare.android.R
 import com.moare.android.core.mvi.AppViewModel
 import com.moare.android.core.mvi.StackItem
@@ -283,6 +287,7 @@ fun SearchView(
                             .alpha(0.7f)
                             .clickable {
                                 isSearchExampleOpened = !isSearchExampleOpened
+//                                Firebase.analytics.logEvent("testtttt", Bundle().apply { putString("fuuccckk", "fuckkkkk") })
                             }
                     ) {
                         Text(

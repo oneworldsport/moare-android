@@ -3,6 +3,11 @@ package com.moare.android
 import android.app.Application
 import android.util.Log
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.analytics.FirebaseAnalytics.ConsentStatus
+import com.google.firebase.analytics.FirebaseAnalytics.ConsentType
+import com.google.firebase.analytics.analytics
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.util.AWSUtils
 import com.moare.android.core.util.EnNameTranslationUtils
@@ -17,6 +22,14 @@ import kotlinx.coroutines.supervisorScope
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+//        FirebaseApp.initializeApp(this)
+//        Firebase.analytics.setAnalyticsCollectionEnabled(true)
+//        Firebase.analytics.setConsent(
+//            mapOf(
+//                ConsentType.ANALYTICS_STORAGE to ConsentStatus.GRANTED,
+//                ConsentType.AD_STORAGE to ConsentStatus.GRANTED
+//            )
+//        )
 
         if (BuildConfig.DEBUG) {
             // NOTE: test code를 실행할때는 s3가 모두 초기화(비동기 작업) 되기 전에 화면이 나와 사전이 비어있는 경우가 있음. 그래서 s3 초기화 작업이 모두 끝나면 다음 코드 진행.
