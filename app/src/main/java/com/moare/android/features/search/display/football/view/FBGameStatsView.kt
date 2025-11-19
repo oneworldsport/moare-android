@@ -1,24 +1,16 @@
 package com.moare.android.features.search.display.football.view
 
-import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.FBUtil
-import com.moare.android.core.util.MatchDescriptionConverter
-import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.common.container.state.GameStatsCoachState
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -26,11 +18,10 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.football.store.FBGameStatsAction
+import com.moare.android.features.search.display.football.store.FBGameStatsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.ModelConverter
-import com.moare.android.ui.common.components.FBLeagueTitle
 import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
 
 @Composable

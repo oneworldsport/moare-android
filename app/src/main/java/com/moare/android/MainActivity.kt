@@ -3,7 +3,6 @@ package com.moare.android
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -23,21 +22,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.firebase.Firebase
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.analytics
-import com.moare.android.core.mvi.AppViewModel
+import com.moare.android.features.search.display.SearchStackViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.moare.android.features.moat.display.moat.view.MoatTrendingView
+import com.moare.android.features.moat.display.view.MoatTrendingView
 import com.moare.android.features.search.display.search.SearchView
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.userprofile.display.view.UserProfileView
@@ -59,7 +54,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppRoot(viewModel: AppViewModel = hiltViewModel()) {
+fun AppRoot(viewModel: SearchStackViewModel = hiltViewModel()) {
     var isSplashFinished by remember { mutableStateOf(false) }
 
 //    val viewForTest: SportDisplayType? = SportDisplayType.KBO_GAME_STATS

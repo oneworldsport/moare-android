@@ -11,11 +11,9 @@ import com.moare.android.features.search.display.common.container.state.NewStand
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.kbo.store.KBOTeamStandingsAction
+import com.moare.android.features.search.display.kbo.store.KBOTeamStandingsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 
 @Composable

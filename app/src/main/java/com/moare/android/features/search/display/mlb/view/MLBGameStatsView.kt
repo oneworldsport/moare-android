@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,13 +44,10 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.mlb.store.MLBGameStatsAction
+import com.moare.android.features.search.display.mlb.store.MLBGameStatsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBGameLineScoreInning
-import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.BaseballLeagueTitleForGameStats
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.RoundedBorderText

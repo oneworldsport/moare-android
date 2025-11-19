@@ -1,6 +1,5 @@
 package com.moare.android.features.search.display.search
 
-import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -12,7 +11,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -46,12 +43,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.google.firebase.Firebase
-import com.google.firebase.analytics.analytics
-import com.google.firebase.analytics.logEvent
 import com.moare.android.R
-import com.moare.android.core.mvi.AppViewModel
-import com.moare.android.core.mvi.StackItem
+import com.moare.android.features.search.display.SearchStackViewModel
+import com.moare.android.features.search.display.SearchStackItem
 import com.moare.android.features.search.display.football.view.FBGameStatsView
 import com.moare.android.features.search.display.football.view.FBLeagueScheduleView
 import com.moare.android.features.search.display.football.view.FBPlayerInfoView
@@ -86,8 +80,8 @@ import com.moare.android.features.search.display.nba.view.NBATeamInfoView
 import com.moare.android.features.search.display.nba.view.NBATeamStandingsView
 import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.nba.view.NBATournamentView
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.search.store.SearchAction
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.ui.common.components.ProgressIndicator
@@ -98,7 +92,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SearchView(
-    viewModel: AppViewModel,
+    viewModel: SearchStackViewModel,
     searchStore: SearchStore,
     viewForTest: SportDisplayType? = null
 ) {
@@ -460,60 +454,60 @@ fun SearchView(
 @Composable
 fun StackItemView(
     searchStore: SearchStore,
-    item: StackItem,
+    item: SearchStackItem,
     didPop: Boolean,
     isCombinedView: Boolean
 ) {
     when (item) {
-        is StackItem.FBPlayerInfo -> FBPlayerInfoView(searchStore, item.store)
-        is StackItem.FBPlayerStats -> FBPlayerStatsView(searchStore, item.store)
-        is StackItem.FBPlayerStandings -> FBPlayerStandingsView(searchStore, item.store)
-        is StackItem.FBTeamInfo -> FBTeamInfoView(searchStore, item.store)
-        is StackItem.FBTeamStats -> FBTeamStatsView(searchStore, item.store)
-        is StackItem.FBTeamStandings -> FBTeamStandingsView(searchStore, item.store)
-        is StackItem.FBLeagueSchedule -> FBLeagueScheduleView(searchStore, item.store, didPop, isCombinedView)
-        is StackItem.FBGameStats -> FBGameStatsView(searchStore, item.store, isCombinedView)
-        is StackItem.FBTournament -> FBTournamentView(searchStore, item.store)
+        is SearchStackItem.FBPlayerInfo -> FBPlayerInfoView(searchStore, item.store)
+        is SearchStackItem.FBPlayerStats -> FBPlayerStatsView(searchStore, item.store)
+        is SearchStackItem.FBPlayerStandings -> FBPlayerStandingsView(searchStore, item.store)
+        is SearchStackItem.FBTeamInfo -> FBTeamInfoView(searchStore, item.store)
+        is SearchStackItem.FBTeamStats -> FBTeamStatsView(searchStore, item.store)
+        is SearchStackItem.FBTeamStandings -> FBTeamStandingsView(searchStore, item.store)
+        is SearchStackItem.FBLeagueSchedule -> FBLeagueScheduleView(searchStore, item.store, didPop, isCombinedView)
+        is SearchStackItem.FBGameStats -> FBGameStatsView(searchStore, item.store, isCombinedView)
+        is SearchStackItem.FBTournament -> FBTournamentView(searchStore, item.store)
 
-        is StackItem.NBAPlayerInfo -> NBAPlayerInfoView(searchStore, item.store)
-        is StackItem.NBAPlayerStats -> NBAPlayerStatsView(searchStore, item.store)
-        is StackItem.NBAPlayerStandings -> NBAPlayerStandingsView(searchStore, item.store)
-        is StackItem.NBATeamInfo -> NBATeamInfoView(searchStore, item.store)
-        is StackItem.NBATeamStats -> NBATeamStatsView(searchStore, item.store)
-        is StackItem.NBATeamStandings -> NBATeamStandingsView(searchStore, item.store)
-        is StackItem.NBALeagueSchedule -> NBALeagueScheduleView(searchStore, item.store, didPop)
-        is StackItem.NBAGameStats -> NBAGameStatsView(searchStore, item.store)
-        is StackItem.NBATournament -> NBATournamentView(searchStore, item.store)
+        is SearchStackItem.NBAPlayerInfo -> NBAPlayerInfoView(searchStore, item.store)
+        is SearchStackItem.NBAPlayerStats -> NBAPlayerStatsView(searchStore, item.store)
+        is SearchStackItem.NBAPlayerStandings -> NBAPlayerStandingsView(searchStore, item.store)
+        is SearchStackItem.NBATeamInfo -> NBATeamInfoView(searchStore, item.store)
+        is SearchStackItem.NBATeamStats -> NBATeamStatsView(searchStore, item.store)
+        is SearchStackItem.NBATeamStandings -> NBATeamStandingsView(searchStore, item.store)
+        is SearchStackItem.NBALeagueSchedule -> NBALeagueScheduleView(searchStore, item.store, didPop)
+        is SearchStackItem.NBAGameStats -> NBAGameStatsView(searchStore, item.store)
+        is SearchStackItem.NBATournament -> NBATournamentView(searchStore, item.store)
 
-        is StackItem.MLBPlayerInfo -> MLBPlayerInfoView(searchStore, item.store)
-        is StackItem.MLBPlayerStats -> MLBPlayerStatsView(searchStore, item.store)
+        is SearchStackItem.MLBPlayerInfo -> MLBPlayerInfoView(searchStore, item.store)
+        is SearchStackItem.MLBPlayerStats -> MLBPlayerStatsView(searchStore, item.store)
 //        displayModels[SportDisplayType.MLB_PLAYER_STANDINGS]?.let {
 ////                        MLBPlayerStandingsView(data = it)
 //            CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
 //                Text(StringConstants.viewPreparingAdviseText("'MLB 선수 순위'"))
 //            }
 //        }
-        is StackItem.MLBTeamInfo -> MLBTeamInfoView(searchStore, item.store)
-        is StackItem.MLBTeamStats -> MLBTeamStatsView(searchStore, item.store)
-        is StackItem.MLBTeamStandings -> MLBTeamStandingsView(searchStore, item.store)
-        is StackItem.MLBLeagueSchedule -> MLBLeagueScheduleView(searchStore, item.store, didPop)
-        is StackItem.MLBGameStats -> MLBGameStatsView(searchStore, item.store)
-        is StackItem.MLBTournament -> MLBTournamentView(searchStore, item.store)
+        is SearchStackItem.MLBTeamInfo -> MLBTeamInfoView(searchStore, item.store)
+        is SearchStackItem.MLBTeamStats -> MLBTeamStatsView(searchStore, item.store)
+        is SearchStackItem.MLBTeamStandings -> MLBTeamStandingsView(searchStore, item.store)
+        is SearchStackItem.MLBLeagueSchedule -> MLBLeagueScheduleView(searchStore, item.store, didPop)
+        is SearchStackItem.MLBGameStats -> MLBGameStatsView(searchStore, item.store)
+        is SearchStackItem.MLBTournament -> MLBTournamentView(searchStore, item.store)
 
-        is StackItem.KBOPlayerInfo -> KBOPlayerInfoView(searchStore, item.store)
-        is StackItem.KBOPlayerStats -> KBOPlayerStatsView(searchStore, item.store)
+        is SearchStackItem.KBOPlayerInfo -> KBOPlayerInfoView(searchStore, item.store)
+        is SearchStackItem.KBOPlayerStats -> KBOPlayerStatsView(searchStore, item.store)
 //        displayModels[SportDisplayType.KBO_PLAYER_STANDINGS]?.let {
 ////                        KBOPlayerStandingsView(data = it)
 //            CenterColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
 //                Text(StringConstants.viewPreparingAdviseText("'KBO 선수 순위'"))
 //            }
 //        }
-        is StackItem.KBOTeamInfo -> KBOTeamInfoView(searchStore, item.store)
-        is StackItem.KBOTeamStats -> KBOTeamStatsView(searchStore, item.store)
-        is StackItem.KBOTeamStandings -> KBOTeamStandingsView(searchStore, item.store)
-        is StackItem.KBOLeagueSchedule -> KBOLeagueScheduleView(searchStore, item.store, didPop)
-        is StackItem.KBOGameStats -> KBOGameStatsView(searchStore, item.store)
-        is StackItem.KBOTournament -> KBOTournamentView(searchStore, item.store)
+        is SearchStackItem.KBOTeamInfo -> KBOTeamInfoView(searchStore, item.store)
+        is SearchStackItem.KBOTeamStats -> KBOTeamStatsView(searchStore, item.store)
+        is SearchStackItem.KBOTeamStandings -> KBOTeamStandingsView(searchStore, item.store)
+        is SearchStackItem.KBOLeagueSchedule -> KBOLeagueScheduleView(searchStore, item.store, didPop)
+        is SearchStackItem.KBOGameStats -> KBOGameStatsView(searchStore, item.store)
+        is SearchStackItem.KBOTournament -> KBOTournamentView(searchStore, item.store)
     }
 }
 

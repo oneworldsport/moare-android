@@ -13,7 +13,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.NBAUtil
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
@@ -22,13 +21,9 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleAction
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
+import com.moare.android.features.search.display.nba.store.NBALeagueScheduleAction
+import com.moare.android.features.search.display.nba.store.NBALeagueScheduleStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 

@@ -13,7 +13,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.KBOUtil
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
@@ -22,13 +21,9 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
-import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleStore
-import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
+import com.moare.android.features.search.display.kbo.store.KBOLeagueScheduleAction
+import com.moare.android.features.search.display.kbo.store.KBOLeagueScheduleStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 

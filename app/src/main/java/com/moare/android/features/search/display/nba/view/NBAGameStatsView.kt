@@ -48,10 +48,9 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.nba.store.NBAGameStatsAction
+import com.moare.android.features.search.display.nba.store.NBAGameStatsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.nba.NBALineScore
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.NBATitle

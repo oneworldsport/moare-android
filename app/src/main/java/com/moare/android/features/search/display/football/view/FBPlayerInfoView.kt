@@ -34,9 +34,9 @@ import com.moare.android.core.util.TranslationType
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.football.store.FBPlayerInfoAction
+import com.moare.android.features.search.display.football.store.FBPlayerInfoStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.ui.common.components.FBLeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
