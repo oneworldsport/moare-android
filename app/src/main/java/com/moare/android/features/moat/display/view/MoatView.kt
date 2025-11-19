@@ -1,11 +1,8 @@
 package com.moare.android.features.moat.display.view
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,57 +21,49 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.moare.android.R
 import com.moare.android.features.moat.display.components.CommentComposer
 import com.moare.android.features.moat.display.components.MoatItem
 import com.moare.android.features.moat.display.components.MoatType
 import com.moare.android.features.moat.display.components.SettingWindow
 import com.moare.android.features.moat.display.components.TextFieldAlert
-import com.moare.android.features.moat.display.store.MoatIntent
-import com.moare.android.features.moat.display.store.MoatViewModel
-import com.moare.android.features.moat.display.store.MoatViewType
+import com.moare.android.features.moat.display.store.MoatAction
+import com.moare.android.features.moat.display.store.MoatStore
 import com.moare.android.features.moat.models.MoatResponse
 import com.moare.android.features.moat.models.TargetType
-import com.moare.android.features.sign.display.signin.view.SignView
-import com.moare.android.ui.common.components.HDivider
+import com.moare.android.ui.components.HDivider
 import com.moare.android.ui.theme.Moare
 
 @Composable
-fun MoatTrendingView(
-    moatViewModel: MoatViewModel = hiltViewModel()
+fun MoatView(
+    store: MoatStore
 ) {
-    val accessToken by moatViewModel.accessToken.collectAsState(initial = null)
+    val accessToken by store.accessToken.collectAsState(initial = null)
 
-    /*
-    * viewmodel state
-    * */
-
-    val currentViewType by moatViewModel.currentViewType.collectAsState()
-    val viewStack by moatViewModel.viewStack.collectAsState()
-    val poppedView by moatViewModel.poppedView.collectAsState()
-    val moatListResponse by moatViewModel.moatListResponse.collectAsState()
-    val originalTrendingMoats by moatViewModel.originalTrendingMoats.collectAsState()
-    val trendingMoats by moatViewModel.trendingMoats.collectAsState()
-    val selectedMoat by moatViewModel.selectedMoat.collectAsState()
-    val fireMap by moatViewModel.fireMap.collectAsState()
-    val fireCountMap by moatViewModel.fireCountMap.collectAsState()
+    val moatListResponse by store.moatListResponse.collectAsState()
+    val originalTrendingMoats by store.originalTrendingMoats.collectAsState()
+    val trendingMoats by store.trendingMoats.collectAsState()
+    val selectedMoat by store.selectedMoat.collectAsState()
+    val fireMap by store.fireMap.collectAsState()
+    val fireCountMap by store.fireCountMap.collectAsState()
 
     var text by rememberSaveable { mutableStateOf("") }
     var settingsShowing by rememberSaveable { mutableStateOf(false) }
     var reportShowing by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(accessToken) {
-        if (!accessToken.isNullOrEmpty()) {
-            moatViewModel.send(MoatIntent.GetTrendingMoats)
+    LaunchedEffect(Unit) {
+        if (store.moatId != null) {
+            // TODO: 뒤로가기를 통해 detail로 왔을때도 불필요하게 실행됨. 불필요한게 아닐수도 있지만 그래도 고민은 해봐야 할 것 같음.
+            store.send(MoatAction.GetMoatDetail(moatId = store.moatId))
+        } else {
+            if (originalTrendingMoats.isEmpty()) {
+                store.send(MoatAction.GetTrendingMoats)
+            }
         }
     }
 
     BackHandler {
-        moatViewModel.send(MoatIntent.Goback)
+//        moatStore.send(MoatAction.Goback)
     }
 
     /*
@@ -82,176 +71,130 @@ fun MoatTrendingView(
        * */
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.BottomEnd
     ) {
-        /*
-        * back button
-        * */
-        Column(
-            Modifier.zIndex(1f)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Row {
-                Box(
-                    contentAlignment = Alignment.CenterEnd,
-                    modifier = Modifier.size(width = 34.dp, height = 50.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_round_arrow_back_24),
-                        contentDescription = null,
-                        tint = Moare,
-                        modifier = Modifier
-                            .clickable {
-                                moatViewModel.send(MoatIntent.Goback)
-                            }
-                    )
-                }
+            items(trendingMoats.size) { index ->
+                val moat = trendingMoats[index]
+                val lines = moat.content.split('\n')
+                val title = lines.firstOrNull().orEmpty()
+                val body  = lines.drop(1).joinToString("\n")
+                val fired = fireMap[moat.moatId] ?: false
+                val fireCount = fireCountMap[moat.moatId] ?: moat.fireCount
 
-                Spacer(Modifier.weight(1f))
+                MoatItem(
+                    moatType = if (selectedMoat != null) MoatType.DETAIL else MoatType.TRENDING,
+                    isButtonDisabled = selectedMoat != null,
+                    title = title,
+                    content = body,
+                    hashtagList = moat.sportTags,
+                    fireCount = fireCount,
+                    commentCount = moat.commentCount,
+                    userHandle = moat.userHandle,
+                    createdAt = moat.createdAt,
+                    settingTapped = {
+                        settingsShowing = true
+                    },
+                    fired = fired,
+                    fireTapped = { newValue ->
+                        store.send(MoatAction.ToggleFire(moat.moatId, targetType = TargetType.MOAT))
+                    },
+                    action = {
+                        store.send(MoatAction.SelectMoat(moatId = moat.moatId))
+                    }
+                )
             }
 
-            Spacer(Modifier.weight(1f))
-        }
+            if (selectedMoat != null) {
+                val comments: List<MoatResponse> = selectedMoat?.commentListResponse?.moats.orEmpty()
 
-        if (!accessToken.isNullOrEmpty()) {
-            if (currentViewType == MoatViewType.FORM) {
-                MoatFormView()
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(top = 50.dp)
-                ) {
-                    items(trendingMoats.size) { index ->
-                        val moat = trendingMoats[index]
-                        val lines = moat.content.split('\n')
-                        val title = lines.firstOrNull().orEmpty()
-                        val body  = lines.drop(1).joinToString("\n")
-                        val fired = fireMap[moat.moatId] ?: false
-                        val fireCount = fireCountMap[moat.moatId] ?: moat.fireCount
+                item { HDivider(Modifier.padding(vertical = 8.dp)) }
 
-                        LaunchedEffect(moat.moatId) {
-                            moatViewModel.send(MoatIntent.CheckFire(moat.moatId))
-                        }
+                items(comments.size) { index ->
+                    val moat = comments[index]
+                    val fired = fireMap[moat.moatId] ?: false
+                    val fireCount = fireCountMap[moat.moatId] ?: moat.fireCount
 
-                        MoatItem(
-                            moatType = if (selectedMoat != null) MoatType.DETAIL else MoatType.TRENDING,
-                            isButtonDisabled = selectedMoat != null,
-                            title = title,
-                            content = body,
-                            hashtagList = moat.sportTags,
-                            fireCount = fireCount,
-                            commentCount = moat.commentCount,
-                            userHandle = moat.userHandle,
-                            createdAt = moat.createdAt,
-                            settingTapped = {
-                                settingsShowing = true
-                            },
-                            fired = fired,
-                            fireTapped = { newValue ->
-                                moatViewModel.send(MoatIntent.ToggleFire(moat.moatId, targetType = TargetType.MOAT))
-                            },
-                            action = {
-                                moatViewModel.send(MoatIntent.SelectMoat(moatId = moat.moatId))
-                            }
-                        )
-                    }
-
-                    if (selectedMoat != null) {
-                        val comments: List<MoatResponse> = selectedMoat?.commentListResponse?.moats.orEmpty()
-
-                        item { HDivider(Modifier.padding(vertical = 8.dp)) }
-
-                        items(comments.size) { index ->
-                            val moat = comments[index]
-                            val fired = fireMap[moat.moatId] ?: false
-                            val fireCount = fireCountMap[moat.moatId] ?: moat.fireCount
-
-                            LaunchedEffect(moat.moatId) {
-                                moatViewModel.send(MoatIntent.CheckFire(moat.moatId))
-                            }
-
-                            MoatItem(
-                                moatType = MoatType.COMMENT,
-                                content = moat.content,
-                                hashtagList = moat.sportTags,
-                                fireCount = fireCount,
-                                commentCount = moat.commentCount,
-                                userHandle = moat.userHandle,
-                                createdAt = moat.createdAt,
-                                settingTapped = {},
-                                fired = fired,
-                                fireTapped = { newValue ->
-                                    moatViewModel.send(MoatIntent.ToggleFire(moat.moatId, targetType = TargetType.COMMENT))
-                                },
-                                action = {
-                                    moatViewModel.send(
-                                        MoatIntent.SelectMoat(isComment = true, moatId = moat.moatId)
-                                    )
-                                }
+                    MoatItem(
+                        moatType = MoatType.COMMENT,
+                        content = moat.content,
+                        hashtagList = moat.sportTags,
+                        fireCount = fireCount,
+                        commentCount = moat.commentCount,
+                        userHandle = moat.userHandle,
+                        createdAt = moat.createdAt,
+                        settingTapped = {},
+                        fired = fired,
+                        fireTapped = { newValue ->
+                            store.send(MoatAction.ToggleFire(moat.moatId, targetType = TargetType.COMMENT))
+                        },
+                        action = {
+                            store.send(
+                                MoatAction.SelectMoat(moatId = moat.moatId)
                             )
                         }
-                    }
-                }
-
-                if (currentViewType == MoatViewType.TRENDING) {
-                    FloatingActionButton(
-                        onClick = { moatViewModel.send(MoatIntent.AddViewStack(moatViewType = MoatViewType.FORM)) },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(10.dp),
-                        backgroundColor = Color.White,
-                        contentColor = Moare,
-//                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp) // 그림자 제거
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "Add",
-                            modifier = Modifier.size(40.dp))
-                    }
-                }
-
-                if (currentViewType == MoatViewType.DETAIL) {
-                    Row(
-                        modifier = Modifier.align(Alignment.BottomStart).padding(horizontal = 8.dp)
-                    ) {
-                        CommentComposer(
-                            text= text,
-                            onTextChange = { newValue ->
-                                text = newValue
-                            },
-                            action = {
-                                moatViewModel.send(MoatIntent.CreateMoat(content = text))
-                            },
-                            modifier = Modifier
-                        )
-                    }
-                }
-
-                if (settingsShowing) {
-                    Box(
-                        Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 50.dp, end = 25.dp)
-                    ) {
-                        SettingWindow(
-                            reportTapped = {
-                                settingsShowing = false
-                                reportShowing = true
-                            }
-                        )
-                    }
-                }
-
-                if (reportShowing) {
-                    TextFieldAlert(
-                        isPresent = reportShowing,
-                        onDismiss = {
-                            reportShowing = false
-                        }
                     )
                 }
             }
+        }
+
+        if (store.isDetail) {
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
+                CommentComposer(
+                    text= text,
+                    onTextChange = { newValue ->
+                        text = newValue
+                    },
+                    action = {
+                        store.send(MoatAction.CreateMoat(content = text))
+                    },
+                    modifier = Modifier
+                )
+            }
         } else {
-            // 로그인 안 되어있을 때
-            SignView()
+            FloatingActionButton(
+                onClick = {
+                    store.send(MoatAction.ShowMoatForm)
+                },
+                modifier = Modifier
+                    .padding(10.dp),
+                backgroundColor = Color.White,
+                contentColor = Moare,
+//                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp) // 그림자 제거
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Add",
+                    modifier = Modifier.size(40.dp))
+            }
+        }
+
+        if (settingsShowing) {
+            Box(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 50.dp, end = 25.dp)
+            ) {
+                SettingWindow(
+                    reportTapped = {
+                        settingsShowing = false
+                        reportShowing = true
+                    }
+                )
+            }
+        }
+
+        if (reportShowing) {
+            TextFieldAlert(
+                isPresent = reportShowing,
+                onDismiss = {
+                    reportShowing = false
+                }
+            )
         }
     }
 }

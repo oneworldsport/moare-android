@@ -36,7 +36,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideSignClient(apiHelper: ApiHelper): SignClient = SignClient(apiHelper)
+    fun provideSignClient(apiHelper: ApiHelper, dataStore: DataStore<Preferences>): SignClient = SignClient(apiHelper, dataStore)
 
     @Provides
     @Singleton

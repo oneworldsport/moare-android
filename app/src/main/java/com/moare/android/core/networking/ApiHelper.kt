@@ -38,8 +38,8 @@ class ApiHelper {
 //        .build()
 
     private val searchRetrofit = Retrofit.Builder()
-//        .baseUrl("http://10.0.2.2:8000/") // local test
-        .baseUrl("https://moare.kr/") // beanstalk
+        .baseUrl("http://10.0.2.2:8000/") // local test
+//        .baseUrl("https://moare.kr/") // beanstalk
 //        .client(okHttpClient)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()

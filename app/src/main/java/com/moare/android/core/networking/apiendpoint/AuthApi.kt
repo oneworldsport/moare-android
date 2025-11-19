@@ -13,43 +13,49 @@ import com.moare.android.features.sign.models.StartAuthRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface AuthApi {
+    @GET("auth/session")
+    suspend fun bootstrapSession(
+        @Header("Authorization") token: String?
+    ) : SimpleResponse
+
     @POST("auth/login/start")
     suspend fun startLoginAuth(
         @Body body: StartAuthRequest
-    ) : Response<AuthSessionResponse>
+    ) : AuthSessionResponse
 
     @POST("auth/login/confirm")
     suspend fun confirmLoginAuth(
         @Body body: ConfirmAuthRequest
-    ) : Response<AuthTokenResponse>
+    ) : AuthTokenResponse
 
     @POST("auth/signup/initiate")
     suspend fun initiateSignUp(
         @Body body: SignUpInitiateRequest
-    ) : Response<SimpleResponse>
+    ) : SimpleResponse
 
     @POST("auth/signup/verify")
     suspend fun verifySignUpOtp(
         @Body body: SignUpVerificationRequest
-    ) : Response<SimpleResponse>
+    ) : SimpleResponse
 
     @POST("auth/signup/complete")
     suspend fun completeSignUp(
         @Body body: SignUpCompleteRequest
-    ) : Response<SimpleResponse>
+    ) : SimpleResponse
 
     @GET("auth/user-handle/check")
     suspend fun checkUserHandle(
         @Query("userHandle") userHandle: String
-    ) : Response<SimpleResponse>
+    ) : SimpleResponse
 
     @PUT("auth/userHandle/reserve")
     suspend fun reserveUserHandle(
         @Body body:UserHandleReserveRequest
-    ) : Response<SimpleResponse>
+    ) : SimpleResponse
 }

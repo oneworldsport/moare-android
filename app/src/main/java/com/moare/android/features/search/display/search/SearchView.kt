@@ -84,7 +84,7 @@ import com.moare.android.features.search.display.search.store.SearchAction
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.ui.common.components.ProgressIndicator
+import com.moare.android.ui.components.ProgressIndicator
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
 import com.moare.android.ui.util.rememberKeyboardVisibility
@@ -412,7 +412,7 @@ fun SearchView(
                 ) {
                     if (includesPreviousView) {
                         stack.takeLast(2).firstOrNull()?.let { item ->
-                            StackItemView(
+                            SearchStackItemView(
                                 searchStore = searchStore,
                                 item = item,
                                 didPop = true,
@@ -423,7 +423,7 @@ fun SearchView(
                     }
 
                     stack.lastOrNull()?.let { item ->
-                        StackItemView(
+                        SearchStackItemView(
                             searchStore = searchStore,
                             item = item,
                             didPop = didPop,
@@ -452,7 +452,7 @@ fun SearchView(
 }
 
 @Composable
-fun StackItemView(
+fun SearchStackItemView(
     searchStore: SearchStore,
     item: SearchStackItem,
     didPop: Boolean,

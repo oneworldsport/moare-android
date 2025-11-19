@@ -23,12 +23,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.moare.android.features.moat.display.store.MoatIntent
-import com.moare.android.features.moat.display.store.MoatViewModel
+import com.moare.android.features.moat.display.store.MoatAction
+import com.moare.android.features.moat.display.store.MoatStore
 
 @Composable
 fun MoatFormView(
-    moatViewModel: MoatViewModel = hiltViewModel(),
+    moatStore: MoatStore = hiltViewModel(),
 ) {
     var text by rememberSaveable { mutableStateOf("") }
     
@@ -74,7 +74,7 @@ fun MoatFormView(
             }
 
             Button(
-                onClick = { moatViewModel.send(MoatIntent.CreateMoat(text)) }
+                onClick = { moatStore.send(MoatAction.CreateMoat(text)) }
             ) {
                 Text(
                     text = "작성하기",

@@ -161,7 +161,7 @@ sealed interface SearchStackItem {
 
 @HiltViewModel
 class SearchStackViewModel @Inject constructor(
-    val searchFactory: SearchStore.Factory,
+    private val searchFactory: SearchStore.Factory,
     private val fbPlayerInfoFactory: FBPlayerInfoStore.Factory,
     private val fbPlayerStatsFactory: FBPlayerStatsStore.Factory,
     private val fbPlayerStandingsFactory: FBPlayerStandingsStore.Factory,
@@ -550,6 +550,7 @@ class SearchStackViewModel @Inject constructor(
             is FBLeagueScheduleDelegate.ShowGameStats -> {
                 _didPop.value = false
                 // FBLeagueScheduleView에서 아이템 클릭으로 FBGameStatsView보여줄때 _includesPreviousView = true로 설정해 줘야 함.
+                // TODO: ?.let {} 문법으로 변경
                 val lastItem = stack.value.lastOrNull()
                 if (lastItem != null) {
                     if (lastItem is SearchStackItem.FBLeagueSchedule) {

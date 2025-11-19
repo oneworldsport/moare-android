@@ -32,7 +32,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.moare.android.features.moat.display.view.MoatTrendingView
+import com.moare.android.features.moat.display.MoatDisplayView
+import com.moare.android.features.moat.display.MoatStackViewModel
 import com.moare.android.features.search.display.search.SearchView
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.userprofile.display.view.UserProfileView
@@ -54,7 +55,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppRoot(viewModel: SearchStackViewModel = hiltViewModel()) {
+fun AppRoot(
+    searchStackViewModel: SearchStackViewModel = hiltViewModel(),
+    moatStackViewModel: MoatStackViewModel = hiltViewModel()
+) {
     var isSplashFinished by remember { mutableStateOf(false) }
 
 //    val viewForTest: SportDisplayType? = SportDisplayType.KBO_GAME_STATS
@@ -73,8 +77,8 @@ fun AppRoot(viewModel: SearchStackViewModel = hiltViewModel()) {
     ) {
         if (viewForTest != null) {
             SearchView(
-                viewModel = viewModel,
-                searchStore = viewModel.searchStore,
+                viewModel = searchStackViewModel,
+                searchStore = searchStackViewModel.searchStore,
                 viewForTest = viewForTest
             )
         } else {
@@ -116,12 +120,12 @@ fun AppRoot(viewModel: SearchStackViewModel = hiltViewModel()) {
                 ) {
                     composable(Screen.Search.route) {
                         SearchView(
-                            viewModel = viewModel,
-                            searchStore = viewModel.searchStore
+                            viewModel = searchStackViewModel,
+                            searchStore = searchStackViewModel.searchStore
                         )
                     }
                     composable(Screen.Moat.route) {
-                        MoatTrendingView()
+                        MoatDisplayView(moatStackViewModel)
                     }
                     composable(Screen.Profile.route) {
                         UserProfileView()
