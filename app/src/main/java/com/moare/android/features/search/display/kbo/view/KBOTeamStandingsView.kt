@@ -14,7 +14,7 @@ import com.moare.android.features.search.display.common.container.view.Standings
 import com.moare.android.features.search.display.kbo.store.KBOTeamStandingsAction
 import com.moare.android.features.search.display.kbo.store.KBOTeamStandingsStore
 import com.moare.android.features.search.display.search.store.SearchStore
-import com.moare.android.ui.common.components.BaseballLeagueTitle
+import com.moare.android.ui.components.BaseballLeagueTitle
 
 @Composable
 fun KBOTeamStandingsView(

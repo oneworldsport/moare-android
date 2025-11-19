@@ -44,9 +44,9 @@ import com.moare.android.features.search.display.common.container.component.Stan
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.models.ApiFetchState
-import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.ProgressIndicator
-import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.components.HCapsuleBar
+import com.moare.android.ui.components.ProgressIndicator
+import com.moare.android.ui.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterBox
 import com.moare.android.ui.util.CenterColumn

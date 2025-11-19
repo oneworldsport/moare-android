@@ -40,10 +40,10 @@ import com.moare.android.features.search.display.common.components.FBStatDataIte
 import com.moare.android.features.search.display.nba.store.NBAPlayerStatsStore
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.nba.NBAPlayerStats
-import com.moare.android.ui.common.components.HDivider
-import com.moare.android.ui.common.components.NBATitle
-import com.moare.android.ui.common.components.StatsDivider
-import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.components.HDivider
+import com.moare.android.ui.components.NBATitle
+import com.moare.android.ui.components.StatsDivider
+import com.moare.android.ui.components.URLImage
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow
 

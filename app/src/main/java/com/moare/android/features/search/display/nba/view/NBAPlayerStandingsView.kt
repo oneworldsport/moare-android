@@ -22,7 +22,7 @@ import com.moare.android.features.search.display.common.container.view.Standings
 import com.moare.android.features.search.display.nba.store.NBAPlayerStandingsAction
 import com.moare.android.features.search.display.nba.store.NBAPlayerStandingsStore
 import com.moare.android.features.search.display.search.store.SearchStore
-import com.moare.android.ui.common.components.NBATitle
+import com.moare.android.ui.components.NBATitle
 import com.moare.android.ui.util.convertDpToPx
 import kotlinx.coroutines.delay
 

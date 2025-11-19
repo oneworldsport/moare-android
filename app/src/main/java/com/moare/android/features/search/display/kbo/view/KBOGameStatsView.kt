@@ -47,12 +47,12 @@ import com.moare.android.features.search.display.kbo.store.KBOGameStatsAction
 import com.moare.android.features.search.display.kbo.store.KBOGameStatsStore
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.kbo.KBOGameLineScore
-import com.moare.android.ui.common.components.BaseballLeagueTitleForGameStats
-import com.moare.android.ui.common.components.CapsuleButton
-import com.moare.android.ui.common.components.RoundedBorderText
-import com.moare.android.ui.common.components.URLImage
-import com.moare.android.ui.common.components.URLImageSize
-import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.components.BaseballLeagueTitleForGameStats
+import com.moare.android.ui.components.CapsuleButton
+import com.moare.android.ui.components.RoundedBorderText
+import com.moare.android.ui.components.URLImage
+import com.moare.android.ui.components.URLImageSize
+import com.moare.android.ui.components.VCapsuleBar
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterColumn
 

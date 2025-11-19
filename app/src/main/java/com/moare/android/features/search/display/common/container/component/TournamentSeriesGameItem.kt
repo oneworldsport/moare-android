@@ -43,8 +43,8 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.Util
 import com.moare.android.features.search.display.common.container.view.RoundSeriesKey
 import com.moare.android.features.search.models.models.common.GameForSchedule
-import com.moare.android.ui.common.components.URLImage
-import com.moare.android.ui.common.components.URLImageSize
+import com.moare.android.ui.components.URLImage
+import com.moare.android.ui.components.URLImageSize
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow

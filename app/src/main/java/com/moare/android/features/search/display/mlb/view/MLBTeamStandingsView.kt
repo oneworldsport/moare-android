@@ -29,8 +29,8 @@ import com.moare.android.features.search.display.mlb.store.MLBTeamStandingsActio
 import com.moare.android.features.search.display.mlb.store.MLBTeamStandingsStore
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
-import com.moare.android.ui.common.components.BaseballLeagueTitle
-import com.moare.android.ui.common.components.HCapsuleBar
+import com.moare.android.ui.components.BaseballLeagueTitle
+import com.moare.android.ui.components.HCapsuleBar
 import com.moare.android.ui.util.CenterBox
 import com.moare.android.ui.util.CenterColumn
 

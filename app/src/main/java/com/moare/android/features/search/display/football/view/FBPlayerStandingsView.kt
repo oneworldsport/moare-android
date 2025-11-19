@@ -22,7 +22,7 @@ import com.moare.android.features.search.display.common.container.view.Standings
 import com.moare.android.features.search.display.football.store.FBPlayerStandingsAction
 import com.moare.android.features.search.display.football.store.FBPlayerStandingsStore
 import com.moare.android.features.search.display.search.store.SearchStore
-import com.moare.android.ui.common.components.FBLeagueTitle
+import com.moare.android.ui.components.FBLeagueTitle
 import com.moare.android.ui.util.convertDpToPx
 import kotlinx.coroutines.delay
 

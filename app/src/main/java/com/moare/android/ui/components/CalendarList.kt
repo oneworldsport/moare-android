@@ -1,4 +1,4 @@
-package com.moare.android.ui.common.components
+package com.moare.android.ui.components
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState

@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.components.VCapsuleBar
 import com.moare.android.ui.util.nullableOptionalClickable
 import com.moare.android.ui.util.optionalClickable
 

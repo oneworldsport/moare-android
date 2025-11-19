@@ -21,10 +21,10 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerActions
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerState
 import com.moare.android.features.search.models.ApiFetchState
-import com.moare.android.ui.common.components.CalendarList
-import com.moare.android.ui.common.components.CalendarType
-import com.moare.android.ui.common.components.CapsuleButton
-import com.moare.android.ui.common.components.ProgressIndicator
+import com.moare.android.ui.components.CalendarList
+import com.moare.android.ui.components.CalendarType
+import com.moare.android.ui.components.CapsuleButton
+import com.moare.android.ui.components.ProgressIndicator
 import com.moare.android.ui.util.CenterColumn
 
 @Composable

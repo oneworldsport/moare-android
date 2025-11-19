@@ -35,9 +35,9 @@ import com.moare.android.features.search.display.common.components.FBStatDataIte
 import com.moare.android.features.search.display.kbo.store.KBOPlayerInfoAction
 import com.moare.android.features.search.display.kbo.store.KBOPlayerInfoStore
 import com.moare.android.features.search.display.search.store.SearchStore
-import com.moare.android.ui.common.components.BaseballLeagueTitle
-import com.moare.android.ui.common.components.StatsDivider
-import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.components.BaseballLeagueTitle
+import com.moare.android.ui.components.StatsDivider
+import com.moare.android.ui.components.URLImage
 import com.moare.android.ui.util.CenterRow
 
 @Composable

@@ -29,10 +29,10 @@ import com.moare.android.features.search.display.common.components.FBStatDataIte
 import com.moare.android.features.search.display.kbo.store.KBOPlayerStatsStore
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.kbo.KBOPlayerStats
-import com.moare.android.ui.common.components.BaseballLeagueTitle
-import com.moare.android.ui.common.components.HDivider
-import com.moare.android.ui.common.components.StatsDivider
-import com.moare.android.ui.common.components.URLImage
+import com.moare.android.ui.components.BaseballLeagueTitle
+import com.moare.android.ui.components.HDivider
+import com.moare.android.ui.components.StatsDivider
+import com.moare.android.ui.components.URLImage
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow
 

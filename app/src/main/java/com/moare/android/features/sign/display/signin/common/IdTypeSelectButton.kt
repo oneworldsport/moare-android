@@ -25,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.components.HCapsuleBar
+import com.moare.android.ui.components.VCapsuleBar
 import com.moare.android.ui.util.CenterRow
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 import com.moare.android.ui.util.screenWidthDp

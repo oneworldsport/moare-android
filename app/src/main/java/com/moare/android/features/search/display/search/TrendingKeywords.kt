@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.moare.android.features.search.display.search.store.SearchStore
-import com.moare.android.ui.common.components.HCapsuleBar
+import com.moare.android.ui.components.HCapsuleBar
 import com.moare.android.ui.util.clickableCapsuleRippleEffect
 
 @Composable

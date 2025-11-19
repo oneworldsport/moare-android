@@ -24,7 +24,7 @@ import com.moare.android.features.search.display.football.store.FBLeagueSchedule
 import com.moare.android.features.search.display.football.store.FBLeagueScheduleStore
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
-import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
+import com.moare.android.ui.components.FBLeagueTitleForGameStats
 
 @Composable
 fun FBLeagueScheduleView(

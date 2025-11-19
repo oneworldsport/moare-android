@@ -20,7 +20,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.moare.android.ui.common.components.HCapsuleBar
+import com.moare.android.ui.components.HCapsuleBar
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.nullableOptionalClickable
 import com.moare.android.ui.util.nullableSize

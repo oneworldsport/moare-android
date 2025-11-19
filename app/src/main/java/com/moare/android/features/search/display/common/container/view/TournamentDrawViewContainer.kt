@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.features.search.display.common.container.component.TournamentSingleGameItem
 import com.moare.android.features.search.display.common.container.state.TournamentDrawContainerState
-import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.components.HCapsuleBar
+import com.moare.android.ui.components.VCapsuleBar
 import com.moare.android.ui.util.CenterColumn
 
 @Composable

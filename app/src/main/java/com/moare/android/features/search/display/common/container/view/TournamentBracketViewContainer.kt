@@ -25,7 +25,7 @@ import com.moare.android.features.search.display.common.container.component.Tour
 import com.moare.android.features.search.display.common.container.component.TournamentSeriesRightGameItem
 import com.moare.android.features.search.display.common.container.state.TournamentBracketContainerState
 import com.moare.android.features.search.display.common.container.state.TournamentContainerAction
-import com.moare.android.ui.common.components.HCapsuleBar
+import com.moare.android.ui.components.HCapsuleBar
 import com.moare.android.ui.util.CenterColumn
 
 data class RoundSeriesKey(

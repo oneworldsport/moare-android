@@ -37,7 +37,7 @@ import com.moare.android.features.moat.display.components.TextFieldAlert
 import com.moare.android.features.moat.models.TargetType
 import com.moare.android.features.userprofile.display.store.UserProfileIntent
 import com.moare.android.features.userprofile.display.store.UserProfileViewModel
-import com.moare.android.ui.common.components.HDivider
+import com.moare.android.ui.components.HDivider
 import com.moare.android.ui.theme.Moare
 
 @Composable

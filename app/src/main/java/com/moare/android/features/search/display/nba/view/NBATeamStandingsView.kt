@@ -15,7 +15,7 @@ import com.moare.android.features.search.display.common.container.view.Standings
 import com.moare.android.features.search.display.nba.store.NBATeamStandingsAction
 import com.moare.android.features.search.display.nba.store.NBATeamStandingsStore
 import com.moare.android.features.search.display.search.store.SearchStore
-import com.moare.android.ui.common.components.NBATitle
+import com.moare.android.ui.components.NBATitle
 
 @Composable
 fun NBATeamStandingsView(

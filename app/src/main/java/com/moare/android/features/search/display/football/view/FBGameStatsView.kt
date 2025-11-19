@@ -22,7 +22,7 @@ import com.moare.android.features.search.display.football.store.FBGameStatsActio
 import com.moare.android.features.search.display.football.store.FBGameStatsStore
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.ModelConverter
-import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
+import com.moare.android.ui.components.FBLeagueTitleForGameStats
 
 @Composable
 fun FBGameStatsView(

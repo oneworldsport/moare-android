@@ -1,4 +1,4 @@
-package com.moare.android.ui.common.components
+package com.moare.android.ui.components
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator

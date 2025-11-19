@@ -34,10 +34,10 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
-import com.moare.android.ui.common.components.CapsuleButton
-import com.moare.android.ui.common.components.RoundedBorderText
-import com.moare.android.ui.common.components.URLImage
-import com.moare.android.ui.common.components.URLImageSize
+import com.moare.android.ui.components.CapsuleButton
+import com.moare.android.ui.components.RoundedBorderText
+import com.moare.android.ui.components.URLImage
+import com.moare.android.ui.components.URLImageSize
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterColumn
 

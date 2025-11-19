@@ -58,11 +58,11 @@ import com.moare.android.features.search.display.common.container.component.Stan
 import com.moare.android.features.search.display.common.container.component.StandingsRankItem
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
-import com.moare.android.ui.common.components.HCapsuleBar
-import com.moare.android.ui.common.components.HDivider
-import com.moare.android.ui.common.components.URLImage
-import com.moare.android.ui.common.components.URLImageSize
-import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.components.HCapsuleBar
+import com.moare.android.ui.components.HDivider
+import com.moare.android.ui.components.URLImage
+import com.moare.android.ui.components.URLImageSize
+import com.moare.android.ui.components.VCapsuleBar
 import com.moare.android.ui.util.CenterBox
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow
