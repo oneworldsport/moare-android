@@ -62,10 +62,6 @@ fun MoatView(
         }
     }
 
-    BackHandler {
-//        moatStore.send(MoatAction.Goback)
-    }
-
     /*
        * ui
        * */

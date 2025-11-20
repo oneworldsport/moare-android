@@ -8,20 +8,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil3.ImageLoader
 import coil3.compose.AsyncImage
-import coil3.svg.SvgDecoder
 import com.moare.android.core.di.EntryPoint
 import dagger.hilt.android.EntryPointAccessors
 
 enum class URLImageSize {
-    SMALL, MEDIUM, LARGE
+    SMALL, MEDIUM, BIG
 }
 
 @Composable
@@ -39,7 +36,7 @@ fun URLImage(
     val imageSize = customSize ?: when (size) {
         URLImageSize.SMALL -> 30.dp
         URLImageSize.MEDIUM -> 50.dp
-        URLImageSize.LARGE -> 80.dp
+        URLImageSize.BIG -> 80.dp
     }
 
     if (url != null) {

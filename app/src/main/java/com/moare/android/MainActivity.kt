@@ -36,6 +36,8 @@ import com.moare.android.features.moat.display.MoatDisplayView
 import com.moare.android.features.moat.display.MoatStackViewModel
 import com.moare.android.features.search.display.search.SearchView
 import com.moare.android.features.search.models.SportDisplayType
+import com.moare.android.features.userprofile.display.UserProfileDisplayView
+import com.moare.android.features.userprofile.display.UserProfileStackViewModel
 import com.moare.android.features.userprofile.display.view.UserProfileView
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
@@ -57,7 +59,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppRoot(
     searchStackViewModel: SearchStackViewModel = hiltViewModel(),
-    moatStackViewModel: MoatStackViewModel = hiltViewModel()
+    moatStackViewModel: MoatStackViewModel = hiltViewModel(),
+    userProfileStackViewModel: UserProfileStackViewModel = hiltViewModel()
 ) {
     var isSplashFinished by remember { mutableStateOf(false) }
 
@@ -128,7 +131,7 @@ fun AppRoot(
                         MoatDisplayView(moatStackViewModel)
                     }
                     composable(Screen.Profile.route) {
-                        UserProfileView()
+                        UserProfileDisplayView(userProfileStackViewModel)
                     }
                 }
             }

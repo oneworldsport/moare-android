@@ -84,17 +84,6 @@ class SignViewModel @Inject constructor(
     private var userHandle: String? = null
     private var sportsInterests: List<String>? = null
 
-//    init {
-//        // TODO: 테스트용 임시 코드
-//        viewModelScope.launch {
-//            dataStore.edit { preferences ->
-//                preferences.remove(stringPreferencesKey("idToken"))
-//                preferences.remove(stringPreferencesKey("accessToken"))
-//                preferences.remove(stringPreferencesKey("refreshToken"))
-//            }
-//        }
-//    }
-
     fun send(intent: SignIntent) {
         viewModelScope.launch {
             when (intent) {

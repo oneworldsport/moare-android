@@ -1,6 +1,8 @@
 package com.moare.android.features.moat.display
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.moare.android.features.moat.display.view.MoatFormView
 import com.moare.android.features.moat.display.view.MoatView
 import com.moare.android.features.sign.display.signin.view.SignView
+import com.moare.android.features.userprofile.display.store.UserProfileAction
 import com.moare.android.ui.components.BackButton
 
 @Composable
@@ -57,6 +60,10 @@ fun MoatDisplayView(
         }
     }
 
+    BackHandler {
+        viewModel.send(MoatStackAction.Pop)
+    }
+
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -70,7 +77,11 @@ fun MoatDisplayView(
             Text(
                 text = "로그아웃",
                 fontSize = 13.sp,
-                modifier = Modifier.padding(end = 12.dp)
+                modifier = Modifier
+                    .padding(end = 12.dp)
+                    .clickable {
+                        viewModel.logout()
+                    }
             )
         }
 

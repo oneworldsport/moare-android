@@ -2,6 +2,7 @@ package com.moare.android.features.moat.display
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -79,12 +80,23 @@ class MoatStackViewModel @Inject constructor(
                 initialValue = AccessTokenState.Loading
             )
 
+    // TODO: 임시 코드
+    fun logout() {
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences.remove(stringPreferencesKey("idToken"))
+                preferences.remove(stringPreferencesKey("accessToken"))
+                preferences.remove(stringPreferencesKey("refreshToken"))
+            }
+        }
+    }
+
     fun send(action: MoatStackAction) {
         when (action) {
             is MoatStackAction.Push -> push(action.viewType)
             is MoatStackAction.Pop -> pop()
-            is MoatStackAction.BootstrapSession -> bootstrapSession()
             is MoatStackAction.EmptyStack -> emptyStack()
+            is MoatStackAction.BootstrapSession -> bootstrapSession()
         }
     }
 
@@ -105,7 +117,7 @@ class MoatStackViewModel @Inject constructor(
     private fun onTrendingDelegate(delegate: MoatDelegate) {
         val id = ViewId()
 
-        when(delegate) {
+        when (delegate) {
             is MoatDelegate.Push -> {
                 when (delegate.viewType) {
                     MoatViewType.DETAIL -> {
@@ -127,7 +139,7 @@ class MoatStackViewModel @Inject constructor(
     private fun onDetailDelegate(delegate: MoatDelegate) {
         val id = ViewId()
 
-        when(delegate) {
+        when (delegate) {
             is MoatDelegate.Push -> {
                 when (delegate.viewType) {
                     MoatViewType.DETAIL -> {
@@ -151,10 +163,15 @@ class MoatStackViewModel @Inject constructor(
         stack.value.lastOrNull()?.let { lastItem ->
             if (lastItem is MoatStackItem.Trending) {
                 lastItem.store.send(MoatAction.ShowTrending)
+                return
             }
         }
 
         if (stack.value.size > 1) {
+            _stack.value.lastOrNull()?.let {
+                dispose(it)
+            }
+
             _stack.update { current ->
                 current.dropLast(1)
             }
@@ -179,6 +196,15 @@ class MoatStackViewModel @Inject constructor(
 
     private fun emptyStack() {
         _stack.value = emptyList()
+    }
+
+    private fun dispose(item: MoatStackItem) {
+        when (item) {
+            is MoatStackItem.Trending -> item.store.dispose()
+            is MoatStackItem.Detail -> item.store.dispose()
+            is MoatStackItem.CreateForm -> item.store.dispose()
+            is MoatStackItem.UpdateForm -> item.store.dispose()
+        }
     }
 }
 
