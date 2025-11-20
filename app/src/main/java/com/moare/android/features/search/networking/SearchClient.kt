@@ -9,11 +9,14 @@ import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 //import com.moare.android.features.search.models.DataModelDeserializer
 
-class SearchClient(
-    private val context: Context,
+@Singleton
+class SearchClient @Inject constructor(
+//    private val context: Context,
     private val apiHelper: ApiHelper
 ) {
     suspend fun fetchDataByQuery(query: String): DataModel {

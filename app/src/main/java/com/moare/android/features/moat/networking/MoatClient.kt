@@ -16,8 +16,11 @@ import com.moare.android.features.sign.models.SimpleResponse
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class MoatClient(
+@Singleton
+class MoatClient @Inject constructor(
     private val apiHelper: ApiHelper,
     private val dataStore: DataStore<Preferences>
 ) {

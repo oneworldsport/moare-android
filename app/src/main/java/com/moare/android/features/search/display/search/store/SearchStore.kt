@@ -13,7 +13,6 @@ import com.moare.android.features.search.models.NoticeModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.TrendingKeywords
 import com.moare.android.features.search.models.models.nba.NBAGame
-import com.moare.android.features.search.networking.KeywordsClient
 import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -51,7 +50,6 @@ sealed interface SearchDelegate {
 class SearchStore @AssistedInject constructor(
     @ApplicationContext private val context: Context,
     private val searchClient: SearchClient,
-    private val keywordsClient: KeywordsClient,
     private val trieDeferred: CompletableDeferred<Pair<Trie, List<KeywordInfo>>>,
     private val noticeDeferred: CompletableDeferred<List<NoticeModel>>,
     private val trendingKeywordsDeferred: CompletableDeferred<TrendingKeywords>,

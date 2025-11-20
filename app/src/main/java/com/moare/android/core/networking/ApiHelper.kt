@@ -15,8 +15,11 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.create
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class ApiHelper {
+@Singleton
+class ApiHelper @Inject constructor() {
 //    private val gson = GsonBuilder()
 //        .registerTypeAdapter(DataModel::class.java, DataModelDeserializer())
 //        .create()

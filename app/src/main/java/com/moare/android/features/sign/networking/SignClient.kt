@@ -21,8 +21,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class SignClient(
+@Singleton
+class SignClient @Inject constructor(
     private val apiHelper: ApiHelper,
     private val dataStore: DataStore<Preferences>
 ) {
