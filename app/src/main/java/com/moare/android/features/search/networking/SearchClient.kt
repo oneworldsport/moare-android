@@ -2,6 +2,7 @@ package com.moare.android.features.search.networking
 
 import android.content.Context
 import com.moare.android.core.networking.ApiHelper
+import com.moare.android.core.networking.apiendpoint.SearchApi
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.features.search.models.DataModel
 import com.moare.android.features.search.models.EntityInfo
@@ -17,21 +18,21 @@ import javax.inject.Singleton
 @Singleton
 class SearchClient @Inject constructor(
 //    private val context: Context,
-    private val apiHelper: ApiHelper
+    private val searchApi: SearchApi
 ) {
     suspend fun fetchDataByQuery(query: String): DataModel {
-        val response = apiHelper.searchApi.searchByQuery(query)
+        val response = searchApi.searchByQuery(query)
         return DataModel.fromJson(response.string())
 //        return fetchFromJson(context, "커리 순위")
     }
 
     suspend fun fetchDataByKeyword(keyword: KeywordInfo): DataModel {
-        val response = apiHelper.searchApi.searchByKeyword(keyword)
+        val response = searchApi.searchByKeyword(keyword)
         return DataModel.fromJson(response.string())
     }
 
     suspend fun fetchLeagueSchedule(entity: EntityInfo, season: Int?, yearMonth: String): DataModel {
-        val response = apiHelper.searchApi.getLeagueSchedule(entity, season ?: CalendarUtil.currentYear, yearMonth)
+        val response = searchApi.getLeagueSchedule(entity, season ?: CalendarUtil.currentYear, yearMonth)
         return DataModel.fromJson(response.string())
     }
 
@@ -43,7 +44,7 @@ class SearchClient @Inject constructor(
         leagueId: Int,
         id: String
     ): DataModel {
-        val response = apiHelper.searchApi.searchById(season ?: CalendarUtil.currentYear, category, date, dataType, leagueId, id)
+        val response = searchApi.searchById(season ?: CalendarUtil.currentYear, category, date, dataType, leagueId, id)
         return DataModel.fromJson(response.string())
     }
 

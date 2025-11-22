@@ -1,14 +1,10 @@
 package com.moare.android.features.userprofile.display
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.util.TokenManager
 import com.moare.android.features.moat.display.AccessTokenState
-import com.moare.android.features.moat.display.MoatStackItem
-import com.moare.android.features.moat.display.MoatViewType
-import com.moare.android.features.moat.display.store.MoatAction
 import com.moare.android.features.moat.display.store.MoatStore
 import com.moare.android.features.search.display.ViewId
 import com.moare.android.features.sign.networking.SignClient
@@ -52,7 +48,7 @@ class UserProfileStackViewModel @Inject constructor(
     private val signClient: SignClient,
     private val userProfileFactory: UserProfileStore.Factory,
     private val moatFactory: MoatStore.Factory,
-    private val dataStore: DataStore<Preferences>
+    private val tokenManager: TokenManager
 ) : ViewModel() {
     private val _stack = MutableStateFlow<List<UserProfileStackItem>>(emptyList())
     val stack: StateFlow<List<UserProfileStackItem>> = _stack
@@ -61,14 +57,11 @@ class UserProfileStackViewModel @Inject constructor(
     val isBootstrapped: StateFlow<Boolean> = _isBootstrapped
 
     // TODO: 임시 코드
-    val accessToken: Flow<String?> = dataStore.data
-        .map { preferences ->
-            preferences[stringPreferencesKey("accessToken")]
-        }
+    val accessTokenFlow: Flow<String?> = tokenManager.accessTokenFlow
 
     val accessTokenState: StateFlow<AccessTokenState> =
-        accessToken
-            .map< String?, AccessTokenState> { token ->
+        tokenManager.accessTokenFlow
+            .map< String?, AccessTokenState > { token ->
                 AccessTokenState.Loaded(token)
             }
             .stateIn(

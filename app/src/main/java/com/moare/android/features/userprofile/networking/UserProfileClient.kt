@@ -3,7 +3,10 @@ package com.moare.android.features.userprofile.networking
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.moare.android.core.di.Authenticated
 import com.moare.android.core.networking.ApiHelper
+import com.moare.android.core.networking.apiCall
+import com.moare.android.core.util.TokenManager
 import com.moare.android.features.userprofile.models.UserProfileResponse
 import com.moare.android.features.userprofile.models.UserProfileUpdateRequest
 import com.moare.android.features.userprofile.models.UserProfileWithMoatsResponse
@@ -15,23 +18,18 @@ import javax.inject.Singleton
 
 @Singleton
 class UserProfileClient @Inject constructor(
-    private val apiHelper: ApiHelper,
-    private val dataStore: DataStore<Preferences>
+    private val tokenManager: TokenManager,
+    @Authenticated private val protectedUserProfileApi: UserProfileApi
 ) {
-    suspend fun accessTokenHeader(): String? =
-        try {
-            dataStore.data
-                .map { it[stringPreferencesKey("accessToken")] }
-                .firstOrNull()
-                ?.takeIf { it.isNotBlank() }
-                ?.let { "Bearer $it" }
-        } catch (_: IOException) { null }
+    suspend fun fetchUserProfile(): UserProfileWithMoatsResponse =
+        apiCall {
+            val accessToken = tokenManager.getAccessToken()
+            protectedUserProfileApi.getUserProfile(accessToken)
+        }
 
-    suspend fun fetchUserProfile(): UserProfileWithMoatsResponse {
-        return apiHelper.userProfileApi.getUserProfile(accessTokenHeader())
-    }
-
-    suspend fun updateUserProfile(body: UserProfileUpdateRequest): UserProfileResponse {
-        return apiHelper.userProfileApi.updateUserProfile(accessTokenHeader(), body)
-    }
+    suspend fun updateUserProfile(body: UserProfileUpdateRequest): UserProfileResponse =
+        apiCall {
+            val accessToken = tokenManager.getAccessToken()
+            protectedUserProfileApi.updateUserProfile(accessToken, body)
+        }
 }

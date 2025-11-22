@@ -1,11 +1,10 @@
 package com.moare.android.features.moat.display
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.moare.android.core.util.TokenManager
 import com.moare.android.features.moat.display.store.MoatAction
 import com.moare.android.features.moat.display.store.MoatDelegate
 import com.moare.android.features.moat.display.store.MoatFormStore
@@ -55,7 +54,7 @@ class MoatStackViewModel @Inject constructor(
     private val signClient: SignClient,
     private val moatFactory: MoatStore.Factory,
     private val moatFormFactory: MoatFormStore.Factory,
-    private val dataStore: DataStore<Preferences>
+    private val tokenManager: TokenManager
 ) : ViewModel() {
     private val _stack = MutableStateFlow<List<MoatStackItem>>(emptyList())
     val stack: StateFlow<List<MoatStackItem>> = _stack
@@ -64,13 +63,10 @@ class MoatStackViewModel @Inject constructor(
     val isBootstrapped: StateFlow<Boolean> = _isBootstrapped
 
     // TODO: 임시 코드
-    val accessToken: Flow<String?> = dataStore.data
-        .map { preferences ->
-            preferences[stringPreferencesKey("accessToken")]
-        }
+    val accessTokenFlow: Flow<String?> = tokenManager.accessTokenFlow
 
     val accessTokenState: StateFlow<AccessTokenState> =
-        accessToken
+        tokenManager.accessTokenFlow
             .map< String?, AccessTokenState > { token ->
                 AccessTokenState.Loaded(token)
             }
@@ -83,11 +79,7 @@ class MoatStackViewModel @Inject constructor(
     // TODO: 임시 코드
     fun logout() {
         viewModelScope.launch {
-            dataStore.edit { preferences ->
-                preferences.remove(stringPreferencesKey("idToken"))
-                preferences.remove(stringPreferencesKey("accessToken"))
-                preferences.remove(stringPreferencesKey("refreshToken"))
-            }
+            tokenManager.clearTokens()
         }
     }
 

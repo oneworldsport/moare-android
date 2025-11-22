@@ -3,7 +3,12 @@ package com.moare.android.features.sign.networking
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.moare.android.core.di.Authenticated
+import com.moare.android.core.di.NoAuth
 import com.moare.android.core.networking.ApiHelper
+import com.moare.android.core.networking.apiCall
+import com.moare.android.core.networking.apiendpoint.AuthApi
+import com.moare.android.core.util.TokenManager
 import com.moare.android.features.sign.models.AuthResponse
 import com.moare.android.features.sign.models.AuthResponseType
 import com.moare.android.features.sign.models.AuthSessionResponse
@@ -26,48 +31,42 @@ import javax.inject.Singleton
 
 @Singleton
 class SignClient @Inject constructor(
-    private val apiHelper: ApiHelper,
-    private val dataStore: DataStore<Preferences>
+    private val tokenManager: TokenManager,
+    @NoAuth private val authApi: AuthApi,
+    @Authenticated private val protectedAuthApi: AuthApi
 ) {
-    suspend fun accessTokenHeader(): String? =
-        try {
-            dataStore.data
-                .map { it[stringPreferencesKey("accessToken")] }
-                .firstOrNull()
-                ?.takeIf { it.isNotBlank() }
-                ?.let { "Bearer $it" }
-        } catch (_: IOException) { null }
-
-    suspend fun bootstrapSession(): SimpleResponse {
-        return apiHelper.authApi.bootstrapSession(accessTokenHeader())
-    }
+    suspend fun bootstrapSession(): SimpleResponse =
+        apiCall {
+            val accessToken = tokenManager.getAccessToken()
+            protectedAuthApi.bootstrapSession(accessToken)
+        }
 
     suspend fun startLoginAuth(body: StartAuthRequest): AuthSessionResponse {
-        return apiHelper.authApi.startLoginAuth(body)
+        return authApi.startLoginAuth(body)
     }
 
     suspend fun confirmLoginAuth(body: ConfirmAuthRequest): AuthTokenResponse {
-        return apiHelper.authApi.confirmLoginAuth(body)
+        return authApi.confirmLoginAuth(body)
     }
 
     suspend fun initiateSignUp(body: SignUpInitiateRequest): SimpleResponse {
-        return apiHelper.authApi.initiateSignUp(body)
+        return authApi.initiateSignUp(body)
     }
 
     suspend fun verifySignUpOtp(body: SignUpVerificationRequest): SimpleResponse {
-        return apiHelper.authApi.verifySignUpOtp(body)
+        return authApi.verifySignUpOtp(body)
     }
 
     suspend fun completeSignUp(body: SignUpCompleteRequest): SimpleResponse {
-        return apiHelper.authApi.completeSignUp(body)
+        return authApi.completeSignUp(body)
     }
 
     suspend fun checkUserHandle(userHandle: String): SimpleResponse {
-        return apiHelper.authApi.checkUserHandle(userHandle)
+        return authApi.checkUserHandle(userHandle)
     }
 
     suspend fun reserveUserHandle(userHandle: String): SimpleResponse {
         val body = UserHandleReserveRequest(userHandle)
-        return apiHelper.authApi.reserveUserHandle(body)
+        return authApi.reserveUserHandle(body)
     }
 }

@@ -3,6 +3,7 @@ package com.moare.android.core.networking
 import com.google.gson.GsonBuilder
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.moare.android.core.networking.apiendpoint.AuthApi
+import com.moare.android.core.networking.apiendpoint.CognitoAuthApi
 import com.moare.android.core.networking.apiendpoint.KeywordsApi
 import com.moare.android.core.networking.apiendpoint.SearchApi
 import com.moare.android.features.moat.networking.MoatApi
@@ -28,28 +29,10 @@ class ApiHelper @Inject constructor() {
 //        .baseUrl("http://10.0.2.2:8000/search/")
 //        .addConverterFactory(GsonConverterFactory.create(gson))
 //        .build()
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        prettyPrint = true
-    }
 
 //    val okHttpClient = OkHttpClient.Builder()
 //        .connectTimeout(30, TimeUnit.SECONDS)    // 연결 시도 시간
 //        .readTimeout(30, TimeUnit.SECONDS)       // 서버로부터 응답 읽는 시간
 //        .writeTimeout(30, TimeUnit.SECONDS)      // 서버로 데이터 보내는 시간
 //        .build()
-
-    private val searchRetrofit = Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:8000/") // local test
-//        .baseUrl("https://moare.kr/") // beanstalk
-//        .client(okHttpClient)
-        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-        .build()
-
-    val searchApi: SearchApi = searchRetrofit.create(SearchApi::class.java)
-    val keywordsApi: KeywordsApi = searchRetrofit.create(KeywordsApi::class.java)
-    val authApi: AuthApi = searchRetrofit.create(AuthApi::class.java)
-    val moatApi: MoatApi = searchRetrofit.create(MoatApi::class.java)
-    val userProfileApi: UserProfileApi = searchRetrofit.create(UserProfileApi::class.java)
 }
