@@ -29,6 +29,8 @@ import com.moare.android.features.moat.display.MoatViewType
 import com.moare.android.features.moat.display.view.MoatView
 import com.moare.android.features.sign.display.signin.view.SignView
 import com.moare.android.features.userprofile.display.store.UserProfileAction
+import com.moare.android.features.userprofile.display.view.UserProfileImageEditView
+import com.moare.android.features.userprofile.display.view.UserProfileUpdateFormView
 import com.moare.android.features.userprofile.display.view.UserProfileView
 import com.moare.android.ui.components.BackButton
 
@@ -45,6 +47,8 @@ fun UserProfileDisplayView(
     val currentViewType = when (stack.lastOrNull()) {
         is UserProfileStackItem.UserProfile -> UserProfileViewType.USER_PROFILE
         is UserProfileStackItem.MoatDetail -> UserProfileViewType.MOAT_DETAIL
+        is UserProfileStackItem.ProfileUpdateForm -> UserProfileViewType.PROFILE_UPDATE_FORM
+        is UserProfileStackItem.ProfileImageEdit -> UserProfileViewType.PROFILE_IMAGE_EDIT
         else -> UserProfileViewType.USER_PROFILE
     }
 
@@ -76,30 +80,32 @@ fun UserProfileDisplayView(
     }
 
     Column {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BackButton {
-                viewModel.send(UserProfileStackAction.Pop)
-            }
+        if (currentViewType != UserProfileViewType.PROFILE_IMAGE_EDIT) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BackButton {
+                    viewModel.send(UserProfileStackAction.Pop)
+                }
 
-            if (currentViewType != UserProfileViewType.PROFILE_UPDATE_FORM) {
-                Text(
-                    text = userHandle,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-            }
+                if (currentViewType != UserProfileViewType.PROFILE_UPDATE_FORM) {
+                    Text(
+                        text = userHandle,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                }
 
-            Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(1f))
 
-            if (currentViewType != UserProfileViewType.PROFILE_UPDATE_FORM) {
-                Icon(
-                    imageVector = Icons.Outlined.Settings,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
+                if (currentViewType != UserProfileViewType.PROFILE_UPDATE_FORM) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                }
             }
         }
 
@@ -130,6 +136,8 @@ fun UserProfileStackItemView(
     when (item) {
         is UserProfileStackItem.UserProfile -> UserProfileView(item.store, updateUserHandle)
         is UserProfileStackItem.MoatDetail -> MoatView(item.store)
+        is UserProfileStackItem.ProfileUpdateForm -> UserProfileUpdateFormView(item.store)
+        is UserProfileStackItem.ProfileImageEdit -> UserProfileImageEditView(item.store)
     }
 }
 

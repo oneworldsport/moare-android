@@ -17,9 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.ui.theme.MoareAndroidTheme
+import com.moare.android.ui.util.optionalClickable
 
 @Composable
 fun CapsuleButton(
@@ -27,25 +29,19 @@ fun CapsuleButton(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.primary,
     isDisabled: Boolean = false,
+    borderWidth: Dp = 1.dp,
+    fontSize: Int = 12,
     onClick: () -> Unit
 ) {
     Text(
         text = text,
-        fontSize = 12.sp,
+        fontSize = fontSize.sp,
         color = color,
         textAlign = TextAlign.Center,
-        modifier = if (isDisabled) {
-            modifier
-                .border(BorderStroke(1.dp, color), RoundedCornerShape(20.dp))
-                .padding(horizontal = 10.dp, vertical = 4.dp)
-        } else {
-            modifier
-                .clickable {
-                    onClick()
-                }
-                .border(BorderStroke(1.dp, color), RoundedCornerShape(20.dp))
-                .padding(horizontal = 10.dp, vertical = 4.dp)
-        }
+        modifier = modifier
+            .border(BorderStroke(borderWidth, color), RoundedCornerShape(20.dp))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+            .optionalClickable(!isDisabled, onClick)
     )
 }
 

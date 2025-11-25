@@ -30,6 +30,9 @@ sealed interface UserProfileAction {
     data object ShowUserProfileUpdateForm : UserProfileAction
 
     data class ToggleFire(val targetId: String, val targetType: TargetType) : UserProfileAction
+
+    // 외부 실행
+    data class UpdateProfile(val userProfile: UserProfileResponse) : UserProfileAction
 }
 
 sealed interface UserProfileDelegate {
@@ -77,7 +80,7 @@ class UserProfileStore @AssistedInject constructor(
             is UserProfileAction.ShowUserProfile -> showUserProfile()
             is UserProfileAction.ShowUserProfileUpdateForm -> showUserProfileUpdateForm()
             is UserProfileAction.ToggleFire -> toggleFire(action.targetId, action.targetType)
-
+            is UserProfileAction.UpdateProfile -> updateUserProfile(action.userProfile)
         }
     }
 
@@ -216,4 +219,20 @@ class UserProfileStore @AssistedInject constructor(
             createFire(targetId, targetType)
         }
     }
+
+    // 외부 실행
+    private fun updateUserProfile(userProfile: UserProfileResponse) {
+        _userProfile.value = userProfile
+    }
 }
+
+
+
+
+
+
+
+
+
+
+

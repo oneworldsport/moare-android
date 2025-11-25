@@ -5,8 +5,8 @@ import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class AuthResponse(
-    val type: AuthResponseType,
-    val message: String,
+    val type: AuthResponseType = AuthResponseType.SUCCESS,
+    val message: String = "",
     val data: JsonElement? = null
 )
 
@@ -29,6 +29,6 @@ data class AuthSessionResponse(
 
 @Serializable
 data class SimpleResponse(
-    val success: Boolean? = null, // 범용으로 쓰고 싶어서 수정함...
+    val success: Boolean,
     val message: String
 )

@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferState
+import com.amazonaws.services.s3.model.CannedAccessControlList
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.moare.android.core.di.EntryPoint
 import com.moare.android.features.search.models.KeywordInfo
@@ -392,7 +393,49 @@ object AWSUtils {
             tournamentTeamsDeferred.complete(emptyMap())
         }
     }
+
+    fun uploadImage(
+        context: Context,
+        file: File,
+        key: String,
+        onProgress: (Double) -> Unit,
+        onComplete: (Result<String>) -> Unit
+    ) {
+        val entryPoint = EntryPointAccessors.fromApplication(context, EntryPoint::class.java)
+        val transferUtility = entryPoint.getTransferUtility()
+
+        val observer = transferUtility.upload(
+            "moare-sns-profile-images",
+            key,
+            file,
+//            CannedAccessControlList.PublicRead
+        )
+
+        observer.setTransferListener(object : TransferListener {
+            override fun onStateChanged(id: Int, state: TransferState?) {
+                when (state) {
+                    TransferState.COMPLETED -> onComplete(Result.success(key))
+                    TransferState.FAILED, TransferState.CANCELED ->
+                        onComplete(Result.failure(IllegalStateException("Upload failed: $state")))
+                    else -> Unit
+                }
+            }
+
+            override fun onProgressChanged(id: Int, bytesCurrent: Long, bytesTotal: Long) {
+                if (bytesTotal > 0) {
+                    onProgress(bytesCurrent.toDouble() / bytesTotal.toDouble())
+                }
+            }
+
+            override fun onError(id: Int, ex: java.lang.Exception?) {
+                onComplete(Result.failure(ex ?: Exception("Unknown error")))
+            }
+        })
+    }
 }
+
+
+
 
 
 

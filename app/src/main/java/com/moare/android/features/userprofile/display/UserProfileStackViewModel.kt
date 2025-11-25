@@ -10,7 +10,12 @@ import com.moare.android.features.search.display.ViewId
 import com.moare.android.features.sign.networking.SignClient
 import com.moare.android.features.userprofile.display.store.UserProfileAction
 import com.moare.android.features.userprofile.display.store.UserProfileDelegate
+import com.moare.android.features.userprofile.display.store.UserProfileImageEditDelegate
+import com.moare.android.features.userprofile.display.store.UserProfileImageEditStore
 import com.moare.android.features.userprofile.display.store.UserProfileStore
+import com.moare.android.features.userprofile.display.store.UserProfileUpdateFormAction
+import com.moare.android.features.userprofile.display.store.UserProfileUpdateFormDelegate
+import com.moare.android.features.userprofile.display.store.UserProfileUpdateFormStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,8 +32,8 @@ sealed interface UserProfileStackItem {
 
     data class UserProfile(override val id: ViewId, val store: UserProfileStore) : UserProfileStackItem
     data class MoatDetail(override val id: ViewId, val store: MoatStore) : UserProfileStackItem
-    //    data class ProfileUpdateForm(override val id: ViewId, val store: ) : UserProfileStackItem
-//    data class ProfileImageEdit(override val id: ViewId, val store: ) : UserProfileStackItem
+    data class ProfileUpdateForm(override val id: ViewId, val store: UserProfileUpdateFormStore) : UserProfileStackItem
+    data class ProfileImageEdit(override val id: ViewId, val store: UserProfileImageEditStore) : UserProfileStackItem
 }
 
 enum class UserProfileViewType {
@@ -48,6 +53,8 @@ class UserProfileStackViewModel @Inject constructor(
     private val signClient: SignClient,
     private val userProfileFactory: UserProfileStore.Factory,
     private val moatFactory: MoatStore.Factory,
+    private val profileUpdateFormFactory: UserProfileUpdateFormStore.Factory,
+    private val profileImageEditFactory: UserProfileImageEditStore.Factory,
     private val tokenManager: TokenManager
 ) : ViewModel() {
     private val _stack = MutableStateFlow<List<UserProfileStackItem>>(emptyList())
@@ -107,13 +114,72 @@ class UserProfileStackViewModel @Inject constructor(
                     }
                     UserProfileViewType.PROFILE_UPDATE_FORM -> {
                         delegate.userProfile?.let {
-//                            val store = moatFactory.create { delegate ->
-//
-//                            }
-//                            _stack.update { it + UserProfileStackItem.MoatDetail(id, store) }
+                            val store = profileUpdateFormFactory.create(it) { delegate ->
+                                onProfileUpdateFormDelegate(delegate)
+                            }
+                            _stack.update { it + UserProfileStackItem.ProfileUpdateForm(id, store) }
                         }
                     }
                     else -> {}
+                }
+            }
+        }
+    }
+
+    private fun onProfileUpdateFormDelegate(delegate: UserProfileUpdateFormDelegate) {
+        val id = ViewId()
+
+        when (delegate) {
+            is UserProfileUpdateFormDelegate.Push -> {
+                when (delegate.viewType) {
+                    UserProfileViewType.PROFILE_IMAGE_EDIT -> {
+                        val store = profileImageEditFactory.create(delegate.uri, delegate.userId) { delegate ->
+                            onProfileImageEditDelegate(delegate)
+                        }
+                        _stack.update { it + UserProfileStackItem.ProfileImageEdit(id, store) }
+                    }
+                    else -> {}
+                }
+            }
+            is UserProfileUpdateFormDelegate.Pop -> {
+                _stack.value.lastOrNull()?.let {
+                    dispose(it)
+                }
+                _stack.update { current ->
+                    current.dropLast(1)
+                }
+
+                delegate.userProfile?.let { userProfile ->
+                    stack.value.lastOrNull()?.let { lastItem ->
+                        if (lastItem is UserProfileStackItem.UserProfile) {
+                            lastItem.store.send(UserProfileAction.UpdateProfile(userProfile))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun onProfileImageEditDelegate(delegate: UserProfileImageEditDelegate) {
+        val id = ViewId()
+
+        when (delegate) {
+            is UserProfileImageEditDelegate.Pop -> {
+                _stack.value.lastOrNull()?.let {
+                    dispose(it)
+                }
+                _stack.update { current ->
+                    current.dropLast(1)
+                }
+
+                delegate.key?.let { key ->
+                    delegate.file?.let { file ->
+                        stack.value.lastOrNull()?.let { lastItem ->
+                            if (lastItem is UserProfileStackItem.ProfileUpdateForm) {
+                                lastItem.store.send(UserProfileUpdateFormAction.UpdatePreviewImage(key, file))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -128,10 +194,10 @@ class UserProfileStackViewModel @Inject constructor(
         }
 
         if (stack.value.size > 1) {
+            // TODO: 함수로 정리
             _stack.value.lastOrNull()?.let {
                 dispose(it)
             }
-
             _stack.update { current ->
                 current.dropLast(1)
             }
@@ -162,6 +228,8 @@ class UserProfileStackViewModel @Inject constructor(
         when (item) {
             is UserProfileStackItem.UserProfile -> item.store.dispose()
             is UserProfileStackItem.MoatDetail -> item.store.dispose()
+            is UserProfileStackItem.ProfileUpdateForm -> item.store.dispose()
+            is UserProfileStackItem.ProfileImageEdit -> item.store.dispose()
         }
     }
 }

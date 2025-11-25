@@ -1,25 +1,20 @@
 package com.moare.android.features.userprofile.display.view
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,12 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.moare.android.R
 import com.moare.android.features.moat.display.components.MoatItem
 import com.moare.android.features.moat.display.components.MoatType
 import com.moare.android.features.moat.display.components.SettingWindow
@@ -43,22 +34,22 @@ import com.moare.android.features.moat.display.components.TextFieldAlert
 import com.moare.android.features.moat.models.TargetType
 import com.moare.android.features.userprofile.display.store.UserProfileAction
 import com.moare.android.features.userprofile.display.store.UserProfileStore
+import com.moare.android.ui.components.AppMenu
 import com.moare.android.ui.components.HDivider
 import com.moare.android.ui.components.ProfileImage
 import com.moare.android.ui.components.ProfileImageSize
-import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterBox
 
 @Composable
 fun UserProfileView(
-    userProfileStore: UserProfileStore = hiltViewModel(),
+    store: UserProfileStore = hiltViewModel(),
     updateUserHandle: (String) -> Unit
 ) {
-    val userProfile by userProfileStore.userProfile.collectAsState()
-    val userMoats by userProfileStore.userMoats.collectAsState()
-    val selectedMoat by userProfileStore.selectedMoat.collectAsState()
-    val fireMap by userProfileStore.fireMap.collectAsState()
-    val fireCountMap by userProfileStore.fireCountMap.collectAsState()
+    val userProfile by store.userProfile.collectAsState()
+    val userMoats by store.userMoats.collectAsState()
+    val selectedMoat by store.selectedMoat.collectAsState()
+    val fireMap by store.fireMap.collectAsState()
+    val fireCountMap by store.fireCountMap.collectAsState()
 
     var settingsShowing by rememberSaveable { mutableStateOf(false) }
     var reportShowing by rememberSaveable { mutableStateOf(false) }
@@ -66,7 +57,7 @@ fun UserProfileView(
     val profileImageUrl = userProfile?.profileImageUrl?.let { "https://moare-sns-profile-images.s3.ap-northeast-2.amazonaws.com/${it}" }
 
     LaunchedEffect(Unit) {
-        userProfileStore.send(UserProfileAction.GetUserProfile)
+        store.send(UserProfileAction.GetUserProfile)
     }
 
     LaunchedEffect(userProfile) {
@@ -88,17 +79,34 @@ fun UserProfileView(
 
                 userProfile?.bio?.let {
                     CenterBox(
-                        height = 80.dp
+                        height = 80.dp,
+                        modifier = Modifier.weight(1f)
                     ) {
                         Text(
                             text = it,
                             maxLines = 3,
-                            modifier = Modifier.fillMaxWidth().padding(start = 8.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 8.dp)
                         )
                     }
                 }
 
-                // 프로필 수정
+                AppMenu(
+                    label = {
+                        Icon(
+                            imageVector = Icons.Default.MoreHoriz,
+                            contentDescription = null
+                        )
+                    },
+                    items = listOf("프로필 수정")
+                ) { index, label ->
+                    when (label) {
+                        "프로필 수정" -> {
+                            store.send(UserProfileAction.ShowUserProfileUpdateForm)
+                        }
+                    }
+                }
             }
 
 
@@ -157,10 +165,10 @@ fun UserProfileView(
                     },
                     fired = fired,
                     fireTapped = { newValue ->
-                        userProfileStore.send(UserProfileAction.ToggleFire(userMoats[index].moatId, targetType = TargetType.MOAT))
+                        store.send(UserProfileAction.ToggleFire(userMoats[index].moatId, targetType = TargetType.MOAT))
                     },
                     action = {
-                        userProfileStore.send(UserProfileAction.SelectMoat(moatId = userMoats[index].moatId))
+                        store.send(UserProfileAction.SelectMoat(moatId = userMoats[index].moatId))
                     }
                 )
             }
@@ -185,10 +193,10 @@ fun UserProfileView(
                         settingTapped = {},
                         fired = fired,
                         fireTapped = { newValue ->
-                            userProfileStore.send(UserProfileAction.ToggleFire(userMoats[index].moatId, targetType = TargetType.COMMENT))
+                            store.send(UserProfileAction.ToggleFire(userMoats[index].moatId, targetType = TargetType.COMMENT))
                         },
                         action = {
-                            userProfileStore.send(UserProfileAction.SelectMoat(true, moatId = comments[index].moatId))
+                            store.send(UserProfileAction.SelectMoat(true, moatId = comments[index].moatId))
 
                         }
                     )
@@ -221,3 +229,33 @@ fun UserProfileView(
         )
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

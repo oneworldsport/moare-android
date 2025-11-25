@@ -1,8 +1,11 @@
 package com.moare.android.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +15,7 @@ import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -25,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.moare.android.ui.theme.MoareAndroidTheme
+import com.moare.android.ui.util.nullableClickable
+import com.moare.android.ui.util.nullableOptionalClickable
 
 enum class ProfileImageSize {
     SMALL, MEDIUM, BIG
@@ -60,14 +66,16 @@ fun ProfileImage(
 @Composable
 fun DefaultProfileImage(
     size: Dp,
-    modifier: Modifier
+    modifier: Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     Icon(
         imageVector = Icons.Outlined.AccountCircle,
         contentDescription = null,
         modifier = modifier
             .size(size)
-            .clip(CircleShape),
+            .clip(CircleShape)
+            .nullableClickable(onClick = onClick),
         tint = Color.Gray
     )
 }
@@ -76,8 +84,13 @@ fun DefaultProfileImage(
 fun UpdateFormProfileImage(
     url: String?,
     modifier: Modifier = Modifier,
-    size: Dp
+    size: Dp,
+    onClick: (() -> Unit)
 ) {
+    LaunchedEffect(Unit) {
+        Log.d("sdfdsf", url.toString())
+    }
+
     Box(contentAlignment = Alignment.BottomEnd) {
         if (url != null) {
             AsyncImage(
@@ -85,16 +98,17 @@ fun UpdateFormProfileImage(
                 contentDescription = null,
                 modifier = modifier
                     .size(size)
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .clickable(onClick = onClick),
                 contentScale = ContentScale.Crop
             )
         } else {
-            DefaultProfileImage(size, modifier)
+            DefaultProfileImage(size, modifier, onClick)
         }
 
         Box(
             modifier = Modifier
-                .offset(x = -10.dp, y = -11.dp)
+                .offset(x = -15.dp, y = -16.dp)
                 .shadow(
                     elevation = 4.dp,
                     shape = RoundedCornerShape(3.dp)
@@ -117,6 +131,6 @@ fun UpdateFormProfileImage(
 @Composable
 fun ProfileImagePreview() {
     MoareAndroidTheme {
-        UpdateFormProfileImage(url = null, size = 100.dp)
+        UpdateFormProfileImage(url = null, size = 120.dp) {}
     }
 }

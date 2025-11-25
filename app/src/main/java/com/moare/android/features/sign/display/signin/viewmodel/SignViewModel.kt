@@ -17,6 +17,7 @@ import com.moare.android.features.sign.models.SignUpCompleteRequest
 import com.moare.android.features.sign.models.SignUpInitiateRequest
 import com.moare.android.features.sign.models.SignUpVerificationRequest
 import com.moare.android.features.sign.models.StartAuthRequest
+import com.moare.android.features.sign.models.UserHandleReserveRequest
 import com.moare.android.features.sign.models.UserProfileCreateRequest
 import com.moare.android.features.sign.networking.SignClient
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -322,7 +323,9 @@ class SignViewModel @Inject constructor(
         if (!userHandle.isNullOrBlank()) {
             // start loading
             _apiFetchState.value = ApiFetchState.Fetching
-            val result = signClient.reserveUserHandle(userHandle!!)
+
+            val body = UserHandleReserveRequest(userHandle!!)
+            val result = signClient.reserveUserHandle(body)
 
             if (result?.success == true) {
                 updateSignFlow(SignFlow.SIGN_UP_SPORTS_INTERESTS)

@@ -65,8 +65,7 @@ class SignClient @Inject constructor(
         return authApi.checkUserHandle(userHandle)
     }
 
-    suspend fun reserveUserHandle(userHandle: String): SimpleResponse {
-        val body = UserHandleReserveRequest(userHandle)
+    suspend fun reserveUserHandle(body: UserHandleReserveRequest): SimpleResponse {
         return authApi.reserveUserHandle(body)
     }
 }

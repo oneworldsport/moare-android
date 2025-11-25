@@ -9,7 +9,7 @@ data class UserProfileResponse(
     val userHandle: String,
     val profileImageUrl: String?,
     val bio: String?,
-    val sportsInterests: List<String>?,
+    val sportsInterests: List<String>,
     val joinedAt: String
 )
 
