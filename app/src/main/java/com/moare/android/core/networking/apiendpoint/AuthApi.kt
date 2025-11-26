@@ -47,14 +47,14 @@ interface AuthApi {
     @POST("auth/signup/complete")
     suspend fun completeSignUp(
         @Body body: SignUpCompleteRequest
-    ) : SimpleResponse
+    ) : AuthTokenResponse
 
     @GET("auth/user-handle/check")
     suspend fun checkUserHandle(
         @Query("userHandle") userHandle: String
     ) : SimpleResponse
 
-    @PUT("auth/userHandle/reserve")
+    @PUT("auth/user-handle/reserve")
     suspend fun reserveUserHandle(
         @Body body:UserHandleReserveRequest
     ) : SimpleResponse

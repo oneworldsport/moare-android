@@ -27,7 +27,7 @@ import com.moare.android.features.moat.display.MoatStackAction
 import com.moare.android.features.moat.display.MoatStackItemView
 import com.moare.android.features.moat.display.MoatViewType
 import com.moare.android.features.moat.display.view.MoatView
-import com.moare.android.features.sign.display.signin.view.SignView
+import com.moare.android.features.sign.display.view.SignView
 import com.moare.android.features.userprofile.display.store.UserProfileAction
 import com.moare.android.features.userprofile.display.view.UserProfileImageEditView
 import com.moare.android.features.userprofile.display.view.UserProfileUpdateFormView

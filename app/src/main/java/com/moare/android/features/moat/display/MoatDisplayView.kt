@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.features.moat.display.view.MoatFormView
 import com.moare.android.features.moat.display.view.MoatView
-import com.moare.android.features.sign.display.signin.view.SignView
+import com.moare.android.features.sign.display.view.SignView
 import com.moare.android.features.userprofile.display.store.UserProfileAction
 import com.moare.android.ui.components.BackButton
 

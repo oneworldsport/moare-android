@@ -41,31 +41,38 @@ class SignClient @Inject constructor(
             protectedAuthApi.bootstrapSession(accessToken)
         }
 
-    suspend fun startLoginAuth(body: StartAuthRequest): AuthSessionResponse {
-        return authApi.startLoginAuth(body)
-    }
+    suspend fun startLoginAuth(body: StartAuthRequest): AuthSessionResponse =
+        apiCall {
+            authApi.startLoginAuth(body)
+        }
 
-    suspend fun confirmLoginAuth(body: ConfirmAuthRequest): AuthTokenResponse {
-        return authApi.confirmLoginAuth(body)
-    }
+    suspend fun confirmLoginAuth(body: ConfirmAuthRequest): AuthTokenResponse =
+        apiCall {
+            authApi.confirmLoginAuth(body)
+        }
 
-    suspend fun initiateSignUp(body: SignUpInitiateRequest): SimpleResponse {
-        return authApi.initiateSignUp(body)
-    }
+    suspend fun initiateSignUp(body: SignUpInitiateRequest): SimpleResponse =
+        apiCall {
+            authApi.initiateSignUp(body)
+        }
 
-    suspend fun verifySignUpOtp(body: SignUpVerificationRequest): SimpleResponse {
-        return authApi.verifySignUpOtp(body)
-    }
+    suspend fun verifySignUpOtp(body: SignUpVerificationRequest): SimpleResponse =
+        apiCall {
+            authApi.verifySignUpOtp(body)
+        }
 
-    suspend fun completeSignUp(body: SignUpCompleteRequest): SimpleResponse {
-        return authApi.completeSignUp(body)
-    }
+    suspend fun completeSignUp(body: SignUpCompleteRequest): AuthTokenResponse =
+        apiCall {
+            authApi.completeSignUp(body)
+        }
 
-    suspend fun checkUserHandle(userHandle: String): SimpleResponse {
-        return authApi.checkUserHandle(userHandle)
-    }
+    suspend fun checkUserHandle(userHandle: String): SimpleResponse =
+        apiCall {
+            authApi.checkUserHandle(userHandle)
+        }
 
-    suspend fun reserveUserHandle(body: UserHandleReserveRequest): SimpleResponse {
-        return authApi.reserveUserHandle(body)
-    }
+    suspend fun reserveUserHandle(body: UserHandleReserveRequest): SimpleResponse =
+        apiCall {
+            authApi.reserveUserHandle(body)
+        }
 }

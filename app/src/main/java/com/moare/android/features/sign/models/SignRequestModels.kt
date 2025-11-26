@@ -43,13 +43,12 @@ data class SignUpCompleteRequest(
     val profile: UserProfileCreateRequest
 )
 
-// TODO: User 도메인으로 옮기기
 @Serializable
 data class UserProfileCreateRequest(
     val userHandle: String,
     val profileImageUrl: String? = null,
     val bio: String? = null,
-    val sportsInterests: List<String>? = null
+    val sportsInterests: List<String>
 )
 
 @Serializable

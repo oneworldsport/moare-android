@@ -11,13 +11,13 @@ suspend inline fun <T> apiCall(
     } catch (e: HttpException) {
         val apiError = e.toApiHttpError()
 
-        if (isSessionInvalidating(apiError)) {
+//        if (isSessionInvalidating(apiError)) {
             // 리프레시도 안되고, 세션 자체가 무효인 경우
             // (401인데 리프레시 불가 / 403 등)
             // -> 토큰 삭제 + 세션 만료 예외 던지기
             // (TokenManager는 주입받은 쪽에서 사용)
-            throw SessionExpiredException()
-        }
+//            throw SessionExpiredException()
+//        }
 
         throw apiError
     } catch (e: IOException) {
