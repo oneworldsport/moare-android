@@ -1,5 +1,6 @@
 package com.moare.android.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.DropdownMenu
@@ -26,7 +27,9 @@ fun AppMenu(
     Box(
 //        modifier = Modifier.wrapContentSize(Alignment.TopStart)
     ) {
-        TextButton(onClick = { expanded = true }) {
+        Box(
+            modifier = Modifier.clickable { expanded = true }
+        ) {
             label()
         }
 

@@ -29,8 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.features.moat.display.components.MoatItem
 import com.moare.android.features.moat.display.components.MoatType
-import com.moare.android.features.moat.display.components.SettingWindow
-import com.moare.android.features.moat.display.components.TextFieldAlert
+import com.moare.android.ui.components.TextFieldAlert
 import com.moare.android.features.moat.models.TargetType
 import com.moare.android.features.userprofile.display.store.UserProfileAction
 import com.moare.android.features.userprofile.display.store.UserProfileStore
@@ -51,7 +50,6 @@ fun UserProfileView(
     val fireMap by store.fireMap.collectAsState()
     val fireCountMap by store.fireCountMap.collectAsState()
 
-    var settingsShowing by rememberSaveable { mutableStateOf(false) }
     var reportShowing by rememberSaveable { mutableStateOf(false) }
 
     val profileImageUrl = userProfile?.profileImageUrl?.let { "https://moare-sns-profile-images.s3.ap-northeast-2.amazonaws.com/${it}" }
@@ -161,7 +159,6 @@ fun UserProfileView(
                     userHandle = userMoats[index].userHandle,
                     createdAt = userMoats[index].createdAt,
                     settingTapped = {
-                        settingsShowing = true
                     },
                     fired = fired,
                     fireTapped = { newValue ->
@@ -202,21 +199,6 @@ fun UserProfileView(
                     )
                 }
             }
-        }
-    }
-
-    if (settingsShowing) {
-        Box(
-            Modifier
-//                .align(Alignment.TopEnd)
-                .padding(top = 50.dp, end = 25.dp)
-        ) {
-            SettingWindow(
-                reportTapped = {
-                    settingsShowing = false
-                    reportShowing = true
-                }
-            )
         }
     }
 

@@ -1,6 +1,5 @@
 package com.moare.android.features.moat.display.view
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,8 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.moare.android.features.moat.display.components.CommentComposer
 import com.moare.android.features.moat.display.components.MoatItem
 import com.moare.android.features.moat.display.components.MoatType
-import com.moare.android.features.moat.display.components.SettingWindow
-import com.moare.android.features.moat.display.components.TextFieldAlert
+import com.moare.android.ui.components.TextFieldAlert
 import com.moare.android.features.moat.display.store.MoatAction
 import com.moare.android.features.moat.display.store.MoatStore
 import com.moare.android.features.moat.models.MoatResponse
@@ -48,7 +46,6 @@ fun MoatView(
     val fireCountMap by store.fireCountMap.collectAsState()
 
     var text by rememberSaveable { mutableStateOf("") }
-    var settingsShowing by rememberSaveable { mutableStateOf(false) }
     var reportShowing by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -91,7 +88,6 @@ fun MoatView(
                     userHandle = moat.userHandle,
                     createdAt = moat.createdAt,
                     settingTapped = {
-                        settingsShowing = true
                     },
                     fired = fired,
                     fireTapped = { newValue ->
@@ -166,21 +162,6 @@ fun MoatView(
                     imageVector = Icons.Filled.Add,
                     contentDescription = "Add",
                     modifier = Modifier.size(40.dp))
-            }
-        }
-
-        if (settingsShowing) {
-            Box(
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 50.dp, end = 25.dp)
-            ) {
-                SettingWindow(
-                    reportTapped = {
-                        settingsShowing = false
-                        reportShowing = true
-                    }
-                )
             }
         }
 

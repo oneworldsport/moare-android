@@ -23,6 +23,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,6 +43,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.util.CalendarUtil
+import com.moare.android.features.userprofile.display.store.UserProfileAction
+import com.moare.android.ui.components.AppMenu
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.optionalClickable
 
@@ -216,18 +219,22 @@ fun MoatItem(
                             horizontalAlignment =  Alignment.CenterHorizontally
                         ) {
                             if (moatType == MoatType.DETAIL) {
-                                Text(
-                                    text = "⋮" ,
-                                    fontSize = iconFontSize,
-                                    modifier = Modifier
-                                        .clickable(
-                                            enabled = true,
-                                            onClick = {
-                                                settingTapped()
-                                                Log.d("click", "Tapped")
-                                            }
+                                AppMenu(
+                                    label = {
+                                        Icon(
+                                            imageVector = Icons.Default.MoreHoriz,
+                                            contentDescription = null
                                         )
-                                )
+                                    },
+                                    items = listOf("신고하기")
+                                ) { index, label ->
+                                    when (label) {
+                                        "신고하기" -> {
+                                            settingTapped()
+                                        }
+                                    }
+                                }
+
                                 Spacer(Modifier.weight(1f))
                             }
 
