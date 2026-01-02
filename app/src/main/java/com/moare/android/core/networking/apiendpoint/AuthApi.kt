@@ -3,6 +3,7 @@ package com.moare.android.core.networking.apiendpoint
 import com.moare.android.features.sign.models.AuthResponse
 import com.moare.android.features.sign.models.AuthSessionResponse
 import com.moare.android.features.sign.models.AuthTokenResponse
+import com.moare.android.features.sign.models.BootstrapSessionResponse
 import com.moare.android.features.sign.models.ConfirmAuthRequest
 import com.moare.android.features.sign.models.UserHandleReserveRequest
 import com.moare.android.features.sign.models.SignUpCompleteRequest
@@ -22,7 +23,7 @@ interface AuthApi {
     @GET("auth/session")
     suspend fun bootstrapSession(
         @Header("Authorization") token: String?
-    ) : SimpleResponse
+    ) : BootstrapSessionResponse
 
     @POST("auth/login/start")
     suspend fun startLoginAuth(

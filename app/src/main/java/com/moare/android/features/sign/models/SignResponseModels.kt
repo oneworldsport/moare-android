@@ -33,3 +33,8 @@ data class SimpleResponse(
     val success: Boolean,
     val message: String
 )
+
+@Serializable
+data class BootstrapSessionResponse(
+    val userId: String
+)

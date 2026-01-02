@@ -177,7 +177,7 @@ class MoatStackViewModel @Inject constructor(
             try {
                 val result = signClient.bootstrapSession()
 
-                if (result.success == true && stack.value.isEmpty()) {
+                if (stack.value.isEmpty()) {
                     push(MoatViewType.TRENDING)
                 }
             } catch (e: Exception) {

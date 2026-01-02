@@ -13,6 +13,7 @@ import com.moare.android.features.sign.models.AuthResponse
 import com.moare.android.features.sign.models.AuthResponseType
 import com.moare.android.features.sign.models.AuthSessionResponse
 import com.moare.android.features.sign.models.AuthTokenResponse
+import com.moare.android.features.sign.models.BootstrapSessionResponse
 import com.moare.android.features.sign.models.ConfirmAuthRequest
 import com.moare.android.features.sign.models.UserHandleReserveRequest
 import com.moare.android.features.sign.models.SignUpCompleteRequest
@@ -35,7 +36,7 @@ class SignClient @Inject constructor(
     @NoAuth private val authApi: AuthApi,
     @Authenticated private val protectedAuthApi: AuthApi
 ) {
-    suspend fun bootstrapSession(): SimpleResponse =
+    suspend fun bootstrapSession(): BootstrapSessionResponse =
         apiCall {
             val accessToken = tokenManager.getAccessToken()
             protectedAuthApi.bootstrapSession(accessToken)

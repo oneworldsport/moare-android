@@ -12,11 +12,12 @@ data class MoatResponse(
     val content: String,
     val sportTags: List<String>,
     val parentMoatId:String?,
-    val targetType: String,
+    val moatType: String,
     val createdAt: String,
     val updatedAt: String?,
     val fireCount: Int,
-    val commentCount: Int
+    val commentCount: Int,
+    var isFired: Boolean
 )
 
 @Serializable

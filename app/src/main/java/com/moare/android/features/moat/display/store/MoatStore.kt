@@ -1,5 +1,6 @@
 package com.moare.android.features.moat.display.store
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -116,7 +117,7 @@ class MoatStore @AssistedInject constructor(
                 _originalTrendingMoats.value = result.moats
                 _trendingMoats.value = result.moats
             } catch (e: Exception) {
-
+                Log.e("moats/trending", e.localizedMessage)
             }
         }
     }

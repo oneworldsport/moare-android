@@ -5,6 +5,7 @@ import java.sql.Time
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -219,25 +220,23 @@ object CalendarUtil {
     }
 
     fun timeAgoString(dateString: String): String {
-        val formatter = DateTimeFormatter.ofPattern(
-            "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",
-            Locale("ko", "KR")
-        )
+        val instant = runCatching { Instant.parse(dateString) }
+            .getOrElse { return dateString } // 파싱 실패 시 원본 반환
 
-        val date = LocalDateTime.parse(dateString, formatter).atZone(ZoneId.of("Asia/Seoul"))
+        val now = Instant.now()
+        val diffSeconds = Duration.between(instant, now).seconds
 
-        val now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
-
-        val diff = Duration.between(date, now).seconds
+        // 미래 시간(서버/단말 시계 차이 등) 방어
+        if (diffSeconds < 0) return "방금 전"
 
         return when {
-            diff < 60 -> "방금 전"
-            diff < 3600 -> "${diff / 60}분 전"
-            diff < 86400 -> "${diff / 3600}시간 전"
-            diff < 604800 -> "${diff / 86400}일 전"
-            diff < 2419200 -> "${diff / 604800}주 전"
-            diff < 31536000 -> "${diff / 2419200}개월 전"
-            else -> "${diff / 31536000}년 전"
+            diffSeconds < 60 -> "방금 전"
+            diffSeconds < 60 * 60 -> "${diffSeconds / 60}분 전"
+            diffSeconds < 60 * 60 * 24 -> "${diffSeconds / (60 * 60)}시간 전"
+            diffSeconds < 60 * 60 * 24 * 7 -> "${diffSeconds / (60 * 60 * 24)}일 전"
+            diffSeconds < 60 * 60 * 24 * 30 -> "${diffSeconds / (60 * 60 * 24 * 7)}주 전"
+            diffSeconds < 60 * 60 * 24 * 365 -> "${diffSeconds / (60 * 60 * 24 * 30)}개월 전"
+            else -> "${diffSeconds / (60 * 60 * 24 * 365)}년 전"
         }
     }
 }
