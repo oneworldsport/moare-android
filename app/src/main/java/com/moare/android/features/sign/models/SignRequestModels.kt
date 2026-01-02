@@ -5,21 +5,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class StartAuthRequest(
-    val id: String,
+    val loginId: String,
     val method: AuthMethod
 )
 
 @Serializable
 enum class AuthMethod {
-    @SerialName("email")
-    EMAIL,
-    @SerialName("phone_number")
-    PHONE_NUMBER
+    EMAIL, PHONE_NUMBER
 }
 
 @Serializable
 data class ConfirmAuthRequest(
-    val id: String,
+    val loginId: String,
     val otp: String,
     val session: String
 )

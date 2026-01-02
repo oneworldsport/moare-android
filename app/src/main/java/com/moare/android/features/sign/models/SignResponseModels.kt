@@ -19,7 +19,8 @@ enum class AuthResponseType {
 data class AuthTokenResponse(
     val idToken: String,
     val accessToken: String,
-    val refreshToken: String
+    val refreshToken: String,
+    val userId: String
 )
 
 @Serializable

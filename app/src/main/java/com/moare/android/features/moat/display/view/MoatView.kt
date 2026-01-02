@@ -1,5 +1,6 @@
 package com.moare.android.features.moat.display.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,6 +50,7 @@ fun MoatView(
     var reportShowing by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        Log.d("LaunchedEffect", "실행됨?")
         if (store.moatId != null) {
             // TODO: 뒤로가기를 통해 detail로 왔을때도 불필요하게 실행됨. 불필요한게 아닐수도 있지만 그래도 고민은 해봐야 할 것 같음.
             store.send(MoatAction.GetMoatDetail(moatId = store.moatId))

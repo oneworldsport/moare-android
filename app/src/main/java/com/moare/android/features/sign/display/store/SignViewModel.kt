@@ -325,7 +325,7 @@ class SignViewModel @Inject constructor(
             delay(3000)
 
             try {
-                val body = StartAuthRequest(id = id, method = idType.value)
+                val body = StartAuthRequest(loginId = id, method = idType.value)
                 val result = signClient.startLoginAuth(body)
 
                 session = result.session
