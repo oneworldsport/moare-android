@@ -32,9 +32,9 @@ data class NBABoxScoreTraditional(
 
 @Serializable
 data class NBABoxScoreTeam(
-    val bench: NBAGameBoxScoreStats,
+    val bench: NBAGameBoxScoreStats? = null,
     val players: List<NBABoxScoreTeamPlayer> = emptyList(),
-    val starters: NBAGameBoxScoreStats,
+    val starters: NBAGameBoxScoreStats? = null,
     val statistics: NBAGameBoxScoreStats,
     @SerialName("teamCity") private val _teamCity: String? = null,
     @SerialName("teamId") private val _teamId: Int? = null,

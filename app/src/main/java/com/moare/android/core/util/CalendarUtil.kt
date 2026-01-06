@@ -11,6 +11,7 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.time.format.TextStyle
 import java.util.Locale
 import java.util.TimeZone
@@ -214,6 +215,24 @@ object CalendarUtil {
         val gameDate = OffsetDateTime.parse(date).toLocalDate()
         val today = LocalDate.now()
         return !gameDate.isBefore(today) // 오늘이거나 미래 날짜면 true
+    }
+
+    fun isSameYearMonth(yearMonth: String): Boolean {
+        val formatter = DateTimeFormatter.ofPattern("yy/MM")
+
+        val target: YearMonth = try {
+            YearMonth.parse(yearMonth, formatter)
+        } catch (e: DateTimeParseException) {
+            return false
+        }
+
+        val today = YearMonth.from(LocalDate.now())
+        return target == today
+    }
+
+    fun isToday(day: Int): Boolean {
+        val todayDay = LocalDate.now().dayOfMonth
+        return todayDay == day
     }
 }
 

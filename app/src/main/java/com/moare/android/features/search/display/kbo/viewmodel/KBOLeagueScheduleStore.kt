@@ -34,6 +34,7 @@ sealed interface KBOLeagueScheduleAction {
     data class SelectGame(val game: KBOGameForSchedule) : KBOLeagueScheduleAction
     data object UpdateFilteredGames : KBOLeagueScheduleAction
     data object ShowTournament : KBOLeagueScheduleAction
+    data object ShowTeamStandings : KBOLeagueScheduleAction
 
     data class UpdateStateByRefreshGame(val model: SportDecodableModel.KBOGameStats) : KBOLeagueScheduleAction
 }
@@ -41,6 +42,7 @@ sealed interface KBOLeagueScheduleAction {
 sealed interface KBOLeagueScheduleDelegate {
     data class ShowGameStats(val model: SportDecodableModel.KBOGameStats) : KBOLeagueScheduleDelegate
     data class ShowTournament(val model: SportDecodableModel.KBOTournament) : KBOLeagueScheduleDelegate
+    data class ShowTeamStandings(val model: SportDecodableModel.KBOTeamStandings) : KBOLeagueScheduleDelegate
 }
 
 class KBOLeagueScheduleStore @AssistedInject constructor(
@@ -74,6 +76,7 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
             is KBOLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
             is KBOLeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
             is KBOLeagueScheduleAction.ShowTournament -> showTournament()
+            is KBOLeagueScheduleAction.ShowTeamStandings -> showTeamStandings()
         }
     }
 
@@ -314,6 +317,31 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
 
             if (result.data is SportDecodableModel.KBOTournament) {
                 emitToParent(KBOLeagueScheduleDelegate.ShowTournament(result.data))
+            }
+        }
+    }
+
+    private fun showTeamStandings() {
+        scope.launch {
+            val keywordInfo = KeywordInfo(
+                keyword = "KBO 순위",
+                weight = 100,
+                keywords = listOf(Keyword(keyword = "순위", id = "standings", priority = 1)),
+                entities = listOf(
+                    EntityInfo(
+                        entityId = Constants.Ids.KBO,
+                        entityName = "KBO",
+                        category = "baseball",
+                        entityType = "league",
+                        leagueId = Constants.Ids.KBO
+                    )
+                )
+            )
+
+            val result = searchClient.fetchDataByKeyword(keywordInfo)
+
+            if (result.data is SportDecodableModel.KBOTeamStandings) {
+                emitToParent(KBOLeagueScheduleDelegate.ShowTeamStandings(result.data))
             }
         }
     }

@@ -570,6 +570,16 @@ class AppViewModel @Inject constructor(
                 store.send(FBTournamentAction.InitData)
                 _stack.update { it + StackItem.FBTournament(id, store) }
             }
+            is FBLeagueScheduleDelegate.ShowTeamStandings -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = fbTeamStandingsFactory.create(delegate.model) { delegate ->
+                    onFBTeamStandingsDelegate(delegate)
+                }
+                store.send(FBTeamStandingsAction.InitData)
+                _stack.update { it + StackItem.FBTeamStandings(id, store) }
+            }
         }
     }
 
@@ -705,6 +715,16 @@ class AppViewModel @Inject constructor(
                 store.send(NBATournamentAction.InitData)
                 _stack.update { it + StackItem.NBATournament(id, store) }
             }
+            is NBALeagueScheduleDelegate.ShowTeamStandings -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = nbaTeamStandingsFactory.create(delegate.model) { delegate ->
+                    onNBATeamStandingsDelegate(delegate)
+                }
+                store.send(NBATeamStandingsAction.InitData)
+                _stack.update { it + StackItem.NBATeamStandings(id, store) }
+            }
         }
     }
 
@@ -814,6 +834,16 @@ class AppViewModel @Inject constructor(
                 store.send(MLBTournamentAction.InitData)
                 _stack.update { it + StackItem.MLBTournament(id, store) }
             }
+            is MLBLeagueScheduleDelegate.ShowTeamStandings -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = mlbTeamStandingsFactory.create(delegate.model) { delegate ->
+                    onMLBTeamStandingsDelegate(delegate)
+                }
+                store.send(MLBTeamStandingsAction.InitData)
+                _stack.update { it + StackItem.MLBTeamStandings(id, store) }
+            }
         }
     }
 
@@ -921,6 +951,16 @@ class AppViewModel @Inject constructor(
                 }
                 store.send(KBOTournamentAction.InitData)
                 _stack.update { it + StackItem.KBOTournament(id, store) }
+            }
+            is KBOLeagueScheduleDelegate.ShowTeamStandings -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = kboTeamStandingsFactory.create(delegate.model) { delegate ->
+                    onKBOTeamStandingsDelegate(delegate)
+                }
+                store.send(KBOTeamStandingsAction.InitData)
+                _stack.update { it + StackItem.KBOTeamStandings(id, store) }
             }
         }
     }

@@ -3,7 +3,8 @@ package com.moare.android.ui.common.components
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,9 +30,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
+import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
+import com.moare.android.ui.util.conditionalBorder
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
+import com.moare.android.ui.util.conditionalClickable
 import java.time.DayOfWeek
 
 enum class CalendarType {
@@ -44,6 +50,7 @@ fun <T> CalendarList(
     selectedIndex: Int,
     scrollTrigger: String = "",
     shouldAnimateSroll: Boolean = true,
+    containsToday: Boolean = false,
     onItemSelected: (T, Int) -> Unit
 ) {
     /* ---------------------
@@ -51,21 +58,21 @@ fun <T> CalendarList(
        --------------------- */
     val itemWidth = when (calendarType) {
         CalendarType.SEASON -> 200.dp
-        CalendarType.YEARMONTH -> 44.dp
-        CalendarType.MONTH -> 30.dp
-        CalendarType.DAY -> 20.dp
+        CalendarType.YEARMONTH -> 55.dp
+        CalendarType.MONTH -> 50.dp
+        CalendarType.DAY -> 30.dp
     }
 
     val hPadding = when (calendarType) {
         CalendarType.SEASON -> 20.dp
-        CalendarType.YEARMONTH -> 10.dp
+        CalendarType.YEARMONTH -> 12.dp
         CalendarType.MONTH -> 10.dp
-        CalendarType.DAY -> 4.dp
+        CalendarType.DAY -> 0.dp
     }
 
     val barYOffset = when (calendarType) {
-        CalendarType.DAY -> 21.dp
-        else -> 24.dp
+        CalendarType.DAY -> 22.dp
+        else -> 25.dp
     }
 
     /* ---------------------
@@ -114,7 +121,7 @@ fun <T> CalendarList(
             modifier = Modifier.padding(horizontal = 6.dp)
         ) {
             for ((index, value) in dateList.withIndex()) {
-                CalendarItem(value, calendarType, itemWidth, hPadding) {
+                CalendarItem(value, calendarType, itemWidth, hPadding, containsToday) {
                     onItemSelected(value, index)
                 }
             }
@@ -135,6 +142,7 @@ fun <T> CalendarItem(
     calendarType: CalendarType,
     itemWidth: Dp,
     hPadding: Dp,
+    containsToday: Boolean,
     onItemSelected: () -> Unit
 ) {
     /* ---------------------
@@ -155,23 +163,28 @@ fun <T> CalendarItem(
         else -> false
     }
 
+    val isBorderEnabled = if (calendarType == CalendarType.DAY) {
+        val day = (date as DayInfo).day
+        containsToday && CalendarUtil.isToday(day)
+    } else {
+        false
+    }
+
     /* ---------------------
        ui
        --------------------- */
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = if (isDisabled) {
-            Modifier
-                .padding(horizontal = hPadding)
-                .width(itemWidth)
-        } else {
-            Modifier
-                .padding(horizontal = hPadding)
-                .width(itemWidth)
-                .clickable {
-                    onItemSelected()
-                }
-        }
+        modifier = Modifier
+            .conditionalBorder(
+                isBorderEnabled, 1.dp, Moare, RoundedCornerShape(5.dp)
+            )
+            .padding(horizontal = hPadding)
+            .width(itemWidth)
+            .padding(vertical = if (calendarType == CalendarType.DAY) 2.dp else 0.dp)
+            .conditionalClickable(isDisabled) {
+                onItemSelected()
+            }
     ) {
         Box(
             contentAlignment = Alignment.TopStart,
@@ -187,7 +200,6 @@ fun <T> CalendarItem(
             Box(
                 contentAlignment = Alignment.BottomEnd,
                 modifier = Modifier.height(22.dp)
-//                modifier = Modifier.height(24.dp)
             ) {
                 Text(
                     text = dayOfWeek,

@@ -58,6 +58,23 @@ object StringConstants {
         val GAME_STATS_DEFEND_CATEGORIES = listOf("태클 시도", "볼 경합 성공/시도(%)", "가로채기")
         val GAME_STATS_COMMON_CATEGORIES = listOf("패스 시도", "얻은 파울", "파울", "경고", "퇴장", "출전시간(분)", "평점")
         val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_ATTACK_CATEGORIES + GAME_STATS_DEFEND_CATEGORIES + GAME_STATS_COMMON_CATEGORIES
+
+        fun leagueNameStr(leagueId: Int): String {
+            return when (leagueId) {
+                Constants.Ids.EPL -> "EPL"
+                Constants.Ids.LALIGA -> "라리가"
+                Constants.Ids.BUNDESLIGA -> "분데스리가"
+                Constants.Ids.SERIEA -> "세리에A"
+                Constants.Ids.LIGUE1 -> "리그1"
+                Constants.Ids.FA_CUP -> "FA컵"
+                Constants.Ids.EFL_CUP -> "EFL컵"
+                Constants.Ids.DFB_POKAL -> "DFB 포칼"
+                Constants.Ids.COUPE_DE_FRANCE -> "쿠프 드 프랑스"
+                Constants.Ids.COPA_DEL_REY -> "코파 델 레이"
+                Constants.Ids.COPPA_ITALIA -> "코파 이탈리아"
+                else -> ""
+            }
+        }
     }
 
     object NBA {
@@ -149,6 +166,14 @@ object StringConstants {
             Constants.Ids.MLB -> "포스트시즌 대진표"
             Constants.Ids.KBO -> "가을야구 대진표"
             else -> ""
+        }
+    }
+
+    fun tournamentOrStandingsText(leagueId: Int): String {
+        return if (Constants.Ids.FOOTBALL_DRAW_TOURNAMENT_LEAGUES.contains(leagueId)) {
+            "대진표"
+        } else {
+            "리그 순위"
         }
     }
 }

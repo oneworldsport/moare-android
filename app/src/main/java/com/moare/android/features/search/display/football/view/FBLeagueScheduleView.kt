@@ -100,6 +100,13 @@ fun FBLeagueScheduleView(
             allResultButtonAction = {
                 store.send(FBLeagueScheduleAction.ToggleAllResult)
             },
+            tournamentOrteamStandingsButtonAction = {
+                if (Constants.Ids.FOOTBALL_DRAW_TOURNAMENT_LEAGUES.contains(leagueId)) {
+                    store.send(FBLeagueScheduleAction.ShowTournament)
+                } else {
+                    store.send(FBLeagueScheduleAction.ShowTeamStandings)
+                }
+            },
             tournamentButtonAction = {
                 store.send(FBLeagueScheduleAction.ShowTournament)
             }
