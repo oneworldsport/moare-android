@@ -2,6 +2,7 @@ package com.moare.android.core.networking
 
 import com.google.gson.GsonBuilder
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.moare.android.BuildConfig
 import com.moare.android.core.networking.apiendpoint.KeywordsApi
 import com.moare.android.core.networking.apiendpoint.SearchApi
 import com.moare.android.features.search.models.DataModel
@@ -33,10 +34,24 @@ class ApiHelper {
 //        .writeTimeout(30, TimeUnit.SECONDS)      // 서버로 데이터 보내는 시간
 //        .build()
 
+    val appVersionName = BuildConfig.VERSION_NAME
+    val appVersionCode = BuildConfig.VERSION_CODE
+
+    val client = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val newRequest = chain.request().newBuilder()
+                .addHeader("X-Platform", "android")
+                .addHeader("X-App-Version", appVersionName)
+                .addHeader("Accept", "application/json")
+                .build()
+            chain.proceed(newRequest)
+        }
+        .build()
+
     private val searchRetrofit = Retrofit.Builder()
-//        .baseUrl("http://10.0.2.2:8000/") // local test
-        .baseUrl("https://moare.kr/") // beanstalk
-//        .client(okHttpClient)
+        .baseUrl("http://10.0.2.2:8000/") // local test
+//        .baseUrl("https://moare.kr/") // beanstalk
+        .client(client)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
 
