@@ -239,9 +239,11 @@ object Constants {
         fun gameStatusText(
             leagueId: Int,
             status: String,
+            elapsed: Int? = null,
             isResultOpened: Boolean = true
         ): String {
             return when (leagueId) {
+                in Ids.FOOTBALL_ALL -> fbGameStatusText(status, elapsed)
                 Ids.NBA -> ""
                 Ids.KBO -> {
                     when (status) {

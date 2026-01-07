@@ -41,7 +41,8 @@ fun <T> TournamentSingleGameItem(
     val awayTeamScore = game.awayTeamScore
     val homeTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
     val awayTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
-    val gameStatusText = Constants.GameStatus.gameStatusText(leagueId, game.gameStatus)
+    val elapsed = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?.elapsed }
+    val gameStatusText = Constants.GameStatus.gameStatusText(leagueId, game.gameStatus, elapsed)
     val shouldShowScore = !Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
     val isFinished = gameStatusText == StringConstants.GAME_FINISHED_STR
 
