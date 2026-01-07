@@ -848,7 +848,7 @@ object ModelConverter {
         val awayTeamScore = game.goals.away
         val gameInfo = FBGameInfoForSchedule(
             _round = game.league.round,
-            _elapsed = game.fixture.status.elapsed,
+            status = game.fixture.status,
             _homeTeamPenaltyScore = game.score.penalty._home, // TODO: Optional이 필요해서 임시로 _home, _away 사용. 추후 개선 필요.
             _awayTeamPenaltyScore = game.score.penalty._away
         )

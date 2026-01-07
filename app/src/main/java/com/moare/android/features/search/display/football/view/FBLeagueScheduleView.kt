@@ -220,7 +220,7 @@ fun FBLeagueScheduleListItem(
             teamNameDic = teamNameDic,
             isClickEnabled = if (isFromSchedule) selectedGame == null else false,
             isResultOpened = isResultOpened,
-            gameStatusText = Constants.GameStatus.fbGameStatusText(data.gameStatus, gameInfo?.elapsed, isResultOpened),
+            gameStatusText = Constants.GameStatus.fbGameStatusText(data.gameStatus, gameInfo?.status?.elapsed, isResultOpened),
             gameStatusColor = Constants.GameStatus.gameStatusColor(leagueId, data.gameStatus),
             isCapsuleButtonDisabled = (if (isFromSchedule) selectedGame != null else true) || !Constants.GameStatus.Football.FINISHED_LIST.contains(gameStatus),
             gameType = MatchDescriptionConverter.convert(input = data.gameInfo?.round ?: ""),
