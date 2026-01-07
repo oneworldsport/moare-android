@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.core.util.format3
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
@@ -50,7 +51,7 @@ fun NBATeamStandingsView(
             name = teamNameDic["short_${it.team.id}"] ?: it.team.fullName,
             dataList = listOf(
                 store.calculateGamesBack(stats).toString(),
-                stats.winsPct.toString(),
+                stats.winsPct.format3(),
                 stats.wins.toString(),
                 stats.losses.toString(),
                 stats.gp.toString(),
@@ -58,9 +59,9 @@ fun NBATeamStandingsView(
                 stats.plusMinusPG.toString(),
                 stats.astPG.toString(),
                 stats.rebPG.toString(),
-                stats.fgPct.toString(),
-                stats.fg3Pct.toString(),
-                stats.ftPct.toString(),
+                stats.fgPct.format3(),
+                stats.fg3Pct.format3(),
+                stats.ftPct.format3(),
                 stats.blkPG.toString(),
                 stats.stlPG.toString(),
                 stats.tovPG.toString(),
