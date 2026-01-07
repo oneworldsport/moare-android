@@ -126,8 +126,9 @@ class SearchStore @AssistedInject constructor(
 //            val data = DataModel.fromJson(jsonContent).data as SportDecodableModel.FBPlayerStandings
 //            _fbPlayerStandingsData.emit(data.displayModel)
 //            delay(5000)
-            trendingKeywords = trendingKeywordsDeferred.await().keywords.associateBy { it.keyword }
-            _trendingKeywordList.emit(trendingKeywords.keys.toList())
+            val keywords = trendingKeywordsDeferred.await().keywords
+            trendingKeywords = keywords.associateBy { it.keyword }
+            _trendingKeywordList.emit(keywords.map { it.keyword })
 
             val noticeData = noticeDeferred.await()
             _searchExample.value = noticeData.find { it.title == "검색 예시" }?.content ?: ""
