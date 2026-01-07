@@ -76,6 +76,7 @@ fun KBOGameStatsView(
     val teamHitters by store.teamHitters.collectAsState()
     val teamPitchers by store.teamPitchers.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
 
     val game = displayModel.game
 
@@ -159,12 +160,13 @@ fun KBOGameStatsView(
             firstStatsCategoryButtonAction = { index ->
                 store.send(KBOGameStatsAction.SelectFirstCategory(index))
             },
+            secondStatsCategoryButtonAction = { index ->
+                store.send(KBOGameStatsAction.SelectSecondCategory(index))
+            },
             refreshButtonAction = {
                 store.send(KBOGameStatsAction.RefreshGame())
             },
-            secondStatsCategoryButtonAction = { index ->
-                store.send(KBOGameStatsAction.SelectSecondCategory(index))
-            }
+            isRefreshing = isRefreshing
         ),
         titleContent = {
             Column {

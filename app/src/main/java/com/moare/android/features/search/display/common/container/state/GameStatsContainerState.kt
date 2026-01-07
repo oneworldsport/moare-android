@@ -45,5 +45,6 @@ data class GameStatsContainerActions(
     var firstStatsTitleCategoryAction: (() -> Unit)? = null,
     val firstStatsCategoryButtonAction: ((Int) -> Unit),
     val secondStatsCategoryButtonAction: ((Int) -> Unit)? = null,
-    val refreshButtonAction: () -> Unit
+    val refreshButtonAction: () -> Unit,
+    val isRefreshing: Boolean
 )

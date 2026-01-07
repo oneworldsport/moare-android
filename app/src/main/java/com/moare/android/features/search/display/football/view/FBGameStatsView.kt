@@ -42,6 +42,7 @@ fun FBGameStatsView(
     val playersTotalStats by store.playersTotalStats.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
     val playerNameDic by store.playerNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
 
     val game = displayModel.game
 
@@ -209,7 +210,8 @@ fun FBGameStatsView(
             },
             refreshButtonAction = {
                 store.send(FBGameStatsAction.RefreshGame())
-            }
+            },
+            isRefreshing = isRefreshing
         ),
         titleContent = {
             FBLeagueTitleForGameStats(

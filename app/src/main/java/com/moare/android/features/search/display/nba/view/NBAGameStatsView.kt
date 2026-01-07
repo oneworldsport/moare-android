@@ -82,6 +82,7 @@ fun NBAGameStatsView(
     val playerStats by store.playerStats.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
     val playerNameDic by store.playerNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
 
     val teamIds = listOf(displayModel.game.gameSummary?.homeTeamId, displayModel.game.gameSummary?.awayTeamId)
     val teamCategories = teamIds.map {
@@ -195,7 +196,8 @@ fun NBAGameStatsView(
             },
             refreshButtonAction = {
                 store.send(NBAGameStatsAction.RefreshGame())
-            }
+            },
+            isRefreshing = isRefreshing
         ),
         titleContent = {
             /* ---------------------

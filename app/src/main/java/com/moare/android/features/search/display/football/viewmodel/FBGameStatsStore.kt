@@ -26,6 +26,7 @@ import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -238,6 +239,7 @@ class FBGameStatsStore @AssistedInject constructor(
 
     private fun refreshGame(shouldFetch: Boolean) {
         if (shouldFetch) {
+            _isRefreshing.value = true
             scope.launch {
                 val game = displayModel.value.game
 
@@ -256,6 +258,8 @@ class FBGameStatsStore @AssistedInject constructor(
                     initData()
                     emitToParent(FBGameStatsDelegate.RefreshGame(result.data))
                 }
+
+                _isRefreshing.value = false
             }
         } else {
             val responseModel = FBGameStatsResponseModel(game = displayModel.value.game)

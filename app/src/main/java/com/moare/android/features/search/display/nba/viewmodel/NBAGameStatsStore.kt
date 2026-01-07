@@ -224,6 +224,7 @@ class NBAGameStatsStore @AssistedInject constructor(
 
     private fun refreshGame(shouldFetch: Boolean) {
         if (shouldFetch) {
+            _isRefreshing.value = true
             scope.launch {
                 val game = displayModel.value.game
                 val gameSummary = game.gameSummary
@@ -245,6 +246,8 @@ class NBAGameStatsStore @AssistedInject constructor(
                         emitToParent(NBAGameStatsDelegate.RefreshGame(result.data))
                     }
                 }
+
+                _isRefreshing.value = false
             }
         } else {
             val responseModel = NBAGameStatsResponseModel(game = displayModel.value.game)

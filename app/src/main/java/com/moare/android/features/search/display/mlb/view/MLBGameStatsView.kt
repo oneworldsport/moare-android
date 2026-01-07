@@ -78,6 +78,7 @@ fun MLBGameStatsView(
     val teamPitchers by store.teamPitchers.collectAsState()
     val playerNameDic by store.playerNameDic.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
 
     val game = displayModel.game
     val season = game.game.season.toIntOrNull()
@@ -177,12 +178,13 @@ fun MLBGameStatsView(
             firstStatsCategoryButtonAction = { index ->
                 store.send(MLBGameStatsAction.SelectFirstCategory(index))
             },
+            secondStatsCategoryButtonAction = { index ->
+                store.send(MLBGameStatsAction.SelectSecondCategory(index))
+            },
             refreshButtonAction = {
                 store.send(MLBGameStatsAction.RefreshGame())
             },
-            secondStatsCategoryButtonAction = { index ->
-                store.send(MLBGameStatsAction.SelectSecondCategory(index))
-            }
+            isRefreshing = isRefreshing,
         ),
         titleContent = {
             Column {
