@@ -1,8 +1,5 @@
 package com.moare.android.core.util
 
-import android.util.Log
-import java.sql.Time
-import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -11,11 +8,10 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.time.format.TextStyle
 import java.util.Locale
 import java.util.TimeZone
-import java.util.UUID
-import kotlin.math.min
 
 data class DayInfo(
     val day: Int,
@@ -199,12 +195,12 @@ object CalendarUtil {
         return "$hours:$minutes"
     }
 
-    fun formatHourMinuteToMinutes(time: String): Int {
+    fun formatMinuteSecondToSeconds(time: String): Int {
         if (time.contains(":")) {
             val timeArr = time.split(":")
-            val hours = timeArr.first().toInt()
-            val minutes = timeArr.last().toInt()
-            return (hours * 60) + minutes
+            val minutes = timeArr.first().toInt()
+            val seconds = timeArr.last().toInt()
+            return (minutes * 60) + seconds
         } else {
             return 0
         }
@@ -214,6 +210,24 @@ object CalendarUtil {
         val gameDate = OffsetDateTime.parse(date).toLocalDate()
         val today = LocalDate.now()
         return !gameDate.isBefore(today) // 오늘이거나 미래 날짜면 true
+    }
+
+    fun isSameYearMonth(yearMonth: String): Boolean {
+        val formatter = DateTimeFormatter.ofPattern("yy/MM")
+
+        val target: YearMonth = try {
+            YearMonth.parse(yearMonth, formatter)
+        } catch (e: DateTimeParseException) {
+            return false
+        }
+
+        val today = YearMonth.from(LocalDate.now())
+        return target == today
+    }
+
+    fun isToday(day: Int): Boolean {
+        val todayDay = LocalDate.now().dayOfMonth
+        return todayDay == day
     }
 }
 

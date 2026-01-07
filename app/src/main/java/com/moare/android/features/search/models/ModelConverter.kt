@@ -238,7 +238,9 @@ object ModelConverter {
                             team = item.team,
                             homeAwayStats = item.fixtures,
                             goalsFor = item.goals.teamGoalsFor.total,
-                            goalsAgainst = item.goals.teamGoalsAgainst.total
+                            goalsAgainst = item.goals.teamGoalsAgainst.total,
+                            rank = item.rank,
+                            points = item.points
                         )
                     }
                 }
@@ -263,7 +265,9 @@ object ModelConverter {
                     team = teamInfo.team,
                     homeAwayStats = homeAwayStats,
                     goalsFor = FBHomeAwayIntStats(home.goals.goalsFor, away.goals.goalsFor, all.goals.goalsFor),
-                    goalsAgainst = FBHomeAwayIntStats(home.goals.goalsAgainst, away.goals.goalsAgainst, all.goals.goalsAgainst)
+                    goalsAgainst = FBHomeAwayIntStats(home.goals.goalsAgainst, away.goals.goalsAgainst, all.goals.goalsAgainst),
+                    rank = teamInfo.rank,
+                    points = teamInfo.points
                 )
             }
         }
@@ -848,7 +852,7 @@ object ModelConverter {
         val awayTeamScore = game.goals.away
         val gameInfo = FBGameInfoForSchedule(
             _round = game.league.round,
-            _elapsed = game.fixture.status.elapsed,
+            status = game.fixture.status,
             _homeTeamPenaltyScore = game.score.penalty._home, // TODO: Optional이 필요해서 임시로 _home, _away 사용. 추후 개선 필요.
             _awayTeamPenaltyScore = game.score.penalty._away
         )

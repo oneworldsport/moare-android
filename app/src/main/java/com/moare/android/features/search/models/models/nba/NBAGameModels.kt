@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.models.nba
 
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -32,9 +33,9 @@ data class NBABoxScoreTraditional(
 
 @Serializable
 data class NBABoxScoreTeam(
-    val bench: NBAGameBoxScoreStats,
+    val bench: NBAGameBoxScoreStats? = null,
     val players: List<NBABoxScoreTeamPlayer> = emptyList(),
-    val starters: NBAGameBoxScoreStats,
+    val starters: NBAGameBoxScoreStats? = null,
     val statistics: NBAGameBoxScoreStats,
     @SerialName("teamCity") private val _teamCity: String? = null,
     @SerialName("teamId") private val _teamId: Int? = null,
@@ -69,6 +70,10 @@ data class NBABoxScoreTeamPlayer(
     val personId: Int get() = _personId ?: 0
     val playerSlug: String get() = _playerSlug ?: ""
     val position: String get() = _position ?: ""
+
+    // 선발이면 0, 후보면 1
+    val starterSortKey: Int get() = if (position.isBlank()) 1 else 0
+    val isStarter: Boolean get() = starterSortKey == 0
 }
 
 @Serializable
@@ -108,6 +113,7 @@ data class NBAGameBoxScoreStats(
         get() = _freeThrowsPercentage ?: 0.0
         set(value) { _freeThrowsPercentage = value }
     val minutes: String get() = if (_minutes.isNullOrBlank()) "0:0" else _minutes
+    val seconds: Int get() = CalendarUtil.formatMinuteSecondToSeconds(minutes)
     var plusMinusPoints: Int
         get() = _plusMinusPoints ?: 0
         set(value) { _plusMinusPoints = value }

@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
@@ -53,7 +54,7 @@ fun Modifier.clickableCapsuleRippleEffect(
         }
 }
 
-fun Modifier.optionalFillMaxWidth(apply: Boolean): Modifier {
+fun Modifier.conditionalFillMaxWidth(apply: Boolean): Modifier {
     return if (apply) this.fillMaxWidth() else this
 }
 
@@ -65,13 +66,27 @@ fun Modifier.nullableHeight(height: Dp?): Modifier {
     return height?.let { this.height(height) } ?: this
 }
 
-fun Modifier.optionalClickable(apply: Boolean, onClick: (() -> Unit)): Modifier {
+fun Modifier.conditionalClickable(apply: Boolean, onClick: (() -> Unit)): Modifier {
     return if (apply) this.clickable(onClick = onClick) else this
 }
 
-fun Modifier.nullableOptionalClickable(apply: Boolean = true, onClick: (() -> Unit)?): Modifier {
+fun Modifier.nullableConditionalClickable(apply: Boolean = true, onClick: (() -> Unit)?): Modifier {
     return onClick?.let { if (apply) this.clickable(onClick = onClick) else this } ?: this
 }
+
+fun Modifier.conditionalBorder(
+    enabled: Boolean,
+    width: Dp = 1.dp,
+    color: Color = Color.Black,
+    shape: Shape = RoundedCornerShape(5.dp),
+) = if (enabled) border(width, color, shape) else this
+
+fun RowScope.conditionalWeight(
+    modifier: Modifier = Modifier,
+    enabled: Boolean,
+    weight: Float = 1f,
+    fill: Boolean = true,
+): Modifier = if (enabled) modifier.weight(weight, fill) else modifier
 
 /**
  * Since this is not a Modifier extension, it must be used to create Modifier initially,

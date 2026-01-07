@@ -1,16 +1,20 @@
 package com.moare.android.features.search.display.search
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,7 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -42,6 +48,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +57,8 @@ import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.ui.animation.components.RoundedRectPath
 import com.moare.android.ui.animation.components.RoundedRectWithPathAni
+import com.moare.android.ui.util.CenterRow
+import com.moare.android.ui.util.conditionalWeight
 import com.moare.android.ui.util.convertDpToPx
 import com.moare.android.ui.util.convertPxToDp
 import com.moare.android.ui.util.screenWidthDp
@@ -168,7 +177,8 @@ fun AnimatingSearchBar(
                 .padding(horizontal = 16.dp)
         ) {
             Box(
-                contentAlignment = Alignment.CenterStart
+                contentAlignment = Alignment.CenterStart,
+                modifier = conditionalWeight(Modifier, !aniBarVisibleState && !searchState) // anibar가 사라지고, 검색이 안됐을때만 weight(1f). 안그려면 TextField의 text가 길어질때 검색 icon이 사라짐.
             ) {
                 Text(
                     text = query.text,
@@ -216,6 +226,46 @@ fun AnimatingSearchBar(
                             }
                         }
                     ),
+                    decorationBox = { innerTextField ->
+                        Box(
+                            contentAlignment = Alignment.CenterStart,
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            innerTextField()
+                            if (!aniBarVisibleState) {
+                                CenterRow {
+                                    if (query.text.isEmpty()) {
+                                        Text(
+                                            text = " ${trendingKeywordList.firstOrNull() ?: ""}",
+                                            color = Color.LightGray,
+                                            style = TextStyle(
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Normal,
+                                                fontFamily = FontFamily.Default
+                                            ),
+                                            modifier = Modifier
+                                        )
+                                    } else if (!searchState) { // query가 비어있고, 검색이 안됐을때만 노출
+                                        Spacer(Modifier.weight(1f))
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_round_add_circle_24),
+                                            contentDescription = null,
+                                            tint = Color.LightGray,
+                                            modifier = Modifier
+                                                .clip(CircleShape)
+                                                .alpha(0.8f)
+                                                .background(Color.White)
+                                                .rotate(45f)
+                                                .clickable {
+                                                    searchStore.send(SearchAction.UpdateTextField(TextFieldValue("")))
+                                                }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .width(textFieldWidthState)
                         .focusRequester(focusRequester)
@@ -226,20 +276,20 @@ fun AnimatingSearchBar(
                         }
                 )
 
-                if (!aniBarVisibleState) {
-                    if (query.text.isEmpty()) {
-                        Text(
-                            text = " ${trendingKeywordList.firstOrNull() ?: ""}",
-                            color = Color.LightGray,
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Normal,
-                                fontFamily = FontFamily.Default
-                            ),
-                            modifier = Modifier
-                        )
-                    }
-                }
+//                if (!aniBarVisibleState) {
+//                    if (query.text.isEmpty()) {
+//                        Text(
+//                            text = " ${trendingKeywordList.firstOrNull() ?: ""}",
+//                            color = Color.LightGray,
+//                            style = TextStyle(
+//                                fontSize = 16.sp,
+//                                fontWeight = FontWeight.Normal,
+//                                fontFamily = FontFamily.Default
+//                            ),
+//                            modifier = Modifier
+//                        )
+//                    }
+//                }
             }
 
             Icon(

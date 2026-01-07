@@ -43,6 +43,7 @@ import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.displayOrDash
+import com.moare.android.core.util.format3
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
@@ -50,7 +51,6 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
 import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.nba.NBALineScore
 import com.moare.android.ui.common.components.CapsuleButton
@@ -77,12 +77,12 @@ fun NBAGameStatsView(
        viewmodel state
        --------------------- */
     val displayModel by store.displayModel.collectAsState()
-    val firstSelectedIndex by store.firstCategorySelectedIndex.collectAsState()
-    val secondCategorySelectedIndex by store.secondCategorySelectedIndex.collectAsState()
+    val firstCategorySelectedIndex by store.firstCategorySelectedIndex.collectAsState()
     val selectedTeamIndex by store.teamCategorySelectedIndex.collectAsState()
     val playerStats by store.playerStats.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
     val playerNameDic by store.playerNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
 
     val teamIds = listOf(displayModel.game.gameSummary?.homeTeamId, displayModel.game.gameSummary?.awayTeamId)
     val teamCategories = teamIds.map {
@@ -101,33 +101,30 @@ fun NBAGameStatsView(
             isGameStats = true,
             imageUrl = NBAUtil.playerPhotoUrl(playerId),
             name = playerNameDic["${playerId}"] ?: player.nameI,
-            extraInfo = if (player.position.isNotBlank()) "선발" else "후보",
+            extraInfo = if (player.isStarter) "선발" else "후보",
             extraSubInfo = player.position,
             dataList = listOf(
+                stats.minutes,
                 stats.points.toString(),
                 stats.assists.toString(),
-                stats.reboundsOffensive.toString(),
-                stats.fieldGoalsAttempted.toString(),
-                stats.fieldGoalsMade.toString(),
-                stats.fieldGoalsPercentage.toString(),
-                stats.threePointersAttempted.toString(),
-                stats.threePointersMade.toString(),
-                stats.threePointersPercentage.toString(),
-                stats.freeThrowsAttempted.toString(),
-                stats.freeThrowsMade.toString(),
-                stats.freeThrowsPercentage.toString(),
-                stats.reboundsDefensive.toString(),
-                stats.blocks.toString(),
-                stats.steals.toString(),
                 stats.reboundsTotal.toString(),
+                "",
+                "${stats.fieldGoalsMade}/${stats.fieldGoalsAttempted}(${stats.fieldGoalsPercentage.format3()})",
+                "${stats.threePointersMade}/${stats.threePointersAttempted}(${stats.threePointersPercentage.format3()})",
+                "${stats.freeThrowsMade}/${stats.freeThrowsAttempted}(${stats.freeThrowsPercentage.format3()})",
+                "",
+                stats.steals.toString(),
+                stats.blocks.toString(),
+                "",
                 stats.turnovers.toString(),
                 stats.foulsPersonal.toString(),
-                stats.plusMinusPoints.toString(),
-                stats.minutes,
+                "",
+                "${stats.reboundsOffensive}/${stats.reboundsDefensive}",
+                stats.plusMinusPoints.toString()
             )
         )
     }
-    val columnWidthList = listOf(50.dp, 50.dp, 80.dp, 70.dp, 70.dp, 80.dp, 70.dp, 70.dp, 80.dp, 80.dp, 80.dp, 100.dp, 80.dp, 50.dp, 50.dp, 70.dp, 50.dp, 50.dp, 70.dp, 70.dp)
+    val columnWidthList = listOf(70.dp, 50.dp, 50.dp, 70.dp, 50.dp, 110.dp, 110.dp, 110.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 100.dp, 70.dp)
     val officials = displayModel.game.officials
     val gameDetailTitle = "날짜: \n\n장소: \n관중수: \n심판: "
     val gameDetailContent = buildString {
@@ -147,25 +144,25 @@ fun NBAGameStatsView(
     /* ---------------------
        etc
        --------------------- */
-    val secondSelectedCategoryPosition = with(LocalDensity.current) {
+    val firstSelectedCategoryPosition = with(LocalDensity.current) {
         val attackCategoriesSize = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES.size
         val defendCategoriesSize = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES.size
 
-        if (secondCategorySelectedIndex in 0 until attackCategoriesSize) {
-            (store.itemWidth * secondCategorySelectedIndex).toPx()
-        } else if (secondCategorySelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
-            ((store.itemWidth * secondCategorySelectedIndex) + store.barWidth).toPx()
+        if (firstCategorySelectedIndex in 0 until attackCategoriesSize) {
+            (store.itemWidth * firstCategorySelectedIndex).toPx()
+        } else if (firstCategorySelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
+            ((store.itemWidth * firstCategorySelectedIndex) + store.barWidth).toPx()
         } else {
-            ((store.itemWidth * secondCategorySelectedIndex) + (store.barWidth * 2)).toPx()
+            ((store.itemWidth * firstCategorySelectedIndex) + (store.barWidth * 2)).toPx()
         }
     }.toInt()
 
     // scroll to category that matches with the keyword,
     // and when first category list's item is selected by click
-    LaunchedEffect(firstSelectedIndex) {
+    LaunchedEffect(firstCategorySelectedIndex) {
         if (store.shouldScrollCategory) {
             horizontalScrollState.animateScrollTo(
-                value = secondSelectedCategoryPosition,
+                value = firstSelectedCategoryPosition,
                 animationSpec = tween(
                     durationMillis = 500,
                     easing = LinearOutSlowInEasing
@@ -179,11 +176,11 @@ fun NBAGameStatsView(
             shouldShowStats = displayModel.game.gameSummary?.gameStatus != Constants.GameStatus.NBA.NOT_STARTED,
             shouldShowRefreshButton = displayModel.game.gameSummary?.gameStatus == Constants.GameStatus.NBA.LIVE,
             teamCategories = teamCategories,
-            secondCategories = StringConstants.NBA.GAME_STATS_SECOND_CATEGORIES,
+            firstStatsCategories = StringConstants.NBA.GAME_STATS_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,
-            secondCategorySelectedIndex = secondCategorySelectedIndex,
-            columnWidthList = columnWidthList,
-            playerList = playerList,
+            firstStatsCategorySelectedIndex = firstCategorySelectedIndex,
+            firstStatsColumnWidthList = columnWidthList,
+            firstStatsPlayerList = playerList,
             gameDetailTitle = gameDetailTitle,
             gameDetailContent = gameDetailContent
         ),
@@ -191,12 +188,16 @@ fun NBAGameStatsView(
             teamCategoryButtonAction = { index ->
                 store.send(NBAGameStatsAction.SelectTeam(index))
             },
-            secondCategoryButtonAction = { index ->
-                store.send(NBAGameStatsAction.SelectSecondCategory(index))
+            firstStatsTitleCategoryAction = {
+                store.send(NBAGameStatsAction.SelectTitleCategory)
+            },
+            firstStatsCategoryButtonAction = { index ->
+                store.send(NBAGameStatsAction.SelectFirstCategory(index))
             },
             refreshButtonAction = {
                 store.send(NBAGameStatsAction.RefreshGame())
-            }
+            },
+            isRefreshing = isRefreshing
         ),
         titleContent = {
             /* ---------------------

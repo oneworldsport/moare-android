@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,13 +44,10 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBGameLineScoreInning
-import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.BaseballLeagueTitleForGameStats
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.RoundedBorderText
@@ -82,6 +78,7 @@ fun MLBGameStatsView(
     val teamPitchers by store.teamPitchers.collectAsState()
     val playerNameDic by store.playerNameDic.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
 
     val game = displayModel.game
     val season = game.game.season.toIntOrNull()
@@ -157,14 +154,14 @@ fun MLBGameStatsView(
             shouldShowStats = game.status.detailedState != StringConstants.MLB.GAME_SCHEDULED,
             shouldShowRefreshButton = game.status.detailedState == StringConstants.MLB.GAME_LIVE,
             teamCategories = teamCategories,
-            secondCategories = StringConstants.MLB.GAME_STATS_HITTING_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,
-            secondCategorySelectedIndex = firstCategorySelectedIndex,
-            columnWidthList = columnWidthList,
-            playerList = hitterList,
             gameDetailTitle = gameDetailTitle,
             gameDetailContent = gameDetailContent,
             firstStatsTitle = "타자",
+            firstStatsCategories = StringConstants.MLB.GAME_STATS_HITTING_CATEGORIES,
+            firstStatsCategorySelectedIndex = firstCategorySelectedIndex,
+            firstStatsColumnWidthList = columnWidthList,
+            firstStatsPlayerList = hitterList,
             secondStatsTitle = "투수",
             secondStatsCategories = StringConstants.MLB.GAME_STATS_PITCHING_CATEGORIES,
             secondStatsCategorySelectedIndex = secondCategorySelectedIndex,
@@ -178,15 +175,16 @@ fun MLBGameStatsView(
             firstStatsTitleCategoryAction = {
                 store.send(MLBGameStatsAction.SortByBattingOrder)
             },
-            secondCategoryButtonAction = { index ->
+            firstStatsCategoryButtonAction = { index ->
                 store.send(MLBGameStatsAction.SelectFirstCategory(index))
+            },
+            secondStatsCategoryButtonAction = { index ->
+                store.send(MLBGameStatsAction.SelectSecondCategory(index))
             },
             refreshButtonAction = {
                 store.send(MLBGameStatsAction.RefreshGame())
             },
-            secondStatsCategoryButtonAction = { index ->
-                store.send(MLBGameStatsAction.SelectSecondCategory(index))
-            }
+            isRefreshing = isRefreshing,
         ),
         titleContent = {
             Column {

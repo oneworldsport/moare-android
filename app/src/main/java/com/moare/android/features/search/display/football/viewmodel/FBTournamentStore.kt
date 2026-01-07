@@ -125,17 +125,19 @@ class FBTournamentStore @AssistedInject constructor(
                 eastFirstRoundSeedTuple
             )
         } else {
-            val firstRoundTeams = tournamentTeams["${leagueId}_${season}_32"] ?: emptyList()
-            val secondRoundTeams = tournamentTeams["${leagueId}_${season}_16"] ?: emptyList()
-            val thirdRoundTeams = tournamentTeams["${leagueId}_${season}_8"] ?: emptyList()
-            val fourthRoundTeams = tournamentTeams["${leagueId}_${season}_4"] ?: emptyList()
-            val fifthRoundTeams = tournamentTeams["${leagueId}_${season}_2"] ?: emptyList()
+            val firstRoundTeams = tournamentTeams["${leagueId}_${season}_64"] ?: emptyList()
+            val secondRoundTeams = tournamentTeams["${leagueId}_${season}_32"] ?: emptyList()
+            val thirdRoundTeams = tournamentTeams["${leagueId}_${season}_16"] ?: emptyList()
+            val fourthRoundTeams = tournamentTeams["${leagueId}_${season}_8"] ?: emptyList()
+            val fifthRoundTeams = tournamentTeams["${leagueId}_${season}_4"] ?: emptyList()
+            val sixthRoundTeams = tournamentTeams["${leagueId}_${season}_2"] ?: emptyList()
 
             val firstRoundPairedTeams = firstRoundTeams.chunked(2)
             val secondRoundPairedTeams = secondRoundTeams.chunked(2)
             val thirdRoundPairedTeams = thirdRoundTeams.chunked(2)
             val fourthRoundPairedTeams = fourthRoundTeams.chunked(2)
             val fifthRoundPairedTeams = fifthRoundTeams.chunked(2)
+            val sixthRoundPairedTeams = sixthRoundTeams.chunked(2)
 
             val games = displayModel.games.toMutableList()
 
@@ -144,13 +146,15 @@ class FBTournamentStore @AssistedInject constructor(
             val (_, thirdRound) = Util.collectRound(thirdRoundPairedTeams, games)
             val (_, fourthRound) = Util.collectRound(fourthRoundPairedTeams, games)
             val (_, fifthRound) = Util.collectRound(fifthRoundPairedTeams, games)
+            val (_, sixthRound) = Util.collectRound(sixthRoundPairedTeams, games)
 
             val rounds: List<GameListEntry<FBGameInfoForSchedule>> = listOf(
-                GameListEntry(title = "32강", gameList = firstRound),
-                GameListEntry(title = "16강", gameList = secondRound),
-                GameListEntry(title = "8강", gameList = thirdRound),
-                GameListEntry(title = "준결승", gameList = fourthRound),
-                GameListEntry(title = "결승", gameList = fifthRound)
+                GameListEntry(title = "64강", gameList = firstRound),
+                GameListEntry(title = "32강", gameList = secondRound),
+                GameListEntry(title = "16강", gameList = thirdRound),
+                GameListEntry(title = "8강", gameList = fourthRound),
+                GameListEntry(title = "준결승", gameList = fifthRound),
+                GameListEntry(title = "결승", gameList = sixthRound)
             )
 
             // 가장 먼저 비어있지 않은 라운드부터 마지막 라운드까지 할당.

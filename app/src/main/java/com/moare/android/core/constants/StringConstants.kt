@@ -58,6 +58,24 @@ object StringConstants {
         val GAME_STATS_DEFEND_CATEGORIES = listOf("태클 시도", "볼 경합 성공/시도(%)", "가로채기")
         val GAME_STATS_COMMON_CATEGORIES = listOf("패스 시도", "얻은 파울", "파울", "경고", "퇴장", "출전시간(분)", "평점")
         val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_ATTACK_CATEGORIES + GAME_STATS_DEFEND_CATEGORIES + GAME_STATS_COMMON_CATEGORIES
+        val GAME_STATS_CATEGORIES = listOf("출전시간(분)", "득점", "pk골", "도움", "", "슈팅", "유효슈팅", "패스 시도", "드리블\n성공/시도(%)", "", "태클 시도", "볼 경합\n성공/시도(%)", "인터셉트", "", "오프사이드", "파울 당함", "파울 범함", "경고", "퇴장")
+
+        fun leagueNameStr(leagueId: Int): String {
+            return when (leagueId) {
+                Constants.Ids.EPL -> "EPL"
+                Constants.Ids.LALIGA -> "라리가"
+                Constants.Ids.BUNDESLIGA -> "분데스리가"
+                Constants.Ids.SERIEA -> "세리에A"
+                Constants.Ids.LIGUE1 -> "리그1"
+                Constants.Ids.FA_CUP -> "FA컵"
+                Constants.Ids.EFL_CUP -> "EFL컵"
+                Constants.Ids.DFB_POKAL -> "DFB 포칼"
+                Constants.Ids.COUPE_DE_FRANCE -> "쿠프 드 프랑스"
+                Constants.Ids.COPA_DEL_REY -> "코파 델 레이"
+                Constants.Ids.COPPA_ITALIA -> "코파 이탈리아"
+                else -> ""
+            }
+        }
     }
 
     object NBA {
@@ -76,7 +94,7 @@ object StringConstants {
         val CONFERENCE_CATEGORY = listOf("서부", "동부")
         // TODO: 나중에 데이터 추가되면 카테고리 추가
 //        val teamStandingsCategories = listOf("게임차", "승률", "승", "패", "경기수", "홈성적", "원정성적", "경기당 득점", "경기당 득실마진", "경기당 도움", "경기당 리바운드", "야투 성공률", "3점 성공률", "자유투 성공률", "경기당 블록", "경기당 스틸", "경기당 턴오버", "경기당 파울")
-        val TEAM_STANDINGS_CATEGORIES = listOf("게임차", "승률", "승", "패", "경기수", "경기당 득점", "경기당 득실마진", "경기당 도움", "경기당 리바운드", "야투 성공률", "3점 성공률", "자유투 성공률", "경기당 블록", "경기당 스틸", "경기당 턴오버", "경기당 파울")
+        val TEAM_STANDINGS_CATEGORIES = listOf("게임차", "승률", "승", "패", "경기수", "연속", "최근 10경기", "홈성적", "원정성적", "", "경기당 득점", "경기당\n득실마진", "경기당 도움", "경기당\n리바운드", "야투 성공률", "3점 성공률", "자유투\n성공률", "경기당 스틸", "경기당 블록", "경기당\n턴오버", "경기당 파울")
 
         val PLAYER_STANDINGS_ATTACK_CATEGORIES = listOf("경기당 득점", "경기당 도움", "경기당 공격 리바운드", "경기당 야투 시도", "경기당 야투 성공", "야투 성공률", "경기당 3점 시도", "경기당 3점 성공", "3점 성공률", "경기당 자유투 시도", "경기당 자유투 성공", "자유투 성공률")
         val PLAYER_STANDINGS_DEFEND_CATEGORIES = listOf("경기당 수비 리바운드", "경기당 블록", "경기당 스틸")
@@ -87,6 +105,7 @@ object StringConstants {
         val GAME_STATS_DEFEND_CATEGORIES = listOf("수비 리바운드", "블록", "스틸")
         val GAME_STATS_COMMON_CATEGORIES = listOf("리바운드", "턴오버", "파울", "득실마진", "출전시간")
         val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_ATTACK_CATEGORIES + GAME_STATS_DEFEND_CATEGORIES + GAME_STATS_COMMON_CATEGORIES
+        val GAME_STATS_CATEGORIES = listOf("출전시간", "득점", "도움", "리바운드", "", "야투\n성공/시도(성공률)", "3점\n성공/시도(성공률)", "자유투\n성공/시도(성공률)", "", "스틸", "블록", "", "턴오버", "파울", "", "공격/수비\n리바운드", "득실마진")
     }
 
     object KBO {
@@ -149,6 +168,14 @@ object StringConstants {
             Constants.Ids.MLB -> "포스트시즌 대진표"
             Constants.Ids.KBO -> "가을야구 대진표"
             else -> ""
+        }
+    }
+
+    fun tournamentOrStandingsText(leagueId: Int): String {
+        return if (Constants.Ids.FOOTBALL_DRAW_TOURNAMENT_LEAGUES.contains(leagueId)) {
+            "대진표"
+        } else {
+            "리그 순위"
         }
     }
 }

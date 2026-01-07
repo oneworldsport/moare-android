@@ -178,7 +178,13 @@ data class FBGamePlayers(
 data class FBGamePlayerStats(
     val player: FBPerson,
     val statistics: List<FBGamePlayerStatsDetail> = emptyList()
-)
+) {
+    // 선발이면 0, 후보면 1
+    // 아래 프로퍼티들은 Store에서 선수들 초기화할때 설정해줌
+    var starterSortKey: Int? = null
+    val isStarter: Boolean get() = starterSortKey == 0
+    var position: String? = null
+}
 
 @Serializable
 data class FBGamePlayerStatsDetail(
@@ -229,12 +235,11 @@ data class FBGamePlayerStatsGames(
 @Serializable
 data class FBGameInfoForSchedule(
     @SerialName("round") private val _round: String? = null,
-    @SerialName("elapsed") private val _elapsed: Int? = null,
+    val status: FBGameStatus? = null,
     @SerialName("homeTeamPenaltyScore") private val _homeTeamPenaltyScore: Int? = null,
     @SerialName("awayTeamPenaltyScore") private val _awayTeamPenaltyScore: Int? = null
 ) {
     val round: String get() = _round ?: ""
-    val elapsed: Int get() = _elapsed ?: 0
     val homeTeamPenaltyScore: Int? get() = _homeTeamPenaltyScore
     val awayTeamPenaltyScore: Int? get() = _awayTeamPenaltyScore
 }

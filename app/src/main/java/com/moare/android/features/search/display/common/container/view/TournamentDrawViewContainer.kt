@@ -34,7 +34,7 @@ fun <T> TournamentDrawViewContainer(
     ) {
         state.gameListTuple.forEachIndexed { roundIndex, item ->
             val title = item.title
-            val gameList = item.gameList
+            val gameList = item.gameList.filterNotNull().flatten() // 중첩 배열인 gameList를(null을 제거하고) 펼쳐서 1차원 배열로 만든다
 
             CenterColumn {
                 Text(
@@ -48,18 +48,16 @@ fun <T> TournamentDrawViewContainer(
                     modifier = Modifier.padding(top = 6.dp, bottom = 12.dp)
                 )
 
-                gameList.forEachIndexed { index, games ->
+                gameList.forEachIndexed { _, game ->
                     if (state.isSeries) {
                         // TODO: 추첨인데 시리즈인 경우가 생기면 작업
                     } else {
-                        games?.firstOrNull()?.let {
-                            TournamentSingleGameItem(
-                                leagueId = state.leagueId,
-                                game = it,
-                                teamNameDic = state.teamNameDic,
-                                modifier = Modifier.padding(bottom = 12.dp)
-                            )
-                        }
+                        TournamentSingleGameItem(
+                            leagueId = state.leagueId,
+                            game = game,
+                            teamNameDic = state.teamNameDic,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
                     }
                 }
             }

@@ -5,7 +5,6 @@ import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.common.store.BaseGameStatsStore
 import com.moare.android.features.search.models.SportDecodableModel
@@ -24,9 +23,10 @@ import kotlinx.coroutines.launch
 
 sealed interface NBAGameStatsAction {
     data object InitData : NBAGameStatsAction
-    data class SelectSecondCategory(val index: Int) : NBAGameStatsAction
+    data class SelectFirstCategory(val index: Int) : NBAGameStatsAction
     data class SelectTeam(val index: Int) : NBAGameStatsAction
     data class RefreshGame(val shouldFetch: Boolean = true) : NBAGameStatsAction
+    data object SelectTitleCategory : NBAGameStatsAction
 }
 
 sealed interface NBAGameStatsDelegate {
@@ -77,9 +77,10 @@ class NBAGameStatsStore @AssistedInject constructor(
     override fun send(action: NBAGameStatsAction) {
         when (action) {
             is NBAGameStatsAction.InitData -> initData()
-            is NBAGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
+            is NBAGameStatsAction.SelectFirstCategory -> selectFirstCategory(action.index)
             is NBAGameStatsAction.SelectTeam -> selectTeam(false, action.index)
             is NBAGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
+            is NBAGameStatsAction.SelectTitleCategory -> selectTitleCategory()
         }
     }
 
@@ -113,21 +114,6 @@ class NBAGameStatsStore @AssistedInject constructor(
         }
     }
 
-    override fun selectSecondCategory(index: Int) {
-        super.selectSecondCategory(index)
-
-        val attackCategories = StringConstants.NBA.GAME_STATS_ATTACK_CATEGORIES
-        val defendCategories = StringConstants.NBA.GAME_STATS_DEFEND_CATEGORIES
-
-        when (index) {
-            in attackCategories.indices -> _firstCategorySelectedIndex.value = 0
-            in attackCategories.size until attackCategories.size + defendCategories.size -> _firstCategorySelectedIndex.value = 1
-            else -> _firstCategorySelectedIndex.value = 2
-        }
-
-        sortPlayers()
-    }
-
     override fun selectTeam(isInit: Boolean, index: Int) {
         super.selectTeam(isInit, index)
 
@@ -138,37 +124,43 @@ class NBAGameStatsStore @AssistedInject constructor(
             displayModel.value.game.boxScoreTraditional?.awayTeam?.players ?: emptyList()
         }
 
-        setPlayersTotalStats()
-        sortPlayers()
         if (isInit) {
             refreshGame(false)
+            selectTitleCategory()
+        } else {
+            if (firstCategorySelectedIndex.value == -1) {
+                selectTitleCategory()
+            } else {
+                sortPlayers()
+            }
         }
+
+        setPlayersTotalStats()
+    }
+
+    override fun selectFirstCategory(index: Int) {
+        super.selectFirstCategory(index)
+
+        sortPlayers()
     }
 
     override fun sortPlayers() {
         val playerStats = playerStats.value.toMutableList()
 
-        when (secondCategorySelectedIndex.value) {
-            0 -> playerStats.sortByDescending { it.statistics.points }
-            1 -> playerStats.sortByDescending { it.statistics.assists }
-            2 -> playerStats.sortByDescending { it.statistics.reboundsOffensive }
-            3 -> playerStats.sortByDescending { it.statistics.fieldGoalsAttempted }
-            4 -> playerStats.sortByDescending { it.statistics.fieldGoalsMade }
-            5 -> playerStats.sortByDescending { it.statistics.fieldGoalsPercentage }
-            6 -> playerStats.sortByDescending { it.statistics.threePointersAttempted }
-            7 -> playerStats.sortByDescending { it.statistics.threePointersMade }
-            8 -> playerStats.sortByDescending { it.statistics.threePointersPercentage }
-            9 -> playerStats.sortByDescending { it.statistics.freeThrowsAttempted }
-            10 -> playerStats.sortByDescending { it.statistics.freeThrowsMade }
-            11 -> playerStats.sortByDescending { it.statistics.freeThrowsPercentage }
-            12 -> playerStats.sortByDescending { it.statistics.reboundsDefensive }
-            13 -> playerStats.sortByDescending { it.statistics.blocks }
-            14 -> playerStats.sortByDescending { it.statistics.steals }
+        when (firstCategorySelectedIndex.value) {
+            0 -> playerStats.sortByDescending { it.statistics.seconds }
+            1 -> playerStats.sortByDescending { it.statistics.points }
+            2 -> playerStats.sortByDescending { it.statistics.assists }
+            3 -> playerStats.sortByDescending { it.statistics.reboundsTotal }
+            5 -> playerStats.sortByDescending { it.statistics.fieldGoalsMade }
+            6 -> playerStats.sortByDescending { it.statistics.threePointersMade }
+            7 -> playerStats.sortByDescending { it.statistics.freeThrowsMade }
+            9 -> playerStats.sortByDescending { it.statistics.steals }
+            10 -> playerStats.sortByDescending { it.statistics.blocks }
+            12 -> playerStats.sortByDescending { it.statistics.turnovers }
+            13 -> playerStats.sortByDescending { it.statistics.foulsPersonal }
             15 -> playerStats.sortByDescending { it.statistics.reboundsTotal }
-            16 -> playerStats.sortByDescending { it.statistics.turnovers }
-            17 -> playerStats.sortByDescending { it.statistics.foulsPersonal }
-            18 -> playerStats.sortByDescending { it.statistics.plusMinusPoints }
-            19 -> playerStats.sortByDescending { CalendarUtil.formatHourMinuteToMinutes(it.statistics.minutes) }
+            16 -> playerStats.sortByDescending { it.statistics.plusMinusPoints }
             else -> {}
         }
 
@@ -218,32 +210,44 @@ class NBAGameStatsStore @AssistedInject constructor(
         _playersTotalStats.value = playersTotalStats
     }
 
+    private fun selectTitleCategory() {
+        // 선발, 후보를 먼저 정렬한 후 각각 출전시간 순으로 정렬
+        val playerStats = playerStats.value.toMutableList()
+        playerStats.sortWith(
+            compareBy<NBABoxScoreTeamPlayer> { it.starterSortKey } // 1) 선발/후보(오름차순)
+                .thenByDescending { it.statistics.seconds } // 2) seconds 내림차순
+        )
+        _playersStats.value = playerStats
+
+        selectFirstCategory(-1)
+    }
+
     private fun refreshGame(shouldFetch: Boolean) {
         if (shouldFetch) {
+            _isRefreshing.value = true
             scope.launch {
                 val game = displayModel.value.game
                 val gameSummary = game.gameSummary
-                val boxScoreTraditional = game.boxScoreTraditional
 
                 gameSummary?.let {
-                    boxScoreTraditional?.let {
-                        // TODO: Has to add loading
-                        val result = searchClient.fetchById(
-                            season = displayModel.value.season,
-                            category = "basketball",
-                            date = gameSummary.gameDate,
-                            dataType = "basketball_game_stats",
-                            leagueId = Constants.Ids.NBA,
-                            id = boxScoreTraditional.gameId
-                        )
+                    // TODO: Has to add loading
+                    val result = searchClient.fetchById(
+                        season = displayModel.value.season,
+                        category = "basketball",
+                        date = gameSummary.gameDate,
+                        dataType = "basketball_game_stats",
+                        leagueId = Constants.Ids.NBA,
+                        id = gameSummary.gameId
+                    )
 
-                        if (result.data is SportDecodableModel.NBAGameStats) {
-                            _displayModel.value = result.data.displayModel
-                            initData()
-                            emitToParent(NBAGameStatsDelegate.RefreshGame(result.data))
-                        }
+                    if (result.data is SportDecodableModel.NBAGameStats) {
+                        _displayModel.value = result.data.displayModel
+                        initData()
+                        emitToParent(NBAGameStatsDelegate.RefreshGame(result.data))
                     }
                 }
+
+                _isRefreshing.value = false
             }
         } else {
             val responseModel = NBAGameStatsResponseModel(game = displayModel.value.game)

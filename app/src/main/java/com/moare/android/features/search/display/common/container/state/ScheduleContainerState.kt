@@ -17,5 +17,6 @@ data class ScheduleContainerState(
 data class ScheduleContainerActions(
     val calendarUiActions: CalendarUiActions? = null,
     val allResultButtonAction: () -> Unit,
+    val tournamentOrteamStandingsButtonAction: () -> Unit,
     val tournamentButtonAction: (() -> Unit)? = null
 )

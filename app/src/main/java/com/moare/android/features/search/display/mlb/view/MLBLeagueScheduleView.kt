@@ -89,6 +89,9 @@ fun MLBLeagueScheduleView(
             allResultButtonAction = {
                 store.send(MLBLeagueScheduleAction.ToggleAllResult)
             },
+            tournamentOrteamStandingsButtonAction = {
+                store.send(MLBLeagueScheduleAction.ShowTeamStandings)
+            },
             tournamentButtonAction = {
                 store.send(MLBLeagueScheduleAction.ShowTournament)
             }

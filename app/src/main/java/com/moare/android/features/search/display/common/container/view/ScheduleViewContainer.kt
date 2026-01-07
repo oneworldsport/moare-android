@@ -14,10 +14,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.CalendarUtil
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerActions
 import com.moare.android.features.search.display.common.container.state.ScheduleContainerState
 import com.moare.android.features.search.models.ApiFetchState
@@ -36,6 +38,13 @@ fun ScheduleViewContainer(
 ) {
     val calendarState = state.calendarUiState
     val calendarActions = actions.calendarUiActions
+
+    val isSameYearMonth = remember(calendarState) {
+        calendarState?.let {
+            val selectedYearMonth = calendarState.yearMonthList[calendarState.selectedYearMonthIndex]
+            CalendarUtil.isSameYearMonth(selectedYearMonth)
+        } ?: false
+    }
 
     CenterColumn(
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -59,7 +68,8 @@ fun ScheduleViewContainer(
                 CalendarType.DAY,
                 calendarState.selectedDayIndex,
                 calendarState.dayCalendarScrollTrigger,
-                shouldAnimateSroll = calendarState.shouldAnimateScroll
+                shouldAnimateSroll = calendarState.shouldAnimateScroll,
+                containsToday = isSameYearMonth
             ) { day, index ->
                 calendarActions.onSelectDay(day, index)
             }
@@ -80,6 +90,13 @@ fun ScheduleViewContainer(
                     ) {
                         actions.tournamentButtonAction?.let { it() }
                     }
+                }
+
+                CapsuleButton(
+                    text = StringConstants.tournamentOrStandingsText(state.leagueId),
+                    color = Color.Gray
+                ) {
+                    actions.tournamentOrteamStandingsButtonAction()
                 }
 
                 CapsuleButton(
