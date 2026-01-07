@@ -182,7 +182,7 @@ fun <T> CalendarItem(
             .padding(horizontal = hPadding)
             .width(itemWidth)
             .padding(vertical = if (calendarType == CalendarType.DAY) 2.dp else 0.dp)
-            .conditionalClickable(isDisabled) {
+            .conditionalClickable(!isDisabled) {
                 onItemSelected()
             }
     ) {
