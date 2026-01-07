@@ -3,7 +3,6 @@ package com.moare.android.features.search.display.football.viewmodel
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.common.store.BaseGameStatsStore
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBGameStatsDisplayModel
@@ -26,16 +25,16 @@ import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 sealed interface FBGameStatsAction {
     data object InitData : FBGameStatsAction
-    data class SelectSecondCategory(val index: Int) : FBGameStatsAction
+    data class SelectFirstCategory(val index: Int) : FBGameStatsAction
     data class SelectTeam(val index: Int) : FBGameStatsAction
     data class RefreshGame(val shouldFetch: Boolean = true) : FBGameStatsAction // NOTE: shouldFetch는 최초에 FBGameStats에 진입했을때 받은 데이터로 FBLeagueSchedule데이터 업데이트 해줄때 사용.
+    data object SelectTitleCategory: FBGameStatsAction
 }
 
 sealed interface FBGameStatsDelegate {
@@ -80,9 +79,10 @@ class FBGameStatsStore @AssistedInject constructor(
     override fun send(action: FBGameStatsAction) {
         when (action) {
             is FBGameStatsAction.InitData -> initData()
-            is FBGameStatsAction.SelectSecondCategory -> selectSecondCategory(action.index)
+            is FBGameStatsAction.SelectFirstCategory -> selectFirstCategory(action.index)
             is FBGameStatsAction.SelectTeam -> selectTeam(false, action.index)
             is FBGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
+            is FBGameStatsAction.SelectTitleCategory -> selectTitleCategory()
         }
     }
 
@@ -98,12 +98,6 @@ class FBGameStatsStore @AssistedInject constructor(
         selectTeam(true, 0)
     }
 
-    override fun selectSecondCategory(index: Int) {
-        super.selectSecondCategory(index)
-
-        sortPlayers()
-    }
-
     override fun selectTeam(isInit: Boolean, index: Int) {
         super.selectTeam(isInit, index)
 
@@ -116,56 +110,89 @@ class FBGameStatsStore @AssistedInject constructor(
 
         val playersStats = displayModel.value.game.players.find { teamId != null && it.team.id == teamId }?.players
         _playersStats.value = playersStats ?: emptyList()
-        setPlayersTotalStats()
 
         // set selected team's coach, lineups
         val lineups = displayModel.value.game.lineups.find { teamId != null && it.team.id == teamId }
         _lineups.value = lineups
         _coach.value = lineups?.coach
 
-        sortPlayers()
+        // 선수들의 선발/후보, position 값 설정
+        lineups?.let {
+            val startXIByPlayerId: Map<Int, String> = lineups.startXI.associate { it.player.id to it.player.pos }
+            val substitutesByPlayerId: Map<Int, String> = lineups.substitutes.associate { it.player.id to it.player.pos }
+
+            val playerStats = playerStats.value.toMutableList()
+            playerStats.map { stats ->
+                val playerId = stats.player.id
+
+                if (startXIByPlayerId[playerId] != null) {
+                    stats.starterSortKey = 0
+                    stats.position = startXIByPlayerId[playerId]
+                } else if (substitutesByPlayerId[playerId] != null) {
+                    stats.starterSortKey = 1
+                    stats.position = substitutesByPlayerId[playerId]
+                }
+
+                stats
+            }
+            _playersStats.value = playerStats
+        }
+
         if (isInit) {
             refreshGame(false) // NOTE: 이걸 안해주면 새로고침 누르기 전에는 FBLeagueSchedule 데이터가 업데이트 안됨.
+            selectTitleCategory()
+        } else {
+            if (firstCategorySelectedIndex.value == -1) {
+                selectTitleCategory()
+            } else {
+                sortPlayers()
+            }
         }
+
+        setPlayersTotalStats()
+    }
+
+    override fun selectFirstCategory(index: Int) {
+        super.selectFirstCategory(index)
+
+        sortPlayers()
     }
 
     override fun sortPlayers() {
         val playerStats = playerStats.value.toMutableList()
 
-        when (secondCategorySelectedIndex.value) {
-            0 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.total ?: 0 }
-            1 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.penalty?.scored ?: 0 }
-            2 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.assists ?: 0 }
-            3 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.shots?.total ?: 0 }
-            4 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.shots?.on ?: 0 }
-            5 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.passes?.key ?: 0 }
-            6 -> if (playerStats.all { it.statistics.firstOrNull() != null }) {
-                playerStats.sortByDescending {
-                    val stats = it.statistics.firstOrNull()!!
-                    stats.dribbles.success.percentageOf(stats.dribbles.attempts, 1)
-                }
-            }
-            7 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.offsides ?: 0 }
-            8 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.tackles?.total ?: 0 }
-            9 -> if (playerStats.all { it.statistics.firstOrNull() != null }) {
-                playerStats.sortByDescending {
-                    val stats = it.statistics.firstOrNull()!!
-                    stats.duels.won.percentageOf(stats.duels.total, 1)
-                }
-            }
-            10 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.tackles?.interceptions ?: 0 }
-            11 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.passes?.total ?: 0 }
-            12 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.fouls?.drawn ?: 0 }
-            13 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.fouls?.committed ?: 0 }
-            14 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.yellow ?: 0 }
-            15 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.red ?: 0 }
-            16 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.games?.minutes ?: 0 }
-            17 -> {}
+        when (firstCategorySelectedIndex.value) {
+            0 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.games?.minutes ?: 0 }
+            1 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.total ?: 0 }
+            2 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.penalty?.scored ?: 0 }
+            3 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.goals?.assists ?: 0 }
+            5 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.shots?.total ?: 0 }
+            6 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.shots?.on ?: 0 }
+            7 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.passes?.total ?: 0 }
+            8 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.dribbles?.success ?: 0 }
+//                if (playerStats.all { it.statistics.firstOrNull() != null }) {
+//                playerStats.sortByDescending {
+//                    val stats = it.statistics.firstOrNull()!!
+//                    stats.dribbles.success.percentageOf(stats.dribbles.attempts, 1)
+//                }
+//            }
+            10 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.tackles?.total ?: 0 }
+            11 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.duels?.won ?: 0 }
+//                if (playerStats.all { it.statistics.firstOrNull() != null }) {
+//                playerStats.sortByDescending {
+//                    val stats = it.statistics.firstOrNull()!!
+//                    stats.duels.won.percentageOf(stats.duels.total, 1)
+//                }
+//            }
+            12 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.tackles?.interceptions ?: 0 }
+            14 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.offsides ?: 0 }
+            15 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.fouls?.drawn ?: 0 }
+            16 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.fouls?.committed ?: 0 }
+            17 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.yellow ?: 0 }
+            18 -> playerStats.sortByDescending { it.statistics.firstOrNull()?.cards?.red ?: 0 }
         }
 
         _playersStats.value = playerStats
-
-        setPlayersTotalStats()
     }
 
     override fun setPlayersTotalStats() {
@@ -235,6 +262,18 @@ class FBGameStatsStore @AssistedInject constructor(
             }
 
         _playersTotalStats.value = playersTotalStats
+    }
+
+    private fun selectTitleCategory() {
+        // 선발, 후보를 먼저 정렬한 후 각각 출전시간 순으로 정렬
+        val playerStats = playerStats.value.toMutableList()
+        playerStats.sortWith(
+            compareBy<FBGamePlayerStats> { it.starterSortKey } // 1) 선발/후보(오름차순)
+                .thenByDescending { it.statistics.firstOrNull()?.games?.minutes ?: 0 } // 2) minutes 내림차순
+        )
+        _playersStats.value = playerStats
+
+        selectFirstCategory(-1)
     }
 
     private fun refreshGame(shouldFetch: Boolean) {

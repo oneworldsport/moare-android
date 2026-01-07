@@ -34,11 +34,9 @@ fun FBGameStatsView(
 
     val displayModel by store.displayModel.collectAsState()
     val coach by store.coach.collectAsState()
-    val firstSelectedIndex by store.firstCategorySelectedIndex.collectAsState()
-    val secondCategorySelectedIndex by store.secondCategorySelectedIndex.collectAsState()
+    val firstCategorySelectedIndex by store.firstCategorySelectedIndex.collectAsState()
     val selectedTeamIndex by store.teamCategorySelectedIndex.collectAsState()
     val playerStats by store.playerStats.collectAsState()
-    val lineups by store.lineups.collectAsState()
     val playersTotalStats by store.playersTotalStats.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
     val playerNameDic by store.playerNameDic.collectAsState()
@@ -58,59 +56,39 @@ fun FBGameStatsView(
         val stats = player.statistics.firstOrNull()
         val playerId = player.player.id
 
-        var isStarter = false
-        var position = ""
-
-        lineups?.let {
-            for (item in it.startXI) {
-                if (playerId == item.player.id) {
-                    isStarter = true
-                    position = item.player.pos
-                    return@let
-                }
-            }
-
-            for (item in it.substitutes) {
-                if (playerId == item.player.id) {
-                    isStarter = false
-                    position = item.player.pos
-                    return@let
-                }
-            }
-        }
-
         stats?.let { stats ->
             StandingsItemState(
                 id = playerId,
                 isGameStats = true,
                 imageUrl = player.player.photo,
                 name = playerNameDic["${playerId}"] ?: player.player.name,
-                extraInfo = if (isStarter) "선발" else "후보",
-                extraSubInfo = position,
+                extraInfo = if (player.isStarter) "선발" else "후보",
+                extraSubInfo = player.position ?: "",
                 dataList = listOf(
+                    stats.games.minutes.toString(),
                     stats.goals.total.toString(),
                     stats.penalty.scored.toString(),
                     stats.goals.assists.toString(),
+                    "",
                     stats.shots.total.toString(),
                     stats.shots.on.toString(),
-                    stats.passes.key.toString(),
+                    stats.passes.total.toString(),
                     "${stats.dribbles.success}/${stats.dribbles.attempts}(${stats.dribbles.success.percentageOf(stats.dribbles.attempts, 1)}%)",
-                    stats.offsides.toString(),
+                    "",
                     stats.tackles.total.toString(),
                     "${stats.duels.won}/${stats.duels.total}(${stats.duels.won.percentageOf(stats.duels.total, 1)}%)",
                     stats.tackles.interceptions.toString(),
-                    stats.passes.total.toString(),
+                    "",
+                    stats.offsides.toString(),
                     stats.fouls.drawn.toString(),
                     stats.fouls.committed.toString(),
                     stats.cards.yellow.toString(),
-                    stats.cards.red.toString(),
-                    stats.games.minutes.toString(),
-                    stats.games.rating
+                    stats.cards.red.toString()
                 )
             )
         }
     }
-    val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 60.dp, 50.dp, 80.dp, 70.dp, 70.dp, 80.dp, 60.dp, 60.dp, 60.dp, 50.dp, 50.dp, 50.dp, 80.dp, 50.dp)
+    val columnWidthList = listOf(80.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 70.dp, 70.dp, 100.dp, 50.dp, 70.dp, 100.dp, 70.dp, 50.dp, 80.dp, 70.dp, 70.dp, 50.dp, 50.dp)
     val gameDetailTitle = "장소: \n심판: "
     val gameDetailContent = buildString {
         append("${teamNameDic["venue_${game.teams.home.id}"] ?: ""}\n")
@@ -154,25 +132,25 @@ fun FBGameStatsView(
     /* ---------------------
        etc
        --------------------- */
-    val secondSelectedCategoryPosition = with(LocalDensity.current) {
+    val firstSelectedCategoryPosition = with(LocalDensity.current) {
         val attackCategoriesSize = StringConstants.Football.GAME_STATS_ATTACK_CATEGORIES.size
         val defendCategoriesSize = StringConstants.Football.GAME_STATS_DEFEND_CATEGORIES.size
 
-        if (secondCategorySelectedIndex in 0 until attackCategoriesSize) {
-            (store.itemWidth * secondCategorySelectedIndex).toPx()
-        } else if (secondCategorySelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
-            ((store.itemWidth * secondCategorySelectedIndex) + store.barWidth).toPx()
+        if (firstCategorySelectedIndex in 0 until attackCategoriesSize) {
+            (store.itemWidth * firstCategorySelectedIndex).toPx()
+        } else if (firstCategorySelectedIndex in attackCategoriesSize until attackCategoriesSize + defendCategoriesSize) {
+            ((store.itemWidth * firstCategorySelectedIndex) + store.barWidth).toPx()
         } else {
-            ((store.itemWidth * secondCategorySelectedIndex) + (store.barWidth * 2)).toPx()
+            ((store.itemWidth * firstCategorySelectedIndex) + (store.barWidth * 2)).toPx()
         }
     }.toInt()
 
     // scroll to category that matches with the keyword,
     // and when first category list's item is selected by click
-    LaunchedEffect(firstSelectedIndex) {
+    LaunchedEffect(firstCategorySelectedIndex) {
         if (store.shouldScrollCategory) {
             horizontalScrollState.animateScrollTo(
-                value = secondSelectedCategoryPosition,
+                value = firstSelectedCategoryPosition,
                 animationSpec = tween(
                     durationMillis = 500,
                     easing = LinearOutSlowInEasing
@@ -189,13 +167,13 @@ fun FBGameStatsView(
             shouldShowCoach = true,
             shouldShowRefreshButton = StringConstants.Football.GAME_LIVE_LIST.contains(game.fixture.status.short),
             teamCategories = teamCategories,
-            firstStatsCategories = StringConstants.Football.GAME_STATS_SECOND_CATEGORIES,
+            firstStatsCategories = StringConstants.Football.GAME_STATS_CATEGORIES,
             coachState = GameStatsCoachState(
                 name = coach?.name,
                 imageUrl = coach?.photo
             ),
             teamCategorySelectedIndex = selectedTeamIndex,
-            firstStatsCategorySelectedIndex = secondCategorySelectedIndex,
+            firstStatsCategorySelectedIndex = firstCategorySelectedIndex,
             firstStatsColumnWidthList = columnWidthList,
             firstStatsPlayerList = playerList,
             gameDetailTitle = gameDetailTitle,
@@ -205,8 +183,11 @@ fun FBGameStatsView(
             teamCategoryButtonAction = { index ->
                 store.send(FBGameStatsAction.SelectTeam(index))
             },
+            firstStatsTitleCategoryAction = {
+                store.send(FBGameStatsAction.SelectTitleCategory)
+            },
             firstStatsCategoryButtonAction = { index ->
-                store.send(FBGameStatsAction.SelectSecondCategory(index))
+                store.send(FBGameStatsAction.SelectFirstCategory(index))
             },
             refreshButtonAction = {
                 store.send(FBGameStatsAction.RefreshGame())
