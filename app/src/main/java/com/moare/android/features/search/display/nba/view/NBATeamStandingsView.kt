@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.core.util.format3
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
@@ -46,29 +47,35 @@ fun NBATeamStandingsView(
         val stats = it.stats
         StandingsItemState(
             id = it.team.id,
+            rank = it.displayRank,
             imageUrl = NBAUtil.teamLogoUrl(it.team.id),
             name = teamNameDic["short_${it.team.id}"] ?: it.team.fullName,
             dataList = listOf(
                 store.calculateGamesBack(stats).toString(),
-                stats.winsPct.toString(),
+                stats.winsPct.format3(),
                 stats.wins.toString(),
                 stats.losses.toString(),
                 stats.gp.toString(),
+                stats.krCurrentStreak,
+                stats.krL10,
+                stats.krHome,
+                stats.krRoad,
+                "",
                 stats.ptsPG.toString(),
                 stats.plusMinusPG.toString(),
                 stats.astPG.toString(),
                 stats.rebPG.toString(),
-                stats.fgPct.toString(),
-                stats.fg3Pct.toString(),
-                stats.ftPct.toString(),
-                stats.blkPG.toString(),
+                stats.fgPct.format3(),
+                stats.fg3Pct.format3(),
+                stats.ftPct.format3(),
                 stats.stlPG.toString(),
+                stats.blkPG.toString(),
                 stats.tovPG.toString(),
                 stats.pfPG.toString()
             )
         )
     }
-    val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp, 80.dp)
+    val columnWidthList = listOf(50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 80.dp, 80.dp, 80.dp, 50.dp, 80.dp, 70.dp, 80.dp, 70.dp, 80.dp, 80.dp, 70.dp, 80.dp, 80.dp, 70.dp, 80.dp)
 
     StandingsViewContainer(
         state = NewStandingsContainerState(

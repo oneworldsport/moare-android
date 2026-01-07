@@ -56,6 +56,11 @@ object AWSUtils {
                 val jsonString = withContext(Dispatchers.IO) {
                     File(context.filesDir, s3Key.substringAfter("/")).readText()
                 }
+
+                // test
+//                val inputStream = context.assets.open("trending_keywords_test.json")
+//                val jsonString = inputStream.bufferedReader().use { it.readText() }
+
                 val jsonElement = Json.parseToJsonElement(jsonString)
                 val trendingKeywords: TrendingKeywords = Json.decodeFromJsonElement(jsonElement)
                 trendingKeywordsDeferred.complete(trendingKeywords)

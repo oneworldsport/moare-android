@@ -45,6 +45,7 @@ object Constants {
         const val COPA_DEL_REY = 143
         const val COPPA_ITALIA = 137
         val FOOTBALL_TOURNAMENT_LEAGUES = listOf(CHAMPIONS_LEAGUE, EUROPA_LEAGUE, CONFERENCE_LEAGUE, FA_CUP, EFL_CUP, DFB_POKAL, COUPE_DE_FRANCE, COPA_DEL_REY, COPPA_ITALIA)
+        val FOOTBALL_DRAW_TOURNAMENT_LEAGUES = listOf(FA_CUP, EFL_CUP, DFB_POKAL, COUPE_DE_FRANCE, COPA_DEL_REY, COPPA_ITALIA)
         val FOOTBALL_ALL = FOOTBALL_LEAGUES + FOOTBALL_TOURNAMENT_LEAGUES
 
         object NBATeam {
@@ -238,9 +239,11 @@ object Constants {
         fun gameStatusText(
             leagueId: Int,
             status: String,
+            elapsed: Int? = null,
             isResultOpened: Boolean = true
         ): String {
             return when (leagueId) {
+                in Ids.FOOTBALL_ALL -> fbGameStatusText(status, elapsed)
                 Ids.NBA -> ""
                 Ids.KBO -> {
                     when (status) {
@@ -292,7 +295,11 @@ object Constants {
                 NBA.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
                 NBA.LIVE -> {
                     if (period != null) {
-                        "${period}쿼터"
+                        if (period > 4) {
+                            "연장 ${period-4}쿼터"
+                        } else {
+                            "${period}쿼터"
+                        }
                     } else {
                         StringConstants.GAME_LIVE_STR
                     }

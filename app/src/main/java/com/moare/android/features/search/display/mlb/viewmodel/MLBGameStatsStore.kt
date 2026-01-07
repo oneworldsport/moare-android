@@ -161,6 +161,7 @@ class MLBGameStatsStore @AssistedInject constructor(
 
     private fun refreshGame(shouldFetch: Boolean) {
         if (shouldFetch) {
+            _isRefreshing.value = true
             scope.launch {
                 val game = displayModel.value.game
 
@@ -179,6 +180,8 @@ class MLBGameStatsStore @AssistedInject constructor(
                     initData()
                     emitToParent(MLBGameStatsDelegate.RefreshGame(result.data))
                 }
+
+                _isRefreshing.value = false
             }
         } else {
             val responseModel = MLBGameStatsResponseModel(game = displayModel.value.game)

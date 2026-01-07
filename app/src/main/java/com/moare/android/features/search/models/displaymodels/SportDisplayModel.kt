@@ -9,3 +9,8 @@ interface SportDisplayModel {
     val entityInfo: List<EntityInfo>
     val season: Int
 }
+
+// TODO: 나중에 현재 파일 이름을 변경하던가 or 아래 protocol을 다른곳으로 이동
+interface Rankable {
+    var displayRank: Int
+}

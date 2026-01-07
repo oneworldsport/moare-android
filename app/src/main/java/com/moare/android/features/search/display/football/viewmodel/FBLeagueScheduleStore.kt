@@ -2,6 +2,7 @@ package com.moare.android.features.search.display.football.viewmodel
 
 import android.util.Log
 import com.moare.android.core.constants.Constants
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
@@ -35,15 +36,17 @@ sealed interface FBLeagueScheduleAction {
     data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : FBLeagueScheduleAction
     data class SelectGame(val game: FBGameForSchedule) : FBLeagueScheduleAction
     data object ShowTournament : FBLeagueScheduleAction
+    data object ShowTeamStandings : FBLeagueScheduleAction
+
     data object UpdateSelectedGame : FBLeagueScheduleAction
     data object UpdateFilteredGames : FBLeagueScheduleAction
-
     data class UpdateStateByRefreshGame(val model: SportDecodableModel.FBGameStats) : FBLeagueScheduleAction
 }
 
 sealed interface FBLeagueScheduleDelegate {
     data class ShowGameStats(val model: SportDecodableModel.FBGameStats) : FBLeagueScheduleDelegate
     data class ShowTournament(val model: SportDecodableModel.FBTournament) : FBLeagueScheduleDelegate
+    data class ShowTeamStandings(val model: SportDecodableModel.FBTeamStandings) : FBLeagueScheduleDelegate
 }
 
 class FBLeagueScheduleStore @AssistedInject constructor(
@@ -83,6 +86,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
             is FBLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.gameId, action.isOpened)
             is FBLeagueScheduleAction.SelectGame -> selectGame(action.game)
             is FBLeagueScheduleAction.ShowTournament -> showTournament()
+            is FBLeagueScheduleAction.ShowTeamStandings -> showTeamStandings()
             is FBLeagueScheduleAction.UpdateSelectedGame -> updateSelectedGame()
             is FBLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
             is FBLeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
@@ -333,25 +337,74 @@ class FBLeagueScheduleStore @AssistedInject constructor(
 
     private fun showTournament() {
         scope.launch {
+            val leagueId = displayModel.value.leagueId
+            val isMLS = leagueId == Constants.Ids.MLS
+
+            val keywordInfo: KeywordInfo
+            if (isMLS) {
+                keywordInfo = KeywordInfo(
+                    keyword = "MLS 플레이오프",
+                    weight = 100,
+                    keywords = listOf(Keyword(keyword = "플레이오프", id = "tournament", priority = 2)),
+                    entities = listOf(
+                        EntityInfo(
+                            entityId = Constants.Ids.MLS,
+                            entityName = "MLS",
+                            category = "football",
+                            entityType = "league",
+                            leagueId = Constants.Ids.MLS
+                        )
+                    )
+                )
+            } else {
+                val leagueName = StringConstants.Football.leagueNameStr(leagueId)
+                keywordInfo = KeywordInfo(
+                    keyword = "$leagueName 대진표",
+                    weight = 100,
+                    keywords = listOf(Keyword(keyword = "대진표", id = "tournament", priority = 2)),
+                    entities = listOf(
+                        EntityInfo(
+                            entityId = leagueId,
+                            entityName = leagueName,
+                            category = "football",
+                            entityType = "league",
+                            leagueId = leagueId
+                        )
+                    )
+                )
+            }
+
+            val result = searchClient.fetchDataByKeyword(keywordInfo)
+
+            if (result.data is SportDecodableModel.FBTournament) {
+                emitToParent(FBLeagueScheduleDelegate.ShowTournament(result.data))
+            }
+        }
+    }
+
+    private fun showTeamStandings() {
+        scope.launch {
+            val leagueId = displayModel.value.leagueId
+            val leagueName = StringConstants.Football.leagueNameStr(leagueId)
             val keywordInfo = KeywordInfo(
-                keyword = "MLS 플레이오프",
+                keyword = "$leagueName 순위",
                 weight = 100,
-                keywords = listOf(Keyword(keyword = "플레이오프", id = "tournament", priority = 2)),
+                keywords = listOf(Keyword(keyword = "순위", id = "standings", priority = 1)),
                 entities = listOf(
                     EntityInfo(
-                        entityId = Constants.Ids.MLS,
-                        entityName = "MLS",
+                        entityId = leagueId,
+                        entityName = leagueName,
                         category = "football",
                         entityType = "league",
-                        leagueId = Constants.Ids.MLS
+                        leagueId = leagueId
                     )
                 )
             )
 
             val result = searchClient.fetchDataByKeyword(keywordInfo)
 
-            if (result.data is SportDecodableModel.FBTournament) {
-                emitToParent(FBLeagueScheduleDelegate.ShowTournament(result.data))
+            if (result.data is SportDecodableModel.FBTeamStandings) {
+                emitToParent(FBLeagueScheduleDelegate.ShowTeamStandings(result.data))
             }
         }
     }

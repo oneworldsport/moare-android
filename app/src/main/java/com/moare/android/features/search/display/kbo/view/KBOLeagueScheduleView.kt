@@ -89,6 +89,9 @@ fun KBOLeagueScheduleView(
             allResultButtonAction = {
                 store.send(KBOLeagueScheduleAction.ToggleAllResult)
             },
+            tournamentOrteamStandingsButtonAction = {
+                store.send(KBOLeagueScheduleAction.ShowTeamStandings)
+            },
             tournamentButtonAction = {
                 store.send(KBOLeagueScheduleAction.ShowTournament)
             }

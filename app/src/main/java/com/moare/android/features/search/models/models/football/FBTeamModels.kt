@@ -21,11 +21,12 @@ data class FBTeamStats(
     @SerialName("clean_sheet") val cleanSheet: FBHomeAwayIntStats? = null,
     @SerialName("failed_to_score") val failedToScore: FBHomeAwayIntStats? = null,
     val penalty: FBTeamStatsPenalty,
-//    val lineups: List<FBTeamStatsLineups>?,
-//    val cards: FBTeamStatsCards?
+    @SerialName("rank") val _rank: Int? = null,
+    @SerialName("points") val _points: Int? = null,
 ) {
-    val form: String
-        get() = _form ?: ""
+    val form: String get() = _form ?: ""
+    val rank: Int get() = _rank ?: 0
+    val points: Int get() = _points ?: 0
 }
 
 @Serializable
@@ -124,9 +125,15 @@ data class FBTeamForStandings(
     val all: FBTeamStandingsGameStats,
     val home: FBTeamStandingsGameStats,
     val away: FBTeamStandingsGameStats,
-    @SerialName("update") private val _update: String? = null
+    @SerialName("update") private val _update: String? = null,
+    @SerialName("form") private val _form: String? = null,
+    @SerialName("rank") private val _rank: Int? = null,
+    @SerialName("points") private val _points: Int? = null
 ) {
     val update: String get() = _update ?: ""
+    val form: String get() = _form ?: ""
+    val rank: Int get() = _rank ?: 0
+    val points: Int get() = _points ?: 0
 }
 
 @Serializable

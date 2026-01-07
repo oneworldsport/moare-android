@@ -89,6 +89,9 @@ fun NBALeagueScheduleView(
             allResultButtonAction = {
                 store.send(NBALeagueScheduleAction.ToggleAllResult)
             },
+            tournamentOrteamStandingsButtonAction = {
+                store.send(NBALeagueScheduleAction.ShowTeamStandings)
+            },
             tournamentButtonAction = {
                 store.send(NBALeagueScheduleAction.ShowTournament)
             }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,7 +37,6 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.KBOUtil
-import com.moare.android.core.util.MLBUtil
 import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
@@ -47,10 +45,8 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
 import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.models.kbo.KBOGameLineScore
-import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.BaseballLeagueTitleForGameStats
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.RoundedBorderText
@@ -80,6 +76,7 @@ fun KBOGameStatsView(
     val teamHitters by store.teamHitters.collectAsState()
     val teamPitchers by store.teamPitchers.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
 
     val game = displayModel.game
 
@@ -137,16 +134,16 @@ fun KBOGameStatsView(
             shouldShowStats = game.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_LIVE || game.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_FINAL,
             shouldShowRefreshButton = game.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_LIVE,
             teamCategories = teamCategories,
-            secondCategories = StringConstants.KBO.GAME_STATS_HITTING_CATEGORIES,
             teamCategorySelectedIndex = selectedTeamIndex,
-            secondCategorySelectedIndex = firstCategorySelectedIndex,
-            firstColumnWidth = 150.dp,
-            columnWidthList = columnWidthList,
-            playerList = hitterList,
+            firstStatsPlayerList = hitterList,
             gameDetailTitle = gameDetailTitle,
             gameDetailContent = gameDetailContent,
             noStatsText = if (game.gameInfo?.gameStatus?.toIntOrNull() == StringConstants.KBO.GAME_CANCELED) "취소된 경기입니다." else null,
             firstStatsTitle = "타자",
+            firstStatsCategories = StringConstants.KBO.GAME_STATS_HITTING_CATEGORIES,
+            firstStatsCategorySelectedIndex = firstCategorySelectedIndex,
+            firstColumnWidth = 150.dp,
+            firstStatsColumnWidthList = columnWidthList,
             secondStatsTitle = "투수",
             secondStatsCategories = StringConstants.KBO.GAME_STATS_PITCHING_CATEGORIES,
             secondStatsCategorySelectedIndex = secondCategorySelectedIndex,
@@ -160,15 +157,16 @@ fun KBOGameStatsView(
             firstStatsTitleCategoryAction = {
                 store.send(KBOGameStatsAction.SortByBattingOrder)
             },
-            secondCategoryButtonAction = { index ->
+            firstStatsCategoryButtonAction = { index ->
                 store.send(KBOGameStatsAction.SelectFirstCategory(index))
+            },
+            secondStatsCategoryButtonAction = { index ->
+                store.send(KBOGameStatsAction.SelectSecondCategory(index))
             },
             refreshButtonAction = {
                 store.send(KBOGameStatsAction.RefreshGame())
             },
-            secondStatsCategoryButtonAction = { index ->
-                store.send(KBOGameStatsAction.SelectSecondCategory(index))
-            }
+            isRefreshing = isRefreshing
         ),
         titleContent = {
             Column {

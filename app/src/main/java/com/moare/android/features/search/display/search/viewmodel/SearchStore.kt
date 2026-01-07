@@ -39,7 +39,7 @@ sealed interface SearchAction {
     data object ToggleSearchBar : SearchAction
     data object ToggleAutoCompleteListVisibleState : SearchAction
 
-    data class SelectNBATournamentRound(val gameList: List<NBAGame>) : SearchAction
+    data class PopView(val isEmpty: Boolean, val lastQuery: String) : SearchAction
 
     data class TestSearch(val viewForTest: SportDisplayType) : SearchAction
 }
@@ -126,8 +126,9 @@ class SearchStore @AssistedInject constructor(
 //            val data = DataModel.fromJson(jsonContent).data as SportDecodableModel.FBPlayerStandings
 //            _fbPlayerStandingsData.emit(data.displayModel)
 //            delay(5000)
-            trendingKeywords = trendingKeywordsDeferred.await().keywords.associateBy { it.keyword }
-            _trendingKeywordList.emit(trendingKeywords.keys.toList())
+            val keywords = trendingKeywordsDeferred.await().keywords
+            trendingKeywords = keywords.associateBy { it.keyword }
+            _trendingKeywordList.emit(keywords.map { it.keyword })
 
             val noticeData = noticeDeferred.await()
             _searchExample.value = noticeData.find { it.title == "검색 예시" }?.content ?: ""
@@ -166,7 +167,7 @@ class SearchStore @AssistedInject constructor(
                 is SearchAction.ToggleAutoCompleteListVisibleState -> toggleAutoCompleteListVisibleState()
                 is SearchAction.UpdateTextField -> updateTextField(action.newValue, action.updateAutoCompleteList)
                 is SearchAction.ToggleSearchBar -> toggleSearchBar()
-                is SearchAction.SelectNBATournamentRound -> selectNBATournamentRound(action.gameList)
+                is SearchAction.PopView -> popView(action.isEmpty, action.lastQuery)
 
                 is SearchAction.TestSearch -> testSearch(action.viewForTest)
             }
@@ -308,31 +309,15 @@ class SearchStore @AssistedInject constructor(
         }
     }
 
-    private suspend fun selectNBATournamentRound(gameList: List<NBAGame>) {
-//        val modelConverter = ModelConverter()
-//
-//        val dataModel: SportDecodableModel
-//
-//        when (val lastView = viewStack.value.lastOrNull()) {
-//            is SportDecodableModel.NBALeagueTournament-> {
-//                val responseModel = NBAGameScheduleResponseModel(
-//                    scheduleType = ScheduleType.TEAM_FLAT,
-//                    scheduledMonths = emptyList(),
-//                    schedule = modelConverter.nbaGameListToGameScheduleListConverter(gameList)
-//                )
-//                dataModel = SportDecodableModel.NBALeagueSchedule(
-//                    responseModel = responseModel,
-//                    displayModel = modelConverter.nbaLeagueScheduleConverter(responseModel)
-//                )
-//            }
-//
-//            else -> return // Make it do nothing
-//        }
-//
-//        _resultVisibleState.emit(false)
-//        delay(1000)
-//
-//        _resultVisibleState.emit(true)
+    private fun popView(isEmpty: Boolean, lastQuery: String) {
+        if (isEmpty) {
+            scope.launch {
+                updateTextField(TextFieldValue(lastQuery), false) // NOTE: 어짜피 toggleSearchBar에서 updateTextField(query)해줘서 여기서는 두번째 인자를 false로 보냄.
+                toggleSearchBar()
+            }
+        } else {
+            updateTextField(TextFieldValue(lastQuery), false)
+        }
     }
 
     // test code

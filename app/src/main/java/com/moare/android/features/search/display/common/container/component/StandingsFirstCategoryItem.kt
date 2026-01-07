@@ -15,8 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.ui.common.components.VCapsuleBar
-import com.moare.android.ui.util.nullableOptionalClickable
-import com.moare.android.ui.util.optionalClickable
+import com.moare.android.ui.util.nullableConditionalClickable
 
 @Composable
 fun StandingsFirstCategoryItem(
@@ -30,7 +29,7 @@ fun StandingsFirstCategoryItem(
         modifier = Modifier
             .width(width ?: 132.dp)
             .height(height)
-            .nullableOptionalClickable(onClick = onClick)
+            .nullableConditionalClickable(onClick = onClick)
     ) {
         Text(
             text = text,

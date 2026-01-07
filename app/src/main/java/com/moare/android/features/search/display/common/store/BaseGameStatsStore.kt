@@ -38,6 +38,9 @@ abstract class BaseGameStatsStore<A, T: SportDisplayModel>(
     protected var _teamCategorySelectedIndex = MutableStateFlow(0)
     val teamCategorySelectedIndex: StateFlow<Int> = _teamCategorySelectedIndex
 
+    protected var _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
     var shouldScrollCategory = false
 
     abstract fun send(action: A)

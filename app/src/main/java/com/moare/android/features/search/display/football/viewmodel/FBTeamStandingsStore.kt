@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
+import com.moare.android.core.util.assignCompetitionRankBy
 import com.moare.android.features.search.display.common.store.BaseTeamStandingsStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
@@ -136,16 +137,96 @@ class FBTeamStandingsStore @AssistedInject constructor(
         val standings = standings.value.toMutableList()
 
         when (categorySelectedIndex.value) {
-            0 -> standings.sortByDescending { calculatePoints(it.homeAwayStats) }
-            1 -> standings.sortByDescending { it.homeAwayStats.wins.total }
-            2 -> standings.sortByDescending { it.homeAwayStats.draws.total }
-            3 -> standings.sortBy { it.homeAwayStats.loses.total }
-            4 -> standings.sortByDescending { it.homeAwayStats.played.total }
-            5 -> standings.sortByDescending { it.goalsFor.total }
-            6 -> standings.sortBy { it.goalsAgainst.total }
-            7 -> standings.sortByDescending { it.goalsFor.total - it.goalsAgainst.total }
-            8 -> standings.sortByDescending { calculateHomePoints(it.homeAwayStats) }
-            9 -> standings.sortByDescending { calculateAwayPoints(it.homeAwayStats) }
+            0 -> {
+                standings.sortBy { it.rank }
+                for (i in standings.indices) {
+                    standings[i].displayRank = standings[i].rank
+                }
+            }
+            1 -> {
+                standings.sortByDescending { it.homeAwayStats.wins.total }
+                standings.assignCompetitionRankBy { it.homeAwayStats.wins.total }
+            }
+            2 -> {
+                standings.sortByDescending { it.homeAwayStats.draws.total }
+                standings.assignCompetitionRankBy { it.homeAwayStats.draws.total }
+            }
+            3 -> {
+                standings.sortBy { it.homeAwayStats.loses.total }
+                standings.assignCompetitionRankBy { it.homeAwayStats.loses.total }
+            }
+            4 -> {
+                standings.sortByDescending { it.homeAwayStats.played.total }
+                standings.assignCompetitionRankBy { it.homeAwayStats.played.total }
+            }
+            5 -> {
+                standings.sortByDescending { it.goalsFor.total }
+                standings.assignCompetitionRankBy { it.goalsFor.total }
+            }
+            6 -> {
+                standings.sortBy { it.goalsAgainst.total }
+                standings.assignCompetitionRankBy { it.goalsAgainst.total }
+            }
+            7 -> {
+                standings.sortByDescending { it.goalsFor.total - it.goalsAgainst.total }
+                standings.assignCompetitionRankBy { it.goalsFor.total - it.goalsAgainst.total }
+            }
+            8 -> {
+                standings.sortWith { a, b ->
+                    val pa = calculateHomePoints(a.homeAwayStats)
+                    val pb = calculateHomePoints(b.homeAwayStats)
+
+                    when {
+                        pa != pb -> pb.compareTo(pa) // 1) points 내림차순
+                        else -> {
+                            val wa = a.homeAwayStats.wins.home
+                            val wb = b.homeAwayStats.wins.home
+
+                            when {
+                                wa != wb -> wb.compareTo(wa) // 2) wins 내림차순
+                                else -> {
+                                    val la = a.homeAwayStats.loses.home
+                                    val lb = b.homeAwayStats.loses.home
+
+                                    when {
+                                        la != lb -> la.compareTo(lb) // 3) loses 오름차순
+                                        else -> 0
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                standings.assignCompetitionRankBy { getRecordString(it.homeAwayStats) }
+            }
+            9 -> {
+                standings.sortWith { a, b ->
+                    val pa = calculateAwayPoints(a.homeAwayStats)
+                    val pb = calculateAwayPoints(b.homeAwayStats)
+
+                    when {
+                        pa != pb -> pb.compareTo(pa) // 1) points 내림차순
+                        else -> {
+                            val wa = a.homeAwayStats.wins.away
+                            val wb = b.homeAwayStats.wins.away
+
+                            when {
+                                wa != wb -> wb.compareTo(wa) // 2) wins 내림차순
+                                else -> {
+                                    val la = a.homeAwayStats.loses.away
+                                    val lb = b.homeAwayStats.loses.away
+
+                                    when {
+                                        la != lb -> la.compareTo(lb) // 3) loses 오름차순
+                                        else -> 0
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                standings.assignCompetitionRankBy { getRecordString(it.homeAwayStats, false) }
+            }
         }
 
         _standings.value = standings

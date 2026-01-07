@@ -162,6 +162,7 @@ class KBOGameStatsStore @AssistedInject constructor(
 
     private fun refreshGame(shouldFetch: Boolean) {
         if (shouldFetch) {
+            _isRefreshing.value = true
             scope.launch {
                 val game = displayModel.value.game
                 val gameInfo = game.gameInfo
@@ -183,6 +184,8 @@ class KBOGameStatsStore @AssistedInject constructor(
                         emitToParent(KBOGameStatsDelegate.RefreshGame(result.data))
                     }
                 }
+
+                _isRefreshing.value = false
             }
         } else {
             val responseModel = KBOGameStatsResponseModel(game = displayModel.value.game)

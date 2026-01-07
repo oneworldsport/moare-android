@@ -3,6 +3,8 @@ package com.moare.android
 import android.app.Application
 import android.util.Log
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.amazonaws.auth.CognitoCachingCredentialsProvider
+import com.amazonaws.regions.Regions
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.util.AWSUtils
 import com.moare.android.core.util.EnNameTranslationUtils
@@ -12,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
 
 @HiltAndroidApp
 class MyApplication : Application() {
@@ -22,6 +25,16 @@ class MyApplication : Application() {
             // NOTE: test code를 실행할때는 s3가 모두 초기화(비동기 작업) 되기 전에 화면이 나와 사전이 비어있는 경우가 있음. 그래서 s3 초기화 작업이 모두 끝나면 다음 코드 진행.
             // TODO: 추후 runCatching으로 개선
             runBlocking {
+                // cognito identityId 확인
+//                val provider = CognitoCachingCredentialsProvider(
+//                    applicationContext.applicationContext,
+//                    "ap-northeast-2:efa201e1-412b-438a-927f-411cc4838469",
+//                    Regions.AP_NORTHEAST_2
+//                )
+//
+//                val identityId = withContext(Dispatchers.IO) { provider.identityId }
+//                Log.d("AWS", "IdentityId=$identityId")
+
                 launch {
                     AWSUtils.checkTrendingKeywords(
                         context = this@MyApplication,

@@ -94,6 +94,11 @@ data class NBATeamStats(
     @SerialName("tov") private val _tov: Int? = null,
     @SerialName("w") private val _w: Int? = null,
     @SerialName("wPct") private val _wPct: Double? = null,
+    @SerialName("playoffRank") private val _playoffRank: Int? = null,
+    @SerialName("strCurrentStreak") private val _strCurrentStreak: String? = null,
+    @SerialName("home") private val _home: String? = null,
+    @SerialName("road") private val _road: String? = null,
+    @SerialName("l10") private val _l10: String? = null,
 ) {
     val ast: Int get() = _ast ?: 0
     val blk: Int get() = _blk ?: 0
@@ -123,6 +128,34 @@ data class NBATeamStats(
     val tov: Int get() = _tov ?: 0
     val wins: Int get() = _w ?: 0
     val winsPct: Double get() = _wPct ?: 0.0
+    val playoffRank: Int get() = _playoffRank ?: 0
+    val strCurrentStreak: String get() = _strCurrentStreak ?: ""
+    val home: String get() = _home ?: ""
+    val road: String get() = _road ?: ""
+    val l10: String get() = _l10 ?: ""
+
+    val krCurrentStreak: String get() {
+        val raw = _strCurrentStreak?.trim().orEmpty()
+        if (raw.isEmpty()) return ""
+
+        val upper = raw.uppercase()
+        val first = upper.firstOrNull() ?: return ""
+
+        val digits = upper
+            .drop(1)
+            .filter { it.isDigit() }
+
+        if (digits.isEmpty()) return raw
+
+        return when (first) {
+            'W' -> "${digits}승"
+            'L' -> "${digits}패"
+            else -> raw
+        }
+    }
+    val krHome: String get() = recordToKr(_home)
+    val krRoad: String get() = recordToKr(_road)
+    val krL10: String get() = recordToKr(_l10)
 
     val ptsPG: Double get() = if (gp != 0) (pts.toDouble() / gp).rounded(1) else 0.0
     val astPG: Double get() = if (gp != 0) (ast.toDouble() /gp).rounded(1) else 0.0
@@ -143,4 +176,34 @@ data class NBATeamStats(
     val pfdPG: Double get() = if (gp != 0) (pfd.toDouble() /gp).rounded(1) else 0.0
     val minPG: String get() = if (gp != 0) CalendarUtil.formatMinutesToHourMinute(min) else "0:0"
     val plusMinusPG: Double get() = if (gp != 0) (plusMinus.toDouble() /gp).rounded(1) else 0.0
+
+    private fun recordToKr(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isEmpty()) return ""
+
+        // 예: "5-5"
+        val parts = raw.split("-").filter { it.isNotBlank() }
+        if (parts.size != 2) return raw // 형식 이상하면 원본 반환
+
+        val win = parts[0].trim()
+        val lose = parts[1].trim()
+        return "${win}승${lose}패"
+    }
+
+    /** 정렬/비교용: 승률 + 승수 */
+    fun parseRecord(value: String?): Pair<Double, Int> {
+        val raw = value?.trim().orEmpty()
+        if (raw.isEmpty()) return 0.0 to 0
+
+        // 예: "5-5"
+        val parts = raw.split("-").filter { it.isNotBlank() }
+        if (parts.size != 2) return 0.0 to 0
+
+        val w = parts[0].trim().toIntOrNull() ?: return 0.0 to 0
+        val l = parts[1].trim().toIntOrNull() ?: return 0.0 to 0
+
+        val games = w + l
+        val pct = if (games == 0) 0.0 else w.toDouble() / games.toDouble()
+        return pct to w
+    }
 }

@@ -10,6 +10,7 @@ constraintlayout-compose = "1.1.0" # https://developer.android.com/jetpack/andro
 
 compose-ui = "1.7.7" # https://developer.android.com/jetpack/androidx/releases/compose-ui?hl=ko&_gl=1*u4nry5*_up*MQ..*_ga*MTMyNDQyNzc0NC4xNzM4NjM2ODM0*_ga_6HH9YJMN9M*MTczODYzNjgzNC4xLjAuMTczODYzNjgzNC4wLjAuODMzOTIyNzgy
 compose-material = "1.7.7" # https://developer.android.com/jetpack/androidx/releases/compose-material?hl=ko&_gl=1*1xercer*_up*MQ..*_ga*MTMyNDQyNzc0NC4xNzM4NjM2ODM0*_ga_6HH9YJMN9M*MTczODYzNjgzNC4xLjAuMTczODYzNjgzNC4wLjAuODMzOTIyNzgy
+compose-material3 = "1.4.0" # https://developer.android.com/jetpack/androidx/releases/compose-material3
 
 hilt = "2.55" # https://github.com/google/dagger
 retrofit = "2.11.0" # https://github.com/square/retrofit
@@ -19,8 +20,8 @@ serialization = "1.8.0" # https://github.com/Kotlin/kotlinx.serialization
 datastore = "1.1.2" # https://developer.android.com/jetpack/androidx/releases/datastore?hl=ko
 ksp = "2.1.10-1.0.29" # https://github.com/google/ksp
 
-app-version-code = "14" # Should be start from 1
-app-version-name = "1.0.8"
+app-version-code = "15" # Should be start from 1
+app-version-name = "1.0.9"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
@@ -47,6 +48,7 @@ compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", versio
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-ui" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose-ui" }
 compose-material = { module = "androidx.compose.material:material", version.ref = "compose-material" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
 
 # Hilt
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
