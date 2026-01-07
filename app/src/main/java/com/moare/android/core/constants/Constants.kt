@@ -293,7 +293,11 @@ object Constants {
                 NBA.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
                 NBA.LIVE -> {
                     if (period != null) {
-                        "${period}쿼터"
+                        if (period > 4) {
+                            "연장 ${period-4}쿼터"
+                        } else {
+                            "${period}쿼터"
+                        }
                     } else {
                         StringConstants.GAME_LIVE_STR
                     }
