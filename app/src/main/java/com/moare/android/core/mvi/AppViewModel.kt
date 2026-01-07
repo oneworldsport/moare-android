@@ -1,6 +1,7 @@
 package com.moare.android.core.mvi
 
 import android.app.Activity
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsDelegate
@@ -195,6 +196,9 @@ class AppViewModel @Inject constructor(
     private val _stack = MutableStateFlow<List<StackItem>>(emptyList())
     val stack: StateFlow<List<StackItem>> = _stack
 
+    private val _queryList = MutableStateFlow<List<String>>(emptyList())
+    val queryList: StateFlow<List<String>> = _queryList
+
     private val _didPop = MutableStateFlow(false)
     val didPop: StateFlow<Boolean> = _didPop
 
@@ -208,8 +212,16 @@ class AppViewModel @Inject constructor(
     fun pop(activity: Activity?) {
         if (!searchStore.searchState.value) {
             if (stack.value.isEmpty()) {
-                // close app
-                activity?.finishAffinity()
+                if (searchStore.query.value.text.isEmpty()) {
+                    if (searchStore.focusState.value) {
+                        searchStore.send(SearchAction.ToggleFocusState(false))
+                    } else {
+                        // close app
+                        activity?.finishAffinity()
+                    }
+                } else {
+                    searchStore.send(SearchAction.UpdateTextField(TextFieldValue("")))
+                }
             } else {
                 // If searchBar is Opened and there are stack, don't pop and show the previous view.
                 searchStore.send(SearchAction.ToggleSearchBar)
@@ -220,20 +232,24 @@ class AppViewModel @Inject constructor(
             // 그냥 FBGameStats 화면이 잘 나오기 때문에 상관없음
             _includesPreviousView.value = false
 
-            val lastItem = _stack.value.lastOrNull()
+            val lastItem = stack.value.lastOrNull()
 
             _stack.update { current ->
                 current.dropLast(1)
             }
 
+            val poppedQuery = queryList.value.lastOrNull()
+            _queryList.update { current ->
+                current.dropLast(1)
+            }
+
+            val lastQuery = queryList.value.lastOrNull() ?: poppedQuery ?: ""
+
             lastItem?.let {
                 dispose(lastItem)
-
-                // 뒤로가기 후 보여줄 화면이 없으면(마지막 화면을 뒤로가기 했을 경우) SearchBar를 toggle.
-                if (stack.value.isEmpty()) {
-                    searchStore.send(SearchAction.ToggleSearchBar)
-                }
             }
+
+            searchStore.send(SearchAction.PopView(stack.value.isEmpty(), lastQuery))
         }
     }
 
@@ -475,6 +491,8 @@ class AppViewModel @Inject constructor(
                     }
                     else -> null
                 }
+
+                _queryList.update { it + searchStore.query.value.text }
             }
         }
     }
@@ -496,6 +514,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.FBGameStats(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onFBPlayerStandingsDelegate(delegate: FBPlayerStandingsDelegate) {
@@ -506,6 +526,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.FBPlayerStats(ViewId(), store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onFBTeamInfoDelegate(delegate: FBTeamInfoDelegate) {
@@ -525,6 +547,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.FBGameStats(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onFBTeamStandingsDelegate(delegate: FBTeamStandingsDelegate) {
@@ -535,6 +559,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.FBTeamStats(ViewId(), store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onFBLeagueScheduleDelegate(delegate: FBLeagueScheduleDelegate) {
@@ -581,6 +607,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.FBTeamStandings(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onFBGameStatsDelegate(id: ViewId, delegate: FBGameStatsDelegate) {
@@ -631,6 +659,8 @@ class AppViewModel @Inject constructor(
                 store.send(FBGameStatsAction.InitData)
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onNBAPlayerInfoDelegate(delegate: NBAPlayerInfoDelegate) {
@@ -650,6 +680,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.NBAGameStats(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onNBAPlayerStandingsDelegate(delegate: NBAPlayerStandingsDelegate) {
@@ -660,6 +692,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.NBAPlayerStats(ViewId(), store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onNBATeamInfoDelegate(delegate: NBATeamInfoDelegate) {
@@ -679,6 +713,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.NBAGameStats(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onNBATeamStandingsDelegate(delegate: NBATeamStandingsDelegate) {
@@ -689,6 +725,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.NBATeamStats(ViewId(), store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onNBALeagueScheduleDelegate(delegate: NBALeagueScheduleDelegate) {
@@ -726,6 +764,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.NBATeamStandings(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onNBAGameStatsDelegate(id: ViewId, delegate: NBAGameStatsDelegate) {
@@ -760,6 +800,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.NBALeagueSchedule(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onMLBPlayerInfoDelegate(delegate: MLBPlayerInfoDelegate) {
@@ -779,6 +821,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.MLBGameStats(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onMLBTeamInfoDelegate(delegate: MLBTeamInfoDelegate) {
@@ -798,6 +842,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.MLBGameStats(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onMLBTeamStandingsDelegate(delegate: MLBTeamStandingsDelegate) {
@@ -808,6 +854,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.MLBTeamStats(ViewId(), store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onMLBLeagueScheduleDelegate(delegate: MLBLeagueScheduleDelegate) {
@@ -845,6 +893,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.MLBTeamStandings(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onMLBGameStatsDelegate(id: ViewId, delegate: MLBGameStatsDelegate) {
@@ -878,6 +928,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.MLBLeagueSchedule(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onKBOPlayerInfoDelegate(delegate: KBOPlayerInfoDelegate) {
@@ -897,6 +949,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.KBOGameStats(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onKBOTeamInfoDelegate(delegate: KBOTeamInfoDelegate) {
@@ -916,6 +970,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.KBOGameStats(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onKBOTeamStandingsDelegate(delegate: KBOTeamStandingsDelegate) {
@@ -926,6 +982,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.KBOTeamStats(ViewId(), store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onKBOLeagueScheduleDelegate(delegate: KBOLeagueScheduleDelegate) {
@@ -963,6 +1021,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.KBOTeamStandings(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun onKBOGameStatsDelegate(id: ViewId, delegate: KBOGameStatsDelegate) {
@@ -996,6 +1056,8 @@ class AppViewModel @Inject constructor(
                 _stack.update { it + StackItem.KBOLeagueSchedule(id, store) }
             }
         }
+
+        _queryList.update { it + searchStore.query.value.text }
     }
 
     private fun dispose(item: StackItem) {
