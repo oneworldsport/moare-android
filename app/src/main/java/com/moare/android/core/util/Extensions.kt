@@ -1,5 +1,6 @@
 package com.moare.android.core.util
 
+import android.annotation.SuppressLint
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -17,6 +18,9 @@ fun Int.percentageOf(total: Int, decimalPlaces: Int): Double {
 
 fun Int.toKg(decimalPlaces: Int = 0): Double = (this * 0.453592).rounded(decimalPlaces)
 fun Double.toKg(decimalPlaces: Int = 0): Double = (this * 0.453592).rounded(decimalPlaces)
+
+@SuppressLint("DefaultLocale")
+fun Double.format3(): String = String.format("%.3f", this)
 
 /**
  * Use when only (possible)last name need

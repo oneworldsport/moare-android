@@ -66,6 +66,7 @@ import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.util.CenterBox
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow
+import com.moare.android.ui.util.conditionalClickable
 import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -77,13 +78,13 @@ fun GameStatsViewContainer(
     gameContent: @Composable ColumnScope.() -> Unit
 ) {
     val coachState = state.coachState
-    val columnWidthList = state.columnWidthList
+    val columnWidthList = state.firstStatsColumnWidthList
     val defaultColumnWidth = 100.dp
-    val columnTotalWidth: Dp = if (columnWidthList.isNotEmpty()) {
-        columnWidthList.fold(0.dp) { acc, dp -> acc + dp }
-    } else {
-        defaultColumnWidth * state.secondCategories.size
-    }
+//    val columnTotalWidth: Dp = if (columnWidthList.isNotEmpty()) {
+//        columnWidthList.fold(0.dp) { acc, dp -> acc + dp }
+//    } else {
+//        defaultColumnWidth * state.firstStatsCategories.size
+//    }
     val secondStatsColumnWidthList = state.secondStatsColumnWidthList
 
     val verticalScrollState = rememberScrollState()
@@ -106,11 +107,14 @@ fun GameStatsViewContainer(
         )
     )
 
-    val secondCategoryBarOffset by animateDpAsState(
-        targetValue = if (columnWidthList.isNotEmpty()) {
-            getOffsetOfAniCapsuleBar(itemWidths = columnWidthList, index = state.secondCategorySelectedIndex)
+    val firstStatsCategoryBarOffset by animateDpAsState(
+        targetValue = if (state.firstStatsCategorySelectedIndex < 0) {
+            val firstColumnWidth = state.firstColumnWidth ?: 132.dp
+            -(firstColumnWidth / 2) - 10.dp
+        } else if (columnWidthList.isNotEmpty()) {
+            getOffsetOfAniCapsuleBar(itemWidths = columnWidthList, index = state.firstStatsCategorySelectedIndex)
         } else {
-            getOffsetOfAniCapsuleBar(itemWidth = defaultColumnWidth, index = state.secondCategorySelectedIndex)
+            getOffsetOfAniCapsuleBar(itemWidth = defaultColumnWidth, index = state.firstStatsCategorySelectedIndex)
         },
         animationSpec = tween(
             durationMillis = 500,
@@ -330,7 +334,15 @@ fun GameStatsViewContainer(
                         Row(
                             modifier = Modifier.background(Color.White)
                         ) {
-                            StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY, width = state.firstColumnWidth, onClick = actions.firstStatsTitleCategoryAction)
+                            Box(
+                                contentAlignment = Alignment.BottomCenter
+                            ) {
+                                StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY, width = state.firstColumnWidth, onClick = actions.firstStatsTitleCategoryAction)
+
+                                HCapsuleBar(
+                                    modifier = Modifier.alpha(if (state.firstStatsCategorySelectedIndex < 0) 1f else 0f)
+                                )
+                            }
 
                             Row(
                                 Modifier.horizontalScroll(horizontalScrollState)
@@ -339,12 +351,12 @@ fun GameStatsViewContainer(
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        for ((index, item) in state.secondCategories.withIndex()) {
+                                        for ((index, item) in state.firstStatsCategories.withIndex()) {
                                             CenterBox(
                                                 height = 42.dp,
                                                 modifier = Modifier
-                                                    .clickable {
-                                                        actions.secondCategoryButtonAction(index)
+                                                    .conditionalClickable(item.isNotBlank()) {
+                                                        actions.firstStatsCategoryButtonAction(index)
                                                     }
                                             ) {
                                                 Text(
@@ -361,7 +373,7 @@ fun GameStatsViewContainer(
 
                                     HCapsuleBar(
                                         modifier = Modifier
-                                            .offset(x = secondCategoryBarOffset)
+                                            .offset(x = firstStatsCategoryBarOffset)
                                     )
                                 }
                             }
@@ -373,7 +385,7 @@ fun GameStatsViewContainer(
                             Column(
                                 modifier = Modifier.padding(bottom = 10.dp)
                             ) {
-                                for ((index, item) in state.playerList.withIndex()) {
+                                for ((index, item) in state.firstStatsPlayerList.withIndex()) {
                                     StandingsRankItem(
                                         id = item.id,
                                         width = state.firstColumnWidth,
@@ -386,7 +398,7 @@ fun GameStatsViewContainer(
                                         subName = item.subName,
                                         extraInfo = item.extraInfo,
                                         extraSubInfo = item.extraSubInfo,
-                                        isLastItem = index == state.playerList.size - 1,
+                                        isLastItem = index == state.firstStatsPlayerList.size - 1,
                                         action = {}
                                     )
                                 }
@@ -398,7 +410,7 @@ fun GameStatsViewContainer(
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    for ((index, item) in state.playerList.withIndex()) {
+                                    for ((index, item) in state.firstStatsPlayerList.withIndex()) {
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier
@@ -502,7 +514,7 @@ fun GameStatsViewContainer(
                                                 subName = item.subName,
                                                 extraInfo = item.extraInfo,
                                                 extraSubInfo = item.extraSubInfo,
-                                                isLastItem = index == state.playerList.size - 1,
+                                                isLastItem = index == state.secondStatsPlayerList.size - 1,
                                                 action = {}
                                             )
                                         }

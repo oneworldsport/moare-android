@@ -1,8 +1,5 @@
 package com.moare.android.core.util
 
-import android.util.Log
-import java.sql.Time
-import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -15,8 +12,6 @@ import java.time.format.DateTimeParseException
 import java.time.format.TextStyle
 import java.util.Locale
 import java.util.TimeZone
-import java.util.UUID
-import kotlin.math.min
 
 data class DayInfo(
     val day: Int,
@@ -200,12 +195,12 @@ object CalendarUtil {
         return "$hours:$minutes"
     }
 
-    fun formatHourMinuteToMinutes(time: String): Int {
+    fun formatMinuteSecondToSeconds(time: String): Int {
         if (time.contains(":")) {
             val timeArr = time.split(":")
-            val hours = timeArr.first().toInt()
-            val minutes = timeArr.last().toInt()
-            return (hours * 60) + minutes
+            val minutes = timeArr.first().toInt()
+            val seconds = timeArr.last().toInt()
+            return (minutes * 60) + seconds
         } else {
             return 0
         }

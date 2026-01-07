@@ -9,20 +9,19 @@ data class GameStatsContainerState(
     val shouldShowCoach: Boolean = false,
     val shouldShowRefreshButton: Boolean = false,
     val teamCategories: List<GameStatsTeamState>,
-    val firstCategories: List<String>? = null,
-    val secondCategories: List<String>,
     val coachState: GameStatsCoachState? = null,
     val teamCategorySelectedIndex: Int = 0,
-    val firstCategorySelectedIndex: Int = 0,
-    val secondCategorySelectedIndex: Int = 0,
     val firstColumnWidth: Dp? = null,
-    val columnWidthList: List<Dp> = emptyList(),
-    val playerList: List<StandingsItemState>,
     val gameDetailTitle: String = "",
     val gameDetailContent: String = "",
     val noStatsText: String? = null,
 
     val firstStatsTitle: String? = null,
+    val firstStatsCategories: List<String>,
+    val firstStatsCategorySelectedIndex: Int = 0,
+    val firstStatsColumnWidthList: List<Dp> = emptyList(),
+    val firstStatsPlayerList: List<StandingsItemState>,
+
     val secondStatsTitle: String? = null,
     val secondStatsCategories: List<String>? = null,
     val secondStatsCategorySelectedIndex: Int = 0,
@@ -44,8 +43,7 @@ data class GameStatsContainerActions(
     // TODO: 이름에서 Button 빼도 될 듯?
     val teamCategoryButtonAction: ((Int) -> Unit)? = null,
     var firstStatsTitleCategoryAction: (() -> Unit)? = null,
-    val firstCategoryButtonAction: ((Int) -> Unit)? = null,
-    val secondCategoryButtonAction: (Int) -> Unit,
-    val refreshButtonAction: () -> Unit,
-    val secondStatsCategoryButtonAction: ((Int) -> Unit)? = null
+    val firstStatsCategoryButtonAction: ((Int) -> Unit),
+    val secondStatsCategoryButtonAction: ((Int) -> Unit)? = null,
+    val refreshButtonAction: () -> Unit
 )

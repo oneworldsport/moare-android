@@ -104,6 +104,7 @@ object StringConstants {
         val GAME_STATS_DEFEND_CATEGORIES = listOf("수비 리바운드", "블록", "스틸")
         val GAME_STATS_COMMON_CATEGORIES = listOf("리바운드", "턴오버", "파울", "득실마진", "출전시간")
         val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_ATTACK_CATEGORIES + GAME_STATS_DEFEND_CATEGORIES + GAME_STATS_COMMON_CATEGORIES
+        val GAME_STATS_CATEGORIES = listOf("출전시간", "득점", "도움", "리바운드", "", "야투\n성공/시도(성공률)", "3점\n성공/시도(성공률)", "자유투\n성공/시도(성공률)", "", "스틸", "블록", "", "턴오버", "파울", "", "공격/수비\n리바운드", "득실마진")
     }
 
     object KBO {

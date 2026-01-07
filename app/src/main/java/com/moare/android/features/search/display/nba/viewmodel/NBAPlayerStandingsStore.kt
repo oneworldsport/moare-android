@@ -124,7 +124,7 @@ class NBAPlayerStandingsStore @AssistedInject constructor(
             18 -> standings.sortedByDescending { it.stats.pfdPG }
             19 -> standings.sortedByDescending { it.stats.blkaPG }
             20 -> standings.sortedByDescending { it.stats.plusMinusPG }
-            22 -> standings.sortedByDescending { CalendarUtil.formatHourMinuteToMinutes(it.stats.minPG) }
+            22 -> standings.sortedByDescending { CalendarUtil.formatMinuteSecondToSeconds(it.stats.minPG) }
             25 -> standings.sortedByDescending { it.stats.winsPct } // 승률 데이터도 경기당(PG) 데이터와 데이터가 같아 fetch 할 필요 없음
             else -> standings // 경기당(PG) 데이터 이외에는 sort 할 필요 없음
         }

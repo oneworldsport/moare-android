@@ -1,24 +1,16 @@
 package com.moare.android.features.search.display.football.view
 
-import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.FBUtil
-import com.moare.android.core.util.MatchDescriptionConverter
-import com.moare.android.core.util.TimeFormatType
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.common.container.state.GameStatsCoachState
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -30,7 +22,6 @@ import com.moare.android.features.search.display.football.viewmodel.FBGameStatsA
 import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
 import com.moare.android.features.search.display.search.viewmodel.SearchStore
 import com.moare.android.features.search.models.ModelConverter
-import com.moare.android.ui.common.components.FBLeagueTitle
 import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
 
 @Composable
@@ -197,15 +188,15 @@ fun FBGameStatsView(
             shouldShowCoach = true,
             shouldShowRefreshButton = StringConstants.Football.GAME_LIVE_LIST.contains(game.fixture.status.short),
             teamCategories = teamCategories,
-            secondCategories = StringConstants.Football.GAME_STATS_SECOND_CATEGORIES,
+            firstStatsCategories = StringConstants.Football.GAME_STATS_SECOND_CATEGORIES,
             coachState = GameStatsCoachState(
                 name = coach?.name,
                 imageUrl = coach?.photo
             ),
             teamCategorySelectedIndex = selectedTeamIndex,
-            secondCategorySelectedIndex = secondCategorySelectedIndex,
-            columnWidthList = columnWidthList,
-            playerList = playerList,
+            firstStatsCategorySelectedIndex = secondCategorySelectedIndex,
+            firstStatsColumnWidthList = columnWidthList,
+            firstStatsPlayerList = playerList,
             gameDetailTitle = gameDetailTitle,
             gameDetailContent = gameDetailContent
         ),
@@ -213,7 +204,7 @@ fun FBGameStatsView(
             teamCategoryButtonAction = { index ->
                 store.send(FBGameStatsAction.SelectTeam(index))
             },
-            secondCategoryButtonAction = { index ->
+            firstStatsCategoryButtonAction = { index ->
                 store.send(FBGameStatsAction.SelectSecondCategory(index))
             },
             refreshButtonAction = {
