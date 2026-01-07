@@ -1,6 +1,7 @@
 package com.moare.android.core.util
 
 import android.annotation.SuppressLint
+import com.moare.android.features.search.models.displaymodels.Rankable
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -31,6 +32,33 @@ fun String.dropFirstWord(): String {
         components.drop(1).joinToString(" ")
     } else {
         this
+    }
+}
+
+/**
+ * 이미 정렬된 상태라고 가정하고, key 값으로 공동순위 부여 (1,2,2,4 방식)
+ */
+fun <T : Rankable, K> MutableList<T>.assignCompetitionRankBy(key: (T) -> K) {
+    if (isEmpty()) return
+
+    var currentRank = 1
+    var sameCount = 0
+    var lastKey: K? = null
+
+    for (i in indices) {
+        val k = key(this[i])
+
+        if (lastKey == null || k != lastKey) {
+            // 값이 바뀌면: rank를 "이전 공동순위 개수만큼" 점프
+            currentRank += sameCount
+            sameCount = 1
+            lastKey = k
+        } else {
+            // 값이 같으면: 같은 rank 유지
+            sameCount += 1
+        }
+
+        this[i].displayRank = currentRank
     }
 }
 

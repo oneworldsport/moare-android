@@ -109,20 +109,20 @@ fun StandingsViewContainer(
 
     // scroll to category that matches with the keyword
     // NOTE: Only executed on first open
-    LaunchedEffect(state.secondCategorySelectedIndex) {
-        // state.secondCategorySelectedIndex != 0 조건은 첫 오픈때 secondCategorySelectedIndex가 0으로 설정될때 아래 조건문 실행을 방지하기 위해 추가.
-        // 그렇지 않으면 category로 스크롤이 안된다.
-        if (!isCategoryScrollTriggered && state.secondCategorySelectedIndex != 0) {
-            isCategoryScrollTriggered = true
-            horizontalScrollState.animateScrollTo(
-                value = selectedCategoryPosition,
-                animationSpec = tween(
-                    durationMillis = 500,
-                    easing = LinearOutSlowInEasing
-                )
-            )
-        }
-    }
+//    LaunchedEffect(state.secondCategorySelectedIndex) {
+//        // state.secondCategorySelectedIndex != 0 조건은 첫 오픈때 secondCategorySelectedIndex가 0으로 설정될때 아래 조건문 실행을 방지하기 위해 추가.
+//        // 그렇지 않으면 category로 스크롤이 안된다.
+//        if (!isCategoryScrollTriggered && state.secondCategorySelectedIndex != 0) {
+//            isCategoryScrollTriggered = true
+//            horizontalScrollState.animateScrollTo(
+//                value = selectedCategoryPosition,
+//                animationSpec = tween(
+//                    durationMillis = 500,
+//                    easing = LinearOutSlowInEasing
+//                )
+//            )
+//        }
+//    }
 
     CenterColumn(
         // NOTE: If set fillMaxSize, AnimatedVisibility works fine on first show.
@@ -265,7 +265,15 @@ fun StandingsViewContainer(
                                     id = item.id,
                                     width = state.firstColumnWidth,
                                     shouldShowRank = !item.isGameStats,
-                                    rank = if (highlightState != null) highlightState.standingsStartIndex + index + 1 else index + 1,
+                                    rank = if (highlightState != null) {
+                                        highlightState.standingsStartIndex + index + 1
+                                    } else {
+                                        if (item.rank != null) {
+                                            item.rank!!
+                                        } else {
+                                            index + 1
+                                        }
+                                    },
                                     imageUrl = item.imageUrl,
                                     isSvgLogo = item.isSvgLogo,
                                     name = item.name,
