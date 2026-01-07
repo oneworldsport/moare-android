@@ -81,6 +81,13 @@ fun Modifier.conditionalBorder(
     shape: Shape = RoundedCornerShape(5.dp),
 ) = if (enabled) border(width, color, shape) else this
 
+fun RowScope.conditionalWeight(
+    modifier: Modifier = Modifier,
+    enabled: Boolean,
+    weight: Float = 1f,
+    fill: Boolean = true,
+): Modifier = if (enabled) modifier.weight(weight, fill) else modifier
+
 /**
  * Since this is not a Modifier extension, it must be used to create Modifier initially,
  * rather than chaining onto an existing Modifier.
