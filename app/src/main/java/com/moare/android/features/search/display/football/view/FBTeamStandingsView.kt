@@ -44,10 +44,12 @@ fun FBTeamStandingsView(
     val teamStandings: List<StandingsItemState> = standings.map {
         StandingsItemState(
             id = it.team.id,
+            rank = it.displayRank,
             imageUrl = it.team.logo,
             name = teamNameDic["short_${it.team.id}"] ?: it.team.name,
             dataList = listOf(
-                store.calculatePoints(it.homeAwayStats).toString(),
+//                store.calculatePoints(it.homeAwayStats).toString(),
+                it.points.toString(),
                 it.homeAwayStats.wins.total.toString(),
                 it.homeAwayStats.draws.total.toString(),
                 it.homeAwayStats.loses.total.toString(),

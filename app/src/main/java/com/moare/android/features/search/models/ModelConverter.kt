@@ -238,7 +238,9 @@ object ModelConverter {
                             team = item.team,
                             homeAwayStats = item.fixtures,
                             goalsFor = item.goals.teamGoalsFor.total,
-                            goalsAgainst = item.goals.teamGoalsAgainst.total
+                            goalsAgainst = item.goals.teamGoalsAgainst.total,
+                            rank = item.rank,
+                            points = item.points
                         )
                     }
                 }
@@ -263,7 +265,9 @@ object ModelConverter {
                     team = teamInfo.team,
                     homeAwayStats = homeAwayStats,
                     goalsFor = FBHomeAwayIntStats(home.goals.goalsFor, away.goals.goalsFor, all.goals.goalsFor),
-                    goalsAgainst = FBHomeAwayIntStats(home.goals.goalsAgainst, away.goals.goalsAgainst, all.goals.goalsAgainst)
+                    goalsAgainst = FBHomeAwayIntStats(home.goals.goalsAgainst, away.goals.goalsAgainst, all.goals.goalsAgainst),
+                    rank = teamInfo.rank,
+                    points = teamInfo.points
                 )
             }
         }
