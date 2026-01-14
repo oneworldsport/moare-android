@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,12 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.features.moat.display.AccessTokenState
-import com.moare.android.features.moat.display.MoatStackAction
-import com.moare.android.features.moat.display.MoatStackItemView
-import com.moare.android.features.moat.display.MoatViewType
 import com.moare.android.features.moat.display.view.MoatView
+import com.moare.android.features.sign.display.store.SignStore
 import com.moare.android.features.sign.display.view.SignView
-import com.moare.android.features.userprofile.display.store.UserProfileAction
 import com.moare.android.features.userprofile.display.view.UserProfileImageEditView
 import com.moare.android.features.userprofile.display.view.UserProfileUpdateFormView
 import com.moare.android.features.userprofile.display.view.UserProfileView
@@ -36,7 +32,8 @@ import com.moare.android.ui.components.BackButton
 
 @Composable
 fun UserProfileDisplayView(
-    viewModel: UserProfileStackViewModel
+    viewModel: UserProfileStackStore,
+    signStore: SignStore?
 ) {
     val accessTokenState by viewModel.accessTokenState.collectAsState()
     val stack by viewModel.stack.collectAsState()
@@ -121,7 +118,9 @@ fun UserProfileDisplayView(
                         }
                     }
                 } else {
-                    SignView()
+                    signStore?.let {
+                        SignView(it)
+                    }
                 }
             }
         }

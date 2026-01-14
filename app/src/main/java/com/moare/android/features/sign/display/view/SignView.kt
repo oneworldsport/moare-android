@@ -45,7 +45,7 @@ import com.moare.android.features.sign.display.components.SportList
 import com.moare.android.features.sign.display.store.SignFlow
 import com.moare.android.features.sign.display.store.SignAction
 import com.moare.android.features.sign.display.store.SignActivatedState
-import com.moare.android.features.sign.display.store.SignViewModel
+import com.moare.android.features.sign.display.store.SignStore
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow
@@ -53,28 +53,28 @@ import com.moare.android.ui.util.screenWidthDp
 
 @Composable
 fun SignView(
-    viewModel: SignViewModel = hiltViewModel()
+    store: SignStore
 ) {
     val focusRequester = remember { FocusRequester() }
     val fullWidth = screenWidthDp()
 
-    val currentFlow by viewModel.currentFlow.collectAsState()
-    val idType by viewModel.idType.collectAsState()
-    val idTypeSelectedIndex by viewModel.idTypeSelectedIndex.collectAsState()
+    val currentFlow by store.currentFlow.collectAsState()
+    val idType by store.idType.collectAsState()
+    val idTypeSelectedIndex by store.idTypeSelectedIndex.collectAsState()
 
-    val title by viewModel.title.collectAsState()
-    val text by viewModel.text.collectAsState()
-    val placeholder by viewModel.placeholder.collectAsState()
-    val submitBtnLabel by viewModel.submitBtnLabel.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
+    val title by store.title.collectAsState()
+    val text by store.text.collectAsState()
+    val placeholder by store.placeholder.collectAsState()
+    val submitBtnLabel by store.submitBtnLabel.collectAsState()
+    val errorMessage by store.errorMessage.collectAsState()
 
-    val isTextFieldEnabled by viewModel.isTextFieldEnabled.collectAsState()
-    val activatedState by viewModel.activatedState.collectAsState()
-    val barAlignment by viewModel.barAlignment.collectAsState()
-    val barWidth by viewModel.barWidth.collectAsState()
-    val barDuration by viewModel.barDuration.collectAsState()
-    val apiFetchState by viewModel.apiFetchState.collectAsState()
-    val sportsInterests by viewModel.sportsInterests.collectAsState()
+    val isTextFieldEnabled by store.isTextFieldEnabled.collectAsState()
+    val activatedState by store.activatedState.collectAsState()
+    val barAlignment by store.barAlignment.collectAsState()
+    val barWidth by store.barWidth.collectAsState()
+    val barDuration by store.barDuration.collectAsState()
+    val apiFetchState by store.apiFetchState.collectAsState()
+    val sportsInterests by store.sportsInterests.collectAsState()
 
     val animationBarWidth by animateDpAsState(
         targetValue = barWidth,
@@ -86,7 +86,7 @@ fun SignView(
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
-        viewModel.send(SignAction.SetFullWidth(fullWidth))
+        store.send(SignAction.SetFullWidth(fullWidth))
     }
 
     LaunchedEffect(isTextFieldEnabled) {
@@ -128,9 +128,9 @@ fun SignView(
                         modifier = Modifier
                             .clickable {
                                 if (currentFlow == SignFlow.LOGIN_ID) {
-                                    viewModel.send(SignAction.UpdateSignFlow(SignFlow.SIGN_UP_ID))
+                                    store.send(SignAction.UpdateSignFlow(SignFlow.SIGN_UP_ID))
                                 } else if (currentFlow == SignFlow.SIGN_UP_ID) {
-                                    viewModel.send(SignAction.UpdateSignFlow(SignFlow.LOGIN_ID))
+                                    store.send(SignAction.UpdateSignFlow(SignFlow.LOGIN_ID))
                                 }
                             }
                     )
@@ -156,7 +156,7 @@ fun SignView(
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
             IdTypeSelectButton(idTypeSelectedIndex) { index ->
-                viewModel.send(SignAction.SelectIdType(index))
+                store.send(SignAction.SelectIdType(index))
             }
         }
 
@@ -170,7 +170,7 @@ fun SignView(
                 BasicTextField(
                     value = text,
                     onValueChange = { newValue ->
-                        viewModel.send(SignAction.UpdateText(newValue))
+                        store.send(SignAction.UpdateText(newValue))
                     },
                     singleLine = true,
 //                keyboardOptions = KeyboardOptions(
@@ -218,7 +218,7 @@ fun SignView(
                         .clip(RoundedCornerShape(20.dp))
                         .background(Moare)
                         .clickable {
-                            viewModel.send(SignAction.Submit)
+                            store.send(SignAction.Submit)
                         }
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 )
@@ -281,7 +281,7 @@ fun SignView(
                 selectedSports = sportsInterests ?: emptyList(),
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                viewModel.send(SignAction.AddSport(it))
+                store.send(SignAction.AddSport(it))
             }
         }
     }

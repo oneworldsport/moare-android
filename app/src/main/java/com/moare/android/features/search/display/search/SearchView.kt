@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.moare.android.R
-import com.moare.android.features.search.display.SearchStackViewModel
+import com.moare.android.features.search.display.SearchStackStore
 import com.moare.android.features.search.display.SearchStackItem
 import com.moare.android.features.search.display.football.view.FBGameStatsView
 import com.moare.android.features.search.display.football.view.FBLeagueScheduleView
@@ -92,7 +92,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SearchView(
-    viewModel: SearchStackViewModel,
+    viewModel: SearchStackStore,
     searchStore: SearchStore,
     viewForTest: SportDisplayType? = null
 ) {

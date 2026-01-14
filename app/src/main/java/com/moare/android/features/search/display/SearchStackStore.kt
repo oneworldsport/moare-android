@@ -1,7 +1,8 @@
 package com.moare.android.features.search.display
 
 import android.app.Activity
-import androidx.lifecycle.ViewModel
+import com.moare.android.features.moat.display.MoatStackDelegate
+import com.moare.android.features.moat.display.MoatStackStore
 import com.moare.android.features.search.display.football.store.FBGameStatsAction
 import com.moare.android.features.search.display.football.store.FBGameStatsDelegate
 import com.moare.android.features.search.display.football.store.FBGameStatsStore
@@ -99,7 +100,10 @@ import com.moare.android.features.search.display.search.store.SearchAction
 import com.moare.android.features.search.display.search.store.SearchDelegate
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.SportDecodableModel
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -159,8 +163,10 @@ sealed interface SearchStackItem {
     data class KBOTournament(override val id: ViewId, val store: KBOTournamentStore) : SearchStackItem
 }
 
-@HiltViewModel
-class SearchStackViewModel @Inject constructor(
+sealed interface SearchStackDelegate {
+}
+
+class SearchStackStore @AssistedInject constructor(
     private val searchFactory: SearchStore.Factory,
     private val fbPlayerInfoFactory: FBPlayerInfoStore.Factory,
     private val fbPlayerStatsFactory: FBPlayerStatsStore.Factory,
@@ -198,8 +204,19 @@ class SearchStackViewModel @Inject constructor(
     private val kboTeamStandingsFactory: KBOTeamStandingsStore.Factory,
     private val kboLeagueScheduleFactory: KBOLeagueScheduleStore.Factory,
     private val kboGameStatsFactory: KBOGameStatsStore.Factory,
-    private val kboTournamentFactory: KBOTournamentStore.Factory
-) : ViewModel() {
+    private val kboTournamentFactory: KBOTournamentStore.Factory,
+
+    @Assisted private val scope: CoroutineScope,
+    @Assisted private val emitToParent: (SearchStackDelegate) -> Unit
+) {
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            scope: CoroutineScope,
+            emitToParent: (SearchStackDelegate) -> Unit
+        ) : SearchStackStore
+    }
+
     private val _stack = MutableStateFlow<List<SearchStackItem>>(emptyList())
     val stack: StateFlow<List<SearchStackItem>> = _stack
 

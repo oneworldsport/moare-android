@@ -1,6 +1,5 @@
 package com.moare.android.features.moat.display
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,18 +17,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.features.moat.display.view.MoatFormView
 import com.moare.android.features.moat.display.view.MoatView
+import com.moare.android.features.sign.display.store.SignStore
 import com.moare.android.features.sign.display.view.SignView
-import com.moare.android.features.userprofile.display.store.UserProfileAction
 import com.moare.android.ui.components.BackButton
 
 @Composable
 fun MoatDisplayView(
-    viewModel: MoatStackViewModel
+    stackStore: MoatStackStore,
+    signStore: SignStore?
 ) {
 //    val accessToken by viewModel.accessToken.collectAsState(initial = null)
-    val accessTokenState by viewModel.accessTokenState.collectAsState()
-    val stack by viewModel.stack.collectAsState()
-    val isBootstrapped by viewModel.isBootstrapped.collectAsState()
+    val accessTokenState by stackStore.accessTokenState.collectAsState()
+    val stack by stackStore.stack.collectAsState()
+    val isBootstrapped by stackStore.isBootstrapped.collectAsState()
 
     // NOTE: 처음 시작할때 accessToken이 안가져와짐
 //    LaunchedEffect(Unit) {
@@ -45,15 +45,17 @@ fun MoatDisplayView(
                 val token = state.token
 
                 if (!isBootstrapped && !token.isNullOrBlank()) {
-                    viewModel.send(MoatStackAction.BootstrapSession)
+                    stackStore.send(MoatStackAction.BootstrapSession)
                     return@LaunchedEffect
+                } else {
+                    stackStore.send(MoatStackAction.InitSignStore)
                 }
 
                 if (token.isNullOrBlank()) {
-                    viewModel.send(MoatStackAction.EmptyStack)
+                    stackStore.send(MoatStackAction.EmptyStack)
                 } else {
                     if (stack.isEmpty()) {
-                        viewModel.send(MoatStackAction.Push(MoatViewType.TRENDING))
+                        stackStore.send(MoatStackAction.Push(MoatViewType.TRENDING))
                     }
                 }
             }
@@ -61,7 +63,7 @@ fun MoatDisplayView(
     }
 
     BackHandler {
-        viewModel.send(MoatStackAction.Pop)
+        stackStore.send(MoatStackAction.Pop)
     }
 
     Column {
@@ -69,7 +71,7 @@ fun MoatDisplayView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             BackButton {
-                viewModel.send(MoatStackAction.Pop)
+                stackStore.send(MoatStackAction.Pop)
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -80,7 +82,7 @@ fun MoatDisplayView(
                 modifier = Modifier
                     .padding(end = 12.dp)
                     .clickable {
-                        viewModel.logout()
+                        stackStore.logout()
                     }
             )
         }
@@ -97,7 +99,9 @@ fun MoatDisplayView(
                         )
                     }
                 } else {
-                    SignView()
+                    signStore?.let {
+                        SignView(it)
+                    }
                 }
             }
         }

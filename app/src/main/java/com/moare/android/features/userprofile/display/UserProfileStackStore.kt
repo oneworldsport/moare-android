@@ -1,10 +1,10 @@
 package com.moare.android.features.userprofile.display
 
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.util.TokenManager
 import com.moare.android.features.moat.display.AccessTokenState
+import com.moare.android.features.moat.display.MoatStackDelegate
+import com.moare.android.features.moat.display.MoatStackStore
 import com.moare.android.features.moat.display.store.MoatStore
 import com.moare.android.features.search.display.ViewId
 import com.moare.android.features.sign.networking.SignClient
@@ -16,7 +16,10 @@ import com.moare.android.features.userprofile.display.store.UserProfileStore
 import com.moare.android.features.userprofile.display.store.UserProfileUpdateFormAction
 import com.moare.android.features.userprofile.display.store.UserProfileUpdateFormDelegate
 import com.moare.android.features.userprofile.display.store.UserProfileUpdateFormStore
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -48,15 +51,29 @@ sealed interface UserProfileStackAction {
     data object BootstrapSession : UserProfileStackAction
 }
 
-@HiltViewModel
-class UserProfileStackViewModel @Inject constructor(
+sealed interface UserProfileStackDelegate {
+    data object InitSignStore : UserProfileStackDelegate
+    data class Login(val userId: String) : UserProfileStackDelegate
+}
+
+class UserProfileStackStore @AssistedInject constructor(
     private val signClient: SignClient,
     private val userProfileFactory: UserProfileStore.Factory,
     private val moatFactory: MoatStore.Factory,
     private val profileUpdateFormFactory: UserProfileUpdateFormStore.Factory,
     private val profileImageEditFactory: UserProfileImageEditStore.Factory,
-    private val tokenManager: TokenManager
-) : ViewModel() {
+    private val tokenManager: TokenManager,
+    @Assisted private val scope: CoroutineScope,
+    @Assisted private val emitToParent: (UserProfileStackDelegate) -> Unit
+) {
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            scope: CoroutineScope,
+            emitToParent: (UserProfileStackDelegate) -> Unit
+        ) : UserProfileStackStore
+    }
+
     private val _stack = MutableStateFlow<List<UserProfileStackItem>>(emptyList())
     val stack: StateFlow<List<UserProfileStackItem>> = _stack
 
@@ -72,7 +89,7 @@ class UserProfileStackViewModel @Inject constructor(
                 AccessTokenState.Loaded(token)
             }
             .stateIn(
-                scope = viewModelScope,
+                scope = scope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = AccessTokenState.Loading
             )
@@ -207,7 +224,7 @@ class UserProfileStackViewModel @Inject constructor(
     private fun bootstrapSession() {
         _isBootstrapped.value = true
 
-        viewModelScope.launch {
+        scope.launch {
             try {
                 val result = signClient.bootstrapSession()
 

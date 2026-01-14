@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.rounded.PersonOutline
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,18 +28,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.moare.android.features.search.display.SearchStackViewModel
+import com.moare.android.features.search.display.SearchStackStore
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.moare.android.features.moat.display.MoatDisplayView
-import com.moare.android.features.moat.display.MoatStackViewModel
+import com.moare.android.features.moat.display.MoatStackStore
 import com.moare.android.features.search.display.search.SearchView
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.userprofile.display.UserProfileDisplayView
-import com.moare.android.features.userprofile.display.UserProfileStackViewModel
-import com.moare.android.features.userprofile.display.view.UserProfileView
+import com.moare.android.features.userprofile.display.UserProfileStackStore
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.theme.MoareAndroidTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,10 +58,13 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppRoot(
-    searchStackViewModel: SearchStackViewModel = hiltViewModel(),
-    moatStackViewModel: MoatStackViewModel = hiltViewModel(),
-    userProfileStackViewModel: UserProfileStackViewModel = hiltViewModel()
+    appViewModel: AppViewModel = hiltViewModel()
 ) {
+    val searchStackStore = appViewModel.searchStackStore
+    val moatStackStore = appViewModel.moatStackStore
+    val userProfileStackStore = appViewModel.userProfileStackStore
+    val signStore by appViewModel.signStore.collectAsState()
+
     var isSplashFinished by remember { mutableStateOf(false) }
 
 //    val viewForTest: SportDisplayType? = SportDisplayType.KBO_GAME_STATS
@@ -80,8 +83,8 @@ fun AppRoot(
     ) {
         if (viewForTest != null) {
             SearchView(
-                viewModel = searchStackViewModel,
-                searchStore = searchStackViewModel.searchStore,
+                viewModel = searchStackStore,
+                searchStore = searchStackStore.searchStore,
                 viewForTest = viewForTest
             )
         } else {
@@ -123,15 +126,15 @@ fun AppRoot(
                 ) {
                     composable(Screen.Search.route) {
                         SearchView(
-                            viewModel = searchStackViewModel,
-                            searchStore = searchStackViewModel.searchStore
+                            viewModel = searchStackStore,
+                            searchStore = searchStackStore.searchStore
                         )
                     }
                     composable(Screen.Moat.route) {
-                        MoatDisplayView(moatStackViewModel)
+                        MoatDisplayView(moatStackStore, signStore)
                     }
                     composable(Screen.Profile.route) {
-                        UserProfileDisplayView(userProfileStackViewModel)
+                        UserProfileDisplayView(userProfileStackStore, signStore)
                     }
                 }
             }

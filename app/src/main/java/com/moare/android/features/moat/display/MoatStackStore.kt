@@ -1,8 +1,5 @@
 package com.moare.android.features.moat.display
 
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.util.TokenManager
 import com.moare.android.features.moat.display.store.MoatAction
@@ -11,7 +8,10 @@ import com.moare.android.features.moat.display.store.MoatFormStore
 import com.moare.android.features.moat.display.store.MoatStore
 import com.moare.android.features.search.display.ViewId
 import com.moare.android.features.sign.networking.SignClient
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,7 +41,13 @@ sealed interface MoatStackAction {
     data object EmptyStack : MoatStackAction
 
     data object BootstrapSession : MoatStackAction
-    }
+    data object InitSignStore : MoatStackAction
+}
+
+sealed interface MoatStackDelegate {
+    data object InitSignStore : MoatStackDelegate
+    data class Login(val userId: String) : MoatStackDelegate
+}
 
 // NOTE: dataStore에서 token을 가져올때 초기에는 값이 없고 나중에 값이 가져와지는데, 초기에 값이 없을때 LaunchedEffect가 실행되는 문제가 있어서 만들어줌.
 sealed class AccessTokenState {
@@ -49,13 +55,22 @@ sealed class AccessTokenState {
     data class Loaded(val token: String?) : AccessTokenState()
 }
 
-@HiltViewModel
-class MoatStackViewModel @Inject constructor(
+class MoatStackStore @AssistedInject constructor(
     private val signClient: SignClient,
     private val moatFactory: MoatStore.Factory,
     private val moatFormFactory: MoatFormStore.Factory,
-    private val tokenManager: TokenManager
-) : ViewModel() {
+    private val tokenManager: TokenManager,
+    @Assisted private val scope: CoroutineScope,
+    @Assisted private val emitToParent: (MoatStackDelegate) -> Unit
+) {
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            scope: CoroutineScope,
+            emitToParent: (MoatStackDelegate) -> Unit
+        ) : MoatStackStore
+    }
+
     private val _stack = MutableStateFlow<List<MoatStackItem>>(emptyList())
     val stack: StateFlow<List<MoatStackItem>> = _stack
 
@@ -71,14 +86,18 @@ class MoatStackViewModel @Inject constructor(
                 AccessTokenState.Loaded(token)
             }
             .stateIn(
-                scope = viewModelScope,
+                scope = scope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = AccessTokenState.Loading
             )
 
+//    fun attach(scope: CoroutineScope) {
+//        this.scope = scope
+//    }
+
     // TODO: 임시 코드
     fun logout() {
-        viewModelScope.launch {
+        scope.launch {
             tokenManager.clearTokens()
         }
     }
@@ -89,6 +108,9 @@ class MoatStackViewModel @Inject constructor(
             is MoatStackAction.Pop -> pop()
             is MoatStackAction.EmptyStack -> emptyStack()
             is MoatStackAction.BootstrapSession -> bootstrapSession()
+            is MoatStackAction.InitSignStore -> {
+                emitToParent(MoatStackDelegate.InitSignStore)
+            }
         }
     }
 
@@ -173,7 +195,7 @@ class MoatStackViewModel @Inject constructor(
     private fun bootstrapSession() {
         _isBootstrapped.value = true
 
-        viewModelScope.launch {
+        scope.launch {
             try {
                 val result = signClient.bootstrapSession()
 

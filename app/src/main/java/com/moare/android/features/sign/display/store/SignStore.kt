@@ -11,10 +11,12 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moare.android.core.networking.ApiHttpError
+import com.moare.android.core.store.BaseStore
+import com.moare.android.features.moat.display.MoatStackDelegate
+import com.moare.android.features.moat.display.MoatStackStore
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.sign.models.AuthErrorCode
 import com.moare.android.features.sign.models.AuthMethod
-import com.moare.android.features.sign.models.AuthTokenResponse
 import com.moare.android.features.sign.models.ConfirmAuthRequest
 import com.moare.android.features.sign.models.SignUpCompleteRequest
 import com.moare.android.features.sign.models.SignUpInitiateRequest
@@ -23,7 +25,11 @@ import com.moare.android.features.sign.models.StartAuthRequest
 import com.moare.android.features.sign.models.UserHandleReserveRequest
 import com.moare.android.features.sign.models.UserProfileCreateRequest
 import com.moare.android.features.sign.networking.SignClient
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,11 +57,22 @@ enum class SignActivatedState {
     ALL_ACTIVATED, ONLY_BUTTON_ACTIVATED, ALL_DEACTIVATED, ONLY_BAR_ACTIVATED
 }
 
-@HiltViewModel
-class SignViewModel @Inject constructor(
+sealed interface SignDelegate {
+    data class Login(val access: String, val refresh: String, val id: String, val userId: String) : SignDelegate
+}
+
+class SignStore @AssistedInject constructor(
     private val signClient: SignClient,
-    private val dataStore: DataStore<Preferences>
-) : ViewModel() {
+    private val dataStore: DataStore<Preferences>,
+    @Assisted private val emitToParent: (SignDelegate) -> Unit
+) : BaseStore<SignAction>() {
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            emitToParent: (SignDelegate) -> Unit
+        ) : SignStore
+    }
+
     private val _currentFlow = MutableStateFlow(SignFlow.LOGIN_ID)
     val currentFlow: StateFlow<SignFlow> = _currentFlow
 
@@ -110,7 +127,7 @@ class SignViewModel @Inject constructor(
 
     private var checkJob: Job? = null
 
-    fun send(action: SignAction) {
+    override fun send(action: SignAction) {
         when (action) {
             is SignAction.SetFullWidth -> fullWidth = action.fullWidth
             is SignAction.UpdateSignFlow -> updateSignFlow(action.signFlow)
@@ -231,7 +248,7 @@ class SignViewModel @Inject constructor(
                     return
                 }
 
-                checkJob = viewModelScope.launch {
+                checkJob = scope.launch {
                     updateBarState()
                     // text가 바뀌면 2초 후 닉네임 중복 검사 api(checkUserHandle()) 호출.
                     // 2초 이내에 또 text가 바뀌면 이전 실행 취소하고 새로 실행.
@@ -321,7 +338,7 @@ class SignViewModel @Inject constructor(
 
         updateBarState()
 
-        viewModelScope.launch {
+        scope.launch {
             delay(3000)
 
             try {
@@ -351,7 +368,7 @@ class SignViewModel @Inject constructor(
 
         updateBarState()
 
-        viewModelScope.launch {
+        scope.launch {
             delay(3000)
 
             try {
@@ -382,7 +399,7 @@ class SignViewModel @Inject constructor(
 
         updateBarState()
 
-        viewModelScope.launch {
+        scope.launch {
             delay(3000)
 
             try {
@@ -408,7 +425,7 @@ class SignViewModel @Inject constructor(
 
         updateBarState()
 
-        viewModelScope.launch {
+        scope.launch {
             delay(3000)
 
             try {
@@ -438,7 +455,7 @@ class SignViewModel @Inject constructor(
 
         updateBarState()
 
-        viewModelScope.launch {
+        scope.launch {
             delay(3000)
 
             try {
@@ -475,7 +492,7 @@ class SignViewModel @Inject constructor(
 
         updateBarState()
 
-        viewModelScope.launch {
+        scope.launch {
             delay(3000)
 
             try {
@@ -502,7 +519,7 @@ class SignViewModel @Inject constructor(
 
         updateBarState()
 
-        viewModelScope.launch {
+        scope.launch {
             delay(3000)
 
             try {
