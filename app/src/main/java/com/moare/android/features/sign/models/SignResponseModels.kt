@@ -4,18 +4,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 @Serializable
-data class AuthResponse(
-    val type: AuthResponseType = AuthResponseType.SUCCESS,
-    val message: String = "",
-    val data: JsonElement? = null
-)
-
-@Serializable
-enum class AuthResponseType {
-    SUCCESS, RETRY, EXPIRED, LIMIT_EXCEEDED, ERROR
-}
-
-@Serializable
 data class AuthTokenResponse(
     val idToken: String,
     val accessToken: String,
@@ -29,6 +17,11 @@ data class AuthSessionResponse(
 )
 
 @Serializable
+data class SignUpInitiateResponse(
+    val sessionId: String
+)
+
+@Serializable
 data class SimpleResponse(
     val success: Boolean,
     val message: String
@@ -37,4 +30,32 @@ data class SimpleResponse(
 @Serializable
 data class BootstrapSessionResponse(
     val userId: String
+)
+
+@Serializable
+enum class TermStatus {
+    ACTIVE, DEPRECATED
+}
+
+@Serializable
+enum class TermType {
+    PRIVACY, SERVICE
+}
+
+@Serializable
+data class TermsResponse(
+    val isRequired: Boolean,
+    val status: TermStatus,
+    val termType: TermType,
+    val title: String,
+    val url: String,
+    val version: String
+) {
+    val selfKey: TermKey
+        get() = TermKey(termType = termType, version = version)
+}
+
+data class TermKey(
+    val termType: TermType,
+    val version: String
 )

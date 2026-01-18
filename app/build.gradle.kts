@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     implementation(libs.constraintlayout.compose)
     implementation(libs.datastore.preferences)
+    implementation(libs.androidx.browser)
 
     // Compose
     implementation(libs.compose.ui)

@@ -9,8 +9,6 @@ import com.moare.android.core.networking.ApiHelper
 import com.moare.android.core.networking.apiCall
 import com.moare.android.core.networking.apiendpoint.AuthApi
 import com.moare.android.core.util.TokenManager
-import com.moare.android.features.sign.models.AuthResponse
-import com.moare.android.features.sign.models.AuthResponseType
 import com.moare.android.features.sign.models.AuthSessionResponse
 import com.moare.android.features.sign.models.AuthTokenResponse
 import com.moare.android.features.sign.models.BootstrapSessionResponse
@@ -18,9 +16,11 @@ import com.moare.android.features.sign.models.ConfirmAuthRequest
 import com.moare.android.features.sign.models.UserHandleReserveRequest
 import com.moare.android.features.sign.models.SignUpCompleteRequest
 import com.moare.android.features.sign.models.SignUpInitiateRequest
+import com.moare.android.features.sign.models.SignUpInitiateResponse
 import com.moare.android.features.sign.models.SignUpVerificationRequest
 import com.moare.android.features.sign.models.SimpleResponse
 import com.moare.android.features.sign.models.StartAuthRequest
+import com.moare.android.features.sign.models.TermsResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -52,7 +52,7 @@ class SignClient @Inject constructor(
             authApi.confirmLoginAuth(body)
         }
 
-    suspend fun initiateSignUp(body: SignUpInitiateRequest): SimpleResponse =
+    suspend fun initiateSignUp(body: SignUpInitiateRequest): SignUpInitiateResponse =
         apiCall {
             authApi.initiateSignUp(body)
         }
@@ -67,13 +67,18 @@ class SignClient @Inject constructor(
             authApi.completeSignUp(body)
         }
 
-    suspend fun checkUserHandle(userHandle: String): SimpleResponse =
+    suspend fun checkUserHandle(userHandle: String, signupSessionId: String? = null): SimpleResponse =
         apiCall {
-            authApi.checkUserHandle(userHandle)
+            authApi.checkUserHandle(userHandle, signupSessionId)
         }
 
     suspend fun reserveUserHandle(body: UserHandleReserveRequest): SimpleResponse =
         apiCall {
             authApi.reserveUserHandle(body)
+        }
+
+    suspend fun fetchTermsList(): List<TermsResponse> =
+        apiCall {
+            authApi.getTerms("signup")
         }
 }

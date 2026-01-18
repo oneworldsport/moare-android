@@ -23,19 +23,20 @@ data class ConfirmAuthRequest(
 
 @Serializable
 data class SignUpInitiateRequest(
-    val id: String,
+    val loginId: String,
     val method: AuthMethod
 )
 
 @Serializable
 data class SignUpVerificationRequest(
-    val id: String,
+    val sessionId: String,
     val otp: String
 )
 
 @Serializable
 data class SignUpCompleteRequest(
-    val id: String,
+    val sessionId: String,
+    val loginId: String,
     val method: AuthMethod,
     val profile: UserProfileCreateRequest
 )
@@ -45,10 +46,19 @@ data class UserProfileCreateRequest(
     val userHandle: String,
     val profileImageUrl: String? = null,
     val bio: String? = null,
-    val sportsInterests: List<String>
+    val sportsInterests: List<String>,
+    val termsAgreements: List<TermsAgreementRequest>
 )
 
 @Serializable
 data class UserHandleReserveRequest(
+    val signupSessionId: String?,
     val userHandle: String
+)
+
+@Serializable
+data class TermsAgreementRequest(
+    val termType: TermType,
+    val version: String,
+    val isAgreed: Boolean
 )

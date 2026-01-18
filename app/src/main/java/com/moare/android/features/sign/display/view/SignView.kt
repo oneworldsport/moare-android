@@ -1,5 +1,7 @@
 package com.moare.android.features.sign.display.view
 
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -12,6 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,12 +23,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -33,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,15 +51,19 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.moare.android.features.sign.display.components.IdTypeSelectButton
 import com.moare.android.features.sign.display.components.SelectedSports
+import com.moare.android.features.sign.display.components.SignUpTerms
 import com.moare.android.features.sign.display.components.SportList
 import com.moare.android.features.sign.display.store.SignFlow
 import com.moare.android.features.sign.display.store.SignAction
 import com.moare.android.features.sign.display.store.SignActivatedState
 import com.moare.android.features.sign.display.store.SignStore
+import com.moare.android.features.sign.models.TermKey
+import com.moare.android.features.sign.models.TermType
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow
 import com.moare.android.ui.util.screenWidthDp
+import com.moare.android.ui.view.OpenUrlWithCustomTab
 
 @Composable
 fun SignView(
@@ -57,6 +71,7 @@ fun SignView(
 ) {
     val focusRequester = remember { FocusRequester() }
     val fullWidth = screenWidthDp()
+    val context = LocalContext.current
 
     val currentFlow by store.currentFlow.collectAsState()
     val idType by store.idType.collectAsState()
@@ -75,6 +90,7 @@ fun SignView(
     val barDuration by store.barDuration.collectAsState()
     val apiFetchState by store.apiFetchState.collectAsState()
     val sportsInterests by store.sportsInterests.collectAsState()
+    val termsList by store.termsList.collectAsState()
 
     val animationBarWidth by animateDpAsState(
         targetValue = barWidth,
@@ -83,6 +99,24 @@ fun SignView(
             easing = FastOutSlowInEasing
         )
     )
+
+    val termsChecked = remember { mutableStateMapOf<TermKey, Boolean>() }
+    var termsUrl by remember { mutableStateOf<String?>(null) }
+
+    val requiredAllChecked by remember(termsList, termsChecked) {
+        derivedStateOf {
+            termsList
+                .filter { it.isRequired }
+                .all { termsChecked[it.selfKey] == true }
+        }
+    }
+
+    fun setAllRequired(newValue: Boolean) {
+        termsList.forEach { t ->
+            if (t.isRequired) termsChecked[t.selfKey] = newValue
+        }
+        store.send(SignAction.UpdateTermsAgreements(requiredAllChecked, termsChecked))
+    }
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -93,6 +127,18 @@ fun SignView(
         if (isTextFieldEnabled) {
             focusRequester.requestFocus()
         }
+    }
+
+    LaunchedEffect(termsUrl) {
+        val url = termsUrl ?: return@LaunchedEffect
+        if (url.isBlank()) return@LaunchedEffect
+
+        CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .build()
+            .launchUrl(context, Uri.parse(url))
+
+        termsUrl = null
     }
 
     CenterColumn(
@@ -138,6 +184,20 @@ fun SignView(
             }
         }
 
+        if (currentFlow == SignFlow.SIGN_UP_TERMS) {
+            SignUpTerms(
+                terms = termsList,
+                checked = termsChecked,
+                onToggle = { key, value ->
+                    termsChecked[key] = value
+                    store.send(SignAction.UpdateTermsAgreements(requiredAllChecked, termsChecked))
+                },
+                onOpenTerm = { url ->
+                    termsUrl = url
+                }
+            )
+        }
+
         if (currentFlow == SignFlow.SIGN_UP_SPORTS_INTERESTS) {
             Text(
                 text = "보는거나 하는걸 즐기는 스포츠들을 선택해 주세요",
@@ -166,6 +226,27 @@ fun SignView(
         ) {
             if (currentFlow == SignFlow.SIGN_UP_SPORTS_INTERESTS) {
                 SelectedSports(sports = sportsInterests ?: emptyList(), modifier = Modifier.weight(1f))
+            } else if (currentFlow == SignFlow.SIGN_UP_TERMS) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Checkbox(
+                        checked = requiredAllChecked,
+                        onCheckedChange = { setAllRequired(it) },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = Moare,
+                            uncheckedColor = Color(0xFF9E9E9E),
+                        )
+                    )
+
+                    Text(
+                        text = "전체 동의",
+                        modifier = Modifier.clickable {
+                            setAllRequired(!requiredAllChecked)
+                        }
+                    )
+                }
             } else {
                 BasicTextField(
                     value = text,

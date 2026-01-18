@@ -127,7 +127,7 @@ class UserProfileUpdateFormStore @AssistedInject constructor(
 
                 scope.launch {
                     try {
-                        val body = UserHandleReserveRequest(newUserHandle)
+                        val body = UserHandleReserveRequest(null, newUserHandle)
                         val result = signClient.reserveUserHandle(body)
                     } catch (e: Exception) {
 
