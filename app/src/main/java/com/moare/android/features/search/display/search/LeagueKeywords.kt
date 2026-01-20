@@ -76,7 +76,7 @@ fun LeagueKeywords(
                 )
 
                 Text(
-                    text = "실시간"
+                    text = "경기중"
                 )
             }
 
@@ -103,9 +103,15 @@ fun LeagueKeywords(
                 text = "최근 결과"
             )
 
-            for (item in leagueKeywords.recent) {
-                KeywordBox(item.keyword) {
-                    onItemSelected(item)
+            LazyColumn(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.heightIn(max = 150.dp)
+            ) {
+                items(leagueKeywords.recent) { item ->
+                    KeywordBox(item.keyword) {
+                        onItemSelected(item)
+                    }
                 }
             }
         }
