@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class KeywordInfo(
     var keyword: String, // searching keyword
     var weight: Int? = null,
-    var keywords: List<Keyword>, // keyword list that are in searching keyword
+    var keywords: List<Keyword>? = null, // keyword list that are in searching keyword
     var entities: List<EntityInfo>
 )
 
@@ -14,4 +14,10 @@ data class KeywordInfo(
 data class TrendingKeywords(
     val date: String,
     val keywords: List<KeywordInfo>
+)
+
+@Serializable
+data class LeagueKeywords(
+    val live: List<KeywordInfo>,
+    val recent: List<KeywordInfo>
 )
