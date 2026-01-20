@@ -29,6 +29,12 @@ object AWSUtils {
     private val AUTOCOMPLETE_ETAG_KEY = stringPreferencesKey("autoCompleteETag")
     private val NBA_PLAYER_NAME_DICTIONARY_ETAG_KEY = stringPreferencesKey("nbaPlayerNameDictionaryETag")
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        prettyPrint = true
+    }
+
     // TODO: 함수 기능 겹쳐서 합칠 수 있을듯
     suspend fun checkTrendingKeywords(
         context: Context,
@@ -61,8 +67,8 @@ object AWSUtils {
 //                val inputStream = context.assets.open("trending_keywords_test.json")
 //                val jsonString = inputStream.bufferedReader().use { it.readText() }
 
-                val jsonElement = Json.parseToJsonElement(jsonString)
-                val trendingKeywords: TrendingKeywords = Json.decodeFromJsonElement(jsonElement)
+                val jsonElement = json.parseToJsonElement(jsonString)
+                val trendingKeywords: TrendingKeywords = json.decodeFromJsonElement(jsonElement)
                 trendingKeywordsDeferred.complete(trendingKeywords)
 
                 return
@@ -82,8 +88,8 @@ object AWSUtils {
                                 val jsonString = withContext(Dispatchers.IO) {
                                     downloadFile.readText()
                                 }
-                                val jsonElement = Json.parseToJsonElement(jsonString)
-                                val trendingKeywords: TrendingKeywords = Json.decodeFromJsonElement(jsonElement)
+                                val jsonElement = json.parseToJsonElement(jsonString)
+                                val trendingKeywords: TrendingKeywords = json.decodeFromJsonElement(jsonElement)
                                 trendingKeywordsDeferred.complete(trendingKeywords)
                             }
                         }
@@ -135,8 +141,8 @@ object AWSUtils {
 //                val jsonString = inputStream.bufferedReader().use { it.readText() }
                 // test
 
-                val jsonElement = Json.parseToJsonElement(jsonString)
-                val list: List<NoticeModel> = Json.decodeFromJsonElement(jsonElement)
+                val jsonElement = json.parseToJsonElement(jsonString)
+                val list: List<NoticeModel> = json.decodeFromJsonElement(jsonElement)
                 noticeDeferred.complete(list)
 
                 return
@@ -156,8 +162,8 @@ object AWSUtils {
                                 val jsonString = withContext(Dispatchers.IO) {
                                     downloadFile.readText()
                                 }
-                                val jsonElement = Json.parseToJsonElement(jsonString)
-                                val list: List<NoticeModel> = Json.decodeFromJsonElement(jsonElement)
+                                val jsonElement = json.parseToJsonElement(jsonString)
+                                val list: List<NoticeModel> = json.decodeFromJsonElement(jsonElement)
                                 noticeDeferred.complete(list)
                             }
                         }
@@ -241,14 +247,7 @@ object AWSUtils {
             val jsonString = withContext(Dispatchers.IO) {
                 file.readText()
             }
-            val jsonElement = Json.parseToJsonElement(jsonString)
-
-            val json = Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-                prettyPrint = true
-            }
-
+            val jsonElement = json.parseToJsonElement(jsonString)
             val autoCompleteData: List<KeywordInfo> = json.decodeFromJsonElement(jsonElement)
 
             val trie = Trie()
@@ -290,8 +289,8 @@ object AWSUtils {
                 val jsonString = withContext(Dispatchers.IO) {
                     File(context.filesDir, s3Key.substringAfter("/")).readText()
                 }
-                val jsonElement = Json.parseToJsonElement(jsonString)
-                val map: Map<String, String> = Json.decodeFromJsonElement(jsonElement)
+                val jsonElement = json.parseToJsonElement(jsonString)
+                val map: Map<String, String> = json.decodeFromJsonElement(jsonElement)
                 translatedNameProvider.setDictionary(category, map)
 
                 return
@@ -311,8 +310,8 @@ object AWSUtils {
                                 val jsonString = withContext(Dispatchers.IO) {
                                     downloadFile.readText()
                                 }
-                                val jsonElement = Json.parseToJsonElement(jsonString)
-                                val map: Map<String, String> = Json.decodeFromJsonElement(jsonElement)
+                                val jsonElement = json.parseToJsonElement(jsonString)
+                                val map: Map<String, String> = json.decodeFromJsonElement(jsonElement)
                                 translatedNameProvider.setDictionary(category, map)
                             }
                         }
@@ -357,8 +356,8 @@ object AWSUtils {
                 val jsonString = withContext(Dispatchers.IO) {
                     File(context.filesDir, s3Key.substringAfter("/")).readText()
                 }
-                val jsonElement = Json.parseToJsonElement(jsonString)
-                val map: Map<String, List<Int?>> = Json.decodeFromJsonElement(jsonElement)
+                val jsonElement = json.parseToJsonElement(jsonString)
+                val map: Map<String, List<Int?>> = json.decodeFromJsonElement(jsonElement)
                 tournamentTeamsDeferred.complete(map)
 
                 return
@@ -378,8 +377,8 @@ object AWSUtils {
                                 val jsonString = withContext(Dispatchers.IO) {
                                     downloadFile.readText()
                                 }
-                                val jsonElement = Json.parseToJsonElement(jsonString)
-                                val map: Map<String, List<Int?>> = Json.decodeFromJsonElement(jsonElement)
+                                val jsonElement = json.parseToJsonElement(jsonString)
+                                val map: Map<String, List<Int?>> = json.decodeFromJsonElement(jsonElement)
                                 tournamentTeamsDeferred.complete(map)
                             }
                         }

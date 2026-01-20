@@ -90,7 +90,7 @@ data class DataModel(
             }
 
             // TODO: data, keywords, entityInfo null 일때 처리
-            val keywords: List<Keyword> = json.decodeFromJsonElement(jsonObject["keywords"]!!)
+            val keywords: List<Keyword> = json.decodeFromJsonElement(jsonObject["keywords"]!!) ?: emptyList()
             val entityInfo: List<EntityInfo> = json.decodeFromJsonElement(jsonObject["entityInfo"]!!)
             val season: Int = json.decodeFromJsonElement(jsonObject["season"]!!)
 

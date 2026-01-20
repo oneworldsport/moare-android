@@ -9,6 +9,7 @@ import com.moare.android.features.search.display.search.viewmodel.SearchStore.Se
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.KeywordInfo
+import com.moare.android.features.search.models.LeagueKeywords
 import com.moare.android.features.search.models.NoticeModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.TrendingKeywords
@@ -32,7 +33,7 @@ import kotlinx.coroutines.runBlocking
 
 sealed interface SearchAction {
     data object BarFirstOpen : SearchAction
-    data class PerformSearch(val searchType: SearchType = SearchType.QUERY, val aniDuration: Long = 0) : SearchAction
+    data class PerformSearch(val searchType: SearchType = SearchType.Query, val aniDuration: Long = 0) : SearchAction
     data class ToggleFocusState(val isFocused: Boolean) : SearchAction
     data class UpdateTextField(val newValue: TextFieldValue, val updateAutoCompleteList: Boolean = true) : SearchAction
 
@@ -40,6 +41,8 @@ sealed interface SearchAction {
     data object ToggleAutoCompleteListVisibleState : SearchAction
 
     data class PopView(val isEmpty: Boolean, val lastQuery: String) : SearchAction
+
+    data object GetLeagueKeywords : SearchAction
 
     data class TestSearch(val viewForTest: SportDisplayType) : SearchAction
 }
@@ -62,7 +65,6 @@ class SearchStore @AssistedInject constructor(
     private val _searchDataState = MutableStateFlow<ApiFetchState>(ApiFetchState.Idle)
     val searchDataState: StateFlow<ApiFetchState> = _searchDataState
 
-    // auto complete
     private val _autoCompleteList = MutableStateFlow<List<String>>(emptyList())
     val autoCompleteList: StateFlow<List<String>> = _autoCompleteList
 
@@ -74,6 +76,9 @@ class SearchStore @AssistedInject constructor(
 
     private val _searchExample = MutableStateFlow("")
     val searchExample: StateFlow<String> = _searchExample
+
+    private val _leagueKeywords = MutableStateFlow<LeagueKeywords?>(null)
+    val leagueKeyowrds: StateFlow<LeagueKeywords?> = _leagueKeywords
 
     /* ---------------------
        ui state
@@ -143,8 +148,11 @@ class SearchStore @AssistedInject constructor(
         ): SearchStore
     }
 
-    enum class SearchType {
-        QUERY, TRENDING_KEYWORD, AUTO_COMPLETE
+    sealed interface SearchType {
+        data object Query : SearchType
+        data object TrendingKeyword : SearchType
+        data object AutoComplete : SearchType
+        data class LeagueKeyword(val keyword: KeywordInfo) : SearchType
     }
 
     fun send(action: SearchAction) {
@@ -157,7 +165,7 @@ class SearchStore @AssistedInject constructor(
                         val firstTrendingKeyword = trendingKeywordList.value.firstOrNull()
                         if (!firstTrendingKeyword.isNullOrBlank()) {
                             updateTextField(TextFieldValue(firstTrendingKeyword), false)
-                            performSearch(SearchType.TRENDING_KEYWORD, action.aniDuration)
+                            performSearch(SearchType.TrendingKeyword, action.aniDuration)
                         }
                     } else {
                         performSearch(action.searchType, action.aniDuration)
@@ -168,6 +176,7 @@ class SearchStore @AssistedInject constructor(
                 is SearchAction.UpdateTextField -> updateTextField(action.newValue, action.updateAutoCompleteList)
                 is SearchAction.ToggleSearchBar -> toggleSearchBar()
                 is SearchAction.PopView -> popView(action.isEmpty, action.lastQuery)
+                is SearchAction.GetLeagueKeywords -> getLeagueKeywords()
 
                 is SearchAction.TestSearch -> testSearch(action.viewForTest)
             }
@@ -192,14 +201,17 @@ class SearchStore @AssistedInject constructor(
             val dataFetchDeferred = scope.async {
 //                delay(5000) // test for fetching delay
                 when (searchType) {
-                    SearchType.QUERY -> searchClient.fetchDataByQuery(query.value.text)
-                    SearchType.TRENDING_KEYWORD -> {
+                    SearchType.Query -> searchClient.fetchDataByQuery(query.value.text)
+                    SearchType.TrendingKeyword -> {
                         val keyword = trendingKeywords[query.value.text]
                         keyword?.let {
                             searchClient.fetchDataByKeyword(keyword)
                         }
                     }
-                    SearchType.AUTO_COMPLETE -> {
+                    is SearchType.LeagueKeyword -> {
+                        searchClient.fetchDataByKeyword(searchType.keyword)
+                    }
+                    SearchType.AutoComplete -> {
                         val keywordInfo = autoCompleteDataMap[query.value.text]
                         keywordInfo?.let {
                             keywordInfo.weight = null // To exclude field "weight" in the request body
@@ -318,6 +330,11 @@ class SearchStore @AssistedInject constructor(
         } else {
             updateTextField(TextFieldValue(lastQuery), false)
         }
+    }
+
+    private suspend fun getLeagueKeywords() {
+        val leagueKeywords = keywordsClient.fetchLeagueKeywords()
+        _leagueKeywords.value = leagueKeywords
     }
 
     // test code
