@@ -100,7 +100,7 @@ fun LeagueKeywords(
             HCapsuleBar()
 
             Text(
-                text = "최근 경기"
+                text = "최근 결과"
             )
 
             for (item in leagueKeywords.recent) {
