@@ -44,6 +44,7 @@ fun NoticeBox(
     noticeList: List<NoticeModel>,
     height: Dp,
     modifier: Modifier = Modifier,
+    enabled: Boolean,
     onHeightChange: (Dp) -> Unit
 ) {
     val density = LocalDensity.current
@@ -73,7 +74,7 @@ fun NoticeBox(
                 )
 
                 notice.sports?.forEach { sport ->
-                    NoticeSection(sport.category, sport.content)
+                    NoticeSection(sport.category, sport.content, enabled)
                 }
             }
         }
@@ -83,13 +84,18 @@ fun NoticeBox(
 @Composable
 fun NoticeSection(
     category: String,
-    content: String
+    content: String,
+    enabled: Boolean
 ) {
     var isOpened by remember { mutableStateOf(false) }
 
     CenterRow(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.clickable { isOpened = !isOpened }
+        modifier = Modifier.clickable {
+            if (enabled) {
+                isOpened = !isOpened
+            }
+        }
     ) {
         Text(
             text = category,
