@@ -333,8 +333,11 @@ class SearchStore @AssistedInject constructor(
     }
 
     private suspend fun getLeagueKeywords() {
-        val leagueKeywords = keywordsClient.fetchLeagueKeywords()
-        _leagueKeywords.value = leagueKeywords
+        try {
+            val leagueKeywords = keywordsClient.fetchLeagueKeywords()
+            _leagueKeywords.value = leagueKeywords
+        } catch (e: Exception) {
+        }
     }
 
     // test code

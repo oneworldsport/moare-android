@@ -4,7 +4,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -19,8 +21,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -39,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -112,13 +120,14 @@ fun SearchView(
     var noticeBoxHeight by remember { mutableStateOf(0.dp) }
     var searchExampleBoxHeight by remember { mutableStateOf(0.dp) }
     var isSearchBarOpened by remember { mutableStateOf(false) }
+    var leagueKeywordsComponentHeight by remember { mutableStateOf(0.dp) }
 
     // notice 아이콘 y 위치
     // y: (전체 컨텐츠 높이(박스 높이(boxHeight) + 아이콘 높이(20) + padding(6))) / 2 + (검색창 높이(50) + 트렌딩 키워드 높이(40)) / 2 + 추가 패딩 8 + leagueKeywords컴포넌트 높이 / 2
     // searchExampleBoxHeight가 noticeBoxHeight보다 높은 경우는 전체 컨텐츠 높이를 계산할때 searchExampleBoxHeight를 기준으로 해야함
-    val boxHeight = if (searchExampleBoxHeight > noticeBoxHeight) searchExampleBoxHeight else noticeBoxHeight
-    var leagueKeywordsComponentHeight by remember { mutableStateOf(0.dp) }
-    val noticeYOffset = ((boxHeight + 20.dp + 6.dp) / 2) + (((50.dp + 40.dp) / 2) + 8.dp) + (leagueKeywordsComponentHeight / 2)
+    // TODO: noticeBoxHeight가 다시 계산될때 위치가 조정되면서 깜빡이는 이슈가 있는데 해결 필요. 처음 화면이 열리고 noticeYOffset 설정되고 나면 바뀔 필요가 없음.
+    val boxHeight = maxOf(searchExampleBoxHeight, noticeBoxHeight)
+    val noticeYOffset = ((boxHeight + 20.dp + 6.dp) / 2) + ((50.dp + 40.dp) / 2) + 8.dp + (leagueKeywordsComponentHeight / 2)
 
     /* ---------------------
        viewmodel state
@@ -226,7 +235,21 @@ fun SearchView(
        ui
        --------------------- */
     Box(
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .clickable(
+                interactionSource = noRippleInteractionSource,
+                indication = null,
+                onClick = {
+                    if (isNoticeOpened || isSearchExampleOpened) {
+                        isNoticeOpened = false
+                        isSearchExampleOpened = false
+                    } else {
+                        searchStore.send(SearchAction.ToggleFocusState(false))
+                    }
+                }
+            )
+            .imePadding() // 키보드 높이 반영
     ) {
         /* ---------------------
            back button
@@ -313,7 +336,8 @@ fun SearchView(
                     NoticeBox(
                         noticeList = noticeList,
                         height = noticeBoxHeight,
-                        modifier = Modifier.alpha(noticeAlpha)
+                        modifier = Modifier.alpha(noticeAlpha),
+                        enabled = noticeAlpha > 0f  // 닫혀있을때 눌림 방지
                     ) { height ->
                         noticeBoxHeight = height
                     }
@@ -337,20 +361,7 @@ fun SearchView(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .animateContentSize()
-                .clickable(
-                    interactionSource = noRippleInteractionSource,
-                    indication = null,
-                    onClick = {
-                        if (isNoticeOpened || isSearchExampleOpened) {
-                            isNoticeOpened = false
-                            isSearchExampleOpened = false
-                        } else {
-                            searchStore.send(SearchAction.ToggleFocusState(false))
-                        }
-                    }
-                )
-            ,
+                .animateContentSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
