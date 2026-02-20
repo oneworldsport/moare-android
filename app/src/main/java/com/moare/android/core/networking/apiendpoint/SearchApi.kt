@@ -28,7 +28,8 @@ interface SearchApi {
     suspend fun getLeagueSchedule(
         @Body entity: EntityInfo,
         @Query("season") season: Int,
-        @Query("yearMonth") yearMonth: String
+        @Query("yearMonth") yearMonth: String,
+        @Query("day") day: Int?
     ): ResponseBody
 
     @GET("search/id")

@@ -31,6 +31,7 @@ import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
+import com.moare.android.ui.util.Refreshable
 
 @Composable
 fun NBALeagueScheduleView(
@@ -114,17 +115,29 @@ fun NBALeagueScheduleList(
     val filteredGames by store.filteredGames.collectAsState()
     val selectedDayIndex by store.selectedDayIndex.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
 
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
+    val hasLive = gameListToDisplay.any { game ->
+        game.gameStatus == Constants.GameStatus.NBA.LIVE.toString()
+    }
 
-    LazyColumn {
-        items(gameListToDisplay) { item ->
-            NBALeagueScheduleListItem(
-                searchStore = searchStore,
-                store = store,
-                data = item,
-                teamNameDic = teamNameDic
-            )
+    Refreshable(
+        enabled = hasLive,
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            store.send(NBALeagueScheduleAction.RefreshGames)
+        }
+    ) {
+        LazyColumn {
+            items(gameListToDisplay) { item ->
+                NBALeagueScheduleListItem(
+                    searchStore = searchStore,
+                    store = store,
+                    data = item,
+                    teamNameDic = teamNameDic
+                )
+            }
         }
     }
 }

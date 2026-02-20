@@ -6,6 +6,7 @@ import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.features.search.display.common.store.BaseScheduleStore
+import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleDelegate
 import com.moare.android.features.search.models.ApiFetchState
@@ -21,6 +22,7 @@ import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -37,6 +39,7 @@ sealed interface NBALeagueScheduleAction {
     data object UpdateFilteredGames : NBALeagueScheduleAction
     data object ShowTournament : NBALeagueScheduleAction
     data object ShowTeamStandings : NBALeagueScheduleAction
+    data object RefreshGames: NBALeagueScheduleAction
 
     data class UpdateStateByRefreshGame(val model: SportDecodableModel.NBAGameStats) : NBALeagueScheduleAction
 }
@@ -79,6 +82,7 @@ class NBALeagueScheduleStore @AssistedInject constructor(
             is NBALeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
             is NBALeagueScheduleAction.ShowTournament -> showTournament()
             is NBALeagueScheduleAction.ShowTeamStandings -> showTeamStandings()
+            is NBALeagueScheduleAction.RefreshGames -> refreshGames()
         }
     }
 
@@ -344,6 +348,59 @@ class NBALeagueScheduleStore @AssistedInject constructor(
 
             if (result.data is SportDecodableModel.NBATeamStandings) {
                 emitToParent(NBALeagueScheduleDelegate.ShowTeamStandings(result.data))
+            }
+        }
+    }
+
+    private fun refreshGames() {
+        val games = filteredGames.value[selectedDayIndex.value] ?: return
+
+        scope.launch {
+            _isRefreshing.value = true
+
+            try {
+                val splittedYearMonth = selectedYearMonth.value.split("/")
+                val yearMonth = splittedYearMonth[0] + splittedYearMonth[1]
+
+                val entity = displayModel.value.entityInfo.firstOrNull() ?: EntityInfo(
+                    entityId = Constants.Ids.NBA,
+                    entityName = "NBA",
+                    category = "basketball",
+                    entityType = "league",
+                    leagueId = Constants.Ids.NBA
+                )
+
+                val hasLive = games.any { game ->
+                    game.gameStatus == Constants.GameStatus.NBA.LIVE.toString()
+                }
+
+                if (hasLive) {
+                    val result = searchClient.fetchLeagueSchedule(
+                        entity,
+                        displayModel.value.season,
+                        yearMonth,
+                        selectedDay.value?.day
+                    )
+
+                    if (result.data is SportDecodableModel.NBALeagueSchedule) {
+                        val newGames = result.data.displayModel.games
+
+                        val gamesById = newGames.associateBy { it.gameId }
+
+                        _displayModel.update { current ->
+                            current.copy(
+                                games = current.games.map { gamesById[it.gameId] ?: it }
+                            )
+                        }
+
+                        updateFilteredGames()
+                    }
+                }
+            } catch (e: Exception) {
+                _displayDataState.value = ApiFetchState.Error("데이터를 불러오는데 실패하였습니다.")
+                Log.e("dsdf", e.localizedMessage ?: "error")
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }

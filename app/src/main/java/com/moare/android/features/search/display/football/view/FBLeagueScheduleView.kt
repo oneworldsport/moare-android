@@ -31,6 +31,7 @@ import com.moare.android.features.search.models.models.football.FBGameForSchedul
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.ui.common.components.FBLeagueTitle
 import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
+import com.moare.android.ui.util.Refreshable
 
 @Composable
 fun FBLeagueScheduleView(
@@ -134,29 +135,38 @@ fun FBLeagueScheduleList(
     searchStore: SearchStore,
     store: FBLeagueScheduleStore
 ) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
     val filteredGames by store.filteredGames.collectAsState()
     val selectedDayIndex by store.selectedDayIndex.collectAsState()
     val displayModel by store.displayModel.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
 
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
+    val hasLive = gameListToDisplay.any { game ->
+        game.gameStatus in Constants.GameStatus.Football.LIVE_LIST
+    }
 
-    LazyColumn {
-        items(gameListToDisplay) { item ->
-            FBLeagueScheduleListItem(
-                searchStore = searchStore,
-                store = store,
-                data = item,
-                leagueId = displayModel.leagueId,
-                teamNameDic = teamNameDic
-            )
+    Refreshable(
+        enabled = hasLive,
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            store.send(FBLeagueScheduleAction.RefreshGames)
         }
+    ) {
+        LazyColumn {
+            items(gameListToDisplay) { item ->
+                FBLeagueScheduleListItem(
+                    searchStore = searchStore,
+                    store = store,
+                    data = item,
+                    leagueId = displayModel.leagueId,
+                    teamNameDic = teamNameDic
+                )
+            }
 //        for (value in gameListToDisplay) {
 //            FBLeagueScheduleItem(data = value)
 //        }
+        }
     }
 }
 

@@ -22,6 +22,7 @@ import com.moare.android.features.search.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -37,6 +38,7 @@ sealed interface FBLeagueScheduleAction {
     data class SelectGame(val game: FBGameForSchedule) : FBLeagueScheduleAction
     data object ShowTournament : FBLeagueScheduleAction
     data object ShowTeamStandings : FBLeagueScheduleAction
+    data object RefreshGames: FBLeagueScheduleAction
 
     data object UpdateSelectedGame : FBLeagueScheduleAction
     data object UpdateFilteredGames : FBLeagueScheduleAction
@@ -90,6 +92,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
             is FBLeagueScheduleAction.UpdateSelectedGame -> updateSelectedGame()
             is FBLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
             is FBLeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
+            is FBLeagueScheduleAction.RefreshGames -> refreshGames()
         }
     }
 
@@ -405,6 +408,59 @@ class FBLeagueScheduleStore @AssistedInject constructor(
 
             if (result.data is SportDecodableModel.FBTeamStandings) {
                 emitToParent(FBLeagueScheduleDelegate.ShowTeamStandings(result.data))
+            }
+        }
+    }
+
+    private fun refreshGames() {
+        val games = filteredGames.value[selectedDayIndex.value] ?: return
+
+        scope.launch {
+            _isRefreshing.value = true
+
+            try {
+                val splittedYearMonth = selectedYearMonth.value.split("/")
+                val yearMonth = splittedYearMonth[0] + splittedYearMonth[1]
+
+                val entity = displayModel.value.entityInfo.firstOrNull() ?: EntityInfo(
+                    entityId = Constants.Ids.EPL,
+                    entityName = "프리미어리그",
+                    category = "football",
+                    entityType = "league",
+                    leagueId = Constants.Ids.EPL
+                )
+
+                val hasLive = games.any { game ->
+                    game.gameStatus in Constants.GameStatus.Football.LIVE_LIST
+                }
+
+                if (hasLive) {
+                    val result = searchClient.fetchLeagueSchedule(
+                        entity,
+                        displayModel.value.season,
+                        yearMonth,
+                        selectedDay.value?.day
+                    )
+
+                    if (result.data is SportDecodableModel.FBLeagueSchedule) {
+                        val newGames = result.data.displayModel.games
+
+                        val gamesById = newGames.associateBy { it.gameId }
+
+                        _displayModel.update { current ->
+                            current.copy(
+                                games = current.games.map { gamesById[it.gameId] ?: it }
+                            )
+                        }
+
+                        updateFilteredGames()
+                    }
+                }
+            } catch (e: Exception) {
+                _displayDataState.value = ApiFetchState.Error("데이터를 불러오는데 실패하였습니다.")
+                Log.e("dsdf", e.localizedMessage ?: "error")
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }

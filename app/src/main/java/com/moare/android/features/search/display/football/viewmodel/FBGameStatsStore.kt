@@ -278,8 +278,9 @@ class FBGameStatsStore @AssistedInject constructor(
 
     private fun refreshGame(shouldFetch: Boolean) {
         if (shouldFetch) {
-            _isRefreshing.value = true
             scope.launch {
+                _isRefreshing.value = true
+
                 val game = displayModel.value.game
 
                 // TODO: Has to add loading

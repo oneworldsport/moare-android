@@ -60,6 +60,9 @@ abstract class BaseScheduleStore<A, T: SportDisplayModel>(
     protected val _isAllResultOpened = MutableStateFlow(false)
     val isAllResultOpened: StateFlow<Boolean> = _isAllResultOpened
 
+    protected var _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
     abstract fun send(action: A)
 
     open fun initData() {
