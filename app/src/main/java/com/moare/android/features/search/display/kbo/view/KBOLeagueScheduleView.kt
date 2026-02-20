@@ -22,6 +22,7 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
+import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleAction
 import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleStore
 import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
@@ -31,6 +32,7 @@ import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.displaymodels.kbo.KBOGameStatsDisplayModel
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
+import com.moare.android.ui.util.Refreshable
 
 @Composable
 fun KBOLeagueScheduleView(
@@ -114,17 +116,29 @@ fun KBOLeagueScheduleList(
     val filteredGames by store.filteredGames.collectAsState()
     val selectedDayIndex by store.selectedDayIndex.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
 
     val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
+    val hasLive = gameListToDisplay.any { game ->
+        game.gameStatus == Constants.GameStatus.KBO.LIVE
+    }
 
-    LazyColumn {
-        items(gameListToDisplay) { item ->
-            KBOLeagueScheduleListItem(
-                searchStore = searchStore,
-                store = store,
-                data = item,
-                teamNameDic = teamNameDic
-            )
+    Refreshable(
+        enabled = hasLive,
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            store.send(KBOLeagueScheduleAction.RefreshGames)
+        }
+    ) {
+        LazyColumn {
+            items(gameListToDisplay) { item ->
+                KBOLeagueScheduleListItem(
+                    searchStore = searchStore,
+                    store = store,
+                    data = item,
+                    teamNameDic = teamNameDic
+                )
+            }
         }
     }
 }

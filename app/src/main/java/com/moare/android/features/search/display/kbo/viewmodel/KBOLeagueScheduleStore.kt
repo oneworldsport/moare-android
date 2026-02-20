@@ -6,6 +6,7 @@ import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
 import com.moare.android.features.search.display.common.store.BaseScheduleStore
+import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleAction
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
@@ -35,6 +36,7 @@ sealed interface KBOLeagueScheduleAction {
     data object UpdateFilteredGames : KBOLeagueScheduleAction
     data object ShowTournament : KBOLeagueScheduleAction
     data object ShowTeamStandings : KBOLeagueScheduleAction
+    data object RefreshGames: KBOLeagueScheduleAction
 
     data class UpdateStateByRefreshGame(val model: SportDecodableModel.KBOGameStats) : KBOLeagueScheduleAction
 }
@@ -77,6 +79,7 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
             is KBOLeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
             is KBOLeagueScheduleAction.ShowTournament -> showTournament()
             is KBOLeagueScheduleAction.ShowTeamStandings -> showTeamStandings()
+            is KBOLeagueScheduleAction.RefreshGames -> refreshGames()
         }
     }
 
@@ -342,6 +345,59 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
 
             if (result.data is SportDecodableModel.KBOTeamStandings) {
                 emitToParent(KBOLeagueScheduleDelegate.ShowTeamStandings(result.data))
+            }
+        }
+    }
+
+    private fun refreshGames() {
+        val games = filteredGames.value[selectedDayIndex.value] ?: return
+
+        scope.launch {
+            _isRefreshing.value = true
+
+            try {
+                val splittedYearMonth = selectedYearMonth.value.split("/")
+                val yearMonth = splittedYearMonth[0] + splittedYearMonth[1]
+
+                val entity = displayModel.value.entityInfo.firstOrNull() ?: EntityInfo(
+                    entityId = Constants.Ids.KBO,
+                    entityName = "KBO",
+                    category = "baseball",
+                    entityType = "league",
+                    leagueId = Constants.Ids.KBO
+                )
+
+                val hasLive = games.any { game ->
+                    game.gameStatus == Constants.GameStatus.KBO.LIVE
+                }
+
+                if (hasLive) {
+                    val result = searchClient.fetchLeagueSchedule(
+                        entity,
+                        displayModel.value.season,
+                        yearMonth,
+                        selectedDay.value?.day
+                    )
+
+                    if (result.data is SportDecodableModel.KBOLeagueSchedule) {
+                        val newGames = result.data.displayModel.games
+
+                        val gamesById = newGames.associateBy { it.itemKey }
+
+                        _displayModel.update { current ->
+                            current.copy(
+                                games = current.games.map { gamesById[it.itemKey] ?: it }
+                            )
+                        }
+
+                        updateFilteredGames()
+                    }
+                }
+            } catch (e: Exception) {
+                _displayDataState.value = ApiFetchState.Error("데이터를 불러오는데 실패하였습니다.")
+                Log.e("dsdf", e.localizedMessage ?: "error")
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }
