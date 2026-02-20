@@ -91,7 +91,7 @@ fun FBGameStatsView(
     val columnWidthList = listOf(80.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 70.dp, 70.dp, 100.dp, 50.dp, 70.dp, 100.dp, 70.dp, 50.dp, 80.dp, 70.dp, 70.dp, 50.dp, 50.dp)
     val gameDetailTitle = "장소: \n심판: "
     val gameDetailContent = buildString {
-        append("${teamNameDic["venue_${game.teams.home.id}"] ?: ""}\n")
+        append("${teamNameDic["venue_${game.teams.home.id}"] ?: game.fixture.venue.name}\n")
         append(game.fixture.referee)
     }
 

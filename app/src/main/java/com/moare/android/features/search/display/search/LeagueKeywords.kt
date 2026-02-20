@@ -59,58 +59,62 @@ fun LeagueKeywords(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
-        CenterColumn(
-            modifier = Modifier.padding(end = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            HCapsuleBar()
-
-            CenterRow {
-                Box(
-                    modifier = Modifier
-                        .alpha(alpha)
-                        .padding(end = 10.dp)
-                        .size(10.dp)
-                        .clip(CircleShape)
-                        .background(Moare)
-                )
-
-                Text(
-                    text = "경기중"
-                )
-            }
-
-            LazyColumn(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.heightIn(max = 150.dp)
+        if (leagueKeywords.live.isNotEmpty()) {
+            CenterColumn(
+                modifier = Modifier.padding(end = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(leagueKeywords.live) { item ->
-                    KeywordBox(item.keyword) {
-                        onItemSelected(item)
+                HCapsuleBar()
+
+                CenterRow {
+                    Box(
+                        modifier = Modifier
+                            .alpha(alpha)
+                            .padding(end = 10.dp)
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(Moare)
+                    )
+
+                    Text(
+                        text = "경기중"
+                    )
+                }
+
+                LazyColumn(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.heightIn(max = 150.dp)
+                ) {
+                    items(leagueKeywords.live) { item ->
+                        KeywordBox(item.keyword) {
+                            onItemSelected(item)
+                        }
                     }
                 }
             }
         }
 
-        CenterColumn(
-            modifier = Modifier.padding(start = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            HCapsuleBar()
-
-            Text(
-                text = "최근 결과"
-            )
-
-            LazyColumn(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.heightIn(max = 150.dp)
+        if (leagueKeywords.recent.isNotEmpty()) {
+            CenterColumn(
+                modifier = Modifier.padding(start = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(leagueKeywords.recent) { item ->
-                    KeywordBox(item.keyword) {
-                        onItemSelected(item)
+                HCapsuleBar()
+
+                Text(
+                    text = "최근 결과"
+                )
+
+                LazyColumn(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.heightIn(max = 150.dp)
+                ) {
+                    items(leagueKeywords.recent) { item ->
+                        KeywordBox(item.keyword) {
+                            onItemSelected(item)
+                        }
                     }
                 }
             }

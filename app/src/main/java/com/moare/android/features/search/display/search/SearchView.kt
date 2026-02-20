@@ -404,20 +404,18 @@ fun SearchView(
                 exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
             ) {
                 leagueKeywords?.let {
-                    if (it.live.isNotEmpty() && it.recent.isNotEmpty()) {
-                        LeagueKeywords(
-                            leagueKeywords = it,
-                            modifier = Modifier
-                                .padding(top = 16.dp)
-                                .onGloballyPositioned { layoutCoordinates ->
-                                    with(density) {
-                                        leagueKeywordsComponentHeight = layoutCoordinates.size.height.toDp() + 16.dp
-                                    }
+                    LeagueKeywords(
+                        leagueKeywords = it,
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .onGloballyPositioned { layoutCoordinates ->
+                                with(density) {
+                                    leagueKeywordsComponentHeight = layoutCoordinates.size.height.toDp() + 16.dp
                                 }
-                        ) { keywordInfo ->
-                            searchStore.send(SearchAction.UpdateTextField(TextFieldValue(keywordInfo.keyword), false))
-                            searchStore.send(SearchAction.PerformSearch(searchType = SearchStore.SearchType.LeagueKeyword(keywordInfo), aniDuration = 1000))
-                        }
+                            }
+                    ) { keywordInfo ->
+                        searchStore.send(SearchAction.UpdateTextField(TextFieldValue(keywordInfo.keyword), false))
+                        searchStore.send(SearchAction.PerformSearch(searchType = SearchStore.SearchType.LeagueKeyword(keywordInfo), aniDuration = 1000))
                     }
                 }
             }
