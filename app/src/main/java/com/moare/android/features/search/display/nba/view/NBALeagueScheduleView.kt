@@ -1,7 +1,11 @@
 package com.moare.android.features.search.display.nba.view
 
+import android.util.Log
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,7 +14,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ModifierInfo
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
@@ -32,6 +40,7 @@ import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDi
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.ui.util.Refreshable
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun NBALeagueScheduleView(
@@ -109,34 +118,71 @@ fun NBALeagueScheduleList(
     searchStore: SearchStore,
     store: NBALeagueScheduleStore
 ) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
     val filteredGames by store.filteredGames.collectAsState()
-    val selectedDayIndex by store.selectedDayIndex.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
     val isRefreshing by store.isRefreshing.collectAsState()
+    val days by store.days.collectAsState()
+    val selectedDay by store.selectedDay.collectAsState()
 
-    val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
-    val hasLive = gameListToDisplay.any { game ->
-        game.gameStatus == Constants.GameStatus.NBA.LIVE.toString()
+    val validDays = remember(days) { days.filter { !it.isDataEmpty } }
+    val validIndexByDay = remember(validDays) {
+        validDays.mapIndexed { index, info -> info.day to index }.toMap()
+    }
+    val pagerState = rememberPagerState(
+        initialPage = validIndexByDay[selectedDay?.day] ?: 0,
+        pageCount = { validDays.size }
+    )
+
+    LaunchedEffect(pagerState.currentPage) {
+        snapshotFlow { pagerState.currentPage to pagerState.isScrollInProgress }
+            .distinctUntilChanged()
+            .collect { (page, inProgress) ->
+                // 스크롤 중이면 무시, 끝났을 때만 확정
+                // animateScrollToPage로 해당 함수가 실행될때, 한번에 여러 페이지를 이동하는 경우에 설정된 page까지 이동하기 전에 해당 함수가 실행되는 경우가 있어서 추가.
+                if (inProgress) return@collect
+
+                val dayToSelect = validDays.getOrNull(page) ?: return@collect
+                val dayIndexToSelect = dayToSelect.day - 1
+                if (selectedDay?.day != dayToSelect.day) {
+                    store.send(NBALeagueScheduleAction.SelectDay(dayToSelect, dayIndexToSelect))
+                }
+            }
     }
 
-    Refreshable(
-        enabled = hasLive,
-        isRefreshing = isRefreshing,
-        onRefresh = {
-            store.send(NBALeagueScheduleAction.RefreshGames)
+    LaunchedEffect(selectedDay) {
+        val targetIndex = validIndexByDay[selectedDay?.day] ?: return@LaunchedEffect
+        if (targetIndex != pagerState.currentPage) {
+            pagerState.animateScrollToPage(targetIndex)
         }
-    ) {
-        LazyColumn {
-            items(gameListToDisplay) { item ->
-                NBALeagueScheduleListItem(
-                    searchStore = searchStore,
-                    store = store,
-                    data = item,
-                    teamNameDic = teamNameDic
-                )
+    }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.Top
+    ) { page ->
+        val dayIndex = (validDays.getOrNull(page)?.day ?: 1) - 1
+        val gameListToDisplay = filteredGames[dayIndex] ?: emptyList()
+        val hasLive = gameListToDisplay.any { game ->
+            game.gameStatus == Constants.GameStatus.NBA.LIVE.toString()
+        }
+
+        Refreshable(
+            enabled = hasLive,
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                store.send(NBALeagueScheduleAction.RefreshGames)
+            }
+        ) {
+            LazyColumn {
+                items(gameListToDisplay) { item ->
+                    NBALeagueScheduleListItem(
+                        searchStore = searchStore,
+                        store = store,
+                        data = item,
+                        teamNameDic = teamNameDic
+                    )
+                }
             }
         }
     }
