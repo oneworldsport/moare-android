@@ -1,12 +1,10 @@
 package com.moare.android.features.search.display.nba.view
 
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,8 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierInfo
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.NBAUtil
@@ -30,13 +26,9 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleAction
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
+import com.moare.android.features.search.display.nba.store.NBALeagueScheduleAction
+import com.moare.android.features.search.display.nba.store.NBALeagueScheduleStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.ui.util.Refreshable
@@ -196,7 +188,7 @@ fun NBALeagueScheduleListItem(
     data: NBAGameForSchedule,
 ) {
     val gameId = data.gameId
-    val gameStatus = data.gameStatus.toIntOrNull() ?: 0
+    val gameStatus = data.gameStatus.toIntOrNull() ?: 1
 
     /* ---------------------
        ui state
@@ -213,16 +205,16 @@ fun NBALeagueScheduleListItem(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (gameStatus == StringConstants.NBA.GAME_FINAL) {
+        if (gameStatus == Constants.GameStatus.NBA.FINISHED) {
             isResultOpened = gameResultOpenedStateList[gameId] ?: false
-        } else if (gameStatus == StringConstants.NBA.GAME_SCHEDULED) {
+        } else if (gameStatus == Constants.GameStatus.NBA.NOT_STARTED) {
             isResultOpened = false
         } else {
             isResultOpened = true
         }
     }
     LaunchedEffect(gameResultOpenedStateList) {
-        if (gameStatus == StringConstants.NBA.GAME_FINAL) {
+        if (gameStatus == Constants.GameStatus.NBA.FINISHED) {
             isResultOpened = gameResultOpenedStateList[gameId] ?: false
         }
     }
@@ -233,9 +225,9 @@ fun NBALeagueScheduleListItem(
             game = data,
             teamNameDic = teamNameDic,
             isResultOpened = isResultOpened,
-            gameStatusText = Constants.GameStatus.nbaGameStatusText(data.gameStatus, data.gameInfo?.period, isResultOpened),
+            gameStatusText = Constants.GameStatus.nbaGameStatusText(gameStatus, data.gameInfo?.period, isResultOpened),
             gameStatusColor = Constants.GameStatus.gameStatusColor(Constants.Ids.NBA, data.gameStatus),
-            isCapsuleButtonDisabled = gameStatus != StringConstants.NBA.GAME_FINAL,
+            isCapsuleButtonDisabled = gameStatus != Constants.GameStatus.NBA.FINISHED,
             gameType = NBAUtil.gameType(data.gameInfo), // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
         ),

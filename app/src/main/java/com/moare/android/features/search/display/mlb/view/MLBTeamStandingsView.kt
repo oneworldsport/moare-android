@@ -25,11 +25,9 @@ import com.moare.android.features.search.display.common.container.component.Stan
 import com.moare.android.features.search.display.common.container.state.NewStandingsContainerState
 import com.moare.android.features.search.display.common.container.state.StandingsContainerActions
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.mlb.store.MLBTeamStandingsAction
+import com.moare.android.features.search.display.mlb.store.MLBTeamStandingsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.displaymodels.mlb.MLBTeamStandingsDisplay
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HCapsuleBar

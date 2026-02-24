@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -16,10 +15,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.MLBUtil
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
@@ -28,14 +25,9 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleStore
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
+import com.moare.android.features.search.display.mlb.store.MLBLeagueScheduleAction
+import com.moare.android.features.search.display.mlb.store.MLBLeagueScheduleStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.ui.util.Refreshable

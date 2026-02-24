@@ -11,6 +11,7 @@ object Util {
                 Constants.Ids.NBA -> "https://cdn.nba.com/logos/nba/$teamId/primary/L/logo.svg"
                 Constants.Ids.MLB -> "https://www.mlbstatic.com/team-logos/$teamId.svg"
                 Constants.Ids.KBO -> KBOUtil.codeMap[teamId]?.let { "https://6ptotvmi5753.edge.naverncp.com/KBO_IMAGE/emblem/regular/fixed/emblem_$it.png" }
+                in Constants.Ids.TENNIS_ALL -> "https://player-team-images.s3.ap-northeast-2.amazonaws.com/tennis/player/$teamId.png"
                 else -> null
             }
         }

@@ -67,6 +67,10 @@ object StringConstants {
                 Constants.Ids.BUNDESLIGA -> "분데스리가"
                 Constants.Ids.SERIEA -> "세리에A"
                 Constants.Ids.LIGUE1 -> "리그1"
+                Constants.Ids.MLS -> "MLS"
+                Constants.Ids.CHAMPIONS_LEAGUE -> "챔피언스리그"
+                Constants.Ids.EUROPA_LEAGUE -> "유로파리그"
+                Constants.Ids.CONFERENCE_LEAGUE -> "컨퍼런스리그"
                 Constants.Ids.FA_CUP -> "FA컵"
                 Constants.Ids.EFL_CUP -> "EFL컵"
                 Constants.Ids.DFB_POKAL -> "DFB 포칼"
@@ -244,7 +248,7 @@ object StringConstants {
     }
 
     fun tournamentOrStandingsText(leagueId: Int): String {
-        return if (Constants.Ids.FOOTBALL_DRAW_TOURNAMENT_LEAGUES.contains(leagueId)) {
+        return if (Constants.Ids.FOOTBALL_DRAW_TOURNAMENT_LEAGUES.contains(leagueId) || Constants.Ids.TENNIS_ALL.contains(leagueId)) {
             "대진표"
         } else {
             "리그 순위"

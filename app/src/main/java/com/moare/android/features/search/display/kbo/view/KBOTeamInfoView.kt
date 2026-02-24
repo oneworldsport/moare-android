@@ -30,12 +30,9 @@ import com.moare.android.core.util.TimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.kbo.store.KBOTeamInfoAction
+import com.moare.android.features.search.display.kbo.store.KBOTeamInfoStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage

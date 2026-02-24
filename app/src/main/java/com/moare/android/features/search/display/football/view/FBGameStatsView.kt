@@ -18,9 +18,9 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.football.store.FBGameStatsAction
+import com.moare.android.features.search.display.football.store.FBGameStatsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
 

@@ -8,10 +8,9 @@ import com.moare.android.features.search.display.common.container.state.Tourname
 import com.moare.android.features.search.display.common.container.state.TournamentDrawContainerState
 import com.moare.android.features.search.display.common.container.view.TournamentBracketViewContainer
 import com.moare.android.features.search.display.common.container.view.TournamentDrawViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBTournamentAction
-import com.moare.android.features.search.display.football.viewmodel.FBTournamentStore
-import com.moare.android.features.search.display.nba.viewmodel.NBATournamentAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.football.store.FBTournamentAction
+import com.moare.android.features.search.display.football.store.FBTournamentStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 
 @Composable

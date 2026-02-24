@@ -31,9 +31,6 @@ object Constants {
         const val LIGUE1 = 61
         const val SERIEA = 135
         const val MLS = 253
-        const val NBA = 90001
-        const val KBO = 90101
-        const val MLB = 90102
         val FOOTBALL_LEAGUES = listOf(EPL, LALIGA, BUNDESLIGA, LIGUE1, SERIEA, MLS)
         const val CHAMPIONS_LEAGUE = 2
         const val EUROPA_LEAGUE = 3
@@ -47,6 +44,10 @@ object Constants {
         val FOOTBALL_TOURNAMENT_LEAGUES = listOf(CHAMPIONS_LEAGUE, EUROPA_LEAGUE, CONFERENCE_LEAGUE, FA_CUP, EFL_CUP, DFB_POKAL, COUPE_DE_FRANCE, COPA_DEL_REY, COPPA_ITALIA)
         val FOOTBALL_DRAW_TOURNAMENT_LEAGUES = listOf(FA_CUP, EFL_CUP, DFB_POKAL, COUPE_DE_FRANCE, COPA_DEL_REY, COPPA_ITALIA)
         val FOOTBALL_ALL = FOOTBALL_LEAGUES + FOOTBALL_TOURNAMENT_LEAGUES
+
+        const val NBA = 90001
+        const val KBO = 90101
+        const val MLB = 90102
 
         // AUS OPEN
         const val AUS_OPEN_M_SINGLE = 80001
@@ -443,6 +444,7 @@ object Constants {
         fun checkTeamId(leagueId: Int, teamId: Int?): Int? {
             return when (leagueId) {
                 in FOOTBALL_ALL -> teamId
+                in TENNIS_ALL -> teamId
                 NBA -> if (NBATeam.all.contains(teamId)) teamId else null
                 MLB -> if (MLBTeam.all.contains(teamId)) teamId else null
                 KBO -> if (KBOTeam.all.contains(teamId)) teamId else null
@@ -560,12 +562,11 @@ object Constants {
         }
 
         fun nbaGameStatusText(
-            status: String,
+            status: Int,
             period: Int? = null,
             isResultOpened: Boolean = true
         ): String {
-            val insStatus = status.toIntOrNull()
-            return when (insStatus) {
+            return when (status) {
                 NBA.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
                 NBA.LIVE -> {
                     if (period != null) {

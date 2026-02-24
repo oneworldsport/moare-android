@@ -3,103 +3,112 @@ package com.moare.android.core.mvi
 import android.app.Activity
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsDelegate
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleAction
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleStore
-import com.moare.android.features.search.display.football.viewmodel.FBLeagueScheduleDelegate
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoAction
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoDelegate
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerInfoStore
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsAction
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsDelegate
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsStore
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsAction
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStatsStore
-import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
-import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoDelegate
-import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoStore
-import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsAction
-import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsDelegate
-import com.moare.android.features.search.display.football.viewmodel.FBTeamStandingsStore
-import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsAction
-import com.moare.android.features.search.display.football.viewmodel.FBTeamStatsStore
-import com.moare.android.features.search.display.football.viewmodel.FBTournamentAction
-import com.moare.android.features.search.display.football.viewmodel.FBTournamentDelegate
-import com.moare.android.features.search.display.football.viewmodel.FBTournamentStore
-import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsDelegate
-import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsStore
-import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleDelegate
-import com.moare.android.features.search.display.kbo.viewmodel.KBOLeagueScheduleStore
-import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoDelegate
-import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerInfoStore
-import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerStatsAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOPlayerStatsStore
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoDelegate
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamInfoStore
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsDelegate
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStandingsStore
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTeamStatsStore
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTournamentAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTournamentDelegate
-import com.moare.android.features.search.display.kbo.viewmodel.KBOTournamentStore
-import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsDelegate
-import com.moare.android.features.search.display.mlb.viewmodel.MLBGameStatsStore
-import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleDelegate
-import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleStore
-import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerInfoAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerInfoDelegate
-import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerInfoStore
-import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerStatsAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerStatsStore
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamInfoAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamInfoDelegate
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamInfoStore
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsDelegate
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStandingsStore
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTeamStatsStore
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTournamentAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTournamentDelegate
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTournamentStore
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsDelegate
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsStore
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleDelegate
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleStore
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoDelegate
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoStore
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsDelegate
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsStore
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStatsStore
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoAction
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoDelegate
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoStore
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsAction
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsDelegate
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamStandingsStore
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsAction
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamStatsStore
-import com.moare.android.features.search.display.nba.viewmodel.NBATournamentAction
-import com.moare.android.features.search.display.nba.viewmodel.NBATournamentDelegate
-import com.moare.android.features.search.display.nba.viewmodel.NBATournamentStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchDelegate
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.football.store.FBGameStatsAction
+import com.moare.android.features.search.display.football.store.FBGameStatsDelegate
+import com.moare.android.features.search.display.football.store.FBGameStatsStore
+import com.moare.android.features.search.display.football.store.FBLeagueScheduleAction
+import com.moare.android.features.search.display.football.store.FBLeagueScheduleStore
+import com.moare.android.features.search.display.football.store.FBLeagueScheduleDelegate
+import com.moare.android.features.search.display.football.store.FBPlayerInfoAction
+import com.moare.android.features.search.display.football.store.FBPlayerInfoDelegate
+import com.moare.android.features.search.display.football.store.FBPlayerInfoStore
+import com.moare.android.features.search.display.football.store.FBPlayerStandingsAction
+import com.moare.android.features.search.display.football.store.FBPlayerStandingsDelegate
+import com.moare.android.features.search.display.football.store.FBPlayerStandingsStore
+import com.moare.android.features.search.display.football.store.FBPlayerStatsAction
+import com.moare.android.features.search.display.football.store.FBPlayerStatsStore
+import com.moare.android.features.search.display.football.store.FBTeamInfoAction
+import com.moare.android.features.search.display.football.store.FBTeamInfoDelegate
+import com.moare.android.features.search.display.football.store.FBTeamInfoStore
+import com.moare.android.features.search.display.football.store.FBTeamStandingsAction
+import com.moare.android.features.search.display.football.store.FBTeamStandingsDelegate
+import com.moare.android.features.search.display.football.store.FBTeamStandingsStore
+import com.moare.android.features.search.display.football.store.FBTeamStatsAction
+import com.moare.android.features.search.display.football.store.FBTeamStatsStore
+import com.moare.android.features.search.display.football.store.FBTournamentAction
+import com.moare.android.features.search.display.football.store.FBTournamentDelegate
+import com.moare.android.features.search.display.football.store.FBTournamentStore
+import com.moare.android.features.search.display.kbo.store.KBOGameStatsAction
+import com.moare.android.features.search.display.kbo.store.KBOGameStatsDelegate
+import com.moare.android.features.search.display.kbo.store.KBOGameStatsStore
+import com.moare.android.features.search.display.kbo.store.KBOLeagueScheduleAction
+import com.moare.android.features.search.display.kbo.store.KBOLeagueScheduleDelegate
+import com.moare.android.features.search.display.kbo.store.KBOLeagueScheduleStore
+import com.moare.android.features.search.display.kbo.store.KBOPlayerInfoAction
+import com.moare.android.features.search.display.kbo.store.KBOPlayerInfoDelegate
+import com.moare.android.features.search.display.kbo.store.KBOPlayerInfoStore
+import com.moare.android.features.search.display.kbo.store.KBOPlayerStatsAction
+import com.moare.android.features.search.display.kbo.store.KBOPlayerStatsStore
+import com.moare.android.features.search.display.kbo.store.KBOTeamInfoAction
+import com.moare.android.features.search.display.kbo.store.KBOTeamInfoDelegate
+import com.moare.android.features.search.display.kbo.store.KBOTeamInfoStore
+import com.moare.android.features.search.display.kbo.store.KBOTeamStandingsAction
+import com.moare.android.features.search.display.kbo.store.KBOTeamStandingsDelegate
+import com.moare.android.features.search.display.kbo.store.KBOTeamStandingsStore
+import com.moare.android.features.search.display.kbo.store.KBOTeamStatsAction
+import com.moare.android.features.search.display.kbo.store.KBOTeamStatsStore
+import com.moare.android.features.search.display.kbo.store.KBOTournamentAction
+import com.moare.android.features.search.display.kbo.store.KBOTournamentDelegate
+import com.moare.android.features.search.display.kbo.store.KBOTournamentStore
+import com.moare.android.features.search.display.mlb.store.MLBGameStatsAction
+import com.moare.android.features.search.display.mlb.store.MLBGameStatsDelegate
+import com.moare.android.features.search.display.mlb.store.MLBGameStatsStore
+import com.moare.android.features.search.display.mlb.store.MLBLeagueScheduleAction
+import com.moare.android.features.search.display.mlb.store.MLBLeagueScheduleDelegate
+import com.moare.android.features.search.display.mlb.store.MLBLeagueScheduleStore
+import com.moare.android.features.search.display.mlb.store.MLBPlayerInfoAction
+import com.moare.android.features.search.display.mlb.store.MLBPlayerInfoDelegate
+import com.moare.android.features.search.display.mlb.store.MLBPlayerInfoStore
+import com.moare.android.features.search.display.mlb.store.MLBPlayerStatsAction
+import com.moare.android.features.search.display.mlb.store.MLBPlayerStatsStore
+import com.moare.android.features.search.display.mlb.store.MLBTeamInfoAction
+import com.moare.android.features.search.display.mlb.store.MLBTeamInfoDelegate
+import com.moare.android.features.search.display.mlb.store.MLBTeamInfoStore
+import com.moare.android.features.search.display.mlb.store.MLBTeamStandingsAction
+import com.moare.android.features.search.display.mlb.store.MLBTeamStandingsDelegate
+import com.moare.android.features.search.display.mlb.store.MLBTeamStandingsStore
+import com.moare.android.features.search.display.mlb.store.MLBTeamStatsAction
+import com.moare.android.features.search.display.mlb.store.MLBTeamStatsStore
+import com.moare.android.features.search.display.mlb.store.MLBTournamentAction
+import com.moare.android.features.search.display.mlb.store.MLBTournamentDelegate
+import com.moare.android.features.search.display.mlb.store.MLBTournamentStore
+import com.moare.android.features.search.display.nba.store.NBAGameStatsAction
+import com.moare.android.features.search.display.nba.store.NBAGameStatsDelegate
+import com.moare.android.features.search.display.nba.store.NBAGameStatsStore
+import com.moare.android.features.search.display.nba.store.NBALeagueScheduleAction
+import com.moare.android.features.search.display.nba.store.NBALeagueScheduleDelegate
+import com.moare.android.features.search.display.nba.store.NBALeagueScheduleStore
+import com.moare.android.features.search.display.nba.store.NBAPlayerInfoAction
+import com.moare.android.features.search.display.nba.store.NBAPlayerInfoDelegate
+import com.moare.android.features.search.display.nba.store.NBAPlayerInfoStore
+import com.moare.android.features.search.display.nba.store.NBAPlayerStandingsAction
+import com.moare.android.features.search.display.nba.store.NBAPlayerStandingsDelegate
+import com.moare.android.features.search.display.nba.store.NBAPlayerStandingsStore
+import com.moare.android.features.search.display.nba.store.NBAPlayerStatsAction
+import com.moare.android.features.search.display.nba.store.NBAPlayerStatsStore
+import com.moare.android.features.search.display.nba.store.NBATeamInfoAction
+import com.moare.android.features.search.display.nba.store.NBATeamInfoDelegate
+import com.moare.android.features.search.display.nba.store.NBATeamInfoStore
+import com.moare.android.features.search.display.nba.store.NBATeamStandingsAction
+import com.moare.android.features.search.display.nba.store.NBATeamStandingsDelegate
+import com.moare.android.features.search.display.nba.store.NBATeamStandingsStore
+import com.moare.android.features.search.display.nba.store.NBATeamStatsAction
+import com.moare.android.features.search.display.nba.store.NBATeamStatsStore
+import com.moare.android.features.search.display.nba.store.NBATournamentAction
+import com.moare.android.features.search.display.nba.store.NBATournamentDelegate
+import com.moare.android.features.search.display.nba.store.NBATournamentStore
+import com.moare.android.features.search.display.search.store.SearchAction
+import com.moare.android.features.search.display.search.store.SearchDelegate
+import com.moare.android.features.search.display.search.store.SearchStore
+import com.moare.android.features.search.display.tennis.store.TennisGameStatsAction
+import com.moare.android.features.search.display.tennis.store.TennisGameStatsDelegate
+import com.moare.android.features.search.display.tennis.store.TennisGameStatsStore
+import com.moare.android.features.search.display.tennis.store.TennisLeagueScheduleAction
+import com.moare.android.features.search.display.tennis.store.TennisLeagueScheduleDelegate
+import com.moare.android.features.search.display.tennis.store.TennisLeagueScheduleStore
+import com.moare.android.features.search.display.tennis.store.TennisTournamentAction
+import com.moare.android.features.search.display.tennis.store.TennisTournamentDelegate
+import com.moare.android.features.search.display.tennis.store.TennisTournamentStore
 import com.moare.android.features.search.models.SportDecodableModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -150,6 +159,10 @@ sealed interface StackItem {
     data class KBOLeagueSchedule(override val id: ViewId, val store: KBOLeagueScheduleStore) : StackItem
     data class KBOGameStats(override val id: ViewId, val store: KBOGameStatsStore) : StackItem
     data class KBOTournament(override val id: ViewId, val store: KBOTournamentStore) : StackItem
+
+    data class TennisLeagueSchedule(override val id: ViewId, val store: TennisLeagueScheduleStore) : StackItem
+    data class TennisGameStats(override val id: ViewId, val store: TennisGameStatsStore) : StackItem
+    data class TennisTournament(override val id: ViewId, val store: TennisTournamentStore) : StackItem
 }
 
 @HiltViewModel
@@ -191,7 +204,11 @@ class AppViewModel @Inject constructor(
     private val kboTeamStandingsFactory: KBOTeamStandingsStore.Factory,
     private val kboLeagueScheduleFactory: KBOLeagueScheduleStore.Factory,
     private val kboGameStatsFactory: KBOGameStatsStore.Factory,
-    private val kboTournamentFactory: KBOTournamentStore.Factory
+    private val kboTournamentFactory: KBOTournamentStore.Factory,
+
+    private val tennisLeagueScheduleFactory: TennisLeagueScheduleStore.Factory,
+    private val tennisGameStatsFactory: TennisGameStatsStore.Factory,
+    private val tennisTournamentFactory: TennisTournamentStore.Factory
 ) : ViewModel() {
     private val _stack = MutableStateFlow<List<StackItem>>(emptyList())
     val stack: StateFlow<List<StackItem>> = _stack
@@ -263,6 +280,7 @@ class AppViewModel @Inject constructor(
                 val id = ViewId()
 
                 when (val model = delegate.model) {
+                    // football
                     is SportDecodableModel.FBPlayerInfo -> {
                         val store = fbPlayerInfoFactory.create(model) { delegate ->
                             onFBPlayerInfoDelegate(delegate)
@@ -324,6 +342,7 @@ class AppViewModel @Inject constructor(
                         _stack.update { it + StackItem.FBTournament(id, store) }
                     }
 
+                    // nba
                     is SportDecodableModel.NBAPlayerInfo -> {
                         val store = nbaPlayerInfoFactory.create(model) { delegate ->
                             onNBAPlayerInfoDelegate(delegate)
@@ -384,6 +403,7 @@ class AppViewModel @Inject constructor(
                         _stack.update { it + StackItem.NBATournament(id, store) }
                     }
 
+                    // mlb
                     is SportDecodableModel.MLBPlayerInfo -> {
                         val store = mlbPlayerInfoFactory.create(model) { delegate ->
                             onMLBPlayerInfoDelegate(delegate)
@@ -437,6 +457,7 @@ class AppViewModel @Inject constructor(
                         _stack.update { it + StackItem.MLBTournament(id, store) }
                     }
 
+                    // kbo
                     is SportDecodableModel.KBOPlayerInfo -> {
                         val store = kboPlayerInfoFactory.create(model) { delegate ->
                             onKBOPlayerInfoDelegate(delegate)
@@ -489,7 +510,31 @@ class AppViewModel @Inject constructor(
                         store.send(KBOTournamentAction.InitData)
                         _stack.update { it + StackItem.KBOTournament(id, store) }
                     }
-                    else -> null
+
+                    // tennis
+                    is SportDecodableModel.TennisLeagueSchedule -> {
+                        val store = tennisLeagueScheduleFactory.create(model.displayModel) { delegate ->
+                            onTennisLeagueScheduleDelegate(delegate)
+                        }
+                        store.send(TennisLeagueScheduleAction.InitData)
+                        _stack.update { it + StackItem.TennisLeagueSchedule(id, store) }
+                    }
+                    is SportDecodableModel.TennisGameStats -> {
+                        val store = tennisGameStatsFactory.create(model.displayModel) { delegate ->
+                            onTennisGameStatsDelegate(id, delegate)
+                        }
+                        store.send(TennisGameStatsAction.InitData)
+                        _stack.update { it + StackItem.TennisGameStats(id, store) }
+                    }
+                    is SportDecodableModel.TennisTournament -> {
+                        val store = tennisTournamentFactory.create(model.displayModel) { delegate ->
+                            onTennisTournamentDelegate(delegate)
+                        }
+                        store.send(TennisTournamentAction.InitData)
+                        _stack.update { it + StackItem.TennisTournament(id, store) }
+                    }
+
+                    else -> {}
                 }
 
                 _queryList.update { it + searchStore.query.value.text }
@@ -497,6 +542,7 @@ class AppViewModel @Inject constructor(
         }
     }
 
+    // football
     private fun onFBPlayerInfoDelegate(delegate: FBPlayerInfoDelegate) {
         val id = ViewId()
 
@@ -663,6 +709,7 @@ class AppViewModel @Inject constructor(
         _queryList.update { it + searchStore.query.value.text }
     }
 
+    // nba
     private fun onNBAPlayerInfoDelegate(delegate: NBAPlayerInfoDelegate) {
         val id = ViewId()
 
@@ -804,6 +851,7 @@ class AppViewModel @Inject constructor(
         _queryList.update { it + searchStore.query.value.text }
     }
 
+    // mlb
     private fun onMLBPlayerInfoDelegate(delegate: MLBPlayerInfoDelegate) {
         val id = ViewId()
 
@@ -932,6 +980,7 @@ class AppViewModel @Inject constructor(
         _queryList.update { it + searchStore.query.value.text }
     }
 
+    // kbo
     private fun onKBOPlayerInfoDelegate(delegate: KBOPlayerInfoDelegate) {
         val id = ViewId()
 
@@ -1060,6 +1109,42 @@ class AppViewModel @Inject constructor(
         _queryList.update { it + searchStore.query.value.text }
     }
 
+    // tennis
+    private fun onTennisLeagueScheduleDelegate(delegate: TennisLeagueScheduleDelegate) {
+        val id = ViewId()
+
+//        when (delegate) {
+//            is TennisLeagueScheduleDelegate.ShowGameStats -> {
+//                _didPop.value = false
+//                _includesPreviousView.value = false
+//
+//                val store = kboGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+//                    onKBOGameStatsDelegate(id, delegate)
+//                }
+//                store.send(KBOGameStatsAction.InitData)
+//                _stack.update { it + StackItem.KBOGameStats(id, store) }
+//            }
+//            is TennisLeagueScheduleDelegate.ShowTournament -> {
+//                _didPop.value = false
+//                _includesPreviousView.value = false
+//
+//                val store = kboTournamentFactory.create(delegate.model.displayModel) { delegate ->
+//                    onKBOTournamentDelegate(delegate)
+//                }
+//                store.send(KBOTournamentAction.InitData)
+//                _stack.update { it + StackItem.KBOTournament(id, store) }
+//            }
+//        }
+
+        _queryList.update { it + searchStore.query.value.text }
+    }
+
+    private fun onTennisGameStatsDelegate(id: ViewId, delegate: TennisGameStatsDelegate) {
+    }
+
+    private fun onTennisTournamentDelegate(delegate: TennisTournamentDelegate) {
+    }
+
     private fun dispose(item: StackItem) {
         when (item) {
             is StackItem.FBPlayerInfo -> item.store.dispose()
@@ -1099,6 +1184,10 @@ class AppViewModel @Inject constructor(
             is StackItem.KBOLeagueSchedule -> item.store.dispose()
             is StackItem.KBOGameStats -> item.store.dispose()
             is StackItem.KBOTournament -> item.store.dispose()
+
+            is StackItem.TennisLeagueSchedule -> item.store.dispose()
+            is StackItem.TennisGameStats -> item.store.dispose()
+            is StackItem.TennisTournament -> item.store.dispose()
         }
     }
 }
