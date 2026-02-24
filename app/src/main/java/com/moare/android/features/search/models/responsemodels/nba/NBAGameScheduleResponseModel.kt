@@ -8,7 +8,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NBAGameScheduleResponseModel(
-    @SerialName("scheduleType") val scheduleType: ScheduleType? = null,
-    @SerialName("scheduledMonths") val scheduledMonths: List<String> = emptyList(),
+    val scheduleType: ScheduleType? = null,
+    val scheduledMonths: List<String> = emptyList(),
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val relatedLeagues: List<Int>? = null,
     val schedule: List<NBAGameForSchedule> = emptyList()
 )

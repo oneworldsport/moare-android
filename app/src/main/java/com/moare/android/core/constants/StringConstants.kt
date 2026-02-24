@@ -157,6 +157,78 @@ object StringConstants {
         val GAME_STATS_SECOND_CATEGORIES = GAME_STATS_HITTING_CATEGORIES + GAME_STATS_PITCHING_CATEGORIES + GAME_STATS_RUNNING_CATEGORIES
     }
 
+    object Tennis {
+        fun leagueNameStr(leagueId: Int): String {
+            return "${tournamentNameStr(leagueId)} ${relatedLeaguesKrName(leagueId) ?: ""}"
+        }
+
+        fun tournamentNameStr(leagueId: Int): String {
+            return when (leagueId) {
+                in Constants.Ids.AUS_OPEN_ALL -> "호주오픈"
+                in Constants.Ids.ROLAND_GARROS_ALL -> "롤랑가로스"
+                // TODO
+                else -> ""
+            }
+        }
+
+        val playerStatKeyList = listOf("aces", "doubleFaults", "firstServeAccuracy", "firstServePointsAccuracy", "secondServePointsAccuracy", "breakPointsSaved", "pointsTotal", "servicePointsScored", "receiverPointsScored", "gamesWon", "serviceGamesWon", "winnersTotal", "forehandWinners", "backhandWinners", "errorsTotal", "unforcedErrorsTotal")
+        val playerStatKrnameMap = mapOf(
+            "aces" to "에이스",
+            "doubleFaults" to "더블 폴트",
+            "firstServeAccuracy" to "1st 서브 성공",
+            "firstServePointsAccuracy" to "1st 서브 득점",
+            "secondServePointsAccuracy" to "2nd 서브 득점",
+            "breakPointsSaved" to "브레이크 포인트",
+            "pointsTotal" to "총 포인트",
+            "servicePointsScored" to "서브 포인트",
+            "receiverPointsScored" to "리턴 포인트",
+            "gamesWon" to "이긴 게임",
+            "serviceGamesWon" to "이긴 서브 게임",
+            "winnersTotal" to "위너",
+            "forehandWinners" to "포핸드 위너",
+            "backhandWinners" to "백핸드 위너",
+            "errorsTotal" to "실책",
+            "unforcedErrorsTotal" to "자책(Unforced errors)"
+        )
+
+        fun relatedLeaguesKrName(leagueId: Int): String? {
+            return when (leagueId) {
+                in Constants.Ids.M_SINGLE_ALL -> "남자 단식"
+                in Constants.Ids.W_SINGLE_ALL -> "여자 단식"
+                in Constants.Ids.M_DOUBLES_ALL -> "남자 복식"
+                in Constants.Ids.W_DOUBLES_ALL -> "여자 복식"
+                in Constants.Ids.MIXED_DOUBLES_ALL -> "혼합 복식"
+                else -> null
+            }
+        }
+
+        fun relatedLeagueRank(leagueId: Int): Int {
+            return when (leagueId) {
+                in Constants.Ids.M_SINGLE_ALL -> 0
+                in Constants.Ids.W_SINGLE_ALL -> 1
+                in Constants.Ids.M_DOUBLES_ALL -> 2
+                in Constants.Ids.W_DOUBLES_ALL -> 3
+                in Constants.Ids.MIXED_DOUBLES_ALL -> 4
+                else -> 999
+            }
+        }
+
+        fun groundTypeKr(groundType: String?): String {
+            val groundType = groundType ?: return ""
+
+            if (groundType.lowercase().contains("hardcourt")) {
+                return "하드"
+            }
+            if (groundType.lowercase().contains("grass")) {
+                return "잔디"
+            }
+            if (groundType.lowercase().contains("clay")) {
+                return "클레이"
+            }
+            return groundType
+        }
+    }
+
     fun viewPreparingAdviseText(type: String): String {
         return "${type} 화면은 더 나은 서비스 제공을 위해 현재 개선 작업 중입니다. 이용에 불편을 드려 죄송합니다."
     }
