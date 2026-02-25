@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
@@ -34,11 +36,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.moare.android.R
 import com.moare.android.core.mvi.AppViewModel
@@ -270,81 +276,81 @@ fun SearchView(
         /* ---------------------
            notice, search example
            --------------------- */
-//        Row(
-//            verticalAlignment = Alignment.Bottom,
-//            modifier = Modifier
-//                .zIndex(1f)
-//                .padding(horizontal = 12.dp)
-//                .offset(x = 0.dp, y = -(noticeYOffset))
-//        ) {
-//            AnimatedVisibility(
-//                visible = isSearchExampleVisible,
-//                enter = fadeIn(),
-//                exit = fadeOut()
-//            ) {
-//                Column(
-//                    horizontalAlignment = Alignment.Start
-//                ) {
-//                    SearchExampleBox(
-//                        text = searchExample,
-//                        modifier = Modifier.alpha(searchExampleAlpha)
-//                    ) { height ->
-//                        searchExampleBoxHeight = height
-//                    }
-//
-//                    Box(
-//                        contentAlignment = Alignment.BottomCenter,
-//                        modifier = Modifier
-//                            .padding(top = 6.dp)
-//                            .height(20.dp)
-//                            .alpha(0.7f)
-//                            .clickable {
-//                                isSearchExampleOpened = !isSearchExampleOpened
-//                            }
-//                    ) {
-//                        Text(
-//                            text = "검색 예시",
-//                            fontSize = 13.sp,
-//                            color = Color.Gray,
-//                        )
-//                    }
-//                }
-//            }
-//
-//            Spacer(Modifier.weight(1f))
-//
-//            AnimatedVisibility(
-//                visible = isNoticeVisible,
-//                enter = fadeIn(),
-//                exit = fadeOut()
-//            ) {
-//                Column(
-//                    horizontalAlignment = Alignment.End
-//                ) {
-//                    NoticeBox(
-//                        noticeList = noticeList,
-//                        height = noticeBoxHeight,
-//                        modifier = Modifier.alpha(noticeAlpha),
-//                        enabled = noticeAlpha > 0f  // 닫혀있을때 눌림 방지
-//                    ) { height ->
-//                        noticeBoxHeight = height
-//                    }
-//
-//                    Icon(
-//                        painter = painterResource(id = R.drawable.ic_rounded_info_24),
-//                        contentDescription = null,
-//                        tint = Color.Gray,
-//                        modifier = Modifier
-//                            .padding(top = 6.dp)
-//                            .size(20.dp)
-//                            .alpha(0.7f)
-//                            .clickable {
-//                                isNoticeOpened = !isNoticeOpened
-//                            }
-//                    )
-//                }
-//            }
-//        }
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier
+                .zIndex(1f)
+                .padding(horizontal = 12.dp)
+                .offset(x = 0.dp, y = -(noticeYOffset))
+        ) {
+            AnimatedVisibility(
+                visible = isSearchExampleVisible,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    SearchExampleBox(
+                        text = searchExample,
+                        modifier = Modifier.alpha(searchExampleAlpha)
+                    ) { height ->
+                        searchExampleBoxHeight = height
+                    }
+
+                    Box(
+                        contentAlignment = Alignment.BottomCenter,
+                        modifier = Modifier
+                            .padding(top = 6.dp)
+                            .height(20.dp)
+                            .alpha(0.7f)
+                            .clickable {
+                                isSearchExampleOpened = !isSearchExampleOpened
+                            }
+                    ) {
+                        Text(
+                            text = "검색 예시",
+                            fontSize = 13.sp,
+                            color = Color.Gray,
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            AnimatedVisibility(
+                visible = isNoticeVisible,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
+                    NoticeBox(
+                        noticeList = noticeList,
+                        height = noticeBoxHeight,
+                        modifier = Modifier.alpha(noticeAlpha),
+                        enabled = noticeAlpha > 0f  // 닫혀있을때 눌림 방지
+                    ) { height ->
+                        noticeBoxHeight = height
+                    }
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_rounded_info_24),
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier
+                            .padding(top = 6.dp)
+                            .size(20.dp)
+                            .alpha(0.7f)
+                            .clickable {
+                                isNoticeOpened = !isNoticeOpened
+                            }
+                    )
+                }
+            }
+        }
 
         Column(
             modifier = Modifier
@@ -360,53 +366,53 @@ fun SearchView(
             )
 
             // trending keywords
-//            AnimatedVisibility(
-//                visible = if (searchState) {
-//                    false
-//                } else {
-//                    if (isSearchBarOpened) {
-//                        autoCompleteList.isEmpty()
-//                    } else {
-//                        false
-//                    }
-//                },
-//                exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
-//            ) {
-//                TrendingKeywords(searchStore = searchStore) { keyword ->
-//                    searchStore.send(SearchAction.UpdateTextField(TextFieldValue(keyword), false))
-//                    searchStore.send(SearchAction.PerformSearch(searchType = SearchStore.SearchType.TrendingKeyword, aniDuration = 1000))
-//                }
-//            }
+            AnimatedVisibility(
+                visible = if (searchState) {
+                    false
+                } else {
+                    if (isSearchBarOpened) {
+                        autoCompleteList.isEmpty()
+                    } else {
+                        false
+                    }
+                },
+                exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
+            ) {
+                TrendingKeywords(searchStore = searchStore) { keyword ->
+                    searchStore.send(SearchAction.UpdateTextField(TextFieldValue(keyword), false))
+                    searchStore.send(SearchAction.PerformSearch(searchType = SearchStore.SearchType.TrendingKeyword, aniDuration = 1000))
+                }
+            }
 
             // league keywords
-//            AnimatedVisibility(
-//                visible = if (searchState) {
-//                    false
-//                } else {
-//                    if (isSearchBarOpened) {
-//                        autoCompleteList.isEmpty()
-//                    } else {
-//                        false
-//                    }
-//                },
-//                exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
-//            ) {
-//                leagueKeywords?.let {
-//                    LeagueKeywords(
-//                        leagueKeywords = it,
-//                        modifier = Modifier
-//                            .padding(top = 16.dp)
-//                            .onGloballyPositioned { layoutCoordinates ->
-//                                with(density) {
-//                                    leagueKeywordsComponentHeight = layoutCoordinates.size.height.toDp() + 16.dp
-//                                }
-//                            }
-//                    ) { keywordInfo ->
-//                        searchStore.send(SearchAction.UpdateTextField(TextFieldValue(keywordInfo.keyword), false))
-//                        searchStore.send(SearchAction.PerformSearch(searchType = SearchStore.SearchType.LeagueKeyword(keywordInfo), aniDuration = 1000))
-//                    }
-//                }
-//            }
+            AnimatedVisibility(
+                visible = if (searchState) {
+                    false
+                } else {
+                    if (isSearchBarOpened) {
+                        autoCompleteList.isEmpty()
+                    } else {
+                        false
+                    }
+                },
+                exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
+            ) {
+                leagueKeywords?.let {
+                    LeagueKeywords(
+                        leagueKeywords = it,
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .onGloballyPositioned { layoutCoordinates ->
+                                with(density) {
+                                    leagueKeywordsComponentHeight = layoutCoordinates.size.height.toDp() + 16.dp
+                                }
+                            }
+                    ) { keywordInfo ->
+                        searchStore.send(SearchAction.UpdateTextField(TextFieldValue(keywordInfo.keyword), false))
+                        searchStore.send(SearchAction.PerformSearch(searchType = SearchStore.SearchType.LeagueKeyword(keywordInfo), aniDuration = 1000))
+                    }
+                }
+            }
 
             // NOTE: didn't wrap with box because of AnimatedVisibility
             // autoComplete list

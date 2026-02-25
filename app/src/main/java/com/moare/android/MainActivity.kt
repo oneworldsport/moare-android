@@ -42,8 +42,8 @@ class MainActivity : ComponentActivity() {
 fun AppRoot(viewModel: AppViewModel = hiltViewModel()) {
     var isSplashFinished by remember { mutableStateOf(false) }
 
-    val viewForTest: SportDisplayType = SportDisplayType.TENNIS_GAME_STATS
-//    val viewForTest: SportDisplayType? = null
+//    val viewForTest: SportDisplayType = SportDisplayType.TENNIS_GAME_STATS
+    val viewForTest: SportDisplayType? = null
 
     Surface(
         modifier = Modifier

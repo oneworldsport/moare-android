@@ -475,10 +475,10 @@ fun NBATeamInfoFifthItem(
         )
 
         lastGame?.let {
-            val homeTeam = lastGame.boxScoreTraditional?.homeTeam
-            val awayTeam = lastGame.boxScoreTraditional?.awayTeam
-            val homeTeamScore = lastGame.lineScore?.find { it.teamId == homeTeam?.teamId }?.pts ?: 0
-            val awayTeamScore = lastGame.lineScore?.find { it.teamId == awayTeam?.teamId }?.pts ?: 0
+            val homeTeamId = lastGame.gameSummary?.homeTeamId ?: 0
+            val awayTeamId = lastGame.gameSummary?.awayTeamId ?: 0
+            val homeTeamScore = lastGame.lineScore?.find { it.teamId == homeTeamId }?.pts ?: 0
+            val awayTeamScore = lastGame.lineScore?.find { it.teamId == awayTeamId }?.pts ?: 0
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -491,7 +491,7 @@ fun NBATeamInfoFifthItem(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = if (homeTeam == null) "" else teamNameDic["short_${homeTeam.teamId}"] ?: homeTeam.teamCity,
+                        text = teamNameDic["short_${homeTeamId}"] ?: "",
                         fontSize = 15.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -524,7 +524,7 @@ fun NBATeamInfoFifthItem(
                     )
 
                     Text(
-                        text = if (awayTeam == null) "" else teamNameDic["short_${awayTeam.teamId}"] ?: awayTeam.teamCity,
+                        text = teamNameDic["short_${awayTeamId}"] ?: "",
                         fontSize = 15.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -581,8 +581,8 @@ fun NBATeamInfoSixthItem(
         )
 
         if (nextGame != null) {
-            val homeTeamId = nextGame.gameSummary?.homeTeamId
-            val awayTeamId = nextGame.gameSummary?.awayTeamId
+            val homeTeamId = nextGame.gameSummary?.homeTeamId ?: 0
+            val awayTeamId = nextGame.gameSummary?.awayTeamId ?: 0
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -590,7 +590,7 @@ fun NBATeamInfoSixthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = if (homeTeamId == null) "" else teamNameDic["short_${homeTeamId}"] ?: "",
+                    text = teamNameDic["short_${homeTeamId}"] ?: "",
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -607,7 +607,7 @@ fun NBATeamInfoSixthItem(
                 )
 
                 Text(
-                    text = if (awayTeamId == null) "" else teamNameDic["short_${awayTeamId}"] ?: "",
+                    text = teamNameDic["short_${awayTeamId}"] ?: "",
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
