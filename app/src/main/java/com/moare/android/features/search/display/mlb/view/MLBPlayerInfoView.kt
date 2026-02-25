@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.MLBUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.core.util.toKg
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
@@ -710,7 +710,7 @@ fun MLBPlayerInfoSeventhItem(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = CalendarUtil.formatDate(it.gameInfo.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                            text = CalendarUtil.formatDate(it.gameInfo.gameDate, outputFormatType = OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                             fontSize = 15.sp
                         )
                     }
@@ -867,7 +867,7 @@ fun MLBPlayerInfoEighthItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(nextGame.gameInfo.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                text = CalendarUtil.formatDate(nextGame.gameInfo.gameDate, outputFormatType = OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )

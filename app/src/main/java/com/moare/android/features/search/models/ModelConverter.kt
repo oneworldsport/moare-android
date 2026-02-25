@@ -884,7 +884,7 @@ object ModelConverter {
             yearMonthList = yearMonthList,
             startDate = response.startDate,
             endDate = response.endDate,
-            relatedLeagueIds = response.relatedLeagues,
+            relatedLeagueIds = response.relatedLeagueIds,
             games = response.schedule,
         )
     }

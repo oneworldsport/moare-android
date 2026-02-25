@@ -41,7 +41,7 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.core.util.displayOrDash
 import com.moare.android.core.util.format3
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -129,7 +129,7 @@ fun NBAGameStatsView(
     val gameDetailTitle = "날짜: \n\n장소: \n관중수: \n심판: "
     val gameDetailContent = buildString {
         append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.gameDate).split(" ").firstOrNull() ?: ""}\n")
-        append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.gameDate, TimeFormatType.AMPM)}\n")
+        append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.gameDate, outputFormatType = OutputTimeFormatType.AMPM)}\n")
         append("${teamNameDic["venue_${displayModel.game.gameSummary?.homeTeamId}"] ?: ""}\n")
         append("${displayModel.game.gameSummary?.attendance ?: 0}\n")
         officials?.forEachIndexed { index, official ->

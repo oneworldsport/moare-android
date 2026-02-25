@@ -7,11 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,27 +16,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.Constants
-import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.core.util.Util
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
-import com.moare.android.features.search.models.models.common.GameForSchedule
-import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
+import com.moare.android.features.search.models.models.tennis.TennisGameForSchedule
+import com.moare.android.features.search.models.models.tennis.TennisGameInfoForSchedule
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterColumn
+import com.moare.android.ui.util.CenterRow
 
 @Composable
 fun <T> ScheduleGameItem(
@@ -47,13 +45,25 @@ fun <T> ScheduleGameItem(
     actions: ScheduleGameItemActions
 ) {
     val game = state.game
+    val leagueId = state.leagueId
     val teamNameDic = state.teamNameDic
-    val homeTeamId = Constants.Ids.checkTeamId(state.leagueId, game.homeTeamId)
-    val awayTeamId = Constants.Ids.checkTeamId(state.leagueId, game.awayTeamId)
+    val homeTeamId = Constants.Ids.checkTeamId(leagueId, game.homeTeamId)
+    val awayTeamId = Constants.Ids.checkTeamId(leagueId, game.awayTeamId)
     val homeTeamScore = game.homeTeamScore
     val awayTeamScore = game.awayTeamScore
     val homeTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
     val awayTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
+
+    val defaultHomeTeamName = if (leagueId in Constants.Ids.TENNIS_ALL) {
+        game.gameInfo?.let { (it as? TennisGameInfoForSchedule)?.homeTeam?.name } ?: ""
+    } else {
+        ""
+    }
+    val defaultAwayTeamName = if (leagueId in Constants.Ids.TENNIS_ALL) {
+        game.gameInfo?.let { (it as? TennisGameInfoForSchedule)?.awayTeam?.name } ?: ""
+    } else {
+        ""
+    }
 
     val scoreAlpha by animateFloatAsState(
         targetValue = if (state.isResultOpened) 1f else 0f,
@@ -89,13 +99,13 @@ fun <T> ScheduleGameItem(
 //                }
         ) {
             URLImage(
-                url = Util.teamLogoUrl(state.leagueId, homeTeamId),
+                url = Util.teamLogoUrl(leagueId, homeTeamId),
                 size = URLImageSize.SMALL
             )
 
             // TODO: 그냥 id가 오류로 없는 경우도 "미정"이라고 나올 수 있음
             Text(
-                text = if (homeTeamId == null) "미정" else teamNameDic["short_${homeTeamId}"] ?: "",
+                text = if (homeTeamId == null) "미정" else teamNameDic["short_${homeTeamId}"] ?: defaultHomeTeamName,
                 fontSize = 13.sp,
                 maxLines = 2
             )
@@ -112,32 +122,46 @@ fun <T> ScheduleGameItem(
         }
 
         // score
-        CenterColumn(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+        CenterRow(
             modifier = Modifier.weight(0.8f).alpha(scoreAlpha)
         ) {
-            // 축구 패널티킥 경기는 일반 스코어 검정색
-            val scoreColor = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
-                Color.Black
-            } else {
-                if (homeTeamScore >= awayTeamScore) Moare else Color.Black
+            CenterColumn(
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                // 축구 패널티킥 경기는 일반 스코어 검정색
+                val scoreColor = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+                    Color.Black
+                } else {
+                    if (homeTeamScore >= awayTeamScore) Moare else Color.Black
+                }
+
+                Text(
+                    text = homeTeamScore.toString(),
+                    textAlign = TextAlign.Center,
+                    color = scoreColor
+                )
+
+                homeTeamPenaltyScore?.let {
+                    awayTeamPenaltyScore?.let {
+                        Text(
+                            text = homeTeamPenaltyScore.toString(),
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center,
+                            color = if (homeTeamPenaltyScore >= awayTeamPenaltyScore) Moare else Color.Black
+                        )
+                    }
+                }
             }
 
-            Text(
-                text = homeTeamScore.toString(),
-                textAlign = TextAlign.Center,
-                color = scoreColor
-            )
-
-            homeTeamPenaltyScore?.let {
-                awayTeamPenaltyScore?.let {
-                    Text(
-                        text = homeTeamPenaltyScore.toString(),
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                        color = if (homeTeamPenaltyScore >= awayTeamPenaltyScore) Moare else Color.Black
-                    )
-                }
+            if (state.shouldShowWinner && state.isHomeWinner) {
+                RoundedBorderText(
+                    text = "승",
+                    fontSize = 11.sp,
+                    radius = 4.dp,
+                    textColor = Moare,
+                    borderColor = Moare,
+                    modifier = Modifier.padding(start = 6.dp)
+                )
             }
         }
 
@@ -160,7 +184,7 @@ fun <T> ScheduleGameItem(
             // game date
             if (state.shouldShowOnlyDateTime) {
                 Text(
-                    text = CalendarUtil.formatDate(date = state.game.date, formatType = TimeFormatType.AMPM),
+                    text = CalendarUtil.formatDate(date = state.game.date, outputFormatType = OutputTimeFormatType.AMPM),
                     fontSize = 12.sp,
                     modifier = Modifier.padding(vertical = 2.dp)
                 )
@@ -172,7 +196,7 @@ fun <T> ScheduleGameItem(
                 )
 
                 Text(
-                    text = CalendarUtil.formatDate(date = state.game.date, formatType = TimeFormatType.AMPM),
+                    text = CalendarUtil.formatDate(date = state.game.date, outputFormatType = OutputTimeFormatType.AMPM),
                     fontSize = 12.sp,
                     modifier = Modifier.padding(bottom = 2.dp)
                 )
@@ -203,31 +227,45 @@ fun <T> ScheduleGameItem(
            away
            --------------------- */
         // score
-        CenterColumn(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+        CenterRow(
             modifier = Modifier.weight(0.8f).alpha(scoreAlpha)
         ) {
-            // 축구 패널티킥 경기는 일반 스코어 검정색
-            val scoreColor = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
-                Color.Black
-            } else {
-                if (awayTeamScore >= homeTeamScore) Moare else Color.Black
+            if (state.shouldShowWinner && !state.isHomeWinner) {
+                RoundedBorderText(
+                    text = "승",
+                    fontSize = 11.sp,
+                    radius = 4.dp,
+                    textColor = Moare,
+                    borderColor = Moare,
+                    modifier = Modifier.padding(end = 6.dp)
+                )
             }
 
-            Text(
-                text = awayTeamScore.toString(),
-                textAlign = TextAlign.Center,
-                color = scoreColor
-            )
+            CenterColumn(
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                // 축구 패널티킥 경기는 일반 스코어 검정색
+                val scoreColor = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
+                    Color.Black
+                } else {
+                    if (awayTeamScore >= homeTeamScore) Moare else Color.Black
+                }
 
-            homeTeamPenaltyScore?.let {
-                awayTeamPenaltyScore?.let {
-                    Text(
-                        text = awayTeamPenaltyScore.toString(),
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                        color = if (awayTeamPenaltyScore >= homeTeamPenaltyScore) Moare else Color.Black
-                    )
+                Text(
+                    text = awayTeamScore.toString(),
+                    textAlign = TextAlign.Center,
+                    color = scoreColor
+                )
+
+                homeTeamPenaltyScore?.let {
+                    awayTeamPenaltyScore?.let {
+                        Text(
+                            text = awayTeamPenaltyScore.toString(),
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center,
+                            color = if (awayTeamPenaltyScore >= homeTeamPenaltyScore) Moare else Color.Black
+                        )
+                    }
                 }
             }
         }
@@ -239,12 +277,12 @@ fun <T> ScheduleGameItem(
                 .weight(1f)
         ) {
             URLImage(
-                url = Util.teamLogoUrl(state.leagueId, awayTeamId),
+                url = Util.teamLogoUrl(leagueId, awayTeamId),
                 size = URLImageSize.SMALL
             )
 
             Text(
-                text = if (awayTeamId == null) "미정" else teamNameDic["short_${awayTeamId}"] ?: "",
+                text = if (awayTeamId == null) "미정" else teamNameDic["short_${awayTeamId}"] ?: defaultAwayTeamName,
                 fontSize = 13.sp,
                 maxLines = 2
             )

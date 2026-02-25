@@ -349,6 +349,8 @@ class SearchStore @AssistedInject constructor(
             val result = searchClient.fetchFromJson(context, viewForTest)
 
             _resultVisibleState.emit(true)
+
+            emitToParent(SearchDelegate.Push(model = result.data))
         } catch (e: Exception) {
             _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
             Log.e("dsdf", e.localizedMessage ?: "data type error")

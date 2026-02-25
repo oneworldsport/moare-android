@@ -4,7 +4,7 @@ import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.DayInfo
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.displaymodels.SportDisplayModel
 import kotlinx.coroutines.CoroutineScope
@@ -63,6 +63,9 @@ abstract class BaseScheduleStore<A, T: SportDisplayModel>(
     protected var _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
+    protected var _selectedRelatedLeagueIndex = MutableStateFlow(0)
+    val selectedRelatedLeagueIndex: StateFlow<Int> = _selectedRelatedLeagueIndex
+
     abstract fun send(action: A)
 
     open fun initData() {
@@ -114,12 +117,16 @@ abstract class BaseScheduleStore<A, T: SportDisplayModel>(
     }
 
     open fun setDefaultYearMonth(date: String) {
-        val defaultYearMonth = CalendarUtil.formatDate(date, TimeFormatType.YEAR_MONTH)
+        val defaultYearMonth = CalendarUtil.formatDate(date, outputFormatType = OutputTimeFormatType.YEAR_MONTH)
         val defaultYearMonthIndex = yearMonthList.value.withIndex().first{ (_, value) -> value == defaultYearMonth }.index
 
         selectYearMonth(defaultYearMonth, defaultYearMonthIndex, true)
 
         _yearMonthCalendarScrollTrigger.value = UUID.randomUUID().toString()
+    }
+
+    open fun selectRelatedLeague(index: Int) {
+        _selectedRelatedLeagueIndex.value = index
     }
 
     abstract fun toggleAllResult()

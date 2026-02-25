@@ -166,7 +166,7 @@ fun SearchView(
        --------------------- */
     LaunchedEffect(viewForTest) {
         viewForTest?.let {
-//            searchStore.send(SearchStore.Intent.TestSearch(viewForTest))
+            searchStore.send(SearchAction.TestSearch(viewForTest))
         }
     }
 

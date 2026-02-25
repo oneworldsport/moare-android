@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.KBOUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
@@ -716,7 +716,7 @@ fun KBOPlayerInfoSeventhItem(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = CalendarUtil.formatDate(it.gameInfo?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                            text = CalendarUtil.formatDate(it.gameInfo?.date, outputFormatType = OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                             fontSize = 15.sp
                         )
                     }
@@ -872,7 +872,7 @@ fun KBOPlayerInfoEighthItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(nextGame.gameInfo?.date, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                text = CalendarUtil.formatDate(nextGame.gameInfo?.date, outputFormatType = OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )

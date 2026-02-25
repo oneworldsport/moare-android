@@ -37,7 +37,7 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.KBOUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
@@ -125,7 +125,7 @@ fun KBOGameStatsView(
     val gameDetailTitle = "날짜: \n\n장소: "
     val gameDetailContent = buildString {
         append("${CalendarUtil.formatDate(displayModel.game.gameInfo?.date).split(" ").firstOrNull() ?: ""}\n")
-        append("${CalendarUtil.formatDate(displayModel.game.gameInfo?.date, TimeFormatType.AMPM)}\n")
+        append("${CalendarUtil.formatDate(displayModel.game.gameInfo?.date, outputFormatType = OutputTimeFormatType.AMPM)}\n")
         append(teamNameDic["venue_${displayModel.game.gameInfo?.homeTeamId}"] ?: "")
     }
 

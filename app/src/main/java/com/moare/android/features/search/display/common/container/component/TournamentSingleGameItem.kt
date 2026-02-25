@@ -1,6 +1,5 @@
 package com.moare.android.features.search.display.common.container.component
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -15,10 +14,9 @@ import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.CalendarUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.core.util.Util
 import com.moare.android.features.search.models.models.common.GameForSchedule
-import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.HCapsuleBar
@@ -120,7 +118,7 @@ fun <T> TournamentSingleGameItem(
             )
 
             Text(
-                text = CalendarUtil.formatDate(game.date, formatType = TimeFormatType.AMPM),
+                text = CalendarUtil.formatDate(game.date, outputFormatType = OutputTimeFormatType.AMPM),
                 fontSize = 12.sp,
                 modifier = Modifier.padding(bottom = 2.dp)
             )

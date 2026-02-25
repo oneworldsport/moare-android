@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.core.util.toCm
 import com.moare.android.core.util.toKg
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
@@ -759,7 +759,7 @@ fun NBAPlayerInfoEighthItem(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = CalendarUtil.formatDate(lastGame.gameSummary?.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                            text = CalendarUtil.formatDate(lastGame.gameSummary?.gameDate, outputFormatType = OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                             fontSize = 15.sp
                         )
                     }
@@ -887,7 +887,7 @@ fun NBAPlayerInfoNinthItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(nextGame.gameSummary?.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                text = CalendarUtil.formatDate(nextGame.gameSummary?.gameDate, outputFormatType = OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )

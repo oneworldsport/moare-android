@@ -11,7 +11,7 @@ data class FBGameScheduleResponseModel(
     val scheduledMonths: List<String> = emptyList(),
     val startDate: String? = null,
     val endDate: String? = null,
-    val relatedLeagues: List<Int>? = null,
+    val relatedLeagueIds: List<Int>? = null,
     val schedule: List<FBGameForSchedule> = emptyList()
 )
 
