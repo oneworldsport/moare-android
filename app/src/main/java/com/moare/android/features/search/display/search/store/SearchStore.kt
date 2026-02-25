@@ -335,6 +335,9 @@ class SearchStore @AssistedInject constructor(
     private suspend fun getLeagueKeywords() {
         try {
             val leagueKeywords = keywordsClient.fetchLeagueKeywords()
+            // 로고가 사라지면서 검색 아이콘이 나타나는 시간 (1 + 0.2) + BarFirstOpen 애니메이션 시간 1 + trendingKeyowrds 나타나는 시간 0.4(AnimatedVisibility의 enter 애니메이션 기본 값) + 추가 0.1
+            // 1.2 + 1 + 0.4 + 0.1 = 2.7초 지연
+            delay(2700)
             _leagueKeywords.value = leagueKeywords
         } catch (e: Exception) {
         }

@@ -14,16 +14,32 @@ data class FBGame(
     val score: FBGameScore,
     val lineups: List<FBGameLineups> = emptyList(),
     val statistics: List<FBGameStats> = emptyList(),
-    val players: List<FBGamePlayers> = emptyList()
-)
+    val players: List<FBGamePlayers> = emptyList(),
+    val events: List<FBGameEvent> = emptyList()
+) {
+    val goalEvents: List<FBGameEvent>
+        get() = events.filter {
+            it.type.lowercase() == "goal" && !it.detail.lowercase().contains("missed")
+        }
+
+    val cardEvents: List<FBGameEvent>
+        get() = events.filter {
+            it.type.lowercase() == "card"
+        }
+
+    val substEvents: List<FBGameEvent>
+        get() = events.filter {
+            it.type.lowercase() == "sbust"
+        }
+}
 
 @Serializable
 data class FBGameFixture(
-    @SerialName("id") private val _id: Int?,
-    @SerialName("referee") private val _referee: String?,
-    @SerialName("timezone") private val _timezone: String?,
-    @SerialName("date") private val _date: String?,
-    @SerialName("timestamp") private val _timestamp: Int?,
+    @SerialName("id") private val _id: Int? = null,
+    @SerialName("referee") private val _referee: String? = null,
+    @SerialName("timezone") private val _timezone: String? = null,
+    @SerialName("date") private val _date: String? = null,
+    @SerialName("timestamp") private val _timestamp: Int? = null,
     val periods: FBGamePeriods,
     val venue: FBVenue,
     val status: FBGameStatus
@@ -46,8 +62,8 @@ data class FBGameFixture(
 
 @Serializable
 data class FBGamePeriods(
-    @SerialName("first") private val _first: Int?,
-    @SerialName("second") private val _second: Int?,
+    @SerialName("first") private val _first: Int? = null,
+    @SerialName("second") private val _second: Int? = null,
 ) {
     val first: Int
         get() = _first ?: 0
@@ -58,10 +74,10 @@ data class FBGamePeriods(
 
 @Serializable
 data class FBGameStatus(
-    @SerialName("long") private val _long: String?,
-    @SerialName("short") private val _short: String?,
-    @SerialName("elapsed") private val _elapsed: Int?,
-    @SerialName("extra") private val _extra: Int?,
+    @SerialName("long") private val _long: String? = null,
+    @SerialName("short") private val _short: String? = null,
+    @SerialName("elapsed") private val _elapsed: Int? = null,
+    @SerialName("extra") private val _extra: Int? = null,
 ) {
     val long: String
         get() = _long ?: ""
@@ -94,7 +110,7 @@ data class FBGameScore(
 data class FBGameLineups(
     val team: FBTeamInfo,
     val coach: FBPerson,
-    @SerialName("formation") private val _formation: String?,
+    @SerialName("formation") private val _formation: String? = null,
     val startXI: List<FBGameStartXI> = emptyList(),
     val substitutes: List<FBGameStartXI> = emptyList()
 ) {
@@ -110,9 +126,9 @@ data class FBGameColors(
 
 @Serializable
 data class FBGameColorDetail(
-    @SerialName("primary") private val _primary: String?,
-    @SerialName("number") private val _number: String?,
-    @SerialName("border") private val _border: String?,
+    @SerialName("primary") private val _primary: String? = null,
+    @SerialName("number") private val _number: String? = null,
+    @SerialName("border") private val _border: String? = null,
 ) {
     val primary: String
         get() = _primary ?: ""
@@ -131,11 +147,11 @@ data class FBGameStartXI(
 
 @Serializable
 data class FBGamePlayer(
-    @SerialName("id") private val _id: Int?,
-    @SerialName("name") private val _name: String?,
-    @SerialName("number") private val _number: Int?,
-    @SerialName("pos") private val _pos: String?,
-    @SerialName("grid") private val _grid: String?,
+    @SerialName("id") private val _id: Int? = null,
+    @SerialName("name") private val _name: String? = null,
+    @SerialName("number") private val _number: Int? = null,
+    @SerialName("pos") private val _pos: String? = null,
+    @SerialName("grid") private val _grid: String? = null,
 ) {
     val id: Int
         get() = _id ?: 0
@@ -230,6 +246,23 @@ data class FBGamePlayerStatsGames(
 
     val substitute: Boolean
         get() = _substitute ?: false
+}
+
+@Serializable
+data class FBGameEvent(
+    @SerialName("type") private val _type: String? = null,
+    @SerialName("detail") private val _detail: String? = null,
+    @SerialName("comments") private val _comments: String? = null,
+    val time: FBGameStatus? = null,
+    val team: FBTeamInfo? = null,
+    val player: FBPerson? = null,
+    val assist: FBPerson? = null
+) {
+    val type: String get() = _type ?: ""
+    val detail: String get() = _detail ?: "" // Normal Goal, Own Goal, Penalty, Missed Penalty
+    val comments: String get() = _comments ?: ""
+
+    val isOwnGoal: Boolean get() = detail.lowercase().contains("own goal")
 }
 
 @Serializable

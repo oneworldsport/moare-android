@@ -279,18 +279,22 @@ class FBLeagueScheduleStore @AssistedInject constructor(
         }
 
         scope.launch {
-            val result = searchClient.fetchById(
-                season = displayModel.value.season,
-                category = "football",
-                date = game.date,
-                dataType = "football_game_stats",
-                leagueId = displayModel.value.leagueId,
-                id = game.gameId
-            )
+            try {
+                val result = searchClient.fetchById(
+                    season = displayModel.value.season,
+                    category = "football",
+                    date = game.date,
+                    dataType = "football_game_stats",
+                    leagueId = displayModel.value.leagueId,
+                    id = game.gameId
+                )
 
-            if (result.data is SportDecodableModel.FBGameStats) {
-                emitToParent(FBLeagueScheduleDelegate.ShowGameStats(result.data))
-                updateResultOpenedState(game.gameId, true)
+                if (result.data is SportDecodableModel.FBGameStats) {
+                    emitToParent(FBLeagueScheduleDelegate.ShowGameStats(result.data))
+                    updateResultOpenedState(game.gameId, true)
+                }
+            } catch (e: Exception) {
+                Log.e("dsdf", e.localizedMessage ?: "error")
             }
         }
     }
