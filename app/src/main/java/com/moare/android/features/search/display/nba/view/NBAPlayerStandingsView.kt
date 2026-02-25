@@ -19,10 +19,9 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.state.StandingsHighlightItemState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.nba.store.NBAPlayerStandingsAction
+import com.moare.android.features.search.display.nba.store.NBAPlayerStandingsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.util.convertDpToPx
 import kotlinx.coroutines.delay

@@ -20,8 +20,12 @@ data class DayInfo(
     var isDataEmpty: Boolean = false
 )
 
-enum class TimeFormatType {
-    AMPM, AMPM_WITH_DATE, AMPM_WITH_DAY_OF_WEEK_DATE, YEAR_MONTH
+enum class InputTimeFormatType {
+    ISO_DATETIME_WITH_ZONE, DATE_ONLY
+}
+
+enum class OutputTimeFormatType {
+    AMPM, AMPM_WITH_DATE, AMPM_WITH_DAY_OF_WEEK_DATE, YEAR_MONTH, YEAR_MONTH_DAY_KR
 }
 
 object CalendarUtil {
@@ -75,45 +79,44 @@ object CalendarUtil {
 
     fun formatDate(
         date: String?,
-        formatType: TimeFormatType = TimeFormatType.AMPM_WITH_DATE,
+        inputFormatType: InputTimeFormatType = InputTimeFormatType.ISO_DATETIME_WITH_ZONE,
+        outputFormatType: OutputTimeFormatType = OutputTimeFormatType.AMPM_WITH_DATE,
         zoneId: TimeZone = TimeZone.getTimeZone("Asia/Seoul")
     ): String {
-//        val inputDateFormat = SimpleDateFormat("yyyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault())
-//        inputDateFormat.timeZone = TimeZone.getTimeZone("UTC")
-//
-//        val parsedDate = inputDateFormat.parse(date) ?: return ""
-//
-//        val outputDateFormat = SimpleDateFormat(
-//            when (formatType) {
-//                TimeFormatType.AMPM -> "a hh:mm"
-//                TimeFormatType.AMPM_WITH_DATE -> "yyyy.MM.dd a hh:mm"
-//                TimeFormatType.YEAR_MONTH -> "yy/MM"
-//            },
-//            Locale("ko", "KR")
-//        )
-//        outputDateFormat.timeZone = zoneId
-//
-//        return outputDateFormat.format(parsedDate)
+        if (date.isNullOrEmpty()) return ""
 
-        if (!date.isNullOrEmpty()) {
-            // NOTE: OffsetDateTime.parse()는 ISO-8601 표준 지원. "2025-04-02T09:00:00Z" 와 "2025-04-02T09:00:00+00:00" 은 둘다 동일한 의미의 ISO-8601 포맷
-            val offsetDateTime = OffsetDateTime.parse(date)
+        val zone = zoneId.toZoneId()
 
-            val zonedDateTime = offsetDateTime.toInstant().atZone(zoneId.toZoneId())
+        val zonedDateTime: ZonedDateTime = try {
+            when (inputFormatType) {
+                InputTimeFormatType.ISO_DATETIME_WITH_ZONE -> {
+                    // NOTE: OffsetDateTime.parse()는 ISO-8601 표준 지원. "2025-04-02T09:00:00Z" 와 "2025-04-02T09:00:00+00:00" 은 둘다 동일한 의미의 ISO-8601 포맷
+                    val odt = OffsetDateTime.parse(date)
+                    odt.toInstant().atZone(zone)
+                }
 
-            val formatter = DateTimeFormatter.ofPattern(
-                when (formatType) {
-                    TimeFormatType.AMPM -> "a hh:mm"
-                    TimeFormatType.AMPM_WITH_DATE -> "yyyy.MM.dd a hh:mm"
-                    TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE -> "yyyy.MM.dd (E) a hh:mm"
-                    TimeFormatType.YEAR_MONTH -> "yy/MM"
-                }, Locale("ko", "KR")
-            )
-
-            return zonedDateTime.format(formatter)
-        } else {
+                InputTimeFormatType.DATE_ONLY -> {
+                    val localDate = LocalDate.parse(
+                        date,
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
+                    )
+                    localDate.atStartOfDay(zone)
+                }
+            }
+        } catch (_: DateTimeParseException) {
             return ""
         }
+
+        val pattern = when (outputFormatType) {
+            OutputTimeFormatType.AMPM -> "a hh:mm"
+            OutputTimeFormatType.AMPM_WITH_DATE -> "yyyy.MM.dd a hh:mm"
+            OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE -> "yyyy.MM.dd (E) a hh:mm"
+            OutputTimeFormatType.YEAR_MONTH -> "yy/MM"
+            OutputTimeFormatType.YEAR_MONTH_DAY_KR -> "yyyy년 M월 d일"
+        }
+        val formatter = DateTimeFormatter.ofPattern(pattern, Locale("ko", "KR"))
+
+        return zonedDateTime.format(formatter)
     }
 
     fun getDefaultDay(yearMonth: String, dayList: List<DayInfo>): Pair<Int, DayInfo>? {

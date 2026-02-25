@@ -19,9 +19,9 @@ import com.moare.android.features.search.display.common.container.state.Standing
 import com.moare.android.features.search.display.common.container.state.StandingsHighlightItemState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.StandingsViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsAction
-import com.moare.android.features.search.display.football.viewmodel.FBPlayerStandingsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.football.store.FBPlayerStandingsAction
+import com.moare.android.features.search.display.football.store.FBPlayerStandingsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.ui.common.components.FBLeagueTitle
 import com.moare.android.ui.util.convertDpToPx
 import kotlinx.coroutines.delay

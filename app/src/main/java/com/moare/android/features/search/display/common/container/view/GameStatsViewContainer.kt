@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -76,8 +77,10 @@ import com.moare.android.ui.util.getOffsetOfAniCapsuleBar
 fun GameStatsViewContainer(
     state: GameStatsContainerState,
     actions: GameStatsContainerActions,
+    shouldUseCustomStatsContent: Boolean = false,
     titleContent: @Composable ColumnScope.() -> Unit,
-    gameContent: @Composable ColumnScope.() -> Unit
+    gameContent: @Composable ColumnScope.() -> Unit,
+    customStatsContent: @Composable LazyListScope.() -> Unit = {},
 ) {
     val coachState = state.coachState
     val columnWidthList = state.firstStatsColumnWidthList
@@ -195,10 +198,12 @@ fun GameStatsViewContainer(
                                                         actions.teamCategoryButtonAction?.let { it(index) }
                                                     }
                                             ) {
-                                                URLImage(
-                                                    url = item.imageUrl,
-                                                    size = URLImageSize.SMALL
-                                                )
+                                                item.imageUrl?.let {
+                                                    URLImage(
+                                                        url = it,
+                                                        size = URLImageSize.SMALL
+                                                    )
+                                                }
 
                                                 Text(
                                                     text = item.name,
@@ -287,162 +292,42 @@ fun GameStatsViewContainer(
                             }
                         }
 
-                        if (state.shouldShowCoach) {
+                        if (shouldUseCustomStatsContent) {
                             item {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 8.dp)
-                                ) {
-                                    Text(
-                                        text = "감독: ",
-                                        fontSize = 15.sp
-                                    )
-
-                                    URLImage(
-                                        url = coachState?.imageUrl,
-                                        customSize = 23.dp
-                                    )
-
-                                    Text(
-                                        text = coachState?.name ?: "",
-                                        fontSize = 15.sp,
-                                        modifier = Modifier.padding(start = 4.dp)
-                                    )
-                                }
+                                this@LazyColumn.customStatsContent()
                             }
-                        }
-
-                        /* ---------------------
-                           players stats
-                           --------------------- */
-                        state.firstStatsTitle?.let {
-                            item {
-                                Row {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.width(132.dp)
+                        } else {
+                            if (state.shouldShowCoach) {
+                                item {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 8.dp)
                                     ) {
                                         Text(
-                                            text = state.firstStatsTitle,
+                                            text = "감독: ",
+                                            fontSize = 15.sp
+                                        )
+
+                                        URLImage(
+                                            url = coachState?.imageUrl,
+                                            customSize = 23.dp
+                                        )
+
+                                        Text(
+                                            text = coachState?.name ?: "",
                                             fontSize = 15.sp,
-                                            fontWeight = FontWeight.Medium
-                                        )
-
-                                        HCapsuleBar()
-                                    }
-
-                                    Spacer(Modifier.weight(1f))
-                                }
-                            }
-                        }
-
-                        stickyHeader {
-                            Row(
-                                modifier = Modifier.background(Color.White)
-                            ) {
-                                Box(
-                                    contentAlignment = Alignment.BottomCenter
-                                ) {
-                                    StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY, width = state.firstColumnWidth, onClick = actions.firstStatsTitleCategoryAction)
-
-                                    HCapsuleBar(
-                                        modifier = Modifier.alpha(if (state.firstStatsCategorySelectedIndex < 0) 1f else 0f)
-                                    )
-                                }
-
-                                Row(
-                                    Modifier.horizontalScroll(horizontalScrollState)
-                                ) {
-                                    Column {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            for ((index, item) in state.firstStatsCategories.withIndex()) {
-                                                CenterBox(
-                                                    height = 42.dp,
-                                                    modifier = Modifier
-                                                        .conditionalClickable(item.isNotBlank()) {
-                                                            actions.firstStatsCategoryButtonAction(index)
-                                                        }
-                                                ) {
-                                                    Text(
-                                                        text = item,
-                                                        textAlign = TextAlign.Center,
-                                                        fontSize = 14.sp,
-                                                        fontWeight = FontWeight.Medium,
-                                                        modifier = Modifier
-                                                            .width(columnWidthList.getOrNull(index) ?: defaultColumnWidth)
-                                                    )
-                                                }
-                                            }
-                                        }
-
-                                        HCapsuleBar(
-                                            modifier = Modifier
-                                                .offset(x = firstStatsCategoryBarOffset)
+                                            modifier = Modifier.padding(start = 4.dp)
                                         )
                                     }
                                 }
                             }
-                        }
 
-                        item {
-                            Row {
-                                Column(
-                                    modifier = Modifier.padding(bottom = 10.dp)
-                                ) {
-                                    for ((index, item) in state.firstStatsPlayerList.withIndex()) {
-                                        StandingsRankItem(
-                                            id = item.id,
-                                            width = state.firstColumnWidth,
-                                            shouldShowRank = item.numInfo != null,
-                                            shouldShowExtraInfo = true,
-                                            rank = item.numInfo ?: 0,
-                                            imageUrl = item.imageUrl,
-                                            isSvgLogo = item.isSvgLogo,
-                                            name = item.name.dropFirstWord(),
-                                            subName = item.subName,
-                                            extraInfo = item.extraInfo,
-                                            extraSubInfo = item.extraSubInfo,
-                                            isLastItem = index == state.firstStatsPlayerList.size - 1,
-                                            action = {}
-                                        )
-                                    }
-                                }
-
-                                Row(
-                                    modifier = Modifier.horizontalScroll(horizontalScrollState)
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        for ((index, item) in state.firstStatsPlayerList.withIndex()) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier
-                                                    .height(40.dp)
-                                            ) {
-                                                for ((index, data) in item.dataList.withIndex()) {
-                                                    Text(
-                                                        text = data,
-                                                        textAlign = TextAlign.Center,
-                                                        fontSize = 15.sp,
-                                                        modifier = Modifier
-                                                            .width(columnWidthList.getOrNull(index) ?: defaultColumnWidth)
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // 보여줄 Stats list가 두개인 경우의 두번째 Stats list. ex) KBO, MLB의 투수 기록
-                        state.secondStatsCategories?.let {
-                            state.secondStatsTitle?.let {
+                            /* ---------------------
+                               players stats
+                               --------------------- */
+                            state.firstStatsTitle?.let {
                                 item {
                                     Row {
                                         Column(
@@ -450,7 +335,7 @@ fun GameStatsViewContainer(
                                             modifier = Modifier.width(132.dp)
                                         ) {
                                             Text(
-                                                text = state.secondStatsTitle,
+                                                text = state.firstStatsTitle,
                                                 fontSize = 15.sp,
                                                 fontWeight = FontWeight.Medium
                                             )
@@ -467,21 +352,29 @@ fun GameStatsViewContainer(
                                 Row(
                                     modifier = Modifier.background(Color.White)
                                 ) {
-                                    StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY)
+                                    Box(
+                                        contentAlignment = Alignment.BottomCenter
+                                    ) {
+                                        StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY, width = state.firstColumnWidth, onClick = actions.firstStatsTitleCategoryAction)
+
+                                        HCapsuleBar(
+                                            modifier = Modifier.alpha(if (state.firstStatsCategorySelectedIndex < 0) 1f else 0f)
+                                        )
+                                    }
 
                                     Row(
-                                        Modifier.horizontalScroll(secondStatsHorizontalScrollState)
+                                        Modifier.horizontalScroll(horizontalScrollState)
                                     ) {
                                         Column {
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                for ((index, item) in state.secondStatsCategories.withIndex()) {
+                                                for ((index, item) in state.firstStatsCategories.withIndex()) {
                                                     CenterBox(
                                                         height = 42.dp,
                                                         modifier = Modifier
-                                                            .clickable {
-                                                                actions.secondStatsCategoryButtonAction?.let { it(index) }
+                                                            .conditionalClickable(item.isNotBlank()) {
+                                                                actions.firstStatsCategoryButtonAction(index)
                                                             }
                                                     ) {
                                                         Text(
@@ -490,7 +383,7 @@ fun GameStatsViewContainer(
                                                             fontSize = 14.sp,
                                                             fontWeight = FontWeight.Medium,
                                                             modifier = Modifier
-                                                                .width(secondStatsColumnWidthList.getOrNull(index) ?: defaultColumnWidth)
+                                                                .width(columnWidthList.getOrNull(index) ?: defaultColumnWidth)
                                                         )
                                                     }
                                                 }
@@ -498,56 +391,174 @@ fun GameStatsViewContainer(
 
                                             HCapsuleBar(
                                                 modifier = Modifier
-                                                    .offset(x = secondStatsCategoryBarOffset)
+                                                    .offset(x = firstStatsCategoryBarOffset)
                                             )
                                         }
                                     }
                                 }
                             }
 
-                            state.secondStatsPlayerList?.let {
-                                item {
-                                    Row {
+                            item {
+                                Row {
+                                    Column(
+                                        modifier = Modifier.padding(bottom = 10.dp)
+                                    ) {
+                                        for ((index, item) in state.firstStatsPlayerList.withIndex()) {
+                                            StandingsRankItem(
+                                                id = item.id,
+                                                width = state.firstColumnWidth,
+                                                shouldShowRank = item.numInfo != null,
+                                                shouldShowExtraInfo = true,
+                                                rank = item.numInfo ?: 0,
+                                                imageUrl = item.imageUrl,
+                                                isSvgLogo = item.isSvgLogo,
+                                                name = item.name.dropFirstWord(),
+                                                subName = item.subName,
+                                                extraInfo = item.extraInfo,
+                                                extraSubInfo = item.extraSubInfo,
+                                                isLastItem = index == state.firstStatsPlayerList.size - 1,
+                                                action = {}
+                                            )
+                                        }
+                                    }
+
+                                    Row(
+                                        modifier = Modifier.horizontalScroll(horizontalScrollState)
+                                    ) {
                                         Column(
-                                            modifier = Modifier.padding(bottom = 10.dp)
+                                            horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
-                                            for ((index, item) in state.secondStatsPlayerList.withIndex()) {
-                                                StandingsRankItem(
-                                                    id = item.id,
-                                                    shouldShowRank = item.numInfo != null,
-                                                    shouldShowExtraInfo = true,
-                                                    imageUrl = item.imageUrl,
-                                                    isSvgLogo = item.isSvgLogo,
-                                                    name = item.name,
-                                                    subName = item.subName,
-                                                    extraInfo = item.extraInfo,
-                                                    extraSubInfo = item.extraSubInfo,
-                                                    isLastItem = index == state.secondStatsPlayerList.size - 1,
-                                                    action = {}
-                                                )
+                                            for ((index, item) in state.firstStatsPlayerList.withIndex()) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier
+                                                        .height(40.dp)
+                                                ) {
+                                                    for ((index, data) in item.dataList.withIndex()) {
+                                                        Text(
+                                                            text = data,
+                                                            textAlign = TextAlign.Center,
+                                                            fontSize = 15.sp,
+                                                            modifier = Modifier
+                                                                .width(columnWidthList.getOrNull(index) ?: defaultColumnWidth)
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
+                                    }
+                                }
+                            }
+
+                            // 보여줄 Stats list가 두개인 경우의 두번째 Stats list. ex) KBO, MLB의 투수 기록
+                            state.secondStatsCategories?.let {
+                                state.secondStatsTitle?.let {
+                                    item {
+                                        Row {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.width(132.dp)
+                                            ) {
+                                                Text(
+                                                    text = state.secondStatsTitle,
+                                                    fontSize = 15.sp,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+
+                                                HCapsuleBar()
+                                            }
+
+                                            Spacer(Modifier.weight(1f))
+                                        }
+                                    }
+                                }
+
+                                stickyHeader {
+                                    Row(
+                                        modifier = Modifier.background(Color.White)
+                                    ) {
+                                        StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY)
 
                                         Row(
-                                            modifier = Modifier.horizontalScroll(secondStatsHorizontalScrollState)
+                                            Modifier.horizontalScroll(secondStatsHorizontalScrollState)
                                         ) {
-                                            Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally
-                                            ) {
-                                                for ((index, item) in state.secondStatsPlayerList.withIndex()) {
-                                                    Row(
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        modifier = Modifier
-                                                            .height(40.dp)
-                                                    ) {
-                                                        for ((index, data) in item.dataList.withIndex()) {
+                                            Column {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    for ((index, item) in state.secondStatsCategories.withIndex()) {
+                                                        CenterBox(
+                                                            height = 42.dp,
+                                                            modifier = Modifier
+                                                                .clickable {
+                                                                    actions.secondStatsCategoryButtonAction?.let { it(index) }
+                                                                }
+                                                        ) {
                                                             Text(
-                                                                text = data,
+                                                                text = item,
                                                                 textAlign = TextAlign.Center,
-                                                                fontSize = 15.sp,
+                                                                fontSize = 14.sp,
+                                                                fontWeight = FontWeight.Medium,
                                                                 modifier = Modifier
                                                                     .width(secondStatsColumnWidthList.getOrNull(index) ?: defaultColumnWidth)
                                                             )
+                                                        }
+                                                    }
+                                                }
+
+                                                HCapsuleBar(
+                                                    modifier = Modifier
+                                                        .offset(x = secondStatsCategoryBarOffset)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                state.secondStatsPlayerList?.let {
+                                    item {
+                                        Row {
+                                            Column(
+                                                modifier = Modifier.padding(bottom = 10.dp)
+                                            ) {
+                                                for ((index, item) in state.secondStatsPlayerList.withIndex()) {
+                                                    StandingsRankItem(
+                                                        id = item.id,
+                                                        shouldShowRank = item.numInfo != null,
+                                                        shouldShowExtraInfo = true,
+                                                        imageUrl = item.imageUrl,
+                                                        isSvgLogo = item.isSvgLogo,
+                                                        name = item.name,
+                                                        subName = item.subName,
+                                                        extraInfo = item.extraInfo,
+                                                        extraSubInfo = item.extraSubInfo,
+                                                        isLastItem = index == state.secondStatsPlayerList.size - 1,
+                                                        action = {}
+                                                    )
+                                                }
+                                            }
+
+                                            Row(
+                                                modifier = Modifier.horizontalScroll(secondStatsHorizontalScrollState)
+                                            ) {
+                                                Column(
+                                                    horizontalAlignment = Alignment.CenterHorizontally
+                                                ) {
+                                                    for ((index, item) in state.secondStatsPlayerList.withIndex()) {
+                                                        Row(
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            modifier = Modifier
+                                                                .height(40.dp)
+                                                        ) {
+                                                            for ((index, data) in item.dataList.withIndex()) {
+                                                                Text(
+                                                                    text = data,
+                                                                    textAlign = TextAlign.Center,
+                                                                    fontSize = 15.sp,
+                                                                    modifier = Modifier
+                                                                        .width(secondStatsColumnWidthList.getOrNull(index) ?: defaultColumnWidth)
+                                                                )
+                                                            }
                                                         }
                                                     }
                                                 }

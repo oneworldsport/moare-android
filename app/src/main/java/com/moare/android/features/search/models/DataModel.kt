@@ -37,6 +37,10 @@ import com.moare.android.features.search.models.displaymodels.nba.NBATeamInfoDis
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATournamentDisplayModel
+import com.moare.android.features.search.models.displaymodels.tennis.TennisGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.tennis.TennisLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.tennis.TennisPlayerStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.tennis.TennisTournamentDisplayModel
 import com.moare.android.features.search.models.responsemodels.football.FBGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerInfoResponseModel
@@ -63,6 +67,9 @@ import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfo
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.tennis.TennisGameScheduleResponseModel
+import com.moare.android.features.search.models.responsemodels.tennis.TennisGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.tennis.TennisPlayerStandingsResponseModel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -458,6 +465,38 @@ data class DataModel(
                     }
                 }
 
+                // tennis
+                "tennis_player_standings" -> {
+                    val responseModel: TennisPlayerStandingsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+//                    if (responseModel.standings.isEmpty()) {
+                        SportDecodableModel.NoResult
+//                    } else {
+//                        val displayModel = ModelConverter.nbaPlayerStandingsConverter(responseModel)
+//                        SportDecodableModel.NBAPlayerStandings(responseModel, displayModel)
+//                    }
+                }
+                "tennis_league_schedule" -> {
+                    val responseModel: TennisGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                    val displayModel = ModelConverter.tennisLeagueScheduleConverter(responseModel)
+                    SportDecodableModel.TennisLeagueSchedule(responseModel, displayModel)
+                }
+                "tennis_game_stats" -> {
+                    val responseModel: TennisGameStatsResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+
+                    if (responseModel.game == null) {
+                        SportDecodableModel.NoResult
+                    } else {
+                        val displayModel = ModelConverter.tennisGameStatsConverter(responseModel)
+                        SportDecodableModel.TennisGameStats(responseModel, displayModel)
+                    }
+                }
+                "tennis_league_tournament" -> {
+                    val responseModel: TennisGameScheduleResponseModel = json.decodeFromJsonElement(jsonObject["data"]!!)
+                    val displayModel = ModelConverter.tennisTournamentConverter(responseModel)
+                    SportDecodableModel.TennisTournament(responseModel, displayModel)
+                }
+
                 else -> SportDecodableModel.NoResult
             }
 
@@ -493,6 +532,8 @@ enum class SportDisplayType {
     KBO_PLAYER_INFO, KBO_PLAYER_STATS, KBO_PLAYER_STANDINGS, KBO_TEAM_INFO, KBO_TEAM_STATS, KBO_TEAM_STANDINGS, KBO_LEAGUE_SCHEDULE, KBO_GAME_STATS,
     // mlb
     MLB_PLAYER_INFO, MLB_PLAYER_STATS, MLB_PLAYER_STANDINGS, MLB_TEAM_INFO, MLB_TEAM_STATS, MLB_TEAM_STANDINGS, MLB_LEAGUE_SCHEDULE, MLB_GAME_STATS,
+    // tennis
+    TENNIS_PLAYER_STANDINGS, TENNIS_LEAGUE_SCHEDULE, TENNIS_GAME_STATS, TENNIS_TOURNAMENT,
     UNKNOWN
 }
 
@@ -716,6 +757,31 @@ sealed class SportDecodableModel {
     data class MLBTournament(
         val responseModel: MLBGameScheduleResponseModel,
         var displayModel: MLBTournamentDisplayModel
+    ) : SportDecodableModel()
+
+    // tennis
+    @Serializable
+    data class TennisPlayerStandings(
+        val responseModel: TennisPlayerStandingsResponseModel,
+        val displayModel: TennisPlayerStandingsDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class TennisLeagueSchedule(
+        val responseModel: TennisGameScheduleResponseModel,
+        val displayModel: TennisLeagueScheduleDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class TennisGameStats(
+        val responseModel: TennisGameStatsResponseModel,
+        val displayModel: TennisGameStatsDisplayModel
+    ) : SportDecodableModel()
+
+    @Serializable
+    data class TennisTournament(
+        val responseModel: TennisGameScheduleResponseModel,
+        var displayModel: TennisTournamentDisplayModel
     ) : SportDecodableModel()
 
     @Serializable

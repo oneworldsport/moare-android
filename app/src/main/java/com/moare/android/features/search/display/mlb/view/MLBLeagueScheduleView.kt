@@ -1,8 +1,10 @@
 package com.moare.android.features.search.display.mlb.view
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.MaterialTheme
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -10,10 +12,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
-import com.moare.android.core.util.MLBUtil
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
@@ -22,15 +25,13 @@ import com.moare.android.features.search.display.common.container.state.Schedule
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.display.common.container.view.ScheduleViewContainer
-import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBLeagueScheduleStore
-import com.moare.android.features.search.display.nba.viewmodel.NBALeagueScheduleAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
-import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.SportDisplayType
-import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDisplayModel
+import com.moare.android.features.search.display.mlb.store.MLBLeagueScheduleAction
+import com.moare.android.features.search.display.mlb.store.MLBLeagueScheduleStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
+import com.moare.android.ui.util.Refreshable
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun MLBLeagueScheduleView(
@@ -108,23 +109,72 @@ fun MLBLeagueScheduleList(
     searchStore: SearchStore,
     store: MLBLeagueScheduleStore
 ) {
-    /* ---------------------
-       viewmodel state
-       --------------------- */
     val filteredGames by store.filteredGames.collectAsState()
-    val selectedDayIndex by store.selectedDayIndex.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
+    val isRefreshing by store.isRefreshing.collectAsState()
+    val days by store.days.collectAsState()
+    val selectedDay by store.selectedDay.collectAsState()
 
-    val gameListToDisplay = filteredGames[selectedDayIndex] ?: emptyList()
+    val validDays = remember(days) { days.filter { !it.isDataEmpty } }
+    val validIndexByDay = remember(validDays) {
+        validDays.mapIndexed { index, info -> info.day to index }.toMap()
+    }
+    val pagerState = rememberPagerState(
+        initialPage = validIndexByDay[selectedDay?.day] ?: 0,
+        pageCount = { validDays.size }
+    )
 
-    LazyColumn {
-        items(gameListToDisplay) { item ->
-            MLBLeagueScheduleListItem(
-                searchStore = searchStore,
-                store = store,
-                data = item,
-                teamNameDic = teamNameDic
-            )
+    LaunchedEffect(pagerState.currentPage) {
+        snapshotFlow { pagerState.currentPage to pagerState.isScrollInProgress }
+            .distinctUntilChanged()
+            .collect { (page, inProgress) ->
+                // 스크롤 중이면 무시, 끝났을 때만 확정
+                // animateScrollToPage로 해당 함수가 실행될때, 한번에 여러 페이지를 이동하는 경우에 설정된 page까지 이동하기 전에 해당 함수가 실행되는 경우가 있어서 추가.
+                if (inProgress) return@collect
+
+                val dayToSelect = validDays.getOrNull(page) ?: return@collect
+                val dayIndexToSelect = dayToSelect.day - 1
+                if (selectedDay?.day != dayToSelect.day) {
+                    store.send(MLBLeagueScheduleAction.SelectDay(dayToSelect, dayIndexToSelect))
+                }
+            }
+    }
+
+    LaunchedEffect(selectedDay) {
+        val targetIndex = validIndexByDay[selectedDay?.day] ?: return@LaunchedEffect
+        if (targetIndex != pagerState.currentPage) {
+            pagerState.animateScrollToPage(targetIndex)
+        }
+    }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.Top
+    ) { page ->
+        val dayIndex = (validDays.getOrNull(page)?.day ?: 1) - 1
+        val gameListToDisplay = filteredGames[dayIndex] ?: emptyList()
+        val hasLive = gameListToDisplay.any { game ->
+            game.gameStatus == Constants.GameStatus.MLB.LIVE
+        }
+
+        Refreshable(
+            enabled = hasLive,
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                store.send(MLBLeagueScheduleAction.RefreshGames)
+            }
+        ) {
+            LazyColumn {
+                items(gameListToDisplay) { item ->
+                    MLBLeagueScheduleListItem(
+                        searchStore = searchStore,
+                        store = store,
+                        data = item,
+                        teamNameDic = teamNameDic
+                    )
+                }
+            }
         }
     }
 }

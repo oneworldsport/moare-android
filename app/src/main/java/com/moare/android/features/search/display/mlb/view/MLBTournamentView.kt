@@ -6,11 +6,9 @@ import androidx.compose.runtime.getValue
 import com.moare.android.features.search.display.common.container.state.TournamentBracketContainerState
 import com.moare.android.features.search.display.common.container.state.TournamentContainerAction
 import com.moare.android.features.search.display.common.container.view.TournamentBracketViewContainer
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTournamentAction
-import com.moare.android.features.search.display.mlb.viewmodel.MLBTournamentStore
-import com.moare.android.features.search.display.nba.viewmodel.NBATournamentAction
-import com.moare.android.features.search.display.nba.viewmodel.NBATournamentStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.mlb.store.MLBTournamentAction
+import com.moare.android.features.search.display.mlb.store.MLBTournamentStore
+import com.moare.android.features.search.display.search.store.SearchStore
 
 @Composable
 fun MLBTournamentView(

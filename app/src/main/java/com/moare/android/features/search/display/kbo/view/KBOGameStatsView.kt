@@ -37,15 +37,15 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.KBOUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerState
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsAction
-import com.moare.android.features.search.display.kbo.viewmodel.KBOGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.kbo.store.KBOGameStatsAction
+import com.moare.android.features.search.display.kbo.store.KBOGameStatsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.kbo.KBOGameLineScore
 import com.moare.android.ui.common.components.BaseballLeagueTitleForGameStats
 import com.moare.android.ui.common.components.CapsuleButton
@@ -125,7 +125,7 @@ fun KBOGameStatsView(
     val gameDetailTitle = "날짜: \n\n장소: "
     val gameDetailContent = buildString {
         append("${CalendarUtil.formatDate(displayModel.game.gameInfo?.date).split(" ").firstOrNull() ?: ""}\n")
-        append("${CalendarUtil.formatDate(displayModel.game.gameInfo?.date, TimeFormatType.AMPM)}\n")
+        append("${CalendarUtil.formatDate(displayModel.game.gameInfo?.date, outputFormatType = OutputTimeFormatType.AMPM)}\n")
         append(teamNameDic["venue_${displayModel.game.gameInfo?.homeTeamId}"] ?: "")
     }
 

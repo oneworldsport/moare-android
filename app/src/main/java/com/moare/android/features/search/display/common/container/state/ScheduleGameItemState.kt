@@ -18,7 +18,10 @@ data class ScheduleGameItemState<T>(
     val shouldShowGameType: Boolean = true,
     val shouldShowReferee: Boolean = false,
     val shouldShowHomeLabel: Boolean = false,
-    val shouldShowAwayLabel: Boolean = false
+    val shouldShowAwayLabel: Boolean = false,
+
+    val shouldShowWinner: Boolean = false,
+    val isHomeWinner: Boolean = true
 )
 
 data class ScheduleGameItemActions(
