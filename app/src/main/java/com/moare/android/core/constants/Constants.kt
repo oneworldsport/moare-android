@@ -339,9 +339,19 @@ object Constants {
             const val WAS = 1610612764
             const val DET = 1610612765
             const val CHA = 1610612766
-            val eastConference = listOf(CLE, BOS, NYK, IND, MIL, DET, ORL, ATL, CHI, MIA, TOR, BKN, PHI, CHA, WAS)
-            val westConference = listOf(NOP, DAL, DEN, GSW, HOU, LAC, LAL, MIN, PHX, POR, SAC, SAS, OKC, UTA, MEM)
-            val all = eastConference + westConference
+            // TODO: 임시 올스타 팀 id. 나중에 id s3에서 가져와 사용하게 리팩토링 필요.
+            const val TEAM_MELO = 1610616862
+            const val TEAM_AUSTIN = 1610616865
+            const val TEAM_TMAC = 1610616864
+            const val TEAM_VINCE = 1610616863
+            const val TEAM_STARS = 1610616859
+            const val TEAM_WORLD = 1610616861
+            const val TEAM_STRIPES = 1610616860
+            val ALL_STAR = listOf(TEAM_MELO, TEAM_AUSTIN, TEAM_TMAC, TEAM_VINCE, TEAM_STARS, TEAM_WORLD, TEAM_STRIPES)
+            //
+            val EAST_CONFERENCE = listOf(CLE, BOS, NYK, IND, MIL, DET, ORL, ATL, CHI, MIA, TOR, BKN, PHI, CHA, WAS)
+            val WEST_CONFERENCE = listOf(NOP, DAL, DEN, GSW, HOU, LAC, LAL, MIN, PHX, POR, SAC, SAS, OKC, UTA, MEM)
+            val all = EAST_CONFERENCE + WEST_CONFERENCE + ALL_STAR
         }
 
         // MLBTeamInfo의 abbreviation 사용
@@ -376,9 +386,9 @@ object Constants {
             const val LAD = 119
             const val WSH = 120
             const val NYM = 121
-            val alConference = listOf(ATH, SEA, TB, TEX, TOR, MIN, CWS, NYY, LAA, BAL, BOS, CLE, DET, HOU, KC)
-            val nlConference = listOf(PIT, SD, SF, STL, PHI, ATL, MIA, MIL, AZ, CHC, CIN, COL, LAD, WSH, NYM)
-            val all = alConference + nlConference
+            val AL_CONFERENCE = listOf(ATH, SEA, TB, TEX, TOR, MIN, CWS, NYY, LAA, BAL, BOS, CLE, DET, HOU, KC)
+            val NL_CONFERENCE = listOf(PIT, SD, SF, STL, PHI, ATL, MIA, MIL, AZ, CHC, CIN, COL, LAD, WSH, NYM)
+            val all = AL_CONFERENCE + NL_CONFERENCE
         }
 
         object MLSTeam {
