@@ -1113,28 +1113,28 @@ class AppViewModel @Inject constructor(
     private fun onTennisLeagueScheduleDelegate(delegate: TennisLeagueScheduleDelegate) {
         val id = ViewId()
 
-//        when (delegate) {
-//            is TennisLeagueScheduleDelegate.ShowGameStats -> {
-//                _didPop.value = false
-//                _includesPreviousView.value = false
-//
-//                val store = kboGameStatsFactory.create(delegate.model.displayModel) { delegate ->
-//                    onKBOGameStatsDelegate(id, delegate)
-//                }
-//                store.send(KBOGameStatsAction.InitData)
-//                _stack.update { it + StackItem.KBOGameStats(id, store) }
-//            }
-//            is TennisLeagueScheduleDelegate.ShowTournament -> {
-//                _didPop.value = false
-//                _includesPreviousView.value = false
-//
-//                val store = kboTournamentFactory.create(delegate.model.displayModel) { delegate ->
-//                    onKBOTournamentDelegate(delegate)
-//                }
-//                store.send(KBOTournamentAction.InitData)
-//                _stack.update { it + StackItem.KBOTournament(id, store) }
-//            }
-//        }
+        when (delegate) {
+            is TennisLeagueScheduleDelegate.ShowGameStats -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = tennisGameStatsFactory.create(delegate.model.displayModel) { delegate ->
+                    onTennisGameStatsDelegate(id, delegate)
+                }
+                store.send(TennisGameStatsAction.InitData)
+                _stack.update { it + StackItem.TennisGameStats(id, store) }
+            }
+            is TennisLeagueScheduleDelegate.ShowTournament -> {
+                _didPop.value = false
+                _includesPreviousView.value = false
+
+                val store = tennisTournamentFactory.create(delegate.model.displayModel) { delegate ->
+                    onTennisTournamentDelegate(delegate)
+                }
+                store.send(TennisTournamentAction.InitData)
+                _stack.update { it + StackItem.TennisTournament(id, store) }
+            }
+        }
 
         _queryList.update { it + searchStore.query.value.text }
     }
