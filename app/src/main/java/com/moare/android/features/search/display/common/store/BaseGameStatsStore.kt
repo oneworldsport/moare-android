@@ -109,8 +109,8 @@ abstract class BaseGameStatsStore<A, T: SportDisplayModel>(
         _teamCategorySelectedIndex.value = index
     }
 
-    abstract fun sortPlayers()
-    abstract fun setPlayersTotalStats()
+    open fun sortPlayers() {}
+    open fun setPlayersTotalStats() {}
 
     open fun dispose() {
         scope.cancel()
