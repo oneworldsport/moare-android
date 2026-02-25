@@ -26,20 +26,17 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.moare.android.core.constants.Constants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.core.util.toCm
 import com.moare.android.core.util.toKg
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.nba.store.NBAPlayerInfoAction
+import com.moare.android.features.search.display.nba.store.NBAPlayerInfoStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
@@ -693,10 +690,10 @@ fun NBAPlayerInfoEighthItem(
         )
 
         lastGame?.let {
-            val homeTeam = lastGame.boxScoreTraditional?.homeTeam
-            val awayTeam = lastGame.boxScoreTraditional?.awayTeam
-            val homeTeamScore = lastGame.lineScore?.find { it.teamId == homeTeam?.teamId }?.pts ?: 0
-            val awayTeamScore = lastGame.lineScore?.find { it.teamId == awayTeam?.teamId }?.pts ?: 0
+            val homeTeamId = lastGame.gameSummary?.homeTeamId ?: 0
+            val awayTeamId = lastGame.gameSummary?.awayTeamId ?: 0
+            val homeTeamScore = lastGame.lineScore?.find { it.teamId == homeTeamId }?.pts ?: 0
+            val awayTeamScore = lastGame.lineScore?.find { it.teamId == awayTeamId }?.pts ?: 0
 
             CenterRow(
                 modifier = Modifier
@@ -716,7 +713,7 @@ fun NBAPlayerInfoEighthItem(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = if (homeTeam == null) "" else teamNameDic["short_${homeTeam.teamId}"] ?: homeTeam.teamCity,
+                                text = teamNameDic["short_${homeTeamId}"] ?: "",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Light,
                                 maxLines = 1,
@@ -749,7 +746,7 @@ fun NBAPlayerInfoEighthItem(
                             )
 
                             Text(
-                                text = if (awayTeam == null) "" else teamNameDic["short_${awayTeam.teamId}"] ?: awayTeam.teamCity,
+                                text = teamNameDic["short_${awayTeamId}"] ?: "",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Light,
                                 maxLines = 1,
@@ -762,7 +759,7 @@ fun NBAPlayerInfoEighthItem(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = CalendarUtil.formatDate(lastGame.gameSummary?.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                            text = CalendarUtil.formatDate(lastGame.gameSummary?.gameDate, outputFormatType = OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                             fontSize = 15.sp
                         )
                     }
@@ -857,8 +854,8 @@ fun NBAPlayerInfoNinthItem(
         )
 
         if (nextGame != null) {
-            val homeTeamId = nextGame.gameSummary?.homeTeamId
-            val awayTeamId = nextGame.gameSummary?.awayTeamId
+            val homeTeamId = nextGame.gameSummary?.homeTeamId ?: 0
+            val awayTeamId = nextGame.gameSummary?.awayTeamId ?: 0
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -867,7 +864,7 @@ fun NBAPlayerInfoNinthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = if (homeTeamId == null) "" else teamNameDic["short_${homeTeamId}"] ?: "",
+                    text = teamNameDic["short_${homeTeamId}"] ?: "",
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.End,
                     modifier = Modifier.weight(1f)
@@ -882,7 +879,7 @@ fun NBAPlayerInfoNinthItem(
                 )
 
                 Text(
-                    text = if (awayTeamId == null) "" else teamNameDic["short_${awayTeamId}"] ?: "",
+                    text = teamNameDic["short_${awayTeamId}"] ?: "",
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Start,
                     modifier = Modifier.weight(1f)
@@ -890,7 +887,7 @@ fun NBAPlayerInfoNinthItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(nextGame.gameSummary?.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                text = CalendarUtil.formatDate(nextGame.gameSummary?.gameDate, outputFormatType = OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )

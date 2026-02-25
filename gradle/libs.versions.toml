@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.1.10" # https://github.com/JetBrains/kotlin
-android-gradle-plugin = "8.7.3" # https://developer.android.com/build/releases/gradle-plugin?hl=ko&_gl=1*ldhhmm*_up*MQ..*_ga*NTg2MTkwMjIuMTczODYzNjQ4NQ..*_ga_6HH9YJMN9M*MTczODYzNjQ4NS4xLjAuMTczODYzNjQ4NS4wLjAuOTE0OTA5NTM.
+android-gradle-plugin = "8.13.2" # https://developer.android.com/build/releases/gradle-plugin?hl=ko&_gl=1*ldhhmm*_up*MQ..*_ga*NTg2MTkwMjIuMTczODYzNjQ4NQ..*_ga_6HH9YJMN9M*MTczODYzNjQ4NS4xLjAuMTczODYzNjQ4NS4wLjAuOTE0OTA5NTM.
 
 core = "1.15.0" # https://developer.android.com/jetpack/androidx/releases/core?hl=ko
 lifecycle = "2.8.7" # https://developer.android.com/jetpack/androidx/releases/lifecycle?hl=ko&_gl=1*7zmpwn*_up*MQ..*_ga*OTIzMjUzMzk5LjE3Mzg2MzY3ODQ.*_ga_6HH9YJMN9M*MTczODYzNjc4NC4xLjAuMTczODYzNjc4NC4wLjAuMTM3Mjk5NDE1OQ..
@@ -20,8 +20,8 @@ serialization = "1.8.0" # https://github.com/Kotlin/kotlinx.serialization
 datastore = "1.1.2" # https://developer.android.com/jetpack/androidx/releases/datastore?hl=ko
 ksp = "2.1.10-1.0.29" # https://github.com/google/ksp
 
-app-version-code = "18" # Should be start from 1
-app-version-name = "1.0.10"
+app-version-code = "19" # Should be start from 1
+app-version-name = "1.0.11"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

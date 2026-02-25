@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.ui.util.convertPxToDp
 import com.moare.android.ui.util.screenWidthDp
 import kotlinx.coroutines.delay

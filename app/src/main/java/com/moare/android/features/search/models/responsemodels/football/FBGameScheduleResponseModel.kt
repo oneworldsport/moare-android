@@ -7,8 +7,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FBGameScheduleResponseModel(
-    @SerialName("scheduleType") val scheduleType: ScheduleType = ScheduleType.LEAGUE,
-    @SerialName("scheduledMonths") val scheduledMonths: List<String> = emptyList(),
+    val scheduleType: ScheduleType = ScheduleType.LEAGUE,
+    val scheduledMonths: List<String> = emptyList(),
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val relatedLeagueIds: List<Int>? = null,
     val schedule: List<FBGameForSchedule> = emptyList()
 )
 

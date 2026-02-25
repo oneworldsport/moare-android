@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.R
+import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.MatchDescriptionConverter
 import com.moare.android.ui.theme.MoareAndroidTheme
@@ -194,6 +195,30 @@ fun RoundedBorderText(
                 .border(BorderStroke(borderWidth, borderColor), RoundedCornerShape(radius))
                 .padding(horizontal = 6.dp, vertical = 3.dp)
     )
+}
+
+@Composable
+fun TennisTournamentTitle(
+    leagueId: Int,
+    season: Int?,
+    modifier: Modifier = Modifier
+) {
+    val season = season ?: CalendarUtil.currentYear
+
+    CenterRow(
+        modifier = modifier
+    ) {
+        URLImage(
+            url = "https://player-team-images.s3.ap-northeast-2.amazonaws.com/tennis/tournament/$leagueId.png",
+            size = URLImageSize.SMALL,
+            modifier = Modifier.padding(end = 6.dp)
+        )
+
+        Text(
+            text = "${StringConstants.Tennis.tournamentNameStr(leagueId)} $season",
+            fontWeight = FontWeight.Medium
+        )
+    }
 }
 
 @Preview(showBackground = true)

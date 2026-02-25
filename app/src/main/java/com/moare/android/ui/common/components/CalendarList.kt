@@ -153,6 +153,11 @@ fun <T> CalendarItem(
         else -> date as String
     }
 
+    val fontWeight = when (calendarType) {
+        CalendarType.YEARMONTH -> FontWeight.Bold
+        else -> FontWeight.Normal
+    }
+
     val dayOfWeek = when (calendarType) {
         CalendarType.DAY -> (date as DayInfo).displayName
         else -> ""
@@ -192,6 +197,7 @@ fun <T> CalendarItem(
         ) {
             Text(
                 text = text,
+                fontWeight = fontWeight,
                 color = if (isDisabled) Color.Gray else Color.Black
             )
         }

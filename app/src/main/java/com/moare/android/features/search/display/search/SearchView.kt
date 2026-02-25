@@ -4,16 +4,13 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -21,17 +18,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -92,8 +83,11 @@ import com.moare.android.features.search.display.nba.view.NBATeamInfoView
 import com.moare.android.features.search.display.nba.view.NBATeamStandingsView
 import com.moare.android.features.search.display.nba.view.NBATeamStatsView
 import com.moare.android.features.search.display.nba.view.NBATournamentView
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.search.store.SearchAction
+import com.moare.android.features.search.display.search.store.SearchStore
+import com.moare.android.features.search.display.tennis.view.TennisGameStatsView
+import com.moare.android.features.search.display.tennis.view.TennisLeagueScheduleView
+import com.moare.android.features.search.display.tennis.view.TennisTournamentView
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.ui.common.components.ProgressIndicator
@@ -178,7 +172,7 @@ fun SearchView(
        --------------------- */
     LaunchedEffect(viewForTest) {
         viewForTest?.let {
-//            searchStore.send(SearchStore.Intent.TestSearch(viewForTest))
+            searchStore.send(SearchAction.TestSearch(viewForTest))
         }
     }
 
@@ -404,20 +398,18 @@ fun SearchView(
                 exit = if (searchState) fadeOut(tween(1000)) + shrinkVertically(tween(durationMillis = 1000)) else fadeOut() + shrinkVertically()
             ) {
                 leagueKeywords?.let {
-                    if (it.live.isNotEmpty() && it.recent.isNotEmpty()) {
-                        LeagueKeywords(
-                            leagueKeywords = it,
-                            modifier = Modifier
-                                .padding(top = 16.dp)
-                                .onGloballyPositioned { layoutCoordinates ->
-                                    with(density) {
-                                        leagueKeywordsComponentHeight = layoutCoordinates.size.height.toDp() + 16.dp
-                                    }
+                    LeagueKeywords(
+                        leagueKeywords = it,
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .onGloballyPositioned { layoutCoordinates ->
+                                with(density) {
+                                    leagueKeywordsComponentHeight = layoutCoordinates.size.height.toDp() + 16.dp
                                 }
-                        ) { keywordInfo ->
-                            searchStore.send(SearchAction.UpdateTextField(TextFieldValue(keywordInfo.keyword), false))
-                            searchStore.send(SearchAction.PerformSearch(searchType = SearchStore.SearchType.LeagueKeyword(keywordInfo), aniDuration = 1000))
-                        }
+                            }
+                    ) { keywordInfo ->
+                        searchStore.send(SearchAction.UpdateTextField(TextFieldValue(keywordInfo.keyword), false))
+                        searchStore.send(SearchAction.PerformSearch(searchType = SearchStore.SearchType.LeagueKeyword(keywordInfo), aniDuration = 1000))
                     }
                 }
             }
@@ -558,6 +550,10 @@ fun StackItemView(
         is StackItem.KBOLeagueSchedule -> KBOLeagueScheduleView(searchStore, item.store, didPop)
         is StackItem.KBOGameStats -> KBOGameStatsView(searchStore, item.store)
         is StackItem.KBOTournament -> KBOTournamentView(searchStore, item.store)
+
+        is StackItem.TennisLeagueSchedule -> TennisLeagueScheduleView(searchStore, item.store, didPop)
+        is StackItem.TennisGameStats -> TennisGameStatsView(searchStore, item.store)
+        is StackItem.TennisTournament -> TennisTournamentView(searchStore, item.store)
     }
 }
 

@@ -47,6 +47,10 @@ import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandin
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATeamStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.nba.NBATournamentDisplayModel
+import com.moare.android.features.search.models.displaymodels.tennis.TennisGameStatsDisplayModel
+import com.moare.android.features.search.models.displaymodels.tennis.TennisLeagueScheduleDisplayModel
+import com.moare.android.features.search.models.displaymodels.tennis.TennisPlayerStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.tennis.TennisTournamentDisplayModel
 import com.moare.android.features.search.models.models.football.FBGame
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
@@ -96,6 +100,9 @@ import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfo
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerStandingsResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBATeamStandingsResponseModel
+import com.moare.android.features.search.models.responsemodels.tennis.TennisGameScheduleResponseModel
+import com.moare.android.features.search.models.responsemodels.tennis.TennisGameStatsResponseModel
+import com.moare.android.features.search.models.responsemodels.tennis.TennisPlayerStandingsResponseModel
 
 object ModelConverter {
     var keywords: List<Keyword> = emptyList()
@@ -121,9 +128,7 @@ object ModelConverter {
         this.season = season
     }
 
-    /* ---------------------
-       football
-       --------------------- */
+    // football
     fun fbPlayerInfoConverter(response: FBPlayerInfoResponseModel): FBPlayerInfoDisplayModel {
         val info = response.info!!
 
@@ -321,9 +326,7 @@ object ModelConverter {
         )
     }
 
-    /* ---------------------
-       nba
-       --------------------- */
+    // nba
     fun nbaPlayerInfoConverter(response: NBAPlayerInfoResponseModel): NBAPlayerInfoDisplayModel {
         val info = response.info!!
 
@@ -484,9 +487,7 @@ object ModelConverter {
         )
     }
 
-    /* ---------------------
-       kbo
-       --------------------- */
+    // kbo
     fun kboPlayerInfoConverter(response: KBOPlayerInfoResponseModel): KBOPlayerInfoDisplayModel {
         val info = response.info!!
 
@@ -660,9 +661,7 @@ object ModelConverter {
         )
     }
 
-    /* ---------------------
-       mlb
-       --------------------- */
+    // mlb
     fun mlbPlayerInfoConverter(response: MLBPlayerInfoResponseModel): MLBPlayerInfoDisplayModel {
         val info = response.info!!
 
@@ -839,6 +838,74 @@ object ModelConverter {
             entityInfo = entityInfo,
             season = season,
             scheduleType = response.scheduleType ?: ScheduleType.TOURNAMENT_BRACKET,
+            games = response.schedule
+        )
+    }
+
+    // tennis
+    fun tennisPlayerStandingsConverter(response: TennisPlayerStandingsResponseModel): TennisPlayerStandingsDisplayModel {
+//        val standings: List<NBAPlayerStandingsDisplay> = response.standings.mapNotNull { playerInfo ->
+//            val player = playerInfo.player
+//            val statsList = playerInfo.statistics
+//
+//            for (item in statsList) {
+//                if (item.seasonType == "Regular Season") {
+//                    return@mapNotNull NBAPlayerStandingsDisplay(
+//                        player = player,
+//                        stats = item
+//                    )
+//                }
+//            }
+//
+//            null
+//        }
+
+        return TennisPlayerStandingsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.NBA,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            season = season,
+//            standings = standings
+        )
+    }
+
+    fun tennisLeagueScheduleConverter(response: TennisGameScheduleResponseModel): TennisLeagueScheduleDisplayModel {
+        val yearMonthList = response.scheduledMonths.map {
+            val (year, month) = it.split("-")
+            "${year.takeLast(2)}/$month"
+        }
+
+        return TennisLeagueScheduleDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.AUS_OPEN_M_SINGLE,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType,
+            yearMonthList = yearMonthList,
+            startDate = response.startDate,
+            endDate = response.endDate,
+            relatedLeagueIds = response.relatedLeagueIds,
+            games = response.schedule,
+        )
+    }
+
+    fun tennisGameStatsConverter(response: TennisGameStatsResponseModel): TennisGameStatsDisplayModel {
+        return TennisGameStatsDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.AUS_OPEN_M_SINGLE,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            season = season,
+            game = response.game!!
+        )
+    }
+
+    fun tennisTournamentConverter(response: TennisGameScheduleResponseModel): TennisTournamentDisplayModel {
+        return TennisTournamentDisplayModel(
+            leagueId = leagueId ?: Constants.Ids.AUS_OPEN_M_SINGLE,
+            keywords = keywords,
+            entityInfo = entityInfo,
+            season = season,
+            scheduleType = response.scheduleType,
             games = response.schedule
         )
     }

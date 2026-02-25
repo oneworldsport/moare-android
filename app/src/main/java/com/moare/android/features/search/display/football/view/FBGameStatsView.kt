@@ -2,15 +2,30 @@ package com.moare.android.features.search.display.football.view
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.util.FBUtil
+import com.moare.android.core.util.dropFirstWord
 import com.moare.android.core.util.percentageOf
 import com.moare.android.features.search.display.common.container.state.GameStatsCoachState
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -18,11 +33,13 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsAction
-import com.moare.android.features.search.display.football.viewmodel.FBGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.football.store.FBGameStatsAction
+import com.moare.android.features.search.display.football.store.FBGameStatsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
+import com.moare.android.ui.common.components.VCapsuleBar
+import com.moare.android.ui.util.CenterColumn
 
 @Composable
 fun FBGameStatsView(
@@ -91,7 +108,7 @@ fun FBGameStatsView(
     val columnWidthList = listOf(80.dp, 50.dp, 50.dp, 50.dp, 50.dp, 50.dp, 70.dp, 70.dp, 100.dp, 50.dp, 70.dp, 100.dp, 70.dp, 50.dp, 80.dp, 70.dp, 70.dp, 50.dp, 50.dp)
     val gameDetailTitle = "장소: \n심판: "
     val gameDetailContent = buildString {
-        append("${teamNameDic["venue_${game.teams.home.id}"] ?: ""}\n")
+        append("${teamNameDic["venue_${game.teams.home.id}"] ?: game.fixture.venue.name}\n")
         append(game.fixture.referee)
     }
 
@@ -162,7 +179,6 @@ fun FBGameStatsView(
     GameStatsViewContainer(
         state = GameStatsContainerState(
             shouldShowTitle = !isCombinedView,
-            shouldShowGameContent = !isCombinedView,
             shouldShowStats = game.fixture.status.short != StringConstants.Football.GAME_NOT_STARTED,
             shouldShowCoach = true,
             shouldShowRefreshButton = StringConstants.Football.GAME_LIVE_LIST.contains(game.fixture.status.short),
@@ -203,15 +219,102 @@ fun FBGameStatsView(
             )
         },
         gameContent = {
-            FBLeagueScheduleListItem(
-                searchStore = searchStore,
-                store = null,
-                data = ModelConverter.fbGameToGameScheduleConverter(game),
-                leagueId = displayModel.leagueId,
-                teamNameDic = teamNameDic
-            )
+            CenterColumn() {
+                if (!isCombinedView) {
+                    FBLeagueScheduleListItem(
+                        searchStore = searchStore,
+                        store = null,
+                        data = ModelConverter.fbGameToGameScheduleConverter(game),
+                        leagueId = displayModel.leagueId,
+                        teamNameDic = teamNameDic
+                    )
+                }
+
+                FBGameStatsScorerBox(store)
+            }
         }
     )
+}
+
+@Composable
+fun FBGameStatsScorerBox(
+    store: FBGameStatsStore
+) {
+    val density = LocalDensity.current
+    var height by remember { mutableStateOf(0.dp) }
+
+    val displayModel by store.displayModel.collectAsState()
+    val playerNameDic by store.playerNameDic.collectAsState()
+
+    val game = displayModel.game
+    val homeTeamId = game.teams.home.id
+    val awayTeamId = game.teams.away.id
+    val goalEvents = game.goalEvents
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier.weight(1f).onGloballyPositioned { layoutCoordinates ->
+                with(density) {
+                    height = max(height, layoutCoordinates.size.height.toDp())
+                }
+            }
+        ) {
+            for (event in goalEvents) {
+                if (event.team?.id == homeTeamId) {
+                    val elapsed = event.time?.elapsed ?: 0
+                    val extra = event.time?.extra ?: 0
+                    val timeText = if (extra > 0) {
+                        "$elapsed+$extra'"
+                    } else {
+                        "$elapsed'"
+                    }
+                    val name = (playerNameDic["${event.player?.id}"] ?: (event.player?.name ?: "")).dropFirstWord()
+
+                    Text(
+                        text = "$name $timeText${if (event.isOwnGoal) " (자책골)" else ""}",
+                        fontSize = 13.sp
+                    )
+                }
+            }
+        }
+
+        VCapsuleBar(
+            customHeight = height,
+            customWidth = 1.dp,
+            modifier = Modifier.alpha(0.5f)
+        )
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier.weight(1f).onGloballyPositioned { layoutCoordinates ->
+                with(density) {
+                    height = max(height, layoutCoordinates.size.height.toDp())
+                }
+            }
+        ) {
+            for (event in goalEvents) {
+                if (event.team?.id == awayTeamId) {
+                    val elapsed = event.time?.elapsed ?: 0
+                    val extra = event.time?.extra ?: 0
+                    val timeText = if (extra > 0) {
+                        "$elapsed+$extra'"
+                    } else {
+                        "$elapsed'"
+                    }
+                    val name = (playerNameDic["${event.player?.id}"] ?: (event.player?.name ?: "")).dropFirstWord()
+
+                    Text(
+                        text = "$name $timeText${if (event.isOwnGoal) " (자책골)" else ""}",
+                        fontSize = 13.sp
+                    )
+                }
+            }
+        }
+    }
 }
 
         // team total stats

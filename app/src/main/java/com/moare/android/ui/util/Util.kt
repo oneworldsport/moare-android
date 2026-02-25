@@ -67,9 +67,10 @@ fun screenHeightPx(): Float {
 fun getOffsetOfAniCapsuleBar(
     itemWidth: Dp,
     barWidth: Dp = 20.dp,
+    spacing: Dp = 0.dp,
     index: Int = 0 // if it's 0, just get the bar offset from current item's start
 ): Dp {
-    return (itemWidth * index) + ((itemWidth - barWidth) / 2)
+    return (itemWidth * index) + ((itemWidth - barWidth) / 2) + (spacing * index)
 }
 
 /**

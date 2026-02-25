@@ -41,7 +41,7 @@ import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.core.util.displayOrDash
 import com.moare.android.core.util.format3
 import com.moare.android.features.search.display.common.container.state.GameStatsContainerActions
@@ -49,9 +49,9 @@ import com.moare.android.features.search.display.common.container.state.GameStat
 import com.moare.android.features.search.display.common.container.state.GameStatsTeamState
 import com.moare.android.features.search.display.common.container.state.StandingsItemState
 import com.moare.android.features.search.display.common.container.view.GameStatsViewContainer
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAGameStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.nba.store.NBAGameStatsAction
+import com.moare.android.features.search.display.nba.store.NBAGameStatsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.nba.NBALineScore
 import com.moare.android.ui.common.components.CapsuleButton
 import com.moare.android.ui.common.components.NBATitle
@@ -129,7 +129,7 @@ fun NBAGameStatsView(
     val gameDetailTitle = "날짜: \n\n장소: \n관중수: \n심판: "
     val gameDetailContent = buildString {
         append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.gameDate).split(" ").firstOrNull() ?: ""}\n")
-        append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.gameDate, TimeFormatType.AMPM)}\n")
+        append("${CalendarUtil.formatDate(displayModel.game.gameSummary?.gameDate, outputFormatType = OutputTimeFormatType.AMPM)}\n")
         append("${teamNameDic["venue_${displayModel.game.gameSummary?.homeTeamId}"] ?: ""}\n")
         append("${displayModel.game.gameSummary?.attendance ?: 0}\n")
         officials?.forEachIndexed { index, official ->
@@ -301,7 +301,7 @@ fun NBAGameStatsScoreInfoItem(
 
             // game status
             CapsuleButton(
-                text = Constants.GameStatus.nbaGameStatusText(game.gameSummary?.gameStatus.toString(), game.gameSummary?.period),
+                text = Constants.GameStatus.nbaGameStatusText(game.gameSummary?.gameStatus ?: 1, game.gameSummary?.period),
                 color = Constants.GameStatus.gameStatusColor(Constants.Ids.NBA, game.gameSummary?.gameStatus.toString()),
                 isDisabled = true,
                 modifier = Modifier.padding(vertical = 4.dp)

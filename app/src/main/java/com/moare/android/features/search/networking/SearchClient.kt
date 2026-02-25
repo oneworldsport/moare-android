@@ -27,8 +27,8 @@ class SearchClient(
         return DataModel.fromJson(response.string())
     }
 
-    suspend fun fetchLeagueSchedule(entity: EntityInfo, season: Int?, yearMonth: String): DataModel {
-        val response = apiHelper.searchApi.getLeagueSchedule(entity, season ?: CalendarUtil.currentYear, yearMonth)
+    suspend fun fetchLeagueSchedule(entity: EntityInfo, season: Int?, yearMonth: String?, day: Int? = null): DataModel {
+        val response = apiHelper.searchApi.getLeagueSchedule(entity, season ?: CalendarUtil.currentYear, yearMonth, day)
         return DataModel.fromJson(response.string())
     }
 
@@ -95,6 +95,9 @@ class SearchClient(
 //                "mlb_team_schedule.json"
             }
             SportDisplayType.MLB_GAME_STATS -> { "mlb_game_stats.json" }
+            // tennis
+            SportDisplayType.TENNIS_LEAGUE_SCHEDULE -> { "tennis_league_schedule.json" }
+            SportDisplayType.TENNIS_GAME_STATS -> { "tennis_game_stats.json" }
             else -> {
                 "football_player_info.json"
             }

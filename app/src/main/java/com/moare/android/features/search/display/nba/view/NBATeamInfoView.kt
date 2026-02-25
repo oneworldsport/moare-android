@@ -27,16 +27,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.NBAUtil
-import com.moare.android.core.util.TimeFormatType
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.football.viewmodel.FBTeamInfoAction
-import com.moare.android.features.search.display.nba.viewmodel.NBAPlayerInfoAction
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoAction
-import com.moare.android.features.search.display.nba.viewmodel.NBATeamInfoStore
-import com.moare.android.features.search.display.search.viewmodel.SearchAction
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.nba.store.NBATeamInfoAction
+import com.moare.android.features.search.display.nba.store.NBATeamInfoStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.StatsDivider
 import com.moare.android.ui.common.components.URLImage
@@ -478,10 +475,10 @@ fun NBATeamInfoFifthItem(
         )
 
         lastGame?.let {
-            val homeTeam = lastGame.boxScoreTraditional?.homeTeam
-            val awayTeam = lastGame.boxScoreTraditional?.awayTeam
-            val homeTeamScore = lastGame.lineScore?.find { it.teamId == homeTeam?.teamId }?.pts ?: 0
-            val awayTeamScore = lastGame.lineScore?.find { it.teamId == awayTeam?.teamId }?.pts ?: 0
+            val homeTeamId = lastGame.gameSummary?.homeTeamId ?: 0
+            val awayTeamId = lastGame.gameSummary?.awayTeamId ?: 0
+            val homeTeamScore = lastGame.lineScore?.find { it.teamId == homeTeamId }?.pts ?: 0
+            val awayTeamScore = lastGame.lineScore?.find { it.teamId == awayTeamId }?.pts ?: 0
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -494,7 +491,7 @@ fun NBATeamInfoFifthItem(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = if (homeTeam == null) "" else teamNameDic["short_${homeTeam.teamId}"] ?: homeTeam.teamCity,
+                        text = teamNameDic["short_${homeTeamId}"] ?: "",
                         fontSize = 15.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -527,7 +524,7 @@ fun NBATeamInfoFifthItem(
                     )
 
                     Text(
-                        text = if (awayTeam == null) "" else teamNameDic["short_${awayTeam.teamId}"] ?: awayTeam.teamCity,
+                        text = teamNameDic["short_${awayTeamId}"] ?: "",
                         fontSize = 15.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -536,7 +533,7 @@ fun NBATeamInfoFifthItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(lastGame.gameSummary?.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                text = CalendarUtil.formatDate(lastGame.gameSummary?.gameDate, outputFormatType = OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )
@@ -584,8 +581,8 @@ fun NBATeamInfoSixthItem(
         )
 
         if (nextGame != null) {
-            val homeTeamId = nextGame.gameSummary?.homeTeamId
-            val awayTeamId = nextGame.gameSummary?.awayTeamId
+            val homeTeamId = nextGame.gameSummary?.homeTeamId ?: 0
+            val awayTeamId = nextGame.gameSummary?.awayTeamId ?: 0
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -593,7 +590,7 @@ fun NBATeamInfoSixthItem(
                     .alpha(contentsAlpha)
             ) {
                 Text(
-                    text = if (homeTeamId == null) "" else teamNameDic["short_${homeTeamId}"] ?: "",
+                    text = teamNameDic["short_${homeTeamId}"] ?: "",
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -610,7 +607,7 @@ fun NBATeamInfoSixthItem(
                 )
 
                 Text(
-                    text = if (awayTeamId == null) "" else teamNameDic["short_${awayTeamId}"] ?: "",
+                    text = teamNameDic["short_${awayTeamId}"] ?: "",
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -620,7 +617,7 @@ fun NBATeamInfoSixthItem(
             }
 
             Text(
-                text = CalendarUtil.formatDate(nextGame.gameSummary?.gameDate, TimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
+                text = CalendarUtil.formatDate(nextGame.gameSummary?.gameDate, outputFormatType = OutputTimeFormatType.AMPM_WITH_DAY_OF_WEEK_DATE),
                 fontSize = 15.sp,
                 modifier = Modifier.alpha(contentsAlpha)
             )

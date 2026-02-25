@@ -32,8 +32,8 @@ import com.moare.android.features.search.display.common.components.EmptyStatData
 import com.moare.android.features.search.display.common.container.component.MovingCapsuleItemContainer
 import com.moare.android.features.search.display.common.container.view.InfoViewContainer
 import com.moare.android.features.search.display.common.components.FBStatDataItem
-import com.moare.android.features.search.display.mlb.viewmodel.MLBPlayerStatsStore
-import com.moare.android.features.search.display.search.viewmodel.SearchStore
+import com.moare.android.features.search.display.mlb.store.MLBPlayerStatsStore
+import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBPlayerStats
 import com.moare.android.ui.common.components.BaseballLeagueTitle
 import com.moare.android.ui.common.components.HDivider
