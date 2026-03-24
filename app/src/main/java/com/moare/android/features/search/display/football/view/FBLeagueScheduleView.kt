@@ -251,7 +251,10 @@ fun FBLeagueScheduleListItem(
                 gameResultOpenedStateList?.let {
                     isResultOpened = gameResultOpenedStateList[gameId] ?: false
                 }
-            } else if (gameStatus == Constants.GameStatus.Football.NOT_STARTED) {
+            } else if (gameStatus == Constants.GameStatus.Football.NOT_STARTED ||
+                gameStatus == Constants.GameStatus.Football.CANCELLED ||
+                gameStatus == Constants.GameStatus.Football.POSTPONED
+            ) {
                 isResultOpened = false
             } else {
                 isResultOpened = true
