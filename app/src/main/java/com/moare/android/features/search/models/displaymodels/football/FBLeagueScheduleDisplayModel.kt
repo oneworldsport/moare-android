@@ -16,5 +16,6 @@ data class FBLeagueScheduleDisplayModel(
     override val season: Int,
     val scheduleType: ScheduleType,
     val yearMonthList: List<String>,
-    var games: List<FBGameForSchedule>
+    var games: List<FBGameForSchedule>,
+    val tournamentStartDate: String?
 ) : SportDisplayModel

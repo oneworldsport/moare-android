@@ -300,7 +300,8 @@ object ModelConverter {
             season = season,
             scheduleType = response.scheduleType,
             yearMonthList = yearMonthList,
-            games = response.schedule
+            games = response.schedule,
+            tournamentStartDate = response.tournamentStartDate
         )
     }
 

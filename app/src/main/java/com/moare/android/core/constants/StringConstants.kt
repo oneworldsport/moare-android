@@ -243,7 +243,7 @@ object StringConstants {
             Constants.Ids.NBA -> "플레이오프 대진표"
             Constants.Ids.MLB -> "포스트시즌 대진표"
             Constants.Ids.KBO -> "가을야구 대진표"
-            else -> ""
+            else -> "대진표"
         }
     }
 
