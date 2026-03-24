@@ -1,7 +1,6 @@
 package com.moare.android.ui.common.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +18,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.moare.android.core.constants.Constants
+import com.moare.android.features.search.models.models.mlb.MLBGameLineScore
 import com.moare.android.ui.theme.MoareAndroidTheme
 
 @Composable
@@ -47,6 +48,120 @@ fun CapsuleButton(
                 .padding(horizontal = 10.dp, vertical = 4.dp)
         }
     )
+}
+
+sealed class GameStatusContext {
+    data class Tennis(
+        val status: Int?,
+        val isResultOpened: Boolean = true
+    ) : GameStatusContext()
+
+    data class Nba(
+        val status: Int,
+        val period: Int? = null,
+        val isResultOpened: Boolean = true
+    ) : GameStatusContext()
+
+    data class Mlb(
+        val status: String,
+        val currentInning: String? = null,
+        val linescore: MLBGameLineScore? = null,
+        val isResultOpened: Boolean = true
+    ) : GameStatusContext()
+
+    data class Football(
+        val status: String,
+        val elapsed: Int?,
+        val extra: Int?,
+        val isResultOpened: Boolean = true
+    ) : GameStatusContext()
+
+    data class Kbo(
+        val status: String,
+        val currentInning: String? = null,
+        val isResultOpened: Boolean = true
+    ) : GameStatusContext()
+}
+
+@Composable
+fun GameStatusCapsuleButton(
+    gameStatusContext: GameStatusContext,
+    leagueId: Int,
+    isDisabled: Boolean = false,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val text: String = when (val context = gameStatusContext) {
+        is GameStatusContext.Tennis -> {
+            Constants.GameStatus.tennisGameStatusText(context.status)
+        }
+        is GameStatusContext.Nba -> {
+            Constants.GameStatus.nbaGameStatusText(
+                context.status,
+                context.period
+            )
+        }
+        is GameStatusContext.Mlb -> {
+            Constants.GameStatus.mlbGameStatusText(
+                status = context.status,
+                linescore = context.linescore
+            )
+        }
+        is GameStatusContext.Football -> {
+            Constants.GameStatus.fbGameStatusText(
+                status = context.status,
+                elapsed = context.elapsed,
+                extra = context.extra
+            )
+        }
+        is GameStatusContext.Kbo -> {
+            Constants.GameStatus.kboGameStatusText(
+                status = context.status,
+                currentInning = context.currentInning
+            )
+        }
+    }
+
+    val color: Color = when (gameStatusContext) {
+        is GameStatusContext.Tennis -> {
+            Constants.GameStatus.gameStatusColor(
+                leagueId = leagueId,
+                status = (gameStatusContext.status ?: 0).toString()
+            )
+        }
+        is GameStatusContext.Nba -> {
+            Constants.GameStatus.gameStatusColor(
+                leagueId = leagueId,
+                status = gameStatusContext.status.toString()
+            )
+        }
+        is GameStatusContext.Mlb -> {
+            Constants.GameStatus.gameStatusColor(
+                leagueId = leagueId,
+                status = gameStatusContext.status
+            )
+        }
+        is GameStatusContext.Football -> {
+            Constants.GameStatus.gameStatusColor(
+                leagueId = leagueId,
+                status = gameStatusContext.status
+            )
+        }
+        is GameStatusContext.Kbo -> {
+            Constants.GameStatus.gameStatusColor(
+                leagueId = leagueId,
+                status = gameStatusContext.status
+            )
+        }
+    }
+
+    CapsuleButton(
+        text = text,
+        color = color,
+        modifier = modifier
+    ) {
+        onClick()
+    }
 }
 
 @Preview(showBackground = true)

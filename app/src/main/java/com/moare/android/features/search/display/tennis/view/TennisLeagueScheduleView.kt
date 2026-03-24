@@ -37,6 +37,7 @@ import com.moare.android.features.search.display.tennis.store.TennisTournamentSt
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.models.tennis.TennisGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.common.components.TennisTournamentTitle
 import com.moare.android.ui.util.Refreshable
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -226,8 +227,7 @@ fun TennisLeagueScheduleListItem(
             game = data,
             teamNameDic = teamNameDic,
             isResultOpened = isResultOpened,
-            gameStatusText = Constants.GameStatus.tennisGameStatusText(gameStatus, isResultOpened),
-            gameStatusColor = Constants.GameStatus.gameStatusColor(leagueId, data.gameStatus),
+            gameStatusContext = GameStatusContext.Tennis(status = gameStatus, isResultOpened = isResultOpened),
             isCapsuleButtonDisabled = !Constants.GameStatus.Tennis.FINISHED_LIST.contains(gameStatus),
             gameType = data.gameInfo?.roundInfo?.name,
             shouldShowWinner = data.gameInfo?.isGameFinished ?: false,

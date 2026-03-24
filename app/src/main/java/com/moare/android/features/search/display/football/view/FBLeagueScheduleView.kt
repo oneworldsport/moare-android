@@ -31,6 +31,7 @@ import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.util.Refreshable
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -272,8 +273,7 @@ fun FBLeagueScheduleListItem(
             teamNameDic = teamNameDic,
             isClickEnabled = if (isFromSchedule) selectedGame == null else false,
             isResultOpened = isResultOpened,
-            gameStatusText = Constants.GameStatus.fbGameStatusText(data.gameStatus, gameInfo?.status?.elapsed, isResultOpened),
-            gameStatusColor = Constants.GameStatus.gameStatusColor(leagueId, data.gameStatus),
+            gameStatusContext = GameStatusContext.Football(status = data.gameStatus, elapsed = data.gameInfo?.status?.elapsed, extra = data.gameInfo?.status?._extra, isResultOpened = isResultOpened),
             isCapsuleButtonDisabled = (if (isFromSchedule) selectedGame != null else true) || !Constants.GameStatus.Football.FINISHED_LIST.contains(gameStatus),
             gameType = MatchDescriptionConverter.convert(input = data.gameInfo?.round ?: ""),
             shouldShowOnlyDateTime = if (isFromSchedule) {

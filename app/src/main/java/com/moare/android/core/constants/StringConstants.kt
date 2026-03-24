@@ -35,14 +35,14 @@ object StringConstants {
         const val GAME_FIRST_HALF = "1H"
         const val GAME_HALF_TIME = "HT"
         const val GAME_SECOND_HALF = "2H"
-        const val GAME_EXTRA_TIME = "ET" // 연장전
+        const val GAME_EXTRA_TIME = "연장전" // 연장전
         const val GAME_BREAK_TIME = "BT" // 연장전 전반 후 휴식시간
-        const val GAME_PENALTY_SHOOTOUT = "P" // 승부차기
+        const val GAME_PENALTY_SHOOTOUT = "승부차기" // 승부차기
         const val GAME_FINISHED = "FT"
         const val GAME_FINISHED_AFTER_EXTRA_TIME = "AET" // 승부차기 없이 연장전 후 경기 종료
         const val GAME_FINISHED_AFTER_PENALTY_SHOOTOUT = "PET" // 승부차기 후 경기 종료
-        const val GAME_POSTPONED = "PST"
-        const val GAME_CANCELLED = "CANC"
+        const val GAME_POSTPONED = "경기 연기"
+        const val GAME_CANCELLED = "경기 취소"
         val GAME_LIVE_LIST = listOf(GAME_FIRST_HALF, GAME_HALF_TIME, GAME_SECOND_HALF, GAME_EXTRA_TIME, GAME_BREAK_TIME, GAME_PENALTY_SHOOTOUT)
         val GAME_FINISHED_LIST = listOf(GAME_FINISHED, GAME_FINISHED_AFTER_EXTRA_TIME, GAME_FINISHED_AFTER_PENALTY_SHOOTOUT)
 

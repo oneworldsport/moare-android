@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,9 +28,8 @@ import com.moare.android.core.util.Util
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemActions
 import com.moare.android.features.search.display.common.container.state.ScheduleGameItemState
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
-import com.moare.android.features.search.models.models.tennis.TennisGameForSchedule
 import com.moare.android.features.search.models.models.tennis.TennisGameInfoForSchedule
-import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.ui.common.components.GameStatusCapsuleButton
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
@@ -173,9 +171,9 @@ fun <T> ScheduleGameItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // game status
-            CapsuleButton(
-                text = state.gameStatusText,
-                color = state.gameStatusColor,
+            GameStatusCapsuleButton(
+                gameStatusContext = state.gameStatusContext,
+                leagueId = leagueId,
                 isDisabled = state.isCapsuleButtonDisabled
             ) {
                 actions.onCapsuleButtonClick()

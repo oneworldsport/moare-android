@@ -31,6 +31,7 @@ import com.moare.android.features.search.display.nba.store.NBALeagueScheduleStor
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.util.Refreshable
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -225,8 +226,7 @@ fun NBALeagueScheduleListItem(
             game = data,
             teamNameDic = teamNameDic,
             isResultOpened = isResultOpened,
-            gameStatusText = Constants.GameStatus.nbaGameStatusText(gameStatus, data.gameInfo?.period, isResultOpened),
-            gameStatusColor = Constants.GameStatus.gameStatusColor(Constants.Ids.NBA, data.gameStatus),
+            gameStatusContext = GameStatusContext.Nba(status = gameStatus, period = data.gameInfo?.period, isResultOpened = isResultOpened),
             isCapsuleButtonDisabled = gameStatus != Constants.GameStatus.NBA.FINISHED,
             gameType = NBAUtil.gameType(data.gameInfo), // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true

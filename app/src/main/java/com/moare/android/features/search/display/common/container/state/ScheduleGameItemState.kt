@@ -2,6 +2,7 @@ package com.moare.android.features.search.display.common.container.state
 
 import androidx.compose.ui.graphics.Color
 import com.moare.android.features.search.models.models.common.GameForSchedule
+import com.moare.android.ui.common.components.GameStatusContext
 
 data class ScheduleGameItemState<T>(
     val leagueId: Int,
@@ -9,8 +10,7 @@ data class ScheduleGameItemState<T>(
     val teamNameDic: Map<String, String>,
     val isClickEnabled: Boolean = true,
     val isResultOpened: Boolean = false,
-    val gameStatusText: String,
-    val gameStatusColor: Color,
+    val gameStatusContext: GameStatusContext,
     val isCapsuleButtonDisabled: Boolean = false,
     val gameType: String? = null,
     val referee: String? = null,

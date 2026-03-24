@@ -522,24 +522,15 @@ object Constants {
             val FINISHED_LIST = listOf(FINISHED, CANCELED, RETIRED, WALKOVER)
         }
 
-        fun gameStatusText(
-            leagueId: Int,
+        fun kboGameStatusText(
             status: String,
-            elapsed: Int? = null,
+            currentInning: String? = null,
             isResultOpened: Boolean = true
         ): String {
-            return when (leagueId) {
-                in Ids.FOOTBALL_ALL -> fbGameStatusText(status, elapsed)
-                Ids.NBA -> ""
-                Ids.KBO -> {
-                    when (status) {
-                        KBO.SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-                        KBO.LIVE -> StringConstants.GAME_LIVE_STR
-                        KBO.FINAL -> StringConstants.GAME_FINISHED_STR
-                        KBO.CANCELED -> StringConstants.GAME_CANCELED_STR
-                        else -> ""
-                    }
-                }
+            return when (status) {
+                KBO.SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
+                KBO.LIVE -> currentInning ?: StringConstants.GAME_LIVE_STR
+                KBO.FINAL -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
                 else -> ""
             }
         }
@@ -547,13 +538,18 @@ object Constants {
         fun fbGameStatusText(
             status: String,
             elapsed: Int?,
+            extra: Int?,
             isResultOpened: Boolean = true
         ): String {
             return when (status) {
                 Football.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
                 Football.FIRST_HALF -> {
                     if (elapsed != null) {
-                        "전반$elapsed'"
+                        if (extra != null) {
+                            "전반$elapsed+$extra'"
+                        } else {
+                            "전반$elapsed'"
+                        }
                     } else {
                         StringConstants.Football.GAME_FIRST_HALF_STR
                     }
@@ -561,11 +557,19 @@ object Constants {
                 Football.HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
                 Football.SECOND_HALF -> {
                     if (elapsed != null) {
-                        "후반$elapsed'"
+                        if (extra != null) {
+                            "후반${elapsed-45}+$extra'"
+                        } else {
+                            "후반${elapsed-45}'"
+                        }
                     } else {
                         StringConstants.Football.GAME_SECOND_HALF_STR
                     }
                 }
+                Football.EXTRA_TIME -> StringConstants.Football.GAME_EXTRA_TIME
+                Football.PENALTY_SHOOTOUT -> StringConstants.Football.GAME_PENALTY_SHOOTOUT
+                Football.POSTPONED -> StringConstants.Football.GAME_POSTPONED
+                Football.CANCELLED -> StringConstants.Football.GAME_CANCELLED
                 in Football.FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
                 else -> ""
             }

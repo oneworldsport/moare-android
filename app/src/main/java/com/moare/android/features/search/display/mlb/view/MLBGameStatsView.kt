@@ -50,6 +50,8 @@ import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBGameLineScoreInning
 import com.moare.android.ui.common.components.BaseballLeagueTitleForGameStats
 import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.ui.common.components.GameStatusCapsuleButton
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
@@ -238,23 +240,6 @@ fun MLBGameStatsScoreInfoItem(
     val teamNameDic by store.teamNameDic.collectAsState()
 
     /* ---------------------
-       constants
-       --------------------- */
-    val gameStatusText = when (gameStatus) {
-        StringConstants.MLB.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.MLB.GAME_LIVE -> "${game.linescore?.currentInning ?: 1}회${if (game.linescore?.isTopInning ?: true) "초" else "말"}"
-        StringConstants.MLB.GAME_POSTPONED -> StringConstants.GAME_POSTPONED_STR
-        in StringConstants.MLB.GAME_FINISHED_LIST -> StringConstants.GAME_FINISHED_STR
-        else -> ""
-    }
-
-    val gameStatusColor = if (gameStatus == StringConstants.MLB.GAME_LIVE) {
-        MaterialTheme.colors.primary
-    } else {
-        Color.Gray
-    }
-
-    /* ---------------------
        ui
        --------------------- */
     Row(
@@ -295,9 +280,9 @@ fun MLBGameStatsScoreInfoItem(
                 )
             }
 
-            CapsuleButton(
-                text = gameStatusText,
-                color = gameStatusColor,
+            GameStatusCapsuleButton(
+                gameStatusContext = GameStatusContext.Mlb(status = gameStatus, linescore = game.linescore),
+                leagueId = Constants.Ids.MLB,
                 isDisabled = true,
                 modifier = Modifier.padding(vertical = 4.dp)
             ) {}

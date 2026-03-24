@@ -54,6 +54,8 @@ import com.moare.android.features.search.display.nba.store.NBAGameStatsStore
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.nba.NBALineScore
 import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.ui.common.components.GameStatusCapsuleButton
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.common.components.NBATitle
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
@@ -300,12 +302,15 @@ fun NBAGameStatsScoreInfoItem(
             }
 
             // game status
-            CapsuleButton(
-                text = Constants.GameStatus.nbaGameStatusText(game.gameSummary?.gameStatus ?: 1, game.gameSummary?.period),
-                color = Constants.GameStatus.gameStatusColor(Constants.Ids.NBA, game.gameSummary?.gameStatus.toString()),
+            GameStatusCapsuleButton(
+                gameStatusContext = GameStatusContext.Nba(
+                    status = game.gameSummary?.gameStatus ?: 1,
+                    period = game.gameSummary?.period
+                ),
+                leagueId = Constants.Ids.NBA,
                 isDisabled = true,
                 modifier = Modifier.padding(vertical = 4.dp)
-            ) {}
+            ) { }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,

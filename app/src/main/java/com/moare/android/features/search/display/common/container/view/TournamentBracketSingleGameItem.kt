@@ -36,6 +36,8 @@ import com.moare.android.features.search.display.common.container.component.Tour
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
 import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.ui.common.components.GameStatusCapsuleButton
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.theme.Moare
@@ -62,6 +64,7 @@ fun <T> TournamentBracketSingleLeftGameItem(
     val bottomSeedTeamId = seedIdPair.second
     val gameStatus = game?.gameStatus ?: Constants.GameStatus.Football.NOT_STARTED
     val elapsed = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?.elapsed }
+    val extra = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?._extra }
     val shouldShowScore = !Constants.GameStatus.isBeforeGame(leagueId, gameStatus)
 
     val homeTeamScore = game?.homeTeamScore ?: 0
@@ -207,9 +210,9 @@ fun <T> TournamentBracketSingleLeftGameItem(
 
                 CenterColumn {
                     // game status
-                    CapsuleButton(
-                        text = Constants.GameStatus.fbGameStatusText(gameStatus, elapsed),
-                        color = Constants.GameStatus.gameStatusColor(leagueId, gameStatus)
+                    GameStatusCapsuleButton(
+                        gameStatusContext = GameStatusContext.Football(gameStatus, elapsed, extra),
+                        leagueId = leagueId
                     ) { }
 
                     // game date
@@ -318,6 +321,7 @@ fun <T> TournamentBracketSingleRightGameItem(
     val bottomSeedTeamId = seedIdPair.second
     val gameStatus = game?.gameStatus ?: Constants.GameStatus.Football.NOT_STARTED
     val elapsed = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?.elapsed }
+    val extra = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?._extra }
     val shouldShowScore = !Constants.GameStatus.isBeforeGame(leagueId, gameStatus)
 
     val homeTeamScore = game?.homeTeamScore ?: 0
@@ -473,9 +477,9 @@ fun <T> TournamentBracketSingleRightGameItem(
 
                 CenterColumn {
                     // game status
-                    CapsuleButton(
-                        text = Constants.GameStatus.fbGameStatusText(gameStatus, elapsed),
-                        color = Constants.GameStatus.gameStatusColor(leagueId, gameStatus)
+                    GameStatusCapsuleButton(
+                        gameStatusContext = GameStatusContext.Football(gameStatus, elapsed, extra),
+                        leagueId = leagueId
                     ) { }
 
                     // game date
@@ -567,6 +571,7 @@ fun <T> TournamentBracketSingleFinalGameItem(
     val bottomSeedTeamId = seedIdPair.second
     val gameStatus = game?.gameStatus ?: Constants.GameStatus.Football.NOT_STARTED
     val elapsed = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?.elapsed }
+    val extra = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?._extra }
     val shouldShowScore = !Constants.GameStatus.isBeforeGame(leagueId, gameStatus)
 
     val homeTeamScore = game?.homeTeamScore ?: 0
@@ -657,9 +662,9 @@ fun <T> TournamentBracketSingleFinalGameItem(
                 modifier = Modifier.width(110.dp)
             ) {
                 // game status
-                CapsuleButton(
-                    text = Constants.GameStatus.fbGameStatusText(gameStatus, elapsed),
-                    color = Constants.GameStatus.gameStatusColor(leagueId, gameStatus)
+                GameStatusCapsuleButton(
+                    gameStatusContext = GameStatusContext.Football(gameStatus, elapsed, extra),
+                    leagueId = leagueId
                 ) { }
 
                 // game date
