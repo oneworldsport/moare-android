@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.features.search.display.common.container.component.TournamentSingleGameItem
+import com.moare.android.features.search.display.common.container.state.TournamentContainerAction
 import com.moare.android.features.search.display.common.container.state.TournamentDrawContainerState
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.VCapsuleBar
@@ -25,7 +26,8 @@ import java.time.Instant
 
 @Composable
 fun <T> TournamentDrawViewContainer(
-    state: TournamentDrawContainerState<T>
+    state: TournamentDrawContainerState<T>,
+    action: TournamentContainerAction<T>
 ) {
     Row(
         modifier = Modifier
@@ -59,6 +61,7 @@ fun <T> TournamentDrawViewContainer(
                             leagueId = state.leagueId,
                             game = game,
                             teamNameDic = state.teamNameDic,
+                            selectGame = action.selectGame,
                             modifier = Modifier.padding(bottom = 12.dp)
                         )
                     }

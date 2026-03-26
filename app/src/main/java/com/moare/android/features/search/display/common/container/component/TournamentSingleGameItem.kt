@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.common.container.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -33,6 +34,7 @@ fun <T> TournamentSingleGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
     game: GameForSchedule<T>,
+    selectGame: ((GameForSchedule<T>) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val homeTeamId = game.homeTeamId
@@ -52,7 +54,8 @@ fun <T> TournamentSingleGameItem(
         homeTeamScore > awayTeamScore
     }
 
-    CenterRow(modifier = modifier) {
+    // nullable 함수라서 invoke로 안전하게 호출
+    CenterRow(modifier = Modifier.clickable { selectGame?.invoke(game) }) {
         CenterColumn(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier

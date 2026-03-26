@@ -50,6 +50,11 @@ fun FBTournamentView(
                 teamNameDic = teamNameDic,
                 gameListTuple = gameListTuple,
                 isSeries = false
+            ),
+            action = TournamentContainerAction(
+                selectGame = { game ->
+                    store.send(FBTournamentAction.SelectGame(game))
+                }
             )
         )
     }
