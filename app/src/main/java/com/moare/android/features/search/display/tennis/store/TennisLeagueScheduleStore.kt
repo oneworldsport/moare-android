@@ -36,7 +36,7 @@ sealed interface TennisLeagueScheduleAction {
     data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int) : TennisLeagueScheduleAction
     data class SelectDay(val day: DayInfo, val selectedIndex: Int) : TennisLeagueScheduleAction
     data object ToggleAllResult : TennisLeagueScheduleAction
-    data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : TennisLeagueScheduleAction
+    data class UpdateResultOpenedState(val itemKey: String, val isOpened: Boolean) : TennisLeagueScheduleAction
     data class SelectGame(val game: TennisGameForSchedule) : TennisLeagueScheduleAction
     data class SelectRelatedLeague(val index: Int) : TennisLeagueScheduleAction
     data object UpdateFilteredGames : TennisLeagueScheduleAction
@@ -77,7 +77,7 @@ class TennisLeagueScheduleStore @AssistedInject constructor(
             is TennisLeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex, false)
             is TennisLeagueScheduleAction.SelectDay -> selectDay(action.day, action.selectedIndex)
             is TennisLeagueScheduleAction.ToggleAllResult -> toggleAllResult()
-            is TennisLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.gameId, action.isOpened)
+            is TennisLeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.itemKey, action.isOpened)
             is TennisLeagueScheduleAction.SelectGame -> selectGame(action.game)
             is TennisLeagueScheduleAction.SelectRelatedLeague -> selectRelatedLeague(action.index)
             is TennisLeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
@@ -231,10 +231,10 @@ class TennisLeagueScheduleStore @AssistedInject constructor(
         }
     }
 
-    private fun updateResultOpenedState(gameId: String, isOpened: Boolean) {
+    private fun updateResultOpenedState(itemKey: String, isOpened: Boolean) {
         _gameResultOpenedStateList.update { currentMap ->
             currentMap.toMutableMap().apply {
-                this[gameId] = isOpened
+                this[itemKey] = isOpened
             }
         }
     }
@@ -259,7 +259,7 @@ class TennisLeagueScheduleStore @AssistedInject constructor(
 
 
                 emitToParent(TennisLeagueScheduleDelegate.ShowGameStats(result.data))
-                updateResultOpenedState(game.gameId, true)
+                updateResultOpenedState(game.itemKey, true)
             }
         }
     }

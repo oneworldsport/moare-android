@@ -177,7 +177,7 @@ fun TennisLeagueScheduleList(
             }
         ) {
             LazyColumn {
-                items(gameListToDisplay) { item ->
+                items(gameListToDisplay, key = { it.itemKey }) { item ->
                     TennisLeagueScheduleListItem(
                         searchStore = searchStore,
                         store = store,
@@ -200,7 +200,7 @@ fun TennisLeagueScheduleListItem(
     val gameResultOpenedStateList by store.gameResultOpenedStateList.collectAsState()
     val displayModel by store.displayModel.collectAsState()
 
-    val gameId = data.gameId
+    val itemKey = data.itemKey
     val gameStatus = data.gameStatus.toIntOrNull() ?: 0
     val leagueId = displayModel.leagueId
 
@@ -208,7 +208,7 @@ fun TennisLeagueScheduleListItem(
 
     LaunchedEffect(data) {
         if (gameStatus in Constants.GameStatus.Tennis.FINISHED_LIST) {
-            isResultOpened = gameResultOpenedStateList[gameId] ?: false
+            isResultOpened = gameResultOpenedStateList[itemKey] ?: false
         } else if (gameStatus != Constants.GameStatus.Tennis.NOT_STARTED) {
             isResultOpened = false
         } else {
@@ -217,7 +217,7 @@ fun TennisLeagueScheduleListItem(
     }
     LaunchedEffect(gameResultOpenedStateList) {
         if (gameStatus in Constants.GameStatus.Tennis.FINISHED_LIST) {
-            isResultOpened = gameResultOpenedStateList[gameId] ?: false
+            isResultOpened = gameResultOpenedStateList[itemKey] ?: false
         }
     }
 
@@ -238,7 +238,7 @@ fun TennisLeagueScheduleListItem(
                 store.send(TennisLeagueScheduleAction.SelectGame(data))
             },
             onCapsuleButtonClick = {
-                store.send(TennisLeagueScheduleAction.UpdateResultOpenedState(gameId, !isResultOpened))
+                store.send(TennisLeagueScheduleAction.UpdateResultOpenedState(itemKey, !isResultOpened))
             }
         )
     )
