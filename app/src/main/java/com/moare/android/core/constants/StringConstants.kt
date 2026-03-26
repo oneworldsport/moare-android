@@ -170,7 +170,22 @@ object StringConstants {
             return when (leagueId) {
                 in Constants.Ids.AUS_OPEN_ALL -> "호주오픈"
                 in Constants.Ids.ROLAND_GARROS_ALL -> "롤랑가로스"
-                // TODO
+                in Constants.Ids.WIMBLEDON_ALL -> "윔블던"
+                in Constants.Ids.US_OPEN_ALL -> "US 오픈"
+                in Constants.Ids.INDIAN_WELLS_ALL -> "인디언웰스 마스터스"
+                in Constants.Ids.MIAMI_ALL -> "마이애미 마스터스"
+                in Constants.Ids.MONTE_CARLO_ALL -> "몬테카를로 마스터스"
+                in Constants.Ids.MADRID_ALL -> "마드리드 오픈"
+                in Constants.Ids.ROME_ALL -> "로마 오픈"
+                in Constants.Ids.TORONTO_ALL -> "캐나다 오픈"
+                in Constants.Ids.MONTREAL_ALL -> "캐나다 오픈"
+                in Constants.Ids.CINCINNATI_ALL -> "신시내티 마스터스"
+                in Constants.Ids.SHANGHAI_ALL -> "상하이 마스터스"
+                in Constants.Ids.PARIS_ALL -> "파리 마스터스"
+                in Constants.Ids.DOHA_ALL -> "카타르 오픈"
+                in Constants.Ids.DUBAI_ALL -> "두바이 챔피언십"
+                in Constants.Ids.BEIJING_ALL -> "차이나 오픈"
+                in Constants.Ids.WUHAN_ALL -> "우한 오픈"
                 else -> ""
             }
         }
