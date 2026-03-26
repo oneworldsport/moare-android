@@ -3,6 +3,7 @@ package com.moare.android.features.search.display.football.view
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.moare.android.core.constants.Constants
 import com.moare.android.features.search.display.common.container.state.TournamentBracketContainerState
 import com.moare.android.features.search.display.common.container.state.TournamentContainerAction
 import com.moare.android.features.search.display.common.container.state.TournamentDrawContainerState
@@ -21,17 +22,17 @@ fun FBTournamentView(
     val displayModel by store.displayModel.collectAsState()
     val teamNameDic by store.teamNameDic.collectAsState()
     val gameListTuple by store.gameListTuple.collectAsState()
-    val seedIdPairList by store.seedIdPairList.collectAsState()
+
+    val leagueId = displayModel.leagueId
 
     if (displayModel.scheduleType == ScheduleType.TOURNAMENT_BRACKET) {
         TournamentBracketViewContainer(
             state = TournamentBracketContainerState(
-                leagueId = displayModel.leagueId,
+                leagueId = leagueId,
                 teamNameDic = teamNameDic,
                 gameListTuple = gameListTuple,
-                seedIdPairList = seedIdPairList,
-                isConference = true,
-                isSeries = false
+                isConference = leagueId == Constants.Ids.MLS,
+                isSeries = leagueId != Constants.Ids.MLS
             ),
             action = TournamentContainerAction(
                 selectSeries = { gameList ->

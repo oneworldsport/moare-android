@@ -11,6 +11,7 @@ data class GameForSchedule<T>(
     @SerialName("homeTeamScore") private val _homeTeamScore: Int? = null,
     @SerialName("awayTeamScore") private val _awayTeamScore: Int? = null,
     @SerialName("gameStatus") private val _gameStatus: String? = null,
+    val isHomeTopSeed: Boolean? = null,
     val gameInfo: T? = null
 ) {
     val itemKey: String get() = _itemKey ?: ""

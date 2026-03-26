@@ -42,6 +42,7 @@ object Constants {
         const val COPA_DEL_REY = 143
         const val COPPA_ITALIA = 137
         val FOOTBALL_TOURNAMENT_LEAGUES = listOf(CHAMPIONS_LEAGUE, EUROPA_LEAGUE, CONFERENCE_LEAGUE, FA_CUP, EFL_CUP, DFB_POKAL, COUPE_DE_FRANCE, COPA_DEL_REY, COPPA_ITALIA)
+        val FOOTBALL_UEFA_LEAGUES = listOf(CHAMPIONS_LEAGUE, EUROPA_LEAGUE, CONFERENCE_LEAGUE)
         val FOOTBALL_DRAW_TOURNAMENT_LEAGUES = listOf(FA_CUP, EFL_CUP, DFB_POKAL, COUPE_DE_FRANCE, COPA_DEL_REY, COPPA_ITALIA)
         val FOOTBALL_ALL = FOOTBALL_LEAGUES + FOOTBALL_TOURNAMENT_LEAGUES
 
@@ -204,17 +205,20 @@ object Constants {
         )
         // DUBAI (W)
         const val DUBAI_W_SINGLE = 80055
-        val DUBAI_ALL = listOf(DUBAI_W_SINGLE)
+        const val DUBAI_W_DOUBLES = 80056
+        val DUBAI_ALL = listOf(
+            DUBAI_W_SINGLE,
+            DUBAI_W_DOUBLES)
         // BEIJING (W)
-        const val BEIJING_W_SINGLE = 80056
-        const val BEIJING_W_DOUBLES = 80057
+        const val BEIJING_W_SINGLE = 80057
+        const val BEIJING_W_DOUBLES = 80058
         val BEIJING_ALL = listOf(
             BEIJING_W_SINGLE,
             BEIJING_W_DOUBLES
         )
         // WUHAN (W)
-        const val WUHAN_W_SINGLE = 80058
-        const val WUHAN_W_DOUBLES = 80059
+        const val WUHAN_W_SINGLE = 80059
+        const val WUHAN_W_DOUBLES = 80060
         val WUHAN_ALL = listOf(
             WUHAN_W_SINGLE,
             WUHAN_W_DOUBLES
@@ -518,8 +522,9 @@ object Constants {
             const val CANCELED = 70
             const val RETIRED = 92
             const val WALKOVER = 91
+            const val SUSPENDED = 80
             val LIVE_LIST = listOf(FIRST_SET, SECOND_SET, THIRD_SET, FOURTH_SET, FIFTH_SET)
-            val FINISHED_LIST = listOf(FINISHED, CANCELED, RETIRED, WALKOVER)
+            val FINISHED_LIST = listOf(FINISHED, CANCELED, RETIRED, WALKOVER, SUSPENDED)
         }
 
         fun kboGameStatusText(
@@ -635,6 +640,7 @@ object Constants {
                 Tennis.CANCELED -> StringConstants.GAME_CANCELED_STR
                 Tennis.RETIRED -> if (isResultOpened) "기권" else StringConstants.RESULT_OPEN
                 Tennis.WALKOVER -> if (isResultOpened) "부전" else StringConstants.RESULT_OPEN
+                Tennis.SUSPENDED -> "경기 일시중단"
                 else -> StringConstants.GAME_NOT_STARTED_STR
             }
         }
@@ -655,6 +661,21 @@ object Constants {
                 Ids.NBA -> status == NBA.NOT_STARTED.toString()
                 Ids.MLB -> MLB.BEFORE_GAME_LIST.contains(status)
                 Ids.KBO -> status == KBO.SCHEDULED
+                in Ids.TENNIS_ALL -> status == Tennis.NOT_STARTED.toString()
+                else -> false
+            }
+        }
+
+        fun isGameFinished(leagueId: Int, status: String): Boolean {
+            return when (leagueId) {
+                in Ids.FOOTBALL_ALL -> Football.FINISHED_LIST.contains(status)
+                Ids.NBA -> status == NBA.FINISHED.toString()
+                Ids.MLB -> MLB.FINISHED_LIST.contains(status)
+                Ids.KBO -> status == KBO.FINAL
+                in Ids.TENNIS_ALL -> {
+                    val status = status.toIntOrNull() ?: 0
+                    Tennis.FINISHED_LIST.contains(status)
+                }
                 else -> false
             }
         }
