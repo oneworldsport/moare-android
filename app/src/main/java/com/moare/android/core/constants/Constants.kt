@@ -6,18 +6,13 @@ import com.moare.android.ui.theme.Moare
 
 object Constants {
     object Keys {
-        const val EPL_PLAYER_DIC = "epl_player"
-        const val LALIGA_PLAYER_DIC = "laliga_player"
-        const val BUNDESLIGA_PLAYER_DIC = "bundesliga_player"
-        const val LIGUE1_PLAYER_DIC = "ligue1_player"
-        const val SERIEA_PLAYER_DIC = "seriea_player"
-        const val MLS_PLAYER_DIC = "mls_player"
         const val NBA_PLAYER_DIC = "nba_player"
         const val NBA_TEAM_DIC = "nba_team"
         const val KBO_PLAYER_DIC = "kbo_player"
         const val KBO_TEAM_DIC = "kbo_team"
         const val MLB_PLAYER_DIC = "mlb_player"
         const val MLB_TEAM_DIC = "mlb_team"
+        const val FOOTBALL_PLAYER_DIC = "football_player"
         const val FOOTBALL_TEAM_DIC = "football_team"
 
         const val TOURNAMENT_TEAMS = "tournament_teams"
