@@ -74,7 +74,7 @@ fun FBLeagueScheduleView(
     val tournamentStartDateYearMonthInt =
         tournamentStartDateYearMonth.replace("/", "").toIntOrNull() ?: 0
 
-    val todayYearMonthInt =
+    val selectedYearMonthInt =
         selectedYearMonth.replace("/", "").toIntOrNull() ?: 0
 
     LaunchedEffect(didPop) {
@@ -103,7 +103,7 @@ fun FBLeagueScheduleView(
                 shouldAnimateScroll
             ),
             isAllResultOpened = isAllResultOpened,
-            shouldShowTournamentButton = (displayModel.tournamentStartDate != null) && (tournamentStartDateYearMonthInt <= todayYearMonthInt),
+            shouldShowTournamentButton = (displayModel.tournamentStartDate != null) && (tournamentStartDateYearMonthInt <= selectedYearMonthInt),
         ),
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(

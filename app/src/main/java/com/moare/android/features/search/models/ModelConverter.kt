@@ -464,6 +464,7 @@ object ModelConverter {
             scheduleType = response.scheduleType ?: ScheduleType.LEAGUE,
             yearMonthList = yearMonthList,
             games = response.schedule,
+            tournamentStartDate = response.tournamentStartDate
         )
     }
 

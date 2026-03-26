@@ -17,7 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.InputTimeFormatType
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
@@ -54,6 +57,18 @@ fun NBALeagueScheduleView(
     val dayCalendarScrollTrigger by store.dayCalendarScrollTrigger.collectAsState()
     val isAllResultOpened by store.isAllResultOpened.collectAsState()
     val displayDataState by store.displayDataState.collectAsState()
+    val selectedYearMonth by store.selectedYearMonth.collectAsState()
+
+    val tournamentStartDateYearMonth = CalendarUtil.formatDate(
+        date = displayModel.tournamentStartDate,
+        inputFormatType = InputTimeFormatType.DATE_ONLY,
+        outputFormatType = OutputTimeFormatType.YEAR_MONTH
+    )
+
+    val tournamentStartDateYearMonthInt =
+        tournamentStartDateYearMonth.replace("/", "").toIntOrNull() ?: 0
+
+    val selectedYearMonthInt = selectedYearMonth.replace("/", "").toIntOrNull() ?: 0
 
     LaunchedEffect(didPop) {
         // 뒤로가서 일정화면으로 돌아왔을때 filteredGames update
@@ -78,7 +93,7 @@ fun NBALeagueScheduleView(
                 dayCalendarScrollTrigger
             ),
             isAllResultOpened = isAllResultOpened,
-            shouldShowTournamentButton = selectedMonth in 4..6
+            shouldShowTournamentButton = (displayModel.tournamentStartDate != null) && (tournamentStartDateYearMonthInt <= selectedYearMonthInt)
         ),
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
