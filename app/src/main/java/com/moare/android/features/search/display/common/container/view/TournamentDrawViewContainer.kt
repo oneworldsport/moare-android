@@ -21,6 +21,7 @@ import com.moare.android.features.search.display.common.container.state.Tourname
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.VCapsuleBar
 import com.moare.android.ui.util.CenterColumn
+import java.time.Instant
 
 @Composable
 fun <T> TournamentDrawViewContainer(
@@ -34,7 +35,9 @@ fun <T> TournamentDrawViewContainer(
     ) {
         state.gameListTuple.forEachIndexed { roundIndex, item ->
             val title = item.title
-            val gameList = item.gameList.filterNotNull().flatten() // 중첩 배열인 gameList를(null을 제거하고) 펼쳐서 1차원 배열로 만든다
+            // 1. 중첩 배열인 gameList를(nil을 제거하고) 펼쳐서 1차원 배열로 만든다.
+            // 2. tournament_teams.json에 들어간 id 순서대로 경기가 배치되어 있기 때문에 날짜순으로 정렬을 해준다.
+            val gameList = item.gameList.filterNotNull().flatten().sortedBy { it.parsedDate ?: Instant.MAX }
 
             CenterColumn {
                 Text(
