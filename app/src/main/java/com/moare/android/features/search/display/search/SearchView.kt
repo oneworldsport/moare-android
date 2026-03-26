@@ -346,6 +346,7 @@ fun SearchView(
                             .alpha(0.7f)
                             .clickable {
                                 isNoticeOpened = !isNoticeOpened
+                                searchStore.send(SearchAction.ToggleFocusState(false))
                             }
                     )
                 }
