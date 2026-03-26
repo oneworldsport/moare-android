@@ -97,6 +97,11 @@ class TennisLeagueScheduleStore @AssistedInject constructor(
         // init data
         _yearMonthList.value = displayModel.value.yearMonthList
 
+        //
+        val selectedIndex: Int? = displayModel.value.sortedRelatedLeagues?.indexOf(displayModel.value.leagueId)
+
+        _selectedRelatedLeagueIndex.value = selectedIndex ?: 0
+
         when (displayModel.value.scheduleType) {
             ScheduleType.LEAGUE -> {
                 displayModel.value.games.firstOrNull()?.date?.let {
