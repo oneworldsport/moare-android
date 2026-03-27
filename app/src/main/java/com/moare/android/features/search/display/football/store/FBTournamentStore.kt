@@ -44,9 +44,6 @@ class FBTournamentStore @AssistedInject constructor(
     private val _gameListTuple = MutableStateFlow<List<GameListEntry<FBGameInfoForSchedule>>>(emptyList())
     val gameListTuple: StateFlow<List<GameListEntry<FBGameInfoForSchedule>>> = _gameListTuple
 
-    private val _seedIdPairList = MutableStateFlow<List<List<Pair<Int?, Int?>>>>(emptyList())
-    val seedIdPairList: StateFlow<List<List<Pair<Int?, Int?>>>> = _seedIdPairList
-
     @AssistedFactory
     interface Factory {
         fun create(
@@ -93,13 +90,13 @@ class FBTournamentStore @AssistedInject constructor(
 
             val games = displayModel.games.toMutableList()
 
-            val (westFirstRoundSeedTuple, westFirstRound) = Util.collectRound(westFirstRoundPairedTeams, games)
-            val (eastFirstRoundSeedTuple, eastFirstRound) = Util.collectRound(eastFirstRoundPairedTeams, games)
-            val (westSecondRoundSeedTuple, westSecondRound) = Util.collectRound(westSecondRoundPairedTeams, games)
-            val (eastSecondRoundSeedTuple, eastSecondRound) = Util.collectRound(eastSecondRoundPairedTeams, games)
-            val (westThirdRoundSeedTuple, westThirdRound) = Util.collectRound(westThirdRoundPairedTeams, games)
-            val (eastThirdRoundSeedTuple, eastThirdRound) = Util.collectRound(eastThirdRoundPairedTeams, games)
-            val (fourthRoundSeedTuple, fourthRound) = Util.collectRound(fourthRoundPairedTeams, games)
+            val (_, westFirstRound) = Util.collectRound(westFirstRoundPairedTeams, games)
+            val (_, eastFirstRound) = Util.collectRound(eastFirstRoundPairedTeams, games)
+            val (_, westSecondRound) = Util.collectRound(westSecondRoundPairedTeams, games)
+            val (_, eastSecondRound) = Util.collectRound(eastSecondRoundPairedTeams, games)
+            val (_, westThirdRound) = Util.collectRound(westThirdRoundPairedTeams, games)
+            val (_, eastThirdRound) = Util.collectRound(eastThirdRoundPairedTeams, games)
+            val (_, fourthRound) = Util.collectRound(fourthRoundPairedTeams, games)
 
             _gameListTuple.value = listOf(
                 GameListEntry(title = "서부 컨퍼런스 1라운드", gameList = westFirstRound),
@@ -109,17 +106,6 @@ class FBTournamentStore @AssistedInject constructor(
                 GameListEntry(title = "동부 컨퍼런스 파이널", gameList = eastThirdRound),
                 GameListEntry(title = "동부 컨퍼런스 세미파이널", gameList = eastSecondRound),
                 GameListEntry(title = "동부 컨퍼런스 1라운드", gameList = eastFirstRound)
-            )
-
-            // gameListTuple에 추가되는 순서대로 추가
-            _seedIdPairList.value = listOf(
-                westFirstRoundSeedTuple,
-                westSecondRoundSeedTuple,
-                westThirdRoundSeedTuple,
-                fourthRoundSeedTuple,
-                eastThirdRoundSeedTuple,
-                eastSecondRoundSeedTuple,
-                eastFirstRoundSeedTuple
             )
         } else {
             val firstRoundTeams = tournamentTeams["${leagueId}_${season}_64"] ?: emptyList()

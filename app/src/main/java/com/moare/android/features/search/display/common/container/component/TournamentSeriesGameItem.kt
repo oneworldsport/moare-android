@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -56,7 +57,6 @@ fun <T> TournamentSeriesLeftGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
     games: List<GameForSchedule<T>>?,
-    seedIdPair: Pair<Int?, Int?>,
     itemPosition: RoundSeriesKey, // ui상에서 시리즈의 위치 ex) 1라운드의 첫번째 시리즈면 1_1
     shouldRemoveBar: Boolean = false, // NOTE: MLB의 경우 이전 라운드에 시리즈가 하나 없으면 하단에 HBar가 필요없는 경우가 있음. KBO는 그냥 필요없음.
     itemHeights: Map<RoundSeriesKey, Dp>,
@@ -65,12 +65,10 @@ fun <T> TournamentSeriesLeftGameItem(
     selectSeries: ((List<GameForSchedule<T>>) -> Unit)? = null
 ) {
     val density = LocalDensity.current
-    val topSeedTeamId = seedIdPair.first
-    val bottomSeedTeamId = seedIdPair.second
-    val isSeriesStarted = topSeedTeamId != null && bottomSeedTeamId != null
-
     var itemHeight by remember { mutableStateOf(0.dp) }
     var isScoreOpened by remember { mutableStateOf(false) }
+
+    val isUEFALeague = leagueId in Constants.Ids.FOOTBALL_UEFA_LEAGUES
 
     // function
     fun h(r: Int, s: Int): Dp {
@@ -117,6 +115,16 @@ fun <T> TournamentSeriesLeftGameItem(
 
     // ui
     if (games != null) {
+        val game = games.first()
+        val topSeedTeamId = if (game.isHomeTopSeed == true) game.homeTeamId else game.awayTeamId
+        val bottomSeedTeamId = if (game.isHomeTopSeed == true) game.awayTeamId else game.homeTeamId
+        val isSeriesStarted = if (isUEFALeague) {
+            // UEFA리그(합산 스코어 방식)는 경기중이어도 isSeriesStarted = true
+            !Constants.GameStatus.isBeforeGame(leagueId = leagueId, status = game.gameStatus)
+        } else {
+            Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)
+        }
+
         val (topSeedTeamSeriesScore, bottomSeedTeamSeriesScore) = games.fold(0 to 0) { partial, game ->
             var (top, bottom) = partial
 
@@ -138,22 +146,35 @@ fun <T> TournamentSeriesLeftGameItem(
                 awayTeamScore > homeTeamScore
             }
 
-            if (game.homeTeamId == topSeedTeamId && game.awayTeamId == bottomSeedTeamId) {
-                // 홈팀이 topSeed인경우
-                if (isHomeWinner) {
-                    top += 1
-                } else if (isAwayWinner) {
-                    bottom += 1
-                }
-            } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == topSeedTeamId) {
-                // 홈팀이 bottomSeed인경우
-                if (isHomeWinner) {
-                    bottom += 1
-                } else if (isAwayWinner) {
-                    top += 1
+            if (isUEFALeague) {
+                if (!Constants.GameStatus.isBeforeGame(leagueId = leagueId, status = game.gameStatus)) {
+                    if (game.isHomeTopSeed == true) {
+                        top += homeTeamScore
+                        bottom += awayTeamScore
+                    } else {
+                        top += awayTeamScore
+                        bottom += homeTeamScore
+                    }
+                } else {
+                    if (Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)) {
+                        if (game.isHomeTopSeed == true) {
+                            // 홈팀이 topSeed인경우
+                            if (isHomeWinner) {
+                                top += 1
+                            } else if (isAwayWinner) {
+                                bottom += 1
+                            }
+                        } else {
+                            // 홈팀이 bottomSeed인경우
+                            if (isHomeWinner) {
+                                bottom += 1
+                            } else if (isAwayWinner) {
+                                top += 1
+                            }
+                        }
+                    }
                 }
             }
-
             top to bottom
         }
 
@@ -174,162 +195,188 @@ fun <T> TournamentSeriesLeftGameItem(
                 }
             }
 
-            CenterRow {
-                CenterColumn(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .width(150.dp)
-                        .onGloballyPositioned { layoutCoordinates ->
-                        val size = layoutCoordinates.size
+            CenterColumn(
+                modifier = Modifier.padding(bottom = 2.dp)
+            ) {
+                if (isUEFALeague) {
+                    Text(
+                        text = "합산 스코어",
+                        color = Color.Gray,
+                        fontSize = 12.sp,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
-                        with(density) {
-                            itemHeight = size.height.toDp()
-                            onItemHeightChange(itemPosition, size.height.toDp())
-                        }
-                    }
-                ) {
-                    CenterRow(
-                        modifier = Modifier.padding(bottom = 2.dp)
+                CenterRow {
+                    CenterColumn(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .width(150.dp)
+                            .onGloballyPositioned { layoutCoordinates ->
+                                val size = layoutCoordinates.size
+
+                                with(density) {
+                                    itemHeight = size.height.toDp()
+                                    onItemHeightChange(itemPosition, size.height.toDp())
+                                }
+                            }
                     ) {
                         CenterRow(
-                            modifier = Modifier.width(130.dp)
+                            modifier = Modifier.padding(bottom = 2.dp)
                         ) {
-                            Text(
-                                text = if (topSeedTeamId == null) "미정" else teamNameDic["short_${topSeedTeamId}"] ?: "",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(end = 4.dp)
-                            )
+                            CenterRow(
+                                modifier = Modifier.width(130.dp)
+                            ) {
+                                Text(
+                                    text = if (topSeedTeamId == null) "미정" else teamNameDic["short_${topSeedTeamId}"]
+                                        ?: "",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(end = 4.dp)
+                                )
 
-                            URLImage(
-                                url = Util.teamLogoUrl(leagueId, topSeedTeamId),
-                                size = URLImageSize.SMALL
+                                URLImage(
+                                    url = Util.teamLogoUrl(leagueId, topSeedTeamId),
+                                    size = URLImageSize.SMALL
+                                )
+                            }
+
+                            Text(
+                                text = if (isSeriesStarted) topSeedTeamSeriesScore.toString() else "-",
+                                color = if (isSeriesStarted) {
+                                    if (topSeedTeamSeriesScore >= bottomSeedTeamSeriesScore) Moare else Color.Black
+                                } else {
+                                    Color.Black
+                                }
                             )
                         }
 
-                        Text(
-                            text = if (isSeriesStarted) topSeedTeamSeriesScore.toString() else "-",
-                            color = if (isSeriesStarted) {
-                                if (topSeedTeamSeriesScore >= bottomSeedTeamSeriesScore) Moare else Color.Black
-                            } else {
-                                Color.Black
-                            }
-                        )
-                    }
+                        if (isScoreOpened) {
+                            CenterColumn(
+                                modifier = Modifier.clickable { selectSeries?.let { it(games) } }
+                            ) {
+                                games.forEachIndexed { index, game ->
+                                    val topSeedScore =
+                                        if (game.homeTeamId == topSeedTeamId) game.homeTeamScore else game.awayTeamScore
+                                    val bottomSeedScore =
+                                        if (game.homeTeamId == bottomSeedTeamId) game.homeTeamScore else game.awayTeamScore
+                                    val isBeforeGame =
+                                        Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
 
-                    if (isScoreOpened) {
-                        CenterColumn(
-                            modifier = Modifier.clickable { selectSeries?.let { it(games) } }
-                        ) {
-                            games.forEachIndexed { index, game ->
-                                val topSeedScore = if (game.homeTeamId == topSeedTeamId) game.homeTeamScore else game.awayTeamScore
-                                val bottomSeedScore = if (game.homeTeamId == bottomSeedTeamId) game.homeTeamScore else game.awayTeamScore
-                                val isBeforeGame = Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
-
-                                CenterColumn {
-                                    Text(
-                                        text = "Game ${index + 1} - ${CalendarUtil.formatDate(game.date).split(" ").firstOrNull() ?: ""}",
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Light,
-                                        modifier = Modifier.padding(top = 4.dp)
-                                    )
-
-                                    CenterRow {
+                                    CenterColumn {
                                         Text(
-                                            text = if (isBeforeGame) "-" else topSeedScore.toString(),
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.width(30.dp),
-                                            color = if (isBeforeGame) {
-                                                Color.Black
-                                            } else {
-                                                if (topSeedScore >= bottomSeedScore) Moare else Color.Black
-                                            }
+                                            text = "Game ${index + 1} - ${
+                                                CalendarUtil.formatDate(
+                                                    game.date
+                                                ).split(" ").firstOrNull() ?: ""
+                                            }",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Light,
+                                            modifier = Modifier.padding(top = 4.dp)
                                         )
 
-                                        Text("-")
+                                        CenterRow {
+                                            Text(
+                                                text = if (isBeforeGame) "-" else topSeedScore.toString(),
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier.width(30.dp),
+                                                color = if (isBeforeGame) {
+                                                    Color.Black
+                                                } else {
+                                                    if (topSeedScore >= bottomSeedScore) Moare else Color.Black
+                                                }
+                                            )
 
-                                        Text(
-                                            text = if (isBeforeGame) "-" else bottomSeedScore.toString(),
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.width(30.dp),
-                                            color = if (isBeforeGame) {
-                                                Color.Black
-                                            } else {
-                                                if (bottomSeedScore >= topSeedScore) Moare else Color.Black
-                                            }
-                                        )
+                                            Text("-")
+
+                                            Text(
+                                                text = if (isBeforeGame) "-" else bottomSeedScore.toString(),
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier.width(30.dp),
+                                                color = if (isBeforeGame) {
+                                                    Color.Black
+                                                } else {
+                                                    if (bottomSeedScore >= topSeedScore) Moare else Color.Black
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    CenterRow(
-                        modifier = Modifier
-                            .alpha(0.7f)
-                            .clickable { isScoreOpened = !isScoreOpened }
-                    ) {
-                        Text(
-                            text = if (isScoreOpened) "경기결과 숨기기" else "경기결과 보기",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-
-                        Box(
-                            Modifier
-                                .padding(start = 3.dp)
-                                .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(10.dp))
-                        ) {
-                            Icon(
-                                painter = painterResource(id = if (isScoreOpened) R.drawable.ic_round_arrow_drop_up_24 else R.drawable.ic_round_arrow_drop_down_24),
-                                contentDescription = null,
-                                tint = Color.Gray
-                            )
-                        }
-                    }
-
-                    CenterRow(
-                        modifier = Modifier.padding(top = 2.dp)
-                    ) {
                         CenterRow(
-                            modifier = Modifier.width(130.dp)
+                            modifier = Modifier
+                                .alpha(0.7f)
+                                .clickable { isScoreOpened = !isScoreOpened }
                         ) {
                             Text(
-                                text = if (bottomSeedTeamId == null) "미정" else teamNameDic["short_${bottomSeedTeamId}"] ?: "",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(end = 4.dp)
+                                text = if (isScoreOpened) "경기결과 숨기기" else "경기결과 보기",
+                                fontSize = 14.sp,
+                                color = Color.Gray
                             )
 
-                            URLImage(
-                                url = Util.teamLogoUrl(leagueId, bottomSeedTeamId),
-                                size = URLImageSize.SMALL
-                            )
+                            Box(
+                                Modifier
+                                    .padding(start = 3.dp)
+                                    .border(
+                                        BorderStroke(1.dp, Color.Gray),
+                                        RoundedCornerShape(10.dp)
+                                    )
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = if (isScoreOpened) R.drawable.ic_round_arrow_drop_up_24 else R.drawable.ic_round_arrow_drop_down_24),
+                                    contentDescription = null,
+                                    tint = Color.Gray
+                                )
+                            }
                         }
 
-                        Text(
-                            text = if (isSeriesStarted) bottomSeedTeamSeriesScore.toString() else "-",
-                            color = if (isSeriesStarted) {
-                                if (bottomSeedTeamSeriesScore >= topSeedTeamSeriesScore) Moare else Color.Black
-                            } else {
-                                Color.Black
-                            }
-                        )
-                    }
-                }
+                        CenterRow(
+                            modifier = Modifier.padding(top = 2.dp)
+                        ) {
+                            CenterRow(
+                                modifier = Modifier.width(130.dp)
+                            ) {
+                                Text(
+                                    text = if (bottomSeedTeamId == null) "미정" else teamNameDic["short_${bottomSeedTeamId}"]
+                                        ?: "",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(end = 4.dp)
+                                )
 
-                // bar
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    modifier = Modifier.height(itemHeight).padding(vertical = 15.dp)
-                ) {
-                    TournamentHBar()
-                    TournamentVBar(modifier = Modifier.weight(1f))
-                    TournamentHBar()
+                                URLImage(
+                                    url = Util.teamLogoUrl(leagueId, bottomSeedTeamId),
+                                    size = URLImageSize.SMALL
+                                )
+                            }
+
+                            Text(
+                                text = if (isSeriesStarted) bottomSeedTeamSeriesScore.toString() else "-",
+                                color = if (isSeriesStarted) {
+                                    if (bottomSeedTeamSeriesScore >= topSeedTeamSeriesScore) Moare else Color.Black
+                                } else {
+                                    Color.Black
+                                }
+                            )
+                        }
+                    }
+
+                    // bar
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        modifier = Modifier.height(itemHeight).padding(vertical = 15.dp)
+                    ) {
+                        TournamentHBar()
+                        TournamentVBar(modifier = Modifier.weight(1f))
+                        TournamentHBar()
+                    }
                 }
             }
 
@@ -360,7 +407,6 @@ fun <T> TournamentSeriesRightGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
     games: List<GameForSchedule<T>>?,
-    seedIdPair: Pair<Int?, Int?>,
     itemPosition: RoundSeriesKey, // ui상에서 시리즈의 위치 ex) 1라운드의 첫번째 시리즈면 1_1
     shouldRemoveBar: Boolean = false, // NOTE: MLB의 경우 이전 라운드에 시리즈가 하나 없으면 하단에 HBar가 필요없는 경우가 있음. KBO는 그냥 필요없음.
     itemHeights: Map<RoundSeriesKey, Dp>,
@@ -369,10 +415,6 @@ fun <T> TournamentSeriesRightGameItem(
     selectSeries: ((List<GameForSchedule<T>>) -> Unit)? = null
 ) {
     val density = LocalDensity.current
-    val topSeedTeamId = seedIdPair.first
-    val bottomSeedTeamId = seedIdPair.second
-    val isSeriesStarted = topSeedTeamId != null && bottomSeedTeamId != null
-
     var itemHeight by remember { mutableStateOf(0.dp) }
     var isScoreOpened by remember { mutableStateOf(false) }
 
@@ -419,6 +461,11 @@ fun <T> TournamentSeriesRightGameItem(
 
     // ui
     if (games != null) {
+        val game = games.first()
+        val topSeedTeamId = if (game.isHomeTopSeed == true) game.homeTeamId else game.awayTeamId
+        val bottomSeedTeamId = if (game.isHomeTopSeed == true) game.awayTeamId else game.homeTeamId
+        val isSeriesStarted = Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)
+
         val (topSeedTeamSeriesScore, bottomSeedTeamSeriesScore) = games.fold(0 to 0) { partial, game ->
             var (top, bottom) = partial
 
@@ -440,19 +487,21 @@ fun <T> TournamentSeriesRightGameItem(
                 awayTeamScore > homeTeamScore
             }
 
-            if (game.homeTeamId == topSeedTeamId && game.awayTeamId == bottomSeedTeamId) {
-                // 홈팀이 topSeed인경우
-                if (isHomeWinner) {
-                    top += 1
-                } else if (isAwayWinner) {
-                    bottom += 1
-                }
-            } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == topSeedTeamId) {
-                // 홈팀이 bottomSeed인경우
-                if (isHomeWinner) {
-                    bottom += 1
-                } else if (isAwayWinner) {
-                    top += 1
+            if (Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)) {
+                if (game.isHomeTopSeed == true) {
+                    // 홈팀이 topSeed인경우
+                    if (isHomeWinner) {
+                        top += 1
+                    } else if (isAwayWinner) {
+                        bottom += 1
+                    }
+                } else {
+                    // 홈팀이 bottomSeed인경우
+                    if (isHomeWinner) {
+                        bottom += 1
+                    } else if (isAwayWinner) {
+                        top += 1
+                    }
                 }
             }
 
@@ -662,13 +711,13 @@ fun <T> TournamentSeriesFinalGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
     games: List<GameForSchedule<T>>,
-    seedIdPair: Pair<Int?, Int?>,
     itemHeights: Map<RoundSeriesKey, Dp>,
     selectSeries: ((List<GameForSchedule<T>>) -> Unit)? = null
 ) {
-    val topSeedTeamId = seedIdPair.first
-    val bottomSeedTeamId = seedIdPair.second
-    val isSeriesStarted = topSeedTeamId != null && bottomSeedTeamId != null
+    val game = games.first()
+    val topSeedTeamId = if (game.isHomeTopSeed == true) game.homeTeamId else game.awayTeamId
+    val bottomSeedTeamId = if (game.isHomeTopSeed == true) game.awayTeamId else game.homeTeamId
+    val isSeriesStarted = Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)
 
     var isScoreOpened by remember { mutableStateOf(false) }
     var itemTopPadding by remember { mutableStateOf(0.dp) } // 아이템 Y 위치
@@ -694,19 +743,21 @@ fun <T> TournamentSeriesFinalGameItem(
             awayTeamScore > homeTeamScore
         }
 
-        if (game.homeTeamId == topSeedTeamId && game.awayTeamId == bottomSeedTeamId) {
-            // 홈팀이 topSeed인경우
-            if (isHomeWinner) {
-                top += 1
-            } else if (isAwayWinner) {
-                bottom += 1
-            }
-        } else if (game.homeTeamId == bottomSeedTeamId && game.awayTeamId == topSeedTeamId) {
-            // 홈팀이 bottomSeed인경우
-            if (isHomeWinner) {
-                bottom += 1
-            } else if (isAwayWinner) {
-                top += 1
+        if (Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)) {
+            if (game.isHomeTopSeed == true) {
+                // 홈팀이 topSeed인경우
+                if (isHomeWinner) {
+                    top += 1
+                } else if (isAwayWinner) {
+                    bottom += 1
+                }
+            } else {
+                // 홈팀이 bottomSeed인경우
+                if (isHomeWinner) {
+                    bottom += 1
+                } else if (isAwayWinner) {
+                    top += 1
+                }
             }
         }
 

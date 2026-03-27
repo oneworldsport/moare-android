@@ -77,7 +77,7 @@ data class FBGameStatus(
     @SerialName("long") private val _long: String? = null,
     @SerialName("short") private val _short: String? = null,
     @SerialName("elapsed") private val _elapsed: Int? = null,
-    @SerialName("extra") private val _extra: Int? = null,
+    @SerialName("extra") val _extra: Int? = null,
 ) {
     val long: String
         get() = _long ?: ""

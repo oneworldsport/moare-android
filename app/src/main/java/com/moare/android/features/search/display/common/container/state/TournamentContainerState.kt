@@ -6,7 +6,8 @@ data class TournamentBracketContainerState<T>(
     val leagueId: Int,
     val teamNameDic: Map<String, String>,
     val gameListTuple: List<GameListEntry<T>>,
-    val seedIdPairList: List<List<Pair<Int?, Int?>>>, // Bracket에 한 시리즈 아이템에서 위에 표시되는 팀과 아래 표시되는 팀 id 정보. gameListTuple의 gameList와 동일한 인덱스에 일치하는 정보가 있음.
+    // TODO: seedIdTupleList사용 안되므로 다른 사용하는곳 리팩토링 필요. DB에 isHomeTopSeed작업이 되어있어야함.
+    var seedIdPairList: List<List<Pair<Int?, Int?>>> = listOf(), // Bracket에 한 시리즈 아이템에서 위에 표시되는 팀과 아래 표시되는 팀 id 정보. gameListTuple의 gameList와 동일한 인덱스에 일치하는 정보가 있음.
     val isConference: Boolean,
     val isSeries: Boolean
 )

@@ -30,6 +30,7 @@ import com.moare.android.features.search.display.mlb.store.MLBLeagueScheduleStor
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.mlb.MLBGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.util.Refreshable
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -230,8 +231,7 @@ fun MLBLeagueScheduleListItem(
             teamNameDic = teamNameDic,
             isClickEnabled = gameStatus != Constants.GameStatus.MLB.POSTPONED, // 연기된 경기는 클릭 안되게
             isResultOpened = isResultOpened,
-            gameStatusText = Constants.GameStatus.mlbGameStatusText(status = gameStatus, currentInning = data.gameInfo?.currentInning, isResultOpened = isResultOpened),
-            gameStatusColor = Constants.GameStatus.gameStatusColor(Constants.Ids.MLB, gameStatus),
+            gameStatusContext = GameStatusContext.Mlb(status = gameStatus, currentInning = data.gameInfo?.currentInning, isResultOpened = isResultOpened),
             isCapsuleButtonDisabled = !StringConstants.MLB.GAME_FINISHED_LIST.contains(gameStatus),
             gameType = data.gameInfo?.seriesDescription,
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true

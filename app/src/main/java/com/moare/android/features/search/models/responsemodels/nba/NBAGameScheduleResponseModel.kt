@@ -13,5 +13,6 @@ data class NBAGameScheduleResponseModel(
     val startDate: String? = null,
     val endDate: String? = null,
     val relatedLeagueIds: List<Int>? = null,
-    val schedule: List<NBAGameForSchedule> = emptyList()
+    val schedule: List<NBAGameForSchedule> = emptyList(),
+    val tournamentStartDate: String? = null
 )

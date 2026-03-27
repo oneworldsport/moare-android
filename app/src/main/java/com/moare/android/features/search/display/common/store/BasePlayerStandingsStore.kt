@@ -77,26 +77,9 @@ abstract class BasePlayerStandingsStore<A, R, D: SportDisplayModel>(
 
     private fun loadDictionaries(leagueId: Int) {
         _teamNameDic.value = nameProvider.getDictionary(Constants.Keys.FOOTBALL_TEAM_DIC)
+        _playerNameDic.value = nameProvider.getDictionary(Constants.Keys.FOOTBALL_PLAYER_DIC)
 
         when (leagueId) {
-            Constants.Ids.EPL -> {
-                _playerNameDic.value = nameProvider.getDictionary(Constants.Keys.EPL_PLAYER_DIC)
-            }
-            Constants.Ids.LALIGA -> {
-                _playerNameDic.value = nameProvider.getDictionary(Constants.Keys.LALIGA_PLAYER_DIC)
-            }
-            Constants.Ids.BUNDESLIGA -> {
-                _playerNameDic.value = nameProvider.getDictionary(Constants.Keys.BUNDESLIGA_PLAYER_DIC)
-            }
-            Constants.Ids.LIGUE1 -> {
-                _playerNameDic.value = nameProvider.getDictionary(Constants.Keys.LIGUE1_PLAYER_DIC)
-            }
-            Constants.Ids.SERIEA -> {
-                _playerNameDic.value = nameProvider.getDictionary(Constants.Keys.SERIEA_PLAYER_DIC)
-            }
-            Constants.Ids.MLS -> {
-                _playerNameDic.value = nameProvider.getDictionary(Constants.Keys.MLS_PLAYER_DIC)
-            }
             Constants.Ids.NBA -> {
                 _playerNameDic.value = nameProvider.getDictionary(Constants.Keys.NBA_PLAYER_DIC)
                 _teamNameDic.value = nameProvider.getDictionary(Constants.Keys.NBA_TEAM_DIC)

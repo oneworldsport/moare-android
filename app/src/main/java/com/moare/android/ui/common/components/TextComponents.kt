@@ -74,10 +74,17 @@ fun FBLeagueTitleForGameStats(
                 modifier = Modifier.padding(end = 4.dp)
             )
 
-            Text(
-                text = "${leagueName} ${leagueSeason}-${(leagueSeason + 1).toString().takeLast(2)}",
-                fontWeight = FontWeight.Medium
-            )
+            if (leagueName == "Major League Soccer") {
+                Text(
+                    text = "${leagueName} ${leagueSeason}",
+                    fontWeight = FontWeight.Medium
+                )
+            } else {
+                Text(
+                    text = "${leagueName} ${leagueSeason}-${(leagueSeason + 1).toString().takeLast(2)}",
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
 
         Text(

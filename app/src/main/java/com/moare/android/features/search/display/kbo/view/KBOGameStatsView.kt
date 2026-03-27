@@ -49,6 +49,8 @@ import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.kbo.KBOGameLineScore
 import com.moare.android.ui.common.components.BaseballLeagueTitleForGameStats
 import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.ui.common.components.GameStatusCapsuleButton
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.common.components.RoundedBorderText
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
@@ -214,23 +216,6 @@ fun KBOGameStatsScoreInfoItem(
     val teamNameDic by store.teamNameDic.collectAsState()
 
     /* ---------------------
-       constants
-       --------------------- */
-    val gameStatusText = when (gameStatus) {
-        StringConstants.KBO.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.KBO.GAME_LIVE -> game.lineScore?.currentInning ?: StringConstants.GAME_LIVE_STR
-        StringConstants.KBO.GAME_FINAL -> StringConstants.GAME_FINISHED_STR
-        StringConstants.KBO.GAME_CANCELED -> StringConstants.GAME_CANCELED_STR
-        else -> ""
-    }
-
-    val gameStatusColor = if (gameStatus == StringConstants.KBO.GAME_LIVE) {
-        MaterialTheme.colors.primary
-    } else {
-        Color.Gray
-    }
-
-    /* ---------------------
        ui
        --------------------- */
     Row(
@@ -271,9 +256,9 @@ fun KBOGameStatsScoreInfoItem(
                 )
             }
 
-            CapsuleButton(
-                text = gameStatusText,
-                color = gameStatusColor,
+            GameStatusCapsuleButton(
+                gameStatusContext = GameStatusContext.Kbo(gameStatus.toString()),
+                leagueId = Constants.Ids.KBO,
                 isDisabled = true,
                 modifier = Modifier.padding(vertical = 4.dp)
             ) {}

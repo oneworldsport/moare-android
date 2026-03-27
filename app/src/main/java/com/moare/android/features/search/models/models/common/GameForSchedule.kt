@@ -2,6 +2,7 @@ package com.moare.android.features.search.models.models.common
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.time.OffsetDateTime
 
 @Serializable
 data class GameForSchedule<T>(
@@ -11,6 +12,7 @@ data class GameForSchedule<T>(
     @SerialName("homeTeamScore") private val _homeTeamScore: Int? = null,
     @SerialName("awayTeamScore") private val _awayTeamScore: Int? = null,
     @SerialName("gameStatus") private val _gameStatus: String? = null,
+    val isHomeTopSeed: Boolean? = null,
     val gameInfo: T? = null
 ) {
     val itemKey: String get() = _itemKey ?: ""
@@ -22,4 +24,5 @@ data class GameForSchedule<T>(
 
     val gameId: String get() = _itemKey?.split("#")?.lastOrNull() ?: ""
     val date: String get() = (_itemKey?.split("#")?.firstOrNull() ?: "") + "+09:00"
+    val parsedDate get() = OffsetDateTime.parse(date).toInstant()
 }

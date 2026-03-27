@@ -32,6 +32,7 @@ import com.moare.android.features.search.display.kbo.store.KBOLeagueScheduleStor
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.kbo.KBOGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.util.Refreshable
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -203,23 +204,6 @@ fun KBOLeagueScheduleListItem(
     val displayModel by store.displayModel.collectAsState()
 
     /* ---------------------
-       constants
-       --------------------- */
-    val gameStatusText = when (gameStatus) {
-        StringConstants.KBO.GAME_SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-        StringConstants.KBO.GAME_LIVE -> data.gameInfo?.currentInning ?: StringConstants.GAME_LIVE_STR
-        StringConstants.KBO.GAME_FINAL -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
-        StringConstants.KBO.GAME_CANCELED -> StringConstants.GAME_CANCELED_STR
-        else -> ""
-    }
-
-    val gameStatusColor = if (gameStatus == StringConstants.KBO.GAME_LIVE) {
-        MaterialTheme.colors.primary
-    } else {
-        Color.Gray
-    }
-
-    /* ---------------------
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
@@ -244,8 +228,7 @@ fun KBOLeagueScheduleListItem(
             teamNameDic = teamNameDic,
             isClickEnabled = data.gameStatus != Constants.GameStatus.KBO.CANCELED, // 취소된 경기는 클릭 안되게
             isResultOpened = isResultOpened,
-            gameStatusText = gameStatusText,
-            gameStatusColor = gameStatusColor,
+            gameStatusContext = GameStatusContext.Kbo(status = data.gameStatus, isResultOpened = isResultOpened),
             isCapsuleButtonDisabled = gameStatus != StringConstants.KBO.GAME_FINAL,
             gameType = data.gameInfo?.seriesDescription,
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
