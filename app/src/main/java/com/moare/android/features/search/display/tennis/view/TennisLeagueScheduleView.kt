@@ -209,7 +209,7 @@ fun TennisLeagueScheduleListItem(
     LaunchedEffect(data) {
         if (gameStatus in Constants.GameStatus.Tennis.FINISHED_LIST) {
             isResultOpened = gameResultOpenedStateList[itemKey] ?: false
-        } else if (gameStatus != Constants.GameStatus.Tennis.NOT_STARTED) {
+        } else if (gameStatus == Constants.GameStatus.Tennis.NOT_STARTED) {
             isResultOpened = false
         } else {
             isResultOpened = true

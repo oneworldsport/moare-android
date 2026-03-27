@@ -68,8 +68,6 @@ fun <T> TournamentSeriesLeftGameItem(
     var itemHeight by remember { mutableStateOf(0.dp) }
     var isScoreOpened by remember { mutableStateOf(false) }
 
-    val isUEFALeague = leagueId in Constants.Ids.FOOTBALL_UEFA_LEAGUES
-
     // function
     fun h(r: Int, s: Int): Dp {
         return itemHeights[RoundSeriesKey(r, s)] ?: 0.dp
@@ -118,6 +116,7 @@ fun <T> TournamentSeriesLeftGameItem(
         val game = games.first()
         val topSeedTeamId = if (game.isHomeTopSeed == true) game.homeTeamId else game.awayTeamId
         val bottomSeedTeamId = if (game.isHomeTopSeed == true) game.awayTeamId else game.homeTeamId
+        val isUEFALeague = leagueId in Constants.Ids.FOOTBALL_UEFA_LEAGUES
         val isSeriesStarted = if (isUEFALeague) {
             // UEFA리그(합산 스코어 방식)는 경기중이어도 isSeriesStarted = true
             !Constants.GameStatus.isBeforeGame(leagueId = leagueId, status = game.gameStatus)
@@ -155,22 +154,22 @@ fun <T> TournamentSeriesLeftGameItem(
                         top += awayTeamScore
                         bottom += homeTeamScore
                     }
-                } else {
-                    if (Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)) {
-                        if (game.isHomeTopSeed == true) {
-                            // 홈팀이 topSeed인경우
-                            if (isHomeWinner) {
-                                top += 1
-                            } else if (isAwayWinner) {
-                                bottom += 1
-                            }
-                        } else {
-                            // 홈팀이 bottomSeed인경우
-                            if (isHomeWinner) {
-                                bottom += 1
-                            } else if (isAwayWinner) {
-                                top += 1
-                            }
+                }
+            } else {
+                if (Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)) {
+                    if (game.isHomeTopSeed == true) {
+                        // 홈팀이 topSeed인경우
+                        if (isHomeWinner) {
+                            top += 1
+                        } else if (isAwayWinner) {
+                            bottom += 1
+                        }
+                    } else {
+                        // 홈팀이 bottomSeed인경우
+                        if (isHomeWinner) {
+                            bottom += 1
+                        } else if (isAwayWinner) {
+                            top += 1
                         }
                     }
                 }
@@ -257,12 +256,27 @@ fun <T> TournamentSeriesLeftGameItem(
                                 modifier = Modifier.clickable { selectSeries?.let { it(games) } }
                             ) {
                                 games.forEachIndexed { index, game ->
-                                    val topSeedScore =
-                                        if (game.homeTeamId == topSeedTeamId) game.homeTeamScore else game.awayTeamScore
-                                    val bottomSeedScore =
-                                        if (game.homeTeamId == bottomSeedTeamId) game.homeTeamScore else game.awayTeamScore
-                                    val isBeforeGame =
-                                        Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
+                                    val topSeedScore = if (game.isHomeTopSeed == true) game.homeTeamScore else game.awayTeamScore
+                                    val lowerSeedScore = if (game.isHomeTopSeed == true) game.awayTeamScore else game.homeTeamScore
+                                    val isBeforeGame = Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
+
+                                    // only football
+                                    val homeTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
+                                    val awayTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
+                                    val topSeedPenaltyScore = if (game.isHomeTopSeed == true) homeTeamPenaltyScore else awayTeamPenaltyScore
+                                    val lowerSeedPenaltyScore = if (game.isHomeTopSeed == true) awayTeamPenaltyScore else homeTeamPenaltyScore
+
+                                    // 축구 패널티킥 경기에서 일반 스코어는 검정색
+                                    val topSeedScoreColor = if (topSeedPenaltyScore != null && lowerSeedPenaltyScore != null) {
+                                        Color.Black
+                                    } else {
+                                        if (topSeedScore >= lowerSeedScore) Moare else Color.Black
+                                    }
+                                    val lowerSeedScoreColor = if (topSeedPenaltyScore != null && lowerSeedPenaltyScore != null) {
+                                        Color.Black
+                                    } else {
+                                        if (lowerSeedScore >= topSeedScore) Moare else Color.Black
+                                    }
 
                                     CenterColumn {
                                         Text(
@@ -286,14 +300,34 @@ fun <T> TournamentSeriesLeftGameItem(
                                                 color = if (isBeforeGame) {
                                                     Color.Black
                                                 } else {
-                                                    if (topSeedScore >= bottomSeedScore) Moare else Color.Black
+                                                    topSeedScoreColor
                                                 }
                                             )
 
+                                            if (topSeedPenaltyScore != null && lowerSeedPenaltyScore != null) {
+                                                Text(
+                                                    text = topSeedPenaltyScore.toString(),
+                                                    fontSize = 12.sp,
+                                                    textAlign = TextAlign.Center,
+                                                    modifier = Modifier.width(20.dp),
+                                                    color = if (topSeedPenaltyScore >= lowerSeedPenaltyScore) Moare else Color.Black
+                                                )
+                                            }
+
                                             Text("-")
 
+                                            if (topSeedPenaltyScore != null && lowerSeedPenaltyScore != null) {
+                                                Text(
+                                                    text = lowerSeedPenaltyScore.toString(),
+                                                    fontSize = 12.sp,
+                                                    textAlign = TextAlign.Center,
+                                                    modifier = Modifier.width(20.dp),
+                                                    color = if (lowerSeedPenaltyScore >= topSeedPenaltyScore) Moare else Color.Black
+                                                )
+                                            }
+
                                             Text(
-                                                text = if (isBeforeGame) "-" else bottomSeedScore.toString(),
+                                                text = if (isBeforeGame) "-" else lowerSeedScore.toString(),
                                                 fontSize = 14.sp,
                                                 fontWeight = FontWeight.Medium,
                                                 textAlign = TextAlign.Center,
@@ -301,7 +335,7 @@ fun <T> TournamentSeriesLeftGameItem(
                                                 color = if (isBeforeGame) {
                                                     Color.Black
                                                 } else {
-                                                    if (bottomSeedScore >= topSeedScore) Moare else Color.Black
+                                                    lowerSeedScoreColor
                                                 }
                                             )
                                         }
@@ -583,9 +617,27 @@ fun <T> TournamentSeriesRightGameItem(
                             modifier = Modifier.clickable { selectSeries?.let { it(games) } }
                         ) {
                             games.forEachIndexed { index, game ->
-                                val topSeedScore = if (game.homeTeamId == topSeedTeamId) game.homeTeamScore else game.awayTeamScore
-                                val bottomSeedScore = if (game.homeTeamId == bottomSeedTeamId) game.homeTeamScore else game.awayTeamScore
+                                val topSeedScore = if (game.isHomeTopSeed == true) game.homeTeamScore else game.awayTeamScore
+                                val lowerSeedScore = if (game.isHomeTopSeed == true) game.awayTeamScore else game.homeTeamScore
                                 val isBeforeGame = Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
+
+                                // only football
+                                val homeTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
+                                val awayTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
+                                val topSeedPenaltyScore = if (game.isHomeTopSeed == true) homeTeamPenaltyScore else awayTeamPenaltyScore
+                                val lowerSeedPenaltyScore = if (game.isHomeTopSeed == true) awayTeamPenaltyScore else homeTeamPenaltyScore
+
+                                // 축구 패널티킥 경기에서 일반 스코어는 검정색
+                                val topSeedScoreColor = if (topSeedPenaltyScore != null && lowerSeedPenaltyScore != null) {
+                                    Color.Black
+                                } else {
+                                    if (topSeedScore >= lowerSeedScore) Moare else Color.Black
+                                }
+                                val lowerSeedScoreColor = if (topSeedPenaltyScore != null && lowerSeedPenaltyScore != null) {
+                                    Color.Black
+                                } else {
+                                    if (lowerSeedScore >= topSeedScore) Moare else Color.Black
+                                }
 
                                 CenterColumn {
                                     Text(
@@ -605,14 +657,34 @@ fun <T> TournamentSeriesRightGameItem(
                                             color = if (isBeforeGame) {
                                                 Color.Black
                                             } else {
-                                                if (topSeedScore >= bottomSeedScore) Moare else Color.Black
+                                                topSeedScoreColor
                                             }
                                         )
 
+                                        if (topSeedPenaltyScore != null && lowerSeedPenaltyScore != null) {
+                                            Text(
+                                                text = topSeedPenaltyScore.toString(),
+                                                fontSize = 12.sp,
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier.width(20.dp),
+                                                color = if (topSeedPenaltyScore >= lowerSeedPenaltyScore) Moare else Color.Black
+                                            )
+                                        }
+
                                         Text("-")
 
+                                        if (topSeedPenaltyScore != null && lowerSeedPenaltyScore != null) {
+                                            Text(
+                                                text = lowerSeedPenaltyScore.toString(),
+                                                fontSize = 12.sp,
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier.width(20.dp),
+                                                color = if (lowerSeedPenaltyScore >= topSeedPenaltyScore) Moare else Color.Black
+                                            )
+                                        }
+
                                         Text(
-                                            text = if (isBeforeGame) "-" else bottomSeedScore.toString(),
+                                            text = if (isBeforeGame) "-" else lowerSeedScore.toString(),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Medium,
                                             textAlign = TextAlign.Center,
@@ -620,7 +692,7 @@ fun <T> TournamentSeriesRightGameItem(
                                             color = if (isBeforeGame) {
                                                 Color.Black
                                             } else {
-                                                if (bottomSeedScore >= topSeedScore) Moare else Color.Black
+                                                lowerSeedScoreColor
                                             }
                                         )
                                     }
@@ -841,6 +913,7 @@ fun <T> TournamentSeriesFinalGameItem(
                 modifier = Modifier.clickable { selectSeries?.let { it(games) } }
             ) {
                 games.forEachIndexed { index, game ->
+                    // NOTE: 축구에서 final이 series인 경우는 아직 없어서 관련 코드가 없음
                     val topSeedScore = if (game.homeTeamId == topSeedTeamId) game.homeTeamScore else game.awayTeamScore
                     val bottomSeedScore = if (game.homeTeamId == bottomSeedTeamId) game.homeTeamScore else game.awayTeamScore
                     val isBeforeGame = Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)

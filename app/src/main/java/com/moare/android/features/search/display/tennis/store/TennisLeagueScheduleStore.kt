@@ -149,7 +149,7 @@ class TennisLeagueScheduleStore @AssistedInject constructor(
                 }
 
                 isResultOpenedStateList.putAll(
-                    (games).associate { (it.gameId) to isAllResultOpened.value })
+                    (games).associate { (it.itemKey) to isAllResultOpened.value })
 
                 newFilteredGames[index] = games
 
@@ -357,11 +357,11 @@ class TennisLeagueScheduleStore @AssistedInject constructor(
 
                     if (result.data is SportDecodableModel.TennisLeagueSchedule) {
                         val newGames = result.data.displayModel.games
-                        val gamesById = newGames.associateBy { it.gameId }
+                        val gamesByItemKey = newGames.associateBy { it.itemKey }
 
                         _displayModel.update { current ->
                             current.copy(
-                                games = current.games.map { gamesById[it.gameId] ?: it }
+                                games = current.games.map { gamesByItemKey[it.itemKey] ?: it }
                             )
                         }
 

@@ -63,8 +63,10 @@ fun ScheduleViewContainer(
 
     val isSameYearMonth = remember(calendarState) {
         calendarState?.let {
-            val selectedYearMonth = calendarState.yearMonthList[calendarState.selectedYearMonthIndex]
-            CalendarUtil.isSameYearMonth(selectedYearMonth)
+            val selectedYearMonth = calendarState.yearMonthList.getOrNull(calendarState.selectedYearMonthIndex)
+            selectedYearMonth?.let {
+                CalendarUtil.isSameYearMonth(selectedYearMonth)
+            }
         } ?: false
     }
 
