@@ -12,7 +12,8 @@ data class FBGameScheduleResponseModel(
     val startDate: String? = null,
     val endDate: String? = null,
     val relatedLeagueIds: List<Int>? = null,
-    val schedule: List<FBGameForSchedule> = emptyList()
+    val schedule: List<FBGameForSchedule> = emptyList(),
+    val tournamentStartDate: String? = null
 )
 
 @Serializable

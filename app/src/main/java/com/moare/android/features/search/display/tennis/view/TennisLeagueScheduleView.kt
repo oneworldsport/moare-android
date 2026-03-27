@@ -37,6 +37,7 @@ import com.moare.android.features.search.display.tennis.store.TennisTournamentSt
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.models.tennis.TennisGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.common.components.TennisTournamentTitle
 import com.moare.android.ui.util.Refreshable
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -176,7 +177,7 @@ fun TennisLeagueScheduleList(
             }
         ) {
             LazyColumn {
-                items(gameListToDisplay) { item ->
+                items(gameListToDisplay, key = { it.itemKey }) { item ->
                     TennisLeagueScheduleListItem(
                         searchStore = searchStore,
                         store = store,
@@ -199,7 +200,7 @@ fun TennisLeagueScheduleListItem(
     val gameResultOpenedStateList by store.gameResultOpenedStateList.collectAsState()
     val displayModel by store.displayModel.collectAsState()
 
-    val gameId = data.gameId
+    val itemKey = data.itemKey
     val gameStatus = data.gameStatus.toIntOrNull() ?: 0
     val leagueId = displayModel.leagueId
 
@@ -207,8 +208,8 @@ fun TennisLeagueScheduleListItem(
 
     LaunchedEffect(data) {
         if (gameStatus in Constants.GameStatus.Tennis.FINISHED_LIST) {
-            isResultOpened = gameResultOpenedStateList[gameId] ?: false
-        } else if (gameStatus != Constants.GameStatus.Tennis.NOT_STARTED) {
+            isResultOpened = gameResultOpenedStateList[itemKey] ?: false
+        } else if (gameStatus == Constants.GameStatus.Tennis.NOT_STARTED) {
             isResultOpened = false
         } else {
             isResultOpened = true
@@ -216,7 +217,7 @@ fun TennisLeagueScheduleListItem(
     }
     LaunchedEffect(gameResultOpenedStateList) {
         if (gameStatus in Constants.GameStatus.Tennis.FINISHED_LIST) {
-            isResultOpened = gameResultOpenedStateList[gameId] ?: false
+            isResultOpened = gameResultOpenedStateList[itemKey] ?: false
         }
     }
 
@@ -226,8 +227,7 @@ fun TennisLeagueScheduleListItem(
             game = data,
             teamNameDic = teamNameDic,
             isResultOpened = isResultOpened,
-            gameStatusText = Constants.GameStatus.tennisGameStatusText(gameStatus, isResultOpened),
-            gameStatusColor = Constants.GameStatus.gameStatusColor(leagueId, data.gameStatus),
+            gameStatusContext = GameStatusContext.Tennis(status = gameStatus, isResultOpened = isResultOpened),
             isCapsuleButtonDisabled = !Constants.GameStatus.Tennis.FINISHED_LIST.contains(gameStatus),
             gameType = data.gameInfo?.roundInfo?.name,
             shouldShowWinner = data.gameInfo?.isGameFinished ?: false,
@@ -238,7 +238,7 @@ fun TennisLeagueScheduleListItem(
                 store.send(TennisLeagueScheduleAction.SelectGame(data))
             },
             onCapsuleButtonClick = {
-                store.send(TennisLeagueScheduleAction.UpdateResultOpenedState(gameId, !isResultOpened))
+                store.send(TennisLeagueScheduleAction.UpdateResultOpenedState(itemKey, !isResultOpened))
             }
         )
     )

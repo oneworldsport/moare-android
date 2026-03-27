@@ -6,18 +6,13 @@ import com.moare.android.ui.theme.Moare
 
 object Constants {
     object Keys {
-        const val EPL_PLAYER_DIC = "epl_player"
-        const val LALIGA_PLAYER_DIC = "laliga_player"
-        const val BUNDESLIGA_PLAYER_DIC = "bundesliga_player"
-        const val LIGUE1_PLAYER_DIC = "ligue1_player"
-        const val SERIEA_PLAYER_DIC = "seriea_player"
-        const val MLS_PLAYER_DIC = "mls_player"
         const val NBA_PLAYER_DIC = "nba_player"
         const val NBA_TEAM_DIC = "nba_team"
         const val KBO_PLAYER_DIC = "kbo_player"
         const val KBO_TEAM_DIC = "kbo_team"
         const val MLB_PLAYER_DIC = "mlb_player"
         const val MLB_TEAM_DIC = "mlb_team"
+        const val FOOTBALL_PLAYER_DIC = "football_player"
         const val FOOTBALL_TEAM_DIC = "football_team"
 
         const val TOURNAMENT_TEAMS = "tournament_teams"
@@ -42,6 +37,7 @@ object Constants {
         const val COPA_DEL_REY = 143
         const val COPPA_ITALIA = 137
         val FOOTBALL_TOURNAMENT_LEAGUES = listOf(CHAMPIONS_LEAGUE, EUROPA_LEAGUE, CONFERENCE_LEAGUE, FA_CUP, EFL_CUP, DFB_POKAL, COUPE_DE_FRANCE, COPA_DEL_REY, COPPA_ITALIA)
+        val FOOTBALL_UEFA_LEAGUES = listOf(CHAMPIONS_LEAGUE, EUROPA_LEAGUE, CONFERENCE_LEAGUE)
         val FOOTBALL_DRAW_TOURNAMENT_LEAGUES = listOf(FA_CUP, EFL_CUP, DFB_POKAL, COUPE_DE_FRANCE, COPA_DEL_REY, COPPA_ITALIA)
         val FOOTBALL_ALL = FOOTBALL_LEAGUES + FOOTBALL_TOURNAMENT_LEAGUES
 
@@ -204,17 +200,20 @@ object Constants {
         )
         // DUBAI (W)
         const val DUBAI_W_SINGLE = 80055
-        val DUBAI_ALL = listOf(DUBAI_W_SINGLE)
+        const val DUBAI_W_DOUBLES = 80056
+        val DUBAI_ALL = listOf(
+            DUBAI_W_SINGLE,
+            DUBAI_W_DOUBLES)
         // BEIJING (W)
-        const val BEIJING_W_SINGLE = 80056
-        const val BEIJING_W_DOUBLES = 80057
+        const val BEIJING_W_SINGLE = 80057
+        const val BEIJING_W_DOUBLES = 80058
         val BEIJING_ALL = listOf(
             BEIJING_W_SINGLE,
             BEIJING_W_DOUBLES
         )
         // WUHAN (W)
-        const val WUHAN_W_SINGLE = 80058
-        const val WUHAN_W_DOUBLES = 80059
+        const val WUHAN_W_SINGLE = 80059
+        const val WUHAN_W_DOUBLES = 80060
         val WUHAN_ALL = listOf(
             WUHAN_W_SINGLE,
             WUHAN_W_DOUBLES
@@ -518,28 +517,20 @@ object Constants {
             const val CANCELED = 70
             const val RETIRED = 92
             const val WALKOVER = 91
+            const val SUSPENDED = 80
             val LIVE_LIST = listOf(FIRST_SET, SECOND_SET, THIRD_SET, FOURTH_SET, FIFTH_SET)
-            val FINISHED_LIST = listOf(FINISHED, CANCELED, RETIRED, WALKOVER)
+            val FINISHED_LIST = listOf(FINISHED, CANCELED, RETIRED, WALKOVER, SUSPENDED)
         }
 
-        fun gameStatusText(
-            leagueId: Int,
+        fun kboGameStatusText(
             status: String,
-            elapsed: Int? = null,
+            currentInning: String? = null,
             isResultOpened: Boolean = true
         ): String {
-            return when (leagueId) {
-                in Ids.FOOTBALL_ALL -> fbGameStatusText(status, elapsed)
-                Ids.NBA -> ""
-                Ids.KBO -> {
-                    when (status) {
-                        KBO.SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
-                        KBO.LIVE -> StringConstants.GAME_LIVE_STR
-                        KBO.FINAL -> StringConstants.GAME_FINISHED_STR
-                        KBO.CANCELED -> StringConstants.GAME_CANCELED_STR
-                        else -> ""
-                    }
-                }
+            return when (status) {
+                KBO.SCHEDULED -> StringConstants.GAME_NOT_STARTED_STR
+                KBO.LIVE -> currentInning ?: StringConstants.GAME_LIVE_STR
+                KBO.FINAL -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
                 else -> ""
             }
         }
@@ -547,13 +538,18 @@ object Constants {
         fun fbGameStatusText(
             status: String,
             elapsed: Int?,
+            extra: Int?,
             isResultOpened: Boolean = true
         ): String {
             return when (status) {
                 Football.NOT_STARTED -> StringConstants.GAME_NOT_STARTED_STR
                 Football.FIRST_HALF -> {
                     if (elapsed != null) {
-                        "전반$elapsed'"
+                        if (extra != null) {
+                            "전반$elapsed+$extra'"
+                        } else {
+                            "전반$elapsed'"
+                        }
                     } else {
                         StringConstants.Football.GAME_FIRST_HALF_STR
                     }
@@ -561,11 +557,19 @@ object Constants {
                 Football.HALF_TIME -> StringConstants.Football.GAME_HALF_TIME_STR
                 Football.SECOND_HALF -> {
                     if (elapsed != null) {
-                        "후반$elapsed'"
+                        if (extra != null) {
+                            "후반${elapsed-45}+$extra'"
+                        } else {
+                            "후반${elapsed-45}'"
+                        }
                     } else {
                         StringConstants.Football.GAME_SECOND_HALF_STR
                     }
                 }
+                Football.EXTRA_TIME -> StringConstants.Football.GAME_EXTRA_TIME
+                Football.PENALTY_SHOOTOUT -> StringConstants.Football.GAME_PENALTY_SHOOTOUT
+                Football.POSTPONED -> StringConstants.Football.GAME_POSTPONED
+                Football.CANCELLED -> StringConstants.Football.GAME_CANCELLED
                 in Football.FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
                 else -> ""
             }
@@ -631,6 +635,7 @@ object Constants {
                 Tennis.CANCELED -> StringConstants.GAME_CANCELED_STR
                 Tennis.RETIRED -> if (isResultOpened) "기권" else StringConstants.RESULT_OPEN
                 Tennis.WALKOVER -> if (isResultOpened) "부전" else StringConstants.RESULT_OPEN
+                Tennis.SUSPENDED -> "경기 일시중단"
                 else -> StringConstants.GAME_NOT_STARTED_STR
             }
         }
@@ -651,6 +656,21 @@ object Constants {
                 Ids.NBA -> status == NBA.NOT_STARTED.toString()
                 Ids.MLB -> MLB.BEFORE_GAME_LIST.contains(status)
                 Ids.KBO -> status == KBO.SCHEDULED
+                in Ids.TENNIS_ALL -> status == Tennis.NOT_STARTED.toString()
+                else -> false
+            }
+        }
+
+        fun isGameFinished(leagueId: Int, status: String): Boolean {
+            return when (leagueId) {
+                in Ids.FOOTBALL_ALL -> Football.FINISHED_LIST.contains(status)
+                Ids.NBA -> status == NBA.FINISHED.toString()
+                Ids.MLB -> MLB.FINISHED_LIST.contains(status)
+                Ids.KBO -> status == KBO.FINAL
+                in Ids.TENNIS_ALL -> {
+                    val status = status.toIntOrNull() ?: 0
+                    Tennis.FINISHED_LIST.contains(status)
+                }
                 else -> false
             }
         }

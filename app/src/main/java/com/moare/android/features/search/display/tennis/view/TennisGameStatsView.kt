@@ -64,6 +64,8 @@ import com.moare.android.features.search.display.tennis.store.TennisGameStatsSto
 import com.moare.android.features.search.display.tennis.store.TennisLeagueScheduleStore
 import com.moare.android.features.search.models.models.nba.NBALineScore
 import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.ui.common.components.GameStatusCapsuleButton
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.HDivider
 import com.moare.android.ui.common.components.NBATitle
@@ -220,9 +222,9 @@ fun TennisGameStatsScoreInfoContainer(
                 }
             }
 
-            CapsuleButton(
-                text = Constants.GameStatus.tennisGameStatusText(gameStatus),
-                color = Constants.GameStatus.gameStatusColor(leagueId, gameStatus.toString()),
+            GameStatusCapsuleButton(
+                gameStatusContext = GameStatusContext.Tennis(gameStatus),
+                leagueId = leagueId,
                 isDisabled = true,
                 modifier = Modifier.padding(vertical = 4.dp)
             ) {}

@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
 import java.util.UUID
 
 sealed interface FBLeagueScheduleAction {
@@ -139,6 +140,9 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                 _gameResultOpenedStateList.update {
                     displayModel.value.games.associate { (it.gameId) to false }
                 }
+
+                // paging기능이 생기면서 _days에 기본값(1)을 넣어줘야 아이템이 보임
+                _days.value = listOf(DayInfo(1, DayOfWeek.MONDAY, ""))
             }
             else -> {}
         }

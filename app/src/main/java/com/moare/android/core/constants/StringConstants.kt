@@ -35,14 +35,14 @@ object StringConstants {
         const val GAME_FIRST_HALF = "1H"
         const val GAME_HALF_TIME = "HT"
         const val GAME_SECOND_HALF = "2H"
-        const val GAME_EXTRA_TIME = "ET" // 연장전
+        const val GAME_EXTRA_TIME = "연장전" // 연장전
         const val GAME_BREAK_TIME = "BT" // 연장전 전반 후 휴식시간
-        const val GAME_PENALTY_SHOOTOUT = "P" // 승부차기
+        const val GAME_PENALTY_SHOOTOUT = "승부차기" // 승부차기
         const val GAME_FINISHED = "FT"
         const val GAME_FINISHED_AFTER_EXTRA_TIME = "AET" // 승부차기 없이 연장전 후 경기 종료
         const val GAME_FINISHED_AFTER_PENALTY_SHOOTOUT = "PET" // 승부차기 후 경기 종료
-        const val GAME_POSTPONED = "PST"
-        const val GAME_CANCELLED = "CANC"
+        const val GAME_POSTPONED = "경기 연기"
+        const val GAME_CANCELLED = "경기 취소"
         val GAME_LIVE_LIST = listOf(GAME_FIRST_HALF, GAME_HALF_TIME, GAME_SECOND_HALF, GAME_EXTRA_TIME, GAME_BREAK_TIME, GAME_PENALTY_SHOOTOUT)
         val GAME_FINISHED_LIST = listOf(GAME_FINISHED, GAME_FINISHED_AFTER_EXTRA_TIME, GAME_FINISHED_AFTER_PENALTY_SHOOTOUT)
 
@@ -170,7 +170,22 @@ object StringConstants {
             return when (leagueId) {
                 in Constants.Ids.AUS_OPEN_ALL -> "호주오픈"
                 in Constants.Ids.ROLAND_GARROS_ALL -> "롤랑가로스"
-                // TODO
+                in Constants.Ids.WIMBLEDON_ALL -> "윔블던"
+                in Constants.Ids.US_OPEN_ALL -> "US 오픈"
+                in Constants.Ids.INDIAN_WELLS_ALL -> "인디언웰스 마스터스"
+                in Constants.Ids.MIAMI_ALL -> "마이애미 마스터스"
+                in Constants.Ids.MONTE_CARLO_ALL -> "몬테카를로 마스터스"
+                in Constants.Ids.MADRID_ALL -> "마드리드 오픈"
+                in Constants.Ids.ROME_ALL -> "로마 오픈"
+                in Constants.Ids.TORONTO_ALL -> "캐나다 오픈"
+                in Constants.Ids.MONTREAL_ALL -> "캐나다 오픈"
+                in Constants.Ids.CINCINNATI_ALL -> "신시내티 마스터스"
+                in Constants.Ids.SHANGHAI_ALL -> "상하이 마스터스"
+                in Constants.Ids.PARIS_ALL -> "파리 마스터스"
+                in Constants.Ids.DOHA_ALL -> "카타르 오픈"
+                in Constants.Ids.DUBAI_ALL -> "두바이 챔피언십"
+                in Constants.Ids.BEIJING_ALL -> "차이나 오픈"
+                in Constants.Ids.WUHAN_ALL -> "우한 오픈"
                 else -> ""
             }
         }
@@ -243,7 +258,7 @@ object StringConstants {
             Constants.Ids.NBA -> "플레이오프 대진표"
             Constants.Ids.MLB -> "포스트시즌 대진표"
             Constants.Ids.KBO -> "가을야구 대진표"
-            else -> ""
+            else -> "대진표"
         }
     }
 

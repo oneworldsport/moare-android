@@ -16,5 +16,6 @@ data class NBALeagueScheduleDisplayModel(
     override val season: Int,
     val scheduleType: ScheduleType,
     val yearMonthList: List<String>,
-    var games: List<NBAGameForSchedule>
+    var games: List<NBAGameForSchedule>,
+    val tournamentStartDate: String?
 ) : SportDisplayModel

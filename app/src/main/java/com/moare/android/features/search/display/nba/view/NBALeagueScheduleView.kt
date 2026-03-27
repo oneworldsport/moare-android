@@ -17,7 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
+import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.InputTimeFormatType
 import com.moare.android.core.util.NBAUtil
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
@@ -31,6 +34,7 @@ import com.moare.android.features.search.display.nba.store.NBALeagueScheduleStor
 import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.util.Refreshable
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -53,6 +57,18 @@ fun NBALeagueScheduleView(
     val dayCalendarScrollTrigger by store.dayCalendarScrollTrigger.collectAsState()
     val isAllResultOpened by store.isAllResultOpened.collectAsState()
     val displayDataState by store.displayDataState.collectAsState()
+    val selectedYearMonth by store.selectedYearMonth.collectAsState()
+
+    val tournamentStartDateYearMonth = CalendarUtil.formatDate(
+        date = displayModel.tournamentStartDate,
+        inputFormatType = InputTimeFormatType.DATE_ONLY,
+        outputFormatType = OutputTimeFormatType.YEAR_MONTH
+    )
+
+    val tournamentStartDateYearMonthInt =
+        tournamentStartDateYearMonth.replace("/", "").toIntOrNull() ?: 0
+
+    val selectedYearMonthInt = selectedYearMonth.replace("/", "").toIntOrNull() ?: 0
 
     LaunchedEffect(didPop) {
         // 뒤로가서 일정화면으로 돌아왔을때 filteredGames update
@@ -77,7 +93,7 @@ fun NBALeagueScheduleView(
                 dayCalendarScrollTrigger
             ),
             isAllResultOpened = isAllResultOpened,
-            shouldShowTournamentButton = selectedMonth in 4..6
+            shouldShowTournamentButton = (displayModel.tournamentStartDate != null) && (tournamentStartDateYearMonthInt <= selectedYearMonthInt)
         ),
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
@@ -225,8 +241,7 @@ fun NBALeagueScheduleListItem(
             game = data,
             teamNameDic = teamNameDic,
             isResultOpened = isResultOpened,
-            gameStatusText = Constants.GameStatus.nbaGameStatusText(gameStatus, data.gameInfo?.period, isResultOpened),
-            gameStatusColor = Constants.GameStatus.gameStatusColor(Constants.Ids.NBA, data.gameStatus),
+            gameStatusContext = GameStatusContext.Nba(status = gameStatus, period = data.gameInfo?.period, isResultOpened = isResultOpened),
             isCapsuleButtonDisabled = gameStatus != Constants.GameStatus.NBA.FINISHED,
             gameType = NBAUtil.gameType(data.gameInfo), // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true

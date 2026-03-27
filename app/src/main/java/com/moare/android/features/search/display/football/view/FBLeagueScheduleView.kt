@@ -16,7 +16,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.moare.android.core.constants.Constants
+import com.moare.android.core.util.CalendarUtil
+import com.moare.android.core.util.InputTimeFormatType
 import com.moare.android.core.util.MatchDescriptionConverter
+import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.features.search.display.common.container.component.ScheduleGameItem
 import com.moare.android.features.search.display.common.container.state.CalendarUiActions
 import com.moare.android.features.search.display.common.container.state.CalendarUiState
@@ -31,6 +34,7 @@ import com.moare.android.features.search.display.search.store.SearchStore
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.ui.common.components.FBLeagueTitleForGameStats
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.util.Refreshable
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -59,6 +63,19 @@ fun FBLeagueScheduleView(
     val selectedMonth by store.selectedMonth.collectAsState()
     val league by store.league.collectAsState()
     val leagueId = displayModel.leagueId
+    val selectedYearMonth by store.selectedYearMonth.collectAsState()
+
+    val tournamentStartDateYearMonth = CalendarUtil.formatDate(
+        date = displayModel.tournamentStartDate,
+        inputFormatType = InputTimeFormatType.DATE_ONLY,
+        outputFormatType = OutputTimeFormatType.YEAR_MONTH
+    )
+
+    val tournamentStartDateYearMonthInt =
+        tournamentStartDateYearMonth.replace("/", "").toIntOrNull() ?: 0
+
+    val selectedYearMonthInt =
+        selectedYearMonth.replace("/", "").toIntOrNull() ?: 0
 
     LaunchedEffect(didPop) {
         // 뒤로가서 일정화면으로 돌아왔을때 filteredGames update
@@ -86,7 +103,7 @@ fun FBLeagueScheduleView(
                 shouldAnimateScroll
             ),
             isAllResultOpened = isAllResultOpened,
-            shouldShowTournamentButton = (leagueId == Constants.Ids.MLS) && (selectedMonth >= 10),
+            shouldShowTournamentButton = (displayModel.tournamentStartDate != null) && (tournamentStartDateYearMonthInt <= selectedYearMonthInt),
         ),
         actions = ScheduleContainerActions(
             calendarUiActions = CalendarUiActions(
@@ -250,7 +267,10 @@ fun FBLeagueScheduleListItem(
                 gameResultOpenedStateList?.let {
                     isResultOpened = gameResultOpenedStateList[gameId] ?: false
                 }
-            } else if (gameStatus == Constants.GameStatus.Football.NOT_STARTED) {
+            } else if (gameStatus == Constants.GameStatus.Football.NOT_STARTED ||
+                gameStatus == Constants.GameStatus.Football.CANCELLED ||
+                gameStatus == Constants.GameStatus.Football.POSTPONED
+            ) {
                 isResultOpened = false
             } else {
                 isResultOpened = true
@@ -272,8 +292,7 @@ fun FBLeagueScheduleListItem(
             teamNameDic = teamNameDic,
             isClickEnabled = if (isFromSchedule) selectedGame == null else false,
             isResultOpened = isResultOpened,
-            gameStatusText = Constants.GameStatus.fbGameStatusText(data.gameStatus, gameInfo?.status?.elapsed, isResultOpened),
-            gameStatusColor = Constants.GameStatus.gameStatusColor(leagueId, data.gameStatus),
+            gameStatusContext = GameStatusContext.Football(status = data.gameStatus, elapsed = data.gameInfo?.status?.elapsed, extra = data.gameInfo?.status?._extra, isResultOpened = isResultOpened),
             isCapsuleButtonDisabled = (if (isFromSchedule) selectedGame != null else true) || !Constants.GameStatus.Football.FINISHED_LIST.contains(gameStatus),
             gameType = MatchDescriptionConverter.convert(input = data.gameInfo?.round ?: ""),
             shouldShowOnlyDateTime = if (isFromSchedule) {

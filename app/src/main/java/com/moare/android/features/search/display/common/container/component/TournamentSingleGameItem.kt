@@ -1,5 +1,6 @@
 package com.moare.android.features.search.display.common.container.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -19,6 +20,8 @@ import com.moare.android.core.util.Util
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
 import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.ui.common.components.GameStatusCapsuleButton
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.common.components.HCapsuleBar
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
@@ -31,6 +34,7 @@ fun <T> TournamentSingleGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
     game: GameForSchedule<T>,
+    selectGame: ((GameForSchedule<T>) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val homeTeamId = game.homeTeamId
@@ -40,9 +44,9 @@ fun <T> TournamentSingleGameItem(
     val homeTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
     val awayTeamPenaltyScore = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
     val elapsed = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?.elapsed }
-    val gameStatusText = Constants.GameStatus.gameStatusText(leagueId, game.gameStatus, elapsed)
+    val extra = game.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?._extra }
     val shouldShowScore = !Constants.GameStatus.isBeforeGame(leagueId, game.gameStatus)
-    val isFinished = gameStatusText == StringConstants.GAME_FINISHED_STR
+    val isFinished = Constants.GameStatus.Football.FINISHED_LIST.contains(game.gameStatus)
 
     val isHomeWinner = if (homeTeamPenaltyScore != null && awayTeamPenaltyScore != null) {
         homeTeamPenaltyScore > awayTeamPenaltyScore
@@ -50,7 +54,8 @@ fun <T> TournamentSingleGameItem(
         homeTeamScore > awayTeamScore
     }
 
-    CenterRow(modifier = modifier) {
+    // nullable 함수라서 invoke로 안전하게 호출
+    CenterRow(modifier = Modifier.clickable { selectGame?.invoke(game) }) {
         CenterColumn(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier
@@ -105,10 +110,10 @@ fun <T> TournamentSingleGameItem(
             modifier = Modifier.width(110.dp)
         ) {
             // game status
-            CapsuleButton(
-                text = gameStatusText,
-                color = Constants.GameStatus.gameStatusColor(leagueId, game.gameStatus)
-            ) { }
+            GameStatusCapsuleButton(
+                gameStatusContext = GameStatusContext.Football(status = game.gameStatus, elapsed = elapsed, extra = extra),
+                leagueId = leagueId
+            ) {}
 
             // game date
             Text(

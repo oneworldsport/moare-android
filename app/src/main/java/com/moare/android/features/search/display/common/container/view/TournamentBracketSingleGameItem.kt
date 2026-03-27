@@ -36,18 +36,20 @@ import com.moare.android.features.search.display.common.container.component.Tour
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
 import com.moare.android.ui.common.components.CapsuleButton
+import com.moare.android.ui.common.components.GameStatusCapsuleButton
+import com.moare.android.ui.common.components.GameStatusContext
 import com.moare.android.ui.common.components.URLImage
 import com.moare.android.ui.common.components.URLImageSize
 import com.moare.android.ui.theme.Moare
 import com.moare.android.ui.util.CenterColumn
 import com.moare.android.ui.util.CenterRow
 
+// NOTE: 현재는 축구에서만 쓰임
 @Composable
 fun <T> TournamentBracketSingleLeftGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
     game: GameForSchedule<T>?,
-    seedIdPair: Pair<Int?, Int?>,
     itemPosition: RoundSeriesKey, // ui상에서 시리즈의 위치 ex) 1라운드의 첫번째 시리즈면 1_1
     itemHeights: Map<RoundSeriesKey, Dp>,
     modifier: Modifier = Modifier,
@@ -58,10 +60,11 @@ fun <T> TournamentBracketSingleLeftGameItem(
 
     var itemHeight by remember { mutableStateOf(0.dp) }
 
-    val topSeedTeamId = seedIdPair.first
-    val bottomSeedTeamId = seedIdPair.second
+    val topSeedTeamId = if (game?.isHomeTopSeed == true) game?.homeTeamId else game?.awayTeamId
+    val bottomSeedTeamId = if (game?.isHomeTopSeed == true) game?.awayTeamId else game?.homeTeamId
     val gameStatus = game?.gameStatus ?: Constants.GameStatus.Football.NOT_STARTED
     val elapsed = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?.elapsed }
+    val extra = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?._extra }
     val shouldShowScore = !Constants.GameStatus.isBeforeGame(leagueId, gameStatus)
 
     val homeTeamScore = game?.homeTeamScore ?: 0
@@ -69,25 +72,25 @@ fun <T> TournamentBracketSingleLeftGameItem(
     val homeTeamPenaltyScore = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
     val awayTeamPenaltyScore = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
 
-    val topSeedTeamScore = if (game?.homeTeamId == topSeedTeamId && game?.awayTeamId == bottomSeedTeamId) {
+    val topSeedTeamScore = if (game?.isHomeTopSeed == true) {
         homeTeamScore
     } else {
         awayTeamScore
     }
-    val bottomSeedTeamScore = if (game?.homeTeamId == bottomSeedTeamId && game?.awayTeamId == topSeedTeamId) {
-        homeTeamScore
-    } else {
+    val bottomSeedTeamScore = if (game?.isHomeTopSeed == true) {
         awayTeamScore
+    } else {
+        homeTeamScore
     }
-    val topSeedTeamPenaltyScore = if (game?.homeTeamId == topSeedTeamId && game?.awayTeamId == bottomSeedTeamId) {
+    val topSeedTeamPenaltyScore = if (game?.isHomeTopSeed == true) {
         homeTeamPenaltyScore
     } else {
         awayTeamPenaltyScore
     }
-    val bottomSeedTeamPenaltyScore = if (game?.homeTeamId == bottomSeedTeamId && game?.awayTeamId == topSeedTeamId) {
-        homeTeamPenaltyScore
-    } else {
+    val bottomSeedTeamPenaltyScore = if (game?.isHomeTopSeed == true) {
         awayTeamPenaltyScore
+    } else {
+        homeTeamPenaltyScore
     }
 
     // function
@@ -207,9 +210,9 @@ fun <T> TournamentBracketSingleLeftGameItem(
 
                 CenterColumn {
                     // game status
-                    CapsuleButton(
-                        text = Constants.GameStatus.fbGameStatusText(gameStatus, elapsed),
-                        color = Constants.GameStatus.gameStatusColor(leagueId, gameStatus)
+                    GameStatusCapsuleButton(
+                        gameStatusContext = GameStatusContext.Football(gameStatus, elapsed, extra),
+                        leagueId = leagueId
                     ) { }
 
                     // game date
@@ -303,7 +306,6 @@ fun <T> TournamentBracketSingleRightGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
     game: GameForSchedule<T>?,
-    seedIdPair: Pair<Int?, Int?>,
     itemPosition: RoundSeriesKey, // ui상에서 시리즈의 위치 ex) 1라운드의 첫번째 시리즈면 1_1
     itemHeights: Map<RoundSeriesKey, Dp>,
     modifier: Modifier = Modifier,
@@ -314,10 +316,11 @@ fun <T> TournamentBracketSingleRightGameItem(
 
     var itemHeight by remember { mutableStateOf(0.dp) }
 
-    val topSeedTeamId = seedIdPair.first
-    val bottomSeedTeamId = seedIdPair.second
+    val topSeedTeamId = if (game?.isHomeTopSeed == true) game?.homeTeamId else game?.awayTeamId
+    val bottomSeedTeamId = if (game?.isHomeTopSeed == true) game?.awayTeamId else game?.homeTeamId
     val gameStatus = game?.gameStatus ?: Constants.GameStatus.Football.NOT_STARTED
     val elapsed = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?.elapsed }
+    val extra = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?._extra }
     val shouldShowScore = !Constants.GameStatus.isBeforeGame(leagueId, gameStatus)
 
     val homeTeamScore = game?.homeTeamScore ?: 0
@@ -325,25 +328,25 @@ fun <T> TournamentBracketSingleRightGameItem(
     val homeTeamPenaltyScore = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
     val awayTeamPenaltyScore = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
 
-    val topSeedTeamScore = if (game?.homeTeamId == topSeedTeamId && game?.awayTeamId == bottomSeedTeamId) {
+    val topSeedTeamScore = if (game?.isHomeTopSeed == true) {
         homeTeamScore
     } else {
         awayTeamScore
     }
-    val bottomSeedTeamScore = if (game?.homeTeamId == bottomSeedTeamId && game?.awayTeamId == topSeedTeamId) {
-        homeTeamScore
-    } else {
+    val bottomSeedTeamScore = if (game?.isHomeTopSeed == true) {
         awayTeamScore
+    } else {
+        homeTeamScore
     }
-    val topSeedTeamPenaltyScore = if (game?.homeTeamId == topSeedTeamId && game?.awayTeamId == bottomSeedTeamId) {
+    val topSeedTeamPenaltyScore = if (game?.isHomeTopSeed == true) {
         homeTeamPenaltyScore
     } else {
         awayTeamPenaltyScore
     }
-    val bottomSeedTeamPenaltyScore = if (game?.homeTeamId == bottomSeedTeamId && game?.awayTeamId == topSeedTeamId) {
-        homeTeamPenaltyScore
-    } else {
+    val bottomSeedTeamPenaltyScore = if (game?.isHomeTopSeed == true) {
         awayTeamPenaltyScore
+    } else {
+        homeTeamPenaltyScore
     }
 
     // function
@@ -473,9 +476,9 @@ fun <T> TournamentBracketSingleRightGameItem(
 
                 CenterColumn {
                     // game status
-                    CapsuleButton(
-                        text = Constants.GameStatus.fbGameStatusText(gameStatus, elapsed),
-                        color = Constants.GameStatus.gameStatusColor(leagueId, gameStatus)
+                    GameStatusCapsuleButton(
+                        gameStatusContext = GameStatusContext.Football(gameStatus, elapsed, extra),
+                        leagueId = leagueId
                     ) { }
 
                     // game date
@@ -557,16 +560,16 @@ fun <T> TournamentBracketSingleFinalGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
     game: GameForSchedule<T>?,
-    seedIdPair: Pair<Int?, Int?>,
     itemHeights: Map<RoundSeriesKey, Dp>,
     selectGame: ((GameForSchedule<T>) -> Unit)? = null
 ) {
     var itemTopPadding by remember { mutableStateOf(0.dp) } // 아이템 Y 위치
 
-    val topSeedTeamId = seedIdPair.first
-    val bottomSeedTeamId = seedIdPair.second
+    val topSeedTeamId = if (game?.isHomeTopSeed == true) game?.homeTeamId else game?.awayTeamId
+    val bottomSeedTeamId = if (game?.isHomeTopSeed == true) game?.awayTeamId else game?.homeTeamId
     val gameStatus = game?.gameStatus ?: Constants.GameStatus.Football.NOT_STARTED
     val elapsed = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?.elapsed }
+    val extra = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.status?._extra }
     val shouldShowScore = !Constants.GameStatus.isBeforeGame(leagueId, gameStatus)
 
     val homeTeamScore = game?.homeTeamScore ?: 0
@@ -574,25 +577,25 @@ fun <T> TournamentBracketSingleFinalGameItem(
     val homeTeamPenaltyScore = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.homeTeamPenaltyScore }
     val awayTeamPenaltyScore = game?.gameInfo?.let { (it as? FBGameInfoForSchedule)?.awayTeamPenaltyScore }
 
-    val topSeedTeamScore = if (game?.homeTeamId == topSeedTeamId && game?.awayTeamId == bottomSeedTeamId) {
+    val topSeedTeamScore = if (game?.isHomeTopSeed == true) {
         homeTeamScore
     } else {
         awayTeamScore
     }
-    val bottomSeedTeamScore = if (game?.homeTeamId == bottomSeedTeamId && game?.awayTeamId == topSeedTeamId) {
-        homeTeamScore
-    } else {
+    val bottomSeedTeamScore = if (game?.isHomeTopSeed == true) {
         awayTeamScore
+    } else {
+        homeTeamScore
     }
-    val topSeedTeamPenaltyScore = if (game?.homeTeamId == topSeedTeamId && game?.awayTeamId == bottomSeedTeamId) {
+    val topSeedTeamPenaltyScore = if (game?.isHomeTopSeed == true) {
         homeTeamPenaltyScore
     } else {
         awayTeamPenaltyScore
     }
-    val bottomSeedTeamPenaltyScore = if (game?.homeTeamId == bottomSeedTeamId && game?.awayTeamId == topSeedTeamId) {
-        homeTeamPenaltyScore
-    } else {
+    val bottomSeedTeamPenaltyScore = if (game?.isHomeTopSeed == true) {
         awayTeamPenaltyScore
+    } else {
+        homeTeamPenaltyScore
     }
 
     // function
@@ -657,9 +660,9 @@ fun <T> TournamentBracketSingleFinalGameItem(
                 modifier = Modifier.width(110.dp)
             ) {
                 // game status
-                CapsuleButton(
-                    text = Constants.GameStatus.fbGameStatusText(gameStatus, elapsed),
-                    color = Constants.GameStatus.gameStatusColor(leagueId, gameStatus)
+                GameStatusCapsuleButton(
+                    gameStatusContext = GameStatusContext.Football(gameStatus, elapsed, extra),
+                    leagueId = leagueId
                 ) { }
 
                 // game date
