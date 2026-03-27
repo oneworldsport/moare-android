@@ -178,8 +178,14 @@ fun <T> TournamentBracketViewContainer(
                 val isMLB = state.leagueId == Constants.Ids.MLB
                 val isKBO = state.leagueId == Constants.Ids.KBO
                 val isSeries = if (state.leagueId == Constants.Ids.MLS) {
+                    // mls는 (동/서부)1라운드만 series
                     roundIndex == 0 || roundIndex == 6
-                } else state.isSeries
+                } else if (state.leagueId in Constants.Ids.FOOTBALL_UEFA_LEAGUES) {
+                    // uefa리그들은 final만 single
+                    roundIndex != 3
+                } else {
+                    state.isSeries
+                }
 
                 // left
                 if (isLeft) {
