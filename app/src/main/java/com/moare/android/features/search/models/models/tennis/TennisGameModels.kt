@@ -316,8 +316,8 @@ data class TennisGameInfoForSchedule(
 ) {
     val winnerCode: Int get() = _winnerCode ?: -1
 
-    val isGameFinished: Boolean get() = _winnerCode != -1
-    val isHomeWinner: Boolean get() = _winnerCode == 1
+    val isGameFinished: Boolean get() = winnerCode != -1
+    val isHomeWinner: Boolean get() = winnerCode == 1
 }
 
 typealias TennisGameForSchedule = GameForSchedule<TennisGameInfoForSchedule>
