@@ -205,7 +205,7 @@ class NBAPlayerStandingsStore @AssistedInject constructor(
                     entities = entities
                 )
 
-                val result = searchClient.fetchDataByKeyword(keywordInfo)
+                val result = searchClient.fetchDataByKeyword(keywordInfo, displayModel.value.season)
 
                 if (result.data is SportDecodableModel.NBAPlayerStandings) {
                     _displayModel.value = result.data.displayModel
