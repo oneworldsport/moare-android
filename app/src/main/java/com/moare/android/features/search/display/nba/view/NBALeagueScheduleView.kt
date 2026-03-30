@@ -203,7 +203,7 @@ fun NBALeagueScheduleListItem(
     teamNameDic: Map<String, String>,
     data: NBAGameForSchedule,
 ) {
-    val gameId = data.gameId
+    val itemKey = data.itemKey
     val gameStatus = data.gameStatus.toIntOrNull() ?: 1
 
     /* ---------------------
@@ -222,7 +222,7 @@ fun NBALeagueScheduleListItem(
        --------------------- */
     LaunchedEffect(data) {
         if (gameStatus == Constants.GameStatus.NBA.FINISHED) {
-            isResultOpened = gameResultOpenedStateList[gameId] ?: false
+            isResultOpened = gameResultOpenedStateList[itemKey] ?: false
         } else if (gameStatus == Constants.GameStatus.NBA.NOT_STARTED) {
             isResultOpened = false
         } else {
@@ -231,7 +231,7 @@ fun NBALeagueScheduleListItem(
     }
     LaunchedEffect(gameResultOpenedStateList) {
         if (gameStatus == Constants.GameStatus.NBA.FINISHED) {
-            isResultOpened = gameResultOpenedStateList[gameId] ?: false
+            isResultOpened = gameResultOpenedStateList[itemKey] ?: false
         }
     }
 
@@ -251,7 +251,7 @@ fun NBALeagueScheduleListItem(
                 store.send(NBALeagueScheduleAction.SelectGame(data))
             },
             onCapsuleButtonClick = {
-                store.send(NBALeagueScheduleAction.UpdateResultOpenedState(gameId, !isResultOpened))
+                store.send(NBALeagueScheduleAction.UpdateResultOpenedState(itemKey, !isResultOpened))
             }
         )
     )

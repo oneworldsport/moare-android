@@ -31,7 +31,7 @@ sealed interface NBALeagueScheduleAction {
     data class SelectYearMonth(val yearMonth: String, val selectedIndex: Int) : NBALeagueScheduleAction
     data class SelectDay(val day: DayInfo, val selectedIndex: Int) : NBALeagueScheduleAction
     data object ToggleAllResult : NBALeagueScheduleAction
-    data class UpdateResultOpenedState(val gameId: String, val isOpened: Boolean) : NBALeagueScheduleAction
+    data class UpdateResultOpenedState(val itemKey: String, val isOpened: Boolean) : NBALeagueScheduleAction
     data class SelectGame(val game: NBAGameForSchedule) : NBALeagueScheduleAction
     data object UpdateFilteredGames : NBALeagueScheduleAction
     data object ShowTournament : NBALeagueScheduleAction
@@ -73,7 +73,7 @@ class NBALeagueScheduleStore @AssistedInject constructor(
             is NBALeagueScheduleAction.SelectYearMonth -> selectYearMonth(action.yearMonth, action.selectedIndex, false)
             is NBALeagueScheduleAction.SelectDay -> selectDay(action.day, action.selectedIndex)
             is NBALeagueScheduleAction.ToggleAllResult -> toggleAllResult()
-            is NBALeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.gameId, action.isOpened)
+            is NBALeagueScheduleAction.UpdateResultOpenedState -> updateResultOpenedState(action.itemKey, action.isOpened)
             is NBALeagueScheduleAction.SelectGame -> selectGame(action.game)
             is NBALeagueScheduleAction.UpdateFilteredGames -> updateFilteredGames()
             is NBALeagueScheduleAction.UpdateStateByRefreshGame -> updateStateByRefreshGame(action.model)
@@ -123,7 +123,7 @@ class NBALeagueScheduleStore @AssistedInject constructor(
 
                 // gameResultOpenedStateList 초기화
                 _gameResultOpenedStateList.update {
-                    displayModel.value.games.associate { (it.gameId) to false }
+                    displayModel.value.games.associate { (it.itemKey) to false }
                 }
 
                 // paging기능이 생기면서 _days에 기본값(1)을 넣어줘야 아이템이 보임
@@ -171,7 +171,7 @@ class NBALeagueScheduleStore @AssistedInject constructor(
                 }
 
                 isResultOpenedStateList.putAll(
-                    (games).associate { (it.gameId) to isAllResultOpened.value })
+                    (games).associate { (it.itemKey) to isAllResultOpened.value })
 
                 newFilteredGames[index] = games
 
@@ -253,9 +253,9 @@ class NBALeagueScheduleStore @AssistedInject constructor(
         }
     }
 
-    private fun updateResultOpenedState(gameId: String, isOpened: Boolean) {
+    private fun updateResultOpenedState(itemKey: String, isOpened: Boolean) {
         val newMap = gameResultOpenedStateList.value.toMutableMap()
-        newMap[gameId] = isOpened
+        newMap[itemKey] = isOpened
         _gameResultOpenedStateList.value = newMap
     }
 
@@ -272,7 +272,7 @@ class NBALeagueScheduleStore @AssistedInject constructor(
 
             if (result.data is SportDecodableModel.NBAGameStats) {
                 emitToParent(NBALeagueScheduleDelegate.ShowGameStats(result.data))
-                updateResultOpenedState(game.gameId, true)
+                updateResultOpenedState(game.itemKey, true)
             }
         }
     }
@@ -385,11 +385,11 @@ class NBALeagueScheduleStore @AssistedInject constructor(
                     if (result.data is SportDecodableModel.NBALeagueSchedule) {
                         val newGames = result.data.displayModel.games
 
-                        val gamesById = newGames.associateBy { it.gameId }
+                        val gamesByitemKey = newGames.associateBy { it.itemKey }
 
                         _displayModel.update { current ->
                             current.copy(
-                                games = current.games.map { gamesById[it.gameId] ?: it }
+                                games = current.games.map { gamesByitemKey[it.itemKey] ?: it }
                             )
                         }
 
