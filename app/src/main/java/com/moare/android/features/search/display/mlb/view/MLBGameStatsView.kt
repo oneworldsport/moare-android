@@ -1,5 +1,7 @@
 package com.moare.android.features.search.display.mlb.view
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -151,6 +154,43 @@ fun MLBGameStatsView(
         }
     }
 
+    /* ---------------------
+   etc
+   --------------------- */
+    val firstSelectedCategoryPosition = with(LocalDensity.current) {
+        (store.itemWidth * firstCategorySelectedIndex).toPx()
+    }.toInt()
+
+    val secondSelectedCategoryPosition = with(LocalDensity.current) {
+        (store.itemWidth * secondCategorySelectedIndex).toPx()
+    }.toInt()
+
+    // scroll to category that matches with the keyword,
+    // and when first category list's item is selected by click
+    LaunchedEffect(firstCategorySelectedIndex) {
+        if (store.shouldScrollCategory) {
+            horizontalScrollState.animateScrollTo(
+                value = firstSelectedCategoryPosition,
+                animationSpec = tween(
+                    durationMillis = 500,
+                    easing = LinearOutSlowInEasing
+                )
+            )
+        }
+    }
+
+    LaunchedEffect(secondCategorySelectedIndex) {
+        if (store.shouldScrollCategory) {
+            horizontalScrollState.animateScrollTo(
+                value = secondSelectedCategoryPosition,
+                animationSpec = tween(
+                    durationMillis = 500,
+                    easing = LinearOutSlowInEasing
+                )
+            )
+        }
+    }
+
     GameStatsViewContainer(
         state = GameStatsContainerState(
             shouldShowStats = game.status.detailedState != StringConstants.MLB.GAME_SCHEDULED,
@@ -179,6 +219,9 @@ fun MLBGameStatsView(
             },
             firstStatsCategoryButtonAction = { index ->
                 store.send(MLBGameStatsAction.SelectFirstCategory(index))
+            },
+            secondStatsTitleCategoryAction = {
+                store.send(MLBGameStatsAction.SortByPitcherOrder)
             },
             secondStatsCategoryButtonAction = { index ->
                 store.send(MLBGameStatsAction.SelectSecondCategory(index))

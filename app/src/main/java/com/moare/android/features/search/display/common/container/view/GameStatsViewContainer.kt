@@ -128,7 +128,10 @@ fun GameStatsViewContainer(
     )
 
     val secondStatsCategoryBarOffset by animateDpAsState(
-        targetValue = if (secondStatsColumnWidthList.isNotEmpty()) {
+        targetValue = if (state.secondStatsCategorySelectedIndex < 0) {
+            val secondColumnWidth = state.secondColumnWidth ?: 132.dp
+            -(secondColumnWidth / 2) - 10.dp
+        } else if (secondStatsColumnWidthList.isNotEmpty()) {
             getOffsetOfAniCapsuleBar(itemWidths = secondStatsColumnWidthList, index = state.secondStatsCategorySelectedIndex)
         } else {
             getOffsetOfAniCapsuleBar(itemWidth = defaultColumnWidth, index = state.secondStatsCategorySelectedIndex)
@@ -477,7 +480,16 @@ fun GameStatsViewContainer(
                                     Row(
                                         modifier = Modifier.background(Color.White)
                                     ) {
-                                        StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY)
+                                        Box(
+                                            contentAlignment = Alignment.BottomCenter
+
+                                        ) {
+                                            StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY, width = state.secondColumnWidth, onClick = actions.secondStatsTitleCategoryAction)
+
+                                            HCapsuleBar(
+                                                modifier = Modifier.alpha(if (state.secondStatsCategorySelectedIndex < 0) 1f else 0f)
+                                            )
+                                        }
 
                                         Row(
                                             Modifier.horizontalScroll(secondStatsHorizontalScrollState)

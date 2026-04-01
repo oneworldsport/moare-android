@@ -12,6 +12,7 @@ data class GameStatsContainerState(
     val coachState: GameStatsCoachState? = null,
     val teamCategorySelectedIndex: Int = 0,
     val firstColumnWidth: Dp? = null,
+    val secondColumnWidth: Dp? = null,
     val gameDetailTitle: String = "",
     val gameDetailContent: String = "",
     val noStatsText: String? = null,
@@ -44,6 +45,7 @@ data class GameStatsContainerActions(
     val teamCategoryButtonAction: ((Int) -> Unit)? = null,
     var firstStatsTitleCategoryAction: (() -> Unit)? = null,
     val firstStatsCategoryButtonAction: ((Int) -> Unit),
+    val secondStatsTitleCategoryAction: (() -> Unit)? = null,
     val secondStatsCategoryButtonAction: ((Int) -> Unit)? = null,
     val refreshButtonAction: () -> Unit,
     val isRefreshing: Boolean
