@@ -332,7 +332,9 @@ fun GameStatsViewContainer(
                                --------------------- */
                             state.firstStatsTitle?.let {
                                 item {
-                                    Row {
+                                    Row(
+                                        modifier = Modifier.padding(top = 8.dp)
+                                    ) {
                                         Column(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = Modifier.width(132.dp)
