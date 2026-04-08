@@ -85,7 +85,8 @@ class MLBTournamentStore @AssistedInject constructor(
         val alThirdRoundPairedTeams = alThirdRoundTeams.chunked(2)
         val fourthRoundPairedTeams = fourthRoundTeams.chunked(2)
 
-        val games = displayModel.games.filter { it.gameStatus != Constants.GameStatus.MLB.POSTPONED }.toMutableList()
+//        val games = displayModel.games.filter { it.gameStatus != Constants.GameStatus.MLB.POSTPONED }.toMutableList()
+        val games = displayModel.games.toMutableList()
 
         var (nlFirstRoundSeedTuple, nlFirstRound) = Util.collectRound(nlFirstRoundPairedTeams, games)
         var (alFirstRoundSeedTuple, alFirstRound) = Util.collectRound(alFirstRoundPairedTeams, games)

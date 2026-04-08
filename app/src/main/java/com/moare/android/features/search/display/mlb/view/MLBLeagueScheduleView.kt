@@ -210,16 +210,16 @@ fun MLBLeagueScheduleListItem(
        LaunchedEffect
        --------------------- */
     LaunchedEffect(data) {
-        if (Constants.GameStatus.MLB.FINISHED_LIST.contains(gameStatus)) {
+        if (gameStatus == Constants.GameStatus.MLB.FINAL) {
             isResultOpened = gameResultOpenedStateList[gameId] ?: false
-        } else if (gameStatus == StringConstants.MLB.GAME_SCHEDULED || gameStatus == StringConstants.MLB.GAME_POSTPONED) {
+        } else if (gameStatus == Constants.GameStatus.MLB.PREVIEW) {
             isResultOpened = false
         } else {
             isResultOpened = true
         }
     }
     LaunchedEffect(gameResultOpenedStateList) {
-        if (Constants.GameStatus.MLB.FINISHED_LIST.contains(gameStatus)) {
+        if (gameStatus == Constants.GameStatus.MLB.FINAL) {
             isResultOpened = gameResultOpenedStateList[gameId] ?: false
         }
     }
@@ -229,10 +229,10 @@ fun MLBLeagueScheduleListItem(
             leagueId = Constants.Ids.MLB,
             game = data,
             teamNameDic = teamNameDic,
-            isClickEnabled = gameStatus != Constants.GameStatus.MLB.POSTPONED, // 연기된 경기는 클릭 안되게
+//            isClickEnabled = gameStatus != Constants.GameStatus.MLB.POSTPONED, // 연기된 경기는 클릭 안되게
             isResultOpened = isResultOpened,
             gameStatusContext = GameStatusContext.Mlb(status = gameStatus, currentInning = data.gameInfo?.currentInning, isResultOpened = isResultOpened),
-            isCapsuleButtonDisabled = !Constants.GameStatus.MLB.FINISHED_LIST.contains(gameStatus),
+            isCapsuleButtonDisabled = gameStatus != Constants.GameStatus.MLB.FINAL,
             gameType = data.gameInfo?.seriesDescription,
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
         ),

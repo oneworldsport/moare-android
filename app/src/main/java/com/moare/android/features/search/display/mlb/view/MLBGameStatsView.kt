@@ -193,8 +193,8 @@ fun MLBGameStatsView(
 
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowStats = game.status.detailedState != StringConstants.MLB.GAME_SCHEDULED,
-            shouldShowRefreshButton = game.status.detailedState == StringConstants.MLB.GAME_LIVE,
+            shouldShowStats = game.status.abstractGameState != Constants.GameStatus.MLB.PREVIEW,
+            shouldShowRefreshButton = game.status.abstractGameState == Constants.GameStatus.MLB.LIVE,
             teamCategories = teamCategories,
             teamCategorySelectedIndex = selectedTeamIndex,
             gameDetailTitle = gameDetailTitle,
@@ -279,7 +279,7 @@ fun MLBGameStatsScoreInfoItem(
     val game = displayModel.game
     val homeTeamId = Constants.Ids.checkTeamId(Constants.Ids.MLB, game.teams.home.id)
     val awayTeamId = Constants.Ids.checkTeamId(Constants.Ids.MLB, game.teams.away.id)
-    val gameStatus = game.status.detailedState
+    val gameStatus = game.status.abstractGameState
     val teamNameDic by store.teamNameDic.collectAsState()
 
     /* ---------------------
@@ -471,7 +471,7 @@ fun MLBGameStatsLineScoreItem(
     val displayModel by store.displayModel.collectAsState()
 
     val game = displayModel.game
-    val isGameScheduled = game.status.detailedState == StringConstants.MLB.GAME_SCHEDULED
+    val isGameScheduled = game.status.abstractGameState == Constants.GameStatus.MLB.PREVIEW
     val lineScore = game.linescore
     val homeTeamLineScore = lineScore?.teams?.home?.runs ?: 0
     val awayTeamLineScore = lineScore?.teams?.away?.runs ?: 0

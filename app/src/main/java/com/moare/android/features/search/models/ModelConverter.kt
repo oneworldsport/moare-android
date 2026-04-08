@@ -1008,7 +1008,7 @@ object ModelConverter {
             _awayTeamId = awayTeamId,
             _homeTeamScore = homeTeamScore,
             _awayTeamScore = awayTeamScore,
-            _gameStatus = game.status.detailedState,
+            _gameStatus = game.status.abstractGameState,
             gameInfo = gameInfo
         )
     }

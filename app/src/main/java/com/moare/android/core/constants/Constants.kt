@@ -487,16 +487,10 @@ object Constants {
         }
 
         object MLB {
-            const val SCHEDULED = "Scheduled"
-            const val WARMUP = "Warmup"
-            const val PRE_GAME = "Pre-Game"
-            const val LIVE = "In Progress"
-            const val POSTPONED = "Postponed"
-            const val RAIN = "Completed Early: Rain"
-            const val GAME_OVER = "Game Over"
+            const val PREVIEW = "Preview"
             const val FINAL = "Final"
-            val BEFORE_GAME_LIST = listOf(SCHEDULED, WARMUP, PRE_GAME)
-            val FINISHED_LIST = listOf(RAIN, GAME_OVER, FINAL)
+            const val LIVE = "Live"
+            const val OTHER = "other" // 아직 뭐는 없지만 일단 추가함
         }
 
         object KBO {
@@ -605,7 +599,7 @@ object Constants {
             isResultOpened: Boolean = true
         ): String {
             return when (status) {
-                in MLB.BEFORE_GAME_LIST -> StringConstants.GAME_NOT_STARTED_STR
+                MLB.PREVIEW -> StringConstants.GAME_NOT_STARTED_STR
                 MLB.LIVE -> {
                     currentInning
                         ?: if (linescore != null) {
@@ -614,8 +608,7 @@ object Constants {
                             StringConstants.GAME_LIVE_STR
                         }
                 }
-                MLB.POSTPONED -> StringConstants.GAME_POSTPONED_STR
-                in MLB.FINISHED_LIST -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
+                MLB.FINAL -> if (isResultOpened) StringConstants.GAME_FINISHED_STR else StringConstants.RESULT_OPEN
                 else -> ""
             }
         }
@@ -654,7 +647,7 @@ object Constants {
             return when (leagueId) {
                 in Ids.FOOTBALL_ALL -> status == Football.NOT_STARTED
                 Ids.NBA -> status == NBA.NOT_STARTED.toString()
-                Ids.MLB -> MLB.BEFORE_GAME_LIST.contains(status)
+                Ids.MLB -> status == MLB.PREVIEW
                 Ids.KBO -> status == KBO.SCHEDULED
                 in Ids.TENNIS_ALL -> status == Tennis.NOT_STARTED.toString()
                 else -> false
@@ -665,7 +658,7 @@ object Constants {
             return when (leagueId) {
                 in Ids.FOOTBALL_ALL -> Football.FINISHED_LIST.contains(status)
                 Ids.NBA -> status == NBA.FINISHED.toString()
-                Ids.MLB -> MLB.FINISHED_LIST.contains(status)
+                Ids.MLB -> status == MLB.FINAL
                 Ids.KBO -> status == KBO.FINAL
                 in Ids.TENNIS_ALL -> {
                     val status = status.toIntOrNull() ?: 0
