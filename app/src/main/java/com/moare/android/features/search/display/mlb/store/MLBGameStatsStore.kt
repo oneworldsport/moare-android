@@ -93,11 +93,12 @@ class MLBGameStatsStore @AssistedInject constructor(
         }
 
         _teamHitters.value = teamBoxScore.value?.players?.filter {
-            it.value.position?.abbreviation != "P" && it.value.battingOrder.isNotEmpty()
+            it.value.battingOrder.isNotEmpty()
         }?.map { (it.key to it.value) } ?: emptyList()
 
         _teamPitchers.value = teamBoxScore.value?.players?.filter {
-            it.value.position?.abbreviation == "P" && it.value.allPositions.isNotEmpty()
+            ((it.value.position?.abbreviation == "P") && it.value.allPositions.isNotEmpty()) ||
+            (it.value.allPositions.any { position -> position.abbreviation == "P" }) // 투수, 타자 모두 뛴 경우 _allPositions 에 값이 2개 들어감.
         }?.map { (it.key to it.value) } ?: emptyList()
 
         if (isInit) {
