@@ -34,8 +34,10 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.common.collect.Multimaps.index
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.constants.StringConstants
 import com.moare.android.core.constants.UIConstants
@@ -359,82 +361,23 @@ fun RowScope.NBAGameStatsLineScoreContainer(
     homeTeamLineScore: NBALineScore,
     awayTeamLineScore: NBALineScore
 ) {
-    Row(
-        modifier = Modifier
-            .height(127.dp) // 25 + 1 + 50 + 1 + 50
-            .weight(1f)
+    Column(
+        modifier = Modifier.weight(1f)
     ) {
-        Column(
-            verticalArrangement = Arrangement.Bottom,
-            modifier = Modifier.fillMaxHeight()
-        ) {
-            Text(
-                text = homeTeamLineScore.pts.displayOrDash,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Medium,
-                lineHeight = 50.sp,
-                modifier = Modifier
-                    .padding(start = 4.dp, end = 8.dp)
-                    .width(30.dp),
-                color = homeTeamLineScore.pts?.let { homePts ->
-                    awayTeamLineScore.pts?.let { awayPts ->
-                        if (homePts >= awayPts) MaterialTheme.colors.primary else Color.Black
-                    }
-                } ?: Color.Black
-            )
+        NBAGameStatsLineScoreTitle(homeTeamLineScore)
 
-            Box(
-                Modifier
-                    .width(42.dp) // 30 + 8 + 4
-                    .height(1.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.Gray)
-                    .alpha(0.5f)
-            )
+        NBAGameStatsLineScoreItem(store = store, lineScore = homeTeamLineScore, isHome = true)
 
-            Text(
-                text = awayTeamLineScore.pts.displayOrDash,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Medium,
-                lineHeight = 50.sp,
-                modifier = Modifier
-                    .padding(start = 4.dp, end = 8.dp)
-                    .width(30.dp),
-                color = homeTeamLineScore.pts?.let { homePts ->
-                    awayTeamLineScore.pts?.let { awayPts ->
-                        if (awayPts >= homePts) MaterialTheme.colors.primary else Color.Black
-                    }
-                } ?: Color.Black
-            )
-        }
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Gray)
+                .alpha(0.5f)
+        )
 
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            NBAGameStatsLineScoreTitle(homeTeamLineScore)
-
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.Gray)
-                    .alpha(0.5f)
-            )
-
-            NBAGameStatsLineScoreItem(store = store, lineScore = homeTeamLineScore)
-
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.Gray)
-                    .alpha(0.5f)
-            )
-
-            NBAGameStatsLineScoreItem(store = store, lineScore = awayTeamLineScore)
-        }
+        NBAGameStatsLineScoreItem(store = store, lineScore = awayTeamLineScore, isHome = false)
     }
 }
 
@@ -442,53 +385,70 @@ fun RowScope.NBAGameStatsLineScoreContainer(
 fun NBAGameStatsLineScoreTitle(
     lineScore: NBALineScore
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(25.dp)
-    ) {
-        for (index in 1 until 5) {
-            VCapsuleBar(modifier = Modifier.alpha(0.5f))
-            Text(
-                text = "$index",
-                textAlign = TextAlign.Center,
-                fontSize = 15.sp,
-                modifier = Modifier.weight(1f)
-            )
-        }
+    val ptsOtCount = lineScore.ptsOtList.count { it != null }
 
-        if (lineScore.ptsOt1 != null && lineScore.ptsOt1 != 0) {
-            VCapsuleBar(modifier = Modifier.alpha(0.5f))
-            Text(
-                text = "1OT",
-                textAlign = TextAlign.Center,
-                fontSize = 14.sp,
-                maxLines = 1,
-                modifier = Modifier.weight(1f)
-            )
-        }
+    val maxPts = 4 + ptsOtCount
 
-        if (lineScore.ptsOt2 != null && lineScore.ptsOt2 != 0) {
-            VCapsuleBar(modifier = Modifier.alpha(0.5f))
-            Text(
-                text = "2OT",
-                textAlign = TextAlign.Center,
-                fontSize = 14.sp,
-                maxLines = 1,
-                modifier = Modifier.weight(1f)
-            )
-        }
+    Box {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Gray)
+                .alpha(0.5f)
+                .align(Alignment.BottomStart)
+        )
 
-        if (lineScore.ptsOt3 != null && lineScore.ptsOt3 != 0) {
-            VCapsuleBar(modifier = Modifier.alpha(0.5f))
-            Text(
-                text = "3OT",
-                textAlign = TextAlign.Center,
-                fontSize = 14.sp,
-                maxLines = 1,
-                modifier = Modifier.weight(1f)
-            )
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(25.dp)
+        ) {
+            for (index in 0..maxPts) {
+                if (index == 0) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(MaterialTheme.colors.background)
+                                .align(Alignment.BottomCenter) // 1회 왼쪽으로 그어지는 하단 선 가리는 박스
+                        )
+                    }
+                } else {
+                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
+
+                    val text: String
+                    val fontSize: TextUnit
+
+                    if (index <= 4) {
+                        text = "$index"
+                        fontSize = 15.sp
+                    } else {
+                        text = "${index - 4}OT"
+                        fontSize = 14.sp
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = text,
+                            textAlign = TextAlign.Center,
+                            fontSize = fontSize,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -496,8 +456,15 @@ fun NBAGameStatsLineScoreTitle(
 @Composable
 fun NBAGameStatsLineScoreItem(
     store: NBAGameStatsStore,
-    lineScore: NBALineScore
+    lineScore: NBALineScore,
+    isHome: Boolean
 ) {
+    val homeTeamLineScore by store.homeTeamLineScore.collectAsState()
+    val awayTeamLineScore by store.awayTeamLineScore.collectAsState()
+
+    val homePts = homeTeamLineScore?.pts
+    val awayPts = awayTeamLineScore?.pts
+
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
@@ -505,64 +472,47 @@ fun NBAGameStatsLineScoreItem(
             .fillMaxWidth()
             .height(store.lineScoreItemHeight)
     ) {
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-        Text(
-            text = lineScore.ptsQtr1.displayOrDash,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f)
-        )
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-        Text(
-            text = lineScore.ptsQtr2.displayOrDash,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f)
-        )
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-        Text(
-            text = lineScore.ptsQtr3.displayOrDash,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f)
-        )
-        VCapsuleBar(modifier = Modifier.alpha(0.5f))
-        Text(
-            text = lineScore.ptsQtr4.displayOrDash,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f)
-        )
+        val ptsOtCount = lineScore.ptsOtList.count { it != null }
 
-        // TODO: 홈, 원정 둘중에 하나는 0이 아닌데 다른 팀은 0일때 0인팀의 UI가 깨짐
-        if (lineScore.ptsOt1 != null && lineScore.ptsOt1 != 0) {
-            VCapsuleBar(modifier = Modifier.alpha(0.5f))
-            Text(
-                text = lineScore.ptsOt1.toString(),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
-            )
-        }
+        val maxPts = 4 + ptsOtCount
 
-        if (lineScore.ptsOt2 != null && lineScore.ptsOt2 != 0) {
-            VCapsuleBar(modifier = Modifier.alpha(0.5f))
-            Text(
-                text = lineScore.ptsOt2.toString(),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
-            )
-        }
+        for (index in 0..maxPts) {
+            if (index == 0) {
 
-        if (lineScore.ptsOt3 != null && lineScore.ptsOt3 != 0) {
-            VCapsuleBar(modifier = Modifier.alpha(0.5f))
-            Text(
-                text = lineScore.ptsOt3.toString(),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f)
-            )
+                val text: String = if (isHome) {
+                    homePts.toString()
+                } else {
+                    awayPts.toString()
+                }
+
+                val color: Color = if (isHome) {
+                    if (homePts != null && awayPts != null && homePts >= awayPts)
+                        MaterialTheme.colors.primary else Color.Black
+                } else {
+                    if (homePts != null && awayPts != null && awayPts >= homePts)
+                        MaterialTheme.colors.primary else Color.Black
+                }
+
+                Text(
+                    text = text,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f),
+                    color = color
+                )
+            } else {
+                VCapsuleBar(modifier = Modifier.alpha(0.5f))
+
+                val ptsValue = lineScore.ptsList.getOrNull(index - 1)
+
+                Text(
+                    text = ptsValue.displayOrDash,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f)
+                )
+                // TODO: ptsOt1 에서 홈, 원정 둘중에 하나는 0이 아닌데 다른 팀은 0일때 0인팀의 UI가 깨짐
+            }
         }
     }
 }
