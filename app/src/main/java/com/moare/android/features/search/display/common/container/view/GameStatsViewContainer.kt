@@ -150,6 +150,7 @@ fun GameStatsViewContainer(
         )
     )
 
+    // TODO: stats화면을 스크롤 올릴때 spacedBy때문에 생기는 빈공간을 없애야함. 그렇다고 spacedBy을 없애면 너무 많은걸 수정해야해서, -padding을 주는걸 해봐야할듯
     CenterColumn(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.fillMaxSize()
