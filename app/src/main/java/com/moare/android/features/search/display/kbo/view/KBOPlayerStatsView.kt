@@ -122,7 +122,7 @@ fun KBOPlayerStatsPlayerInfoItem(
                 .padding(top = 8.dp)
                 .alpha(contentsAlpha)
         ) {
-            URLImage(url = KBOUtil.playerPhotoUrl(player.id))
+            URLImage(url = KBOUtil.playerPhotoUrl(displayModel.season, player.id))
 
             // name
             Column(

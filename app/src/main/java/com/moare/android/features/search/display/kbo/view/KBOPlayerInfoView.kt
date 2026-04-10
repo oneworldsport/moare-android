@@ -217,7 +217,7 @@ fun KBOPlayerInfoFirstItem(
         modifier = containerModifier
     ) {
         URLImage(
-            url = KBOUtil.playerPhotoUrl(player.id),
+            url = KBOUtil.playerPhotoUrl(displayModel.season, player.id),
             modifier = Modifier.alpha(contentsAlpha)
         )
 
