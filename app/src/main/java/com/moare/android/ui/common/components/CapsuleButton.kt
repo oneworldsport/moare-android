@@ -104,6 +104,7 @@ fun GameStatusCapsuleButton(
         is GameStatusContext.Mlb -> {
             Constants.GameStatus.mlbGameStatusText(
                 status = context.status,
+                currentInning = context.currentInning,
                 linescore = context.linescore
             )
         }

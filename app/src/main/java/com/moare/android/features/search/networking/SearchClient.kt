@@ -22,8 +22,8 @@ class SearchClient(
 //        return fetchFromJson(context, "커리 순위")
     }
 
-    suspend fun fetchDataByKeyword(keyword: KeywordInfo): DataModel {
-        val response = apiHelper.searchApi.searchByKeyword(keyword)
+    suspend fun fetchDataByKeyword(keyword: KeywordInfo, season: Int? = null): DataModel {
+        val response = apiHelper.searchApi.searchByKeyword(keyword, season)
         return DataModel.fromJson(response.string())
     }
 

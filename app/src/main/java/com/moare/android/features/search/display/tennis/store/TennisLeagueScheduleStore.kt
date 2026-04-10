@@ -317,7 +317,7 @@ class TennisLeagueScheduleStore @AssistedInject constructor(
                 )
             )
 
-            val result = searchClient.fetchDataByKeyword(keywordInfo)
+            val result = searchClient.fetchDataByKeyword(keywordInfo, displayModel.value.season)
 
             if (result.data is SportDecodableModel.TennisTournament) {
                 emitToParent(TennisLeagueScheduleDelegate.ShowTournament(result.data))

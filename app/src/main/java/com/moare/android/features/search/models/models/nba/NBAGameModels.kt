@@ -273,6 +273,8 @@ data class NBALineScore(
     val teamId: Int get() = _teamId ?: 0
     val teamNickname: String get() = _teamNickname ?: ""
     val teamWinsLosses: String get() = _teamWinsLosses ?: ""
+    val ptsList: List<Int?> get() = listOf(ptsQtr1, ptsQtr2, ptsQtr3, ptsQtr4, ptsOt1, ptsOt2, ptsOt3, ptsOt4, ptsOt5, ptsOt6, ptsOt7, ptsOt8, ptsOt9, ptsOt10)
+    val ptsOtList: List<Int?> get() = listOf(ptsOt1, ptsOt2, ptsOt3, ptsOt4, ptsOt5, ptsOt6, ptsOt7, ptsOt8, ptsOt9, ptsOt10)
 }
 
 @Serializable

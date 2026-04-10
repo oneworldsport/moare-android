@@ -25,6 +25,7 @@ sealed interface MLBGameStatsAction {
     data class SelectTeam(val index: Int) : MLBGameStatsAction
     data class RefreshGame(val shouldFetch: Boolean = true) : MLBGameStatsAction
     data object SortByBattingOrder : MLBGameStatsAction
+    data object SortByPitcherOrder : MLBGameStatsAction
 }
 
 sealed interface MLBGameStatsDelegate {
@@ -39,6 +40,7 @@ class MLBGameStatsStore @AssistedInject constructor(
 ) : BaseGameStatsStore<MLBGameStatsAction, MLBGameStatsDisplayModel>(model, nameProvider) {
     val lineScoreItemHeight = 50.dp
     val teamButtonWidth = 100.dp
+    val itemWidth = 70.dp
 
     private val _teamBoxScore = MutableStateFlow<MLBGameBoxscoreTeamData?>(null)
     val teamBoxScore: StateFlow<MLBGameBoxscoreTeamData?> = _teamBoxScore
@@ -65,6 +67,7 @@ class MLBGameStatsStore @AssistedInject constructor(
             is MLBGameStatsAction.SelectTeam -> selectTeam(false, action.index)
             is MLBGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
             is MLBGameStatsAction.SortByBattingOrder -> sortByBattingOrder()
+            is MLBGameStatsAction.SortByPitcherOrder -> sortByPitcherOrder()
         }
     }
 
@@ -90,20 +93,28 @@ class MLBGameStatsStore @AssistedInject constructor(
         }
 
         _teamHitters.value = teamBoxScore.value?.players?.filter {
-            it.value.position?.abbreviation != "P" && it.value.battingOrder.isNotEmpty()
+            it.value.battingOrder.isNotEmpty()
         }?.map { (it.key to it.value) } ?: emptyList()
 
         _teamPitchers.value = teamBoxScore.value?.players?.filter {
-            it.value.position?.abbreviation == "P" && it.value.allPositions.isNotEmpty()
+            ((it.value.position?.abbreviation == "P") && it.value.allPositions.isNotEmpty()) ||
+            (it.value.allPositions.any { position -> position.abbreviation == "P" }) // 투수, 타자 모두 뛴 경우 _allPositions 에 값이 2개 들어감.
         }?.map { (it.key to it.value) } ?: emptyList()
 
         if (isInit) {
-            sortByBattingOrder()
             refreshGame(false)
-        } else {
             sortHitters()
+            sortPitchers()
+        } else {
+            if (firstCategorySelectedIndex.value == -1) {
+                sortByBattingOrder()
+            }
+            if (secondCategorySelectedIndex.value == -1) {
+                sortByPitcherOrder()
+            }
         }
-        sortPitchers()
+        sortByBattingOrder()
+        sortByPitcherOrder()
     }
 
     override fun selectFirstCategory(index: Int) {
@@ -136,7 +147,6 @@ class MLBGameStatsStore @AssistedInject constructor(
             5 -> teamHitters.sortByDescending { it.second.stats?.batting?.stolenBases ?: 0 }
             6 -> teamHitters.sortByDescending { it.second.stats?.batting?.baseOnBalls ?: 0 }
             7 -> teamHitters.sortByDescending { it.second.stats?.batting?.strikeOuts ?: 0 }
-            else -> {}
         }
 
         _teamHitters.value = teamHitters
@@ -152,7 +162,6 @@ class MLBGameStatsStore @AssistedInject constructor(
             3 -> teamPitchers.sortByDescending { it.second.stats?.pitching?.baseOnBalls ?: 0 }
             4 -> teamPitchers.sortByDescending { it.second.stats?.pitching?.strikeOuts ?: 0 }
             5 -> teamPitchers.sortByDescending { it.second.stats?.pitching?.hits ?: 0 }
-            else -> {}
         }
 
         _teamPitchers.value = teamPitchers
@@ -193,5 +202,21 @@ class MLBGameStatsStore @AssistedInject constructor(
 
     private fun sortByBattingOrder() {
         _teamHitters.update { it.toMutableList().apply { sortBy { it.second.battingOrder.take(1).toIntOrNull() ?: 0 } } }
+
+        selectFirstCategory(-1)
+    }
+
+    private fun sortByPitcherOrder() {
+        val pitchersOrder = teamBoxScore.value?.pitchers.orEmpty()
+
+        val orderMap = pitchersOrder.withIndex().associate { it.value to it.index }
+
+        _teamPitchers.value = _teamPitchers.value
+            .sortedBy { (id, _) ->
+                val numericId = id.filter { it.isDigit() }.toIntOrNull()  // first = "ID621107" 이런 형태라서 isDigit()로 숫자만 추출
+                orderMap[numericId] ?: Int.MAX_VALUE
+            }
+
+        selectSecondCategory(-1)
     }
 }
