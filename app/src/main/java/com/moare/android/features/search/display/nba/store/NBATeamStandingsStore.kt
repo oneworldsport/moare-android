@@ -144,7 +144,7 @@ class NBATeamStandingsStore @AssistedInject constructor(
                 updateStandings(true) { it.stats.gp.toFloat() }
             }
             5 -> {
-                updateStandings(trues) {
+                updateStandings(true) {
                     val streak = it.stats.strCurrentStreak
                     val streakNumber = extractNumber(streak)
                     val sign = if (streak.startsWith("W", ignoreCase = true)) 1 else -1
