@@ -26,6 +26,7 @@ sealed interface KBOGameStatsAction {
     data class SelectTeam(val index: Int) : KBOGameStatsAction
     data class RefreshGame(val shouldFetch: Boolean = true) : KBOGameStatsAction
     data object SortByBattingOrder : KBOGameStatsAction
+    data object SortByPitcherOrder : KBOGameStatsAction
 }
 
 sealed interface KBOGameStatsDelegate {
@@ -40,6 +41,7 @@ class KBOGameStatsStore @AssistedInject constructor(
 ) : BaseGameStatsStore<KBOGameStatsAction, KBOGameStatsDisplayModel>(model, nameProvider) {
     val lineScoreItemHeight = 50.dp
     val teamButtonWidth = 100.dp
+    val itemWidth = 70.dp
 
     private val _teamLineup = MutableStateFlow<KBOGameLineup?>(null)
     val teamLineup: StateFlow<KBOGameLineup?> = _teamLineup
@@ -66,6 +68,7 @@ class KBOGameStatsStore @AssistedInject constructor(
             is KBOGameStatsAction.SelectTeam -> selectTeam(false, action.index)
             is KBOGameStatsAction.RefreshGame -> refreshGame(action.shouldFetch)
             is KBOGameStatsAction.SortByBattingOrder -> sortByBattingOrder()
+            is KBOGameStatsAction.SortByPitcherOrder -> sortByPitcherOrder()
         }
     }
 
@@ -100,12 +103,19 @@ class KBOGameStatsStore @AssistedInject constructor(
         _teamPitchers.value = teamLineup.value?.pitchers ?: emptyList()
 
         if (isInit) {
-            sortByBattingOrder()
             refreshGame(false)
-        } else {
             sortHitters()
+            sortPitchers()
+        } else {
+            if (firstCategorySelectedIndex.value == -1) {
+                sortByBattingOrder()
+            }
+            if (secondCategorySelectedIndex.value == -1) {
+                sortByPitcherOrder()
+            }
         }
-        sortPitchers()
+        sortByBattingOrder()
+        sortByPitcherOrder()
     }
 
     override fun selectFirstCategory(index: Int) {
@@ -129,7 +139,7 @@ class KBOGameStatsStore @AssistedInject constructor(
     private fun sortHitters() {
         val teamHitters = teamHitters.value.toMutableList()
 
-        when (secondCategorySelectedIndex.value) {
+        when (firstCategorySelectedIndex.value) {
             0 -> teamHitters.sortByDescending { it.ab }
             1 -> teamHitters.sortByDescending { it.h }
             2 -> teamHitters.sortByDescending { it.homeRuns }
@@ -138,7 +148,6 @@ class KBOGameStatsStore @AssistedInject constructor(
             5 -> teamHitters.sortByDescending { it.baseOnBalls }
             6 -> teamHitters.sortByDescending { it.strikeOuts }
             7 -> teamHitters.sortByDescending { it.groundIntoDoublePlay }
-            else -> {}
         }
 
         _teamHitters.value = teamHitters
@@ -154,7 +163,6 @@ class KBOGameStatsStore @AssistedInject constructor(
             3 -> teamPitchers.sortByDescending { it.bb.toDoubleOrNull() ?: 0.0 }
             4 -> teamPitchers.sortByDescending { it.so.toDoubleOrNull() ?: 0.0 }
             5 -> teamPitchers.sortByDescending { it.h.toDoubleOrNull() ?: 0.0 }
-            else -> {}
         }
 
         _teamPitchers.value = teamPitchers
@@ -197,7 +205,45 @@ class KBOGameStatsStore @AssistedInject constructor(
     }
 
     private fun sortByBattingOrder() {
-        _teamHitters.update { it.toMutableList().apply { sortBy { it.battingNumber } } }
+//        _teamHitters.update { it.toMutableList().apply { sortBy { it.battingNumber } } }
+
+        // 대타가 들어가면 battingNumber 가 0이 되는 듯...
+        val hitterOrderMap = teamLineup.value?.hitters
+            ?.withIndex()
+            ?.associate { it.value.name to it.index }
+            ?: emptyMap()
+
+        _teamHitters.value = _teamHitters.value
+            .sortedBy { player ->
+                val name = player.name
+                if (name.isNotEmpty()) {
+                    hitterOrderMap[name] ?: Int.MAX_VALUE
+                } else {
+                    Int.MAX_VALUE
+                }
+            }
+
+        selectFirstCategory(-1)
+    }
+
+    private fun sortByPitcherOrder() {
+        // id 가 null 인 경우가 너무 많아서 불가피하게 이름 사용. 리팩토링 해야됨
+        val pitcherOrderMap = teamLineup.value?.pitchers
+            ?.withIndex()
+            ?.associate { it.value.name to it.index }
+            ?: emptyMap()
+
+        _teamPitchers.value = _teamPitchers.value
+            .sortedBy { player ->
+                val name = player.name
+                if (name.isNotEmpty()) {
+                    pitcherOrderMap[name] ?: Int.MAX_VALUE
+                } else {
+                    Int.MAX_VALUE
+                }
+            }
+
+        selectSecondCategory(-1)
     }
 }
 
