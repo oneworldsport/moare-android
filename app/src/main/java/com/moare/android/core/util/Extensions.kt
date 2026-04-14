@@ -38,17 +38,38 @@ fun String.dropFirstWord(): String {
 /**
  * 이미 정렬된 상태라고 가정하고, key 값으로 공동순위 부여 (1,2,2,4 방식)
  */
-fun <T : Rankable, K> MutableList<T>.assignCompetitionRankBy(key: (T) -> K) {
-    if (isEmpty()) return
+fun <T : Rankable<T>, K> List<T>.withCompetitionRankBy(key: (T) -> K): List<T> {
+    if (isEmpty()) return this
 
     var currentRank = 1
     var sameCount = 0
     var lastKey: K? = null
 
-    for (i in indices) {
-        val k = key(this[i])
+//    for (i in indices) {
+//        val k = key(this[i])
+//
+//        if (lastKey == null || k != lastKey) {
+//            // 값이 바뀌면: rank를 "이전 공동순위 개수만큼" 점프
+//            currentRank += sameCount
+//            sameCount = 1
+//            lastKey = k
+//        } else {
+//            // 값이 같으면: 같은 rank 유지
+//            sameCount += 1
+//        }
+//
+//        this[i].displayRank = currentRank
+//    }
 
-        if (lastKey == null || k != lastKey) {
+    // NOTE: 위 로직(var displayRank를 수정하는 방식)은 compose ui에 반영이 안돼 아래처럼 변경
+    return mapIndexed { index, item ->
+        val k = key(item)
+
+        if (index == 0) {
+            currentRank = 1
+            sameCount = 1
+            lastKey = k
+        } else if (k != lastKey) {
             // 값이 바뀌면: rank를 "이전 공동순위 개수만큼" 점프
             currentRank += sameCount
             sameCount = 1
@@ -58,7 +79,7 @@ fun <T : Rankable, K> MutableList<T>.assignCompetitionRankBy(key: (T) -> K) {
             sameCount += 1
         }
 
-        this[i].displayRank = currentRank
+        item.withDisplayRank(currentRank)
     }
 }
 
