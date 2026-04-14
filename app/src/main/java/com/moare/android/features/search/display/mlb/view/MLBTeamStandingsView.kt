@@ -149,7 +149,7 @@ fun MLBTeamStandingsDataList(
 
                     StandingsRankItem(
                         id = teamId,
-                        rank = index ,
+                        rank = data.displayRank ,
                         imageUrl = MLBUtil.teamLogoUrl(teamId),
                         isSvgLogo = true,
                         name = teamNameDic["short_${teamId}"] ?: data.team.shortName,

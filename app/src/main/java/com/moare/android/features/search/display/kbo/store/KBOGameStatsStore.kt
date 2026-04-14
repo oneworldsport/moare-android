@@ -148,7 +148,7 @@ class KBOGameStatsStore @AssistedInject constructor(
         val teamPitchers = teamPitchers.value.toMutableList()
 
         when (secondCategorySelectedIndex.value) {
-            0 -> teamPitchers.sortByDescending { it.inningsPitched }
+            0 -> teamPitchers.sortByDescending { it.ip.toDoubleOrNull() ?: 0.0 }
             1 -> teamPitchers.sortByDescending { it.r.toDoubleOrNull() ?: 0.0 }
             2 -> teamPitchers.sortByDescending { it.er.toDoubleOrNull() ?: 0.0 }
             3 -> teamPitchers.sortByDescending { it.bb.toDoubleOrNull() ?: 0.0 }

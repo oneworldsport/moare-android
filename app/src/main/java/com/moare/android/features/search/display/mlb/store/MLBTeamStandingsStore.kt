@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
+import com.moare.android.core.util.withCompetitionRankBy
 import com.moare.android.features.search.display.common.store.BaseTeamStandingsStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
@@ -16,6 +17,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 sealed interface MLBTeamStandingsAction {
@@ -167,116 +169,64 @@ class MLBTeamStandingsStore @AssistedInject constructor(
     }
 
     private fun sortStandings() {
-        val westStandings = westStandings.value.toMutableList()
-        val eastStandings = eastStandings.value.toMutableList()
-        val centralStandings = centralStandings.value.toMutableList()
-
         when (categorySelectedIndex.value) {
             0 -> {
-                westStandings.sortBy { it.stats.recordData?.gamesBack?.toFloatOrNull() }
-                eastStandings.sortBy { it.stats.recordData?.gamesBack?.toFloatOrNull() }
-                centralStandings.sortBy { it.stats.recordData?.gamesBack?.toFloatOrNull() }
+                sortAllDivision(false) { it.stats.recordData?.divisionRank?.toFloatOrNull() }
             }
             1 -> {
-                westStandings.sortByDescending { it.stats.recordData?.winningPercentage?.toFloatOrNull() }
-                eastStandings.sortByDescending { it.stats.recordData?.winningPercentage?.toFloatOrNull() }
-                centralStandings.sortByDescending { it.stats.recordData?.winningPercentage?.toFloatOrNull() }
+                sortAllDivision(false) { it.stats.recordData?.divisionRank?.toFloatOrNull() }
             }
             2 -> {
-                westStandings.sortByDescending { it.stats.recordData?.wins }
-                eastStandings.sortByDescending { it.stats.recordData?.wins }
-                centralStandings.sortByDescending { it.stats.recordData?.wins }
+                sortAllDivision(true) { it.stats.recordData?.wins?.toFloat() }
             }
             3 -> {
-                westStandings.sortBy { it.stats.recordData?.losses }
-                eastStandings.sortBy { it.stats.recordData?.losses }
-                centralStandings.sortBy { it.stats.recordData?.losses }
+                sortAllDivision(false) { it.stats.recordData?.losses?.toFloat() }
             }
             4 -> {
-                westStandings.sortByDescending { it.stats.recordData?.gamesPlayed }
-                eastStandings.sortByDescending { it.stats.recordData?.gamesPlayed }
-                centralStandings.sortByDescending { it.stats.recordData?.gamesPlayed }
+                sortAllDivision(true) { it.stats.recordData?.gamesPlayed?.toFloat() }
             }
             5 -> {
-                westStandings.sortByDescending {
+                sortAllDivision(true) {
                     val streak = it.stats.recordData?.streak
                     val streakNumber = streak?.streakNumber ?: 0
                     val sign = if (streak?.streakType?.lowercase()?.startsWith("w") == true) 1 else -1
-                    streakNumber * sign
-                }
-                eastStandings.sortByDescending {
-                    val streak = it.stats.recordData?.streak
-                    val streakNumber = streak?.streakNumber ?: 0
-                    val sign = if (streak?.streakType?.lowercase()?.startsWith("w") == true) 1 else -1
-                    streakNumber * sign
-                }
-                centralStandings.sortByDescending {
-                    val streak = it.stats.recordData?.streak
-                    val streakNumber = streak?.streakNumber ?: 0
-                    val sign = if (streak?.streakType?.lowercase()?.startsWith("w") == true) 1 else -1
-                    streakNumber * sign
+                    (streakNumber * sign).toFloat()
                 }
             }
             6 -> {
-                westStandings.sortByDescending { it.stats.hitting?.avg?.toFloatOrNull() }
-                eastStandings.sortByDescending { it.stats.hitting?.avg?.toFloatOrNull() }
-                centralStandings.sortByDescending { it.stats.hitting?.avg?.toFloatOrNull() }
+                sortAllDivision(true) { it.stats.hitting?.avg?.toFloatOrNull() }
             }
             7 -> {
-                westStandings.sortByDescending { it.stats.hitting?.hits }
-                eastStandings.sortByDescending { it.stats.hitting?.hits }
-                centralStandings.sortByDescending { it.stats.hitting?.hits }
+                sortAllDivision(true) { it.stats.hitting?.hits?.toFloat() }
             }
             8 -> {
-                westStandings.sortByDescending { it.stats.hitting?.homeRuns }
-                eastStandings.sortByDescending { it.stats.hitting?.homeRuns }
-                centralStandings.sortByDescending { it.stats.hitting?.homeRuns }
+                sortAllDivision(true) { it.stats.hitting?.homeRuns?.toFloat() }
             }
             9 -> {
-                westStandings.sortByDescending { it.stats.hitting?.slg?.toFloatOrNull() }
-                eastStandings.sortByDescending { it.stats.hitting?.slg?.toFloatOrNull() }
-                centralStandings.sortByDescending { it.stats.hitting?.slg?.toFloatOrNull() }
+                sortAllDivision(true) { it.stats.hitting?.slg?.toFloatOrNull() }
             }
             10 -> {
-                westStandings.sortByDescending { it.stats.hitting?.runs }
-                eastStandings.sortByDescending { it.stats.hitting?.runs }
-                centralStandings.sortByDescending { it.stats.hitting?.runs }
+                sortAllDivision(true) { it.stats.hitting?.runs?.toFloat() }
             }
             11 -> {
-                westStandings.sortBy { it.stats.pitching?.era?.toFloatOrNull() }
-                eastStandings.sortBy { it.stats.pitching?.era?.toFloatOrNull() }
-                centralStandings.sortBy { it.stats.pitching?.era?.toFloatOrNull() }
+                sortAllDivision(false) { it.stats.pitching?.era?.toFloatOrNull() }
             }
             12 -> {
-                westStandings.sortBy { it.stats.pitching?.avg?.toFloatOrNull() }
-                eastStandings.sortBy { it.stats.pitching?.avg?.toFloatOrNull() }
-                centralStandings.sortBy { it.stats.pitching?.avg?.toFloatOrNull() }
+                sortAllDivision(false) { it.stats.pitching?.avg?.toFloatOrNull() }
             }
             13 -> {
-                westStandings.sortBy { it.stats.pitching?.hits }
-                eastStandings.sortBy { it.stats.pitching?.hits }
-                centralStandings.sortBy { it.stats.pitching?.hits }
+                sortAllDivision(false) { it.stats.pitching?.hits?.toFloat() }
             }
             14 -> {
-                westStandings.sortBy { it.stats.pitching?.homeRuns }
-                eastStandings.sortBy { it.stats.pitching?.homeRuns }
-                centralStandings.sortBy { it.stats.pitching?.homeRuns }
+                sortAllDivision(false) { it.stats.pitching?.homeRuns?.toFloat() }
             }
             15 -> {
-                westStandings.sortBy { it.stats.pitching?.runs }
-                eastStandings.sortBy { it.stats.pitching?.runs }
-                centralStandings.sortBy { it.stats.pitching?.runs }
+                sortAllDivision(false) { it.stats.pitching?.runs?.toFloat() }
             }
             16 -> {
-                westStandings.sortByDescending { it.stats.hitting?.stolenBasePercentage?.toFloatOrNull() }
-                eastStandings.sortByDescending { it.stats.hitting?.stolenBasePercentage?.toFloatOrNull() }
-                centralStandings.sortByDescending { it.stats.hitting?.stolenBasePercentage?.toFloatOrNull() }
+                sortAllDivision(true) { it.stats.hitting?.stolenBasePercentage?.toFloatOrNull() }
             }
         }
-
-        _westStandings.value = westStandings
-        _eastStandings.value = eastStandings
-        _centralStandings.value = centralStandings
     }
 
     private fun showTeamStats(id: Int) {
@@ -291,5 +241,42 @@ class MLBTeamStandingsStore @AssistedInject constructor(
         )
 
         emitToParent(MLBTeamStandingsDelegate.ShowTeamStats(dataModel))
+    }
+
+    private fun sortAllDivision(
+        isDescending: Boolean,
+        value: (MLBTeamStandingsDisplay) -> Float?
+    ) {
+        _westStandings.update { list ->
+            if (isDescending) {
+                list.sortedByDescending(value)
+            } else {
+                list.sortedBy(value)
+            }
+        }
+        _eastStandings.update { list ->
+            if (isDescending) {
+                list.sortedByDescending(value)
+            } else {
+                list.sortedBy(value)
+            }
+        }
+        _centralStandings.update { list ->
+            if (isDescending) {
+                list.sortedByDescending(value)
+            } else {
+                list.sortedBy(value)
+            }
+        }
+
+        _westStandings.update { current ->
+            current.withCompetitionRankBy(value)
+        }
+        _eastStandings.update { current ->
+            current.withCompetitionRankBy(value)
+        }
+        _centralStandings.update { current ->
+            current.withCompetitionRankBy(value)
+        }
     }
 }

@@ -93,7 +93,7 @@ fun KBOGameStatsView(
     val hitterList: List<StandingsItemState> = teamHitters.map {
         StandingsItemState(
             numInfo = it.battingNumber,
-            imageUrl = KBOUtil.playerPhotoUrl(it.id),
+            imageUrl = KBOUtil.playerPhotoUrl(displayModel.season, it.id),
             name = it.name,
             extraInfo = it.position
                 .replace("#", "•")
@@ -114,10 +114,10 @@ fun KBOGameStatsView(
     }
     val pitcherList: List<StandingsItemState> = teamPitchers.map {
         StandingsItemState(
-            imageUrl = KBOUtil.playerPhotoUrl(it.id),
+            imageUrl = KBOUtil.playerPhotoUrl(displayModel.season, it.id),
             name = it.name,
             dataList = listOf(
-                it.inningsPitched.toString(), it.r, it.er, it.bb, it.so, it.h
+                it.ip, it.r, it.er, it.bb, it.so, it.h
             )
         )
     }

@@ -189,33 +189,6 @@ data class KBOGamePitcherStats(
     val l: String get() = _l ?: "0" // 패
     val sv: String get() = _sv ?: "0" // 세이브
     val era: String get() = _era ?: "0.0" // 평균자책점
-
-    val inningsPitched: Double get() = parseInningString(ip)
-
-    private fun parseInningString(text: String): Double {
-        val parts = text.split(" ")
-        val first = parts.getOrNull(0) ?: return 0.0
-
-        // 토큰이 하나일 때: ex) "1/3" or "2"
-        if (parts.size == 1) {
-            return when (first) {
-                "1/3" -> 0.1
-                "2/3" -> 0.2
-                else -> first.toIntOrNull()?.toDouble() ?: 0.0
-            }
-        }
-
-        // 토큰이 두 개 이상일 때: "2 1/3"
-        val whole = first.toIntOrNull() ?: return 0.0
-        val fraction = parts[1]
-        val fractionValue = when (fraction) {
-            "1/3" -> 0.1
-            "2/3" -> 0.2
-            else -> 0.0
-        }
-
-        return whole + fractionValue
-    }
 }
 
 @Serializable

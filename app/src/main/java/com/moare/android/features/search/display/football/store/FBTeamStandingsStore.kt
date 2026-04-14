@@ -5,12 +5,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.core.util.assignCompetitionRankBy
+import com.moare.android.core.util.withCompetitionRankBy
 import com.moare.android.features.search.display.common.store.BaseTeamStandingsStore
 import com.moare.android.features.search.models.ModelConverter
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBTeamStandingsDisplayModel
+import com.moare.android.features.search.models.displaymodels.nba.NBATeamStandingsDisplay
 import com.moare.android.features.search.models.models.football.FBTeamStatsFixtures
 import com.moare.android.features.search.models.responsemodels.football.FBTeamInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.football.FBTeamStandingsResponseModel
@@ -20,6 +21,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 sealed interface FBTeamStandingsAction {
@@ -134,102 +136,96 @@ class FBTeamStandingsStore @AssistedInject constructor(
     }
 
     private fun sortStandings() {
-        val standings = standings.value.toMutableList()
-
         when (categorySelectedIndex.value) {
             0 -> {
-                standings.sortBy { it.rank }
-                for (i in standings.indices) {
-                    standings[i].displayRank = standings[i].rank
-                }
+                updateStandings(false) { it.rank.toFloat() }
             }
             1 -> {
-                standings.sortByDescending { it.homeAwayStats.wins.total }
-                standings.assignCompetitionRankBy { it.homeAwayStats.wins.total }
+                updateStandings(true) { it.homeAwayStats.wins.total.toFloat() }
             }
             2 -> {
-                standings.sortByDescending { it.homeAwayStats.draws.total }
-                standings.assignCompetitionRankBy { it.homeAwayStats.draws.total }
+                updateStandings(true) { it.homeAwayStats.draws.total.toFloat() }
             }
             3 -> {
-                standings.sortBy { it.homeAwayStats.loses.total }
-                standings.assignCompetitionRankBy { it.homeAwayStats.loses.total }
+                updateStandings(false) { it.homeAwayStats.loses.total.toFloat() }
             }
             4 -> {
-                standings.sortByDescending { it.homeAwayStats.played.total }
-                standings.assignCompetitionRankBy { it.homeAwayStats.played.total }
+                updateStandings(true) { it.homeAwayStats.played.total.toFloat() }
             }
             5 -> {
-                standings.sortByDescending { it.goalsFor.total }
-                standings.assignCompetitionRankBy { it.goalsFor.total }
+                updateStandings(true) { it.goalsFor.total.toFloat() }
             }
             6 -> {
-                standings.sortBy { it.goalsAgainst.total }
-                standings.assignCompetitionRankBy { it.goalsAgainst.total }
+                updateStandings(false) { it.goalsAgainst.total.toFloat() }
             }
             7 -> {
-                standings.sortByDescending { it.goalsFor.total - it.goalsAgainst.total }
-                standings.assignCompetitionRankBy { it.goalsFor.total - it.goalsAgainst.total }
+                updateStandings(true) { (it.goalsFor.total - it.goalsAgainst.total).toFloat() }
             }
             8 -> {
-                standings.sortWith { a, b ->
-                    val pa = calculateHomePoints(a.homeAwayStats)
-                    val pb = calculateHomePoints(b.homeAwayStats)
+                _standings.update { list ->
+                    list.sortedWith { a, b ->
+                        val pa = calculateHomePoints(a.homeAwayStats)
+                        val pb = calculateHomePoints(b.homeAwayStats)
 
-                    when {
-                        pa != pb -> pb.compareTo(pa) // 1) points 내림차순
-                        else -> {
-                            val wa = a.homeAwayStats.wins.home
-                            val wb = b.homeAwayStats.wins.home
+                        when {
+                            pa != pb -> pb.compareTo(pa) // 1) points 내림차순
+                            else -> {
+                                val wa = a.homeAwayStats.wins.home
+                                val wb = b.homeAwayStats.wins.home
 
-                            when {
-                                wa != wb -> wb.compareTo(wa) // 2) wins 내림차순
-                                else -> {
-                                    val la = a.homeAwayStats.loses.home
-                                    val lb = b.homeAwayStats.loses.home
+                                when {
+                                    wa != wb -> wb.compareTo(wa) // 2) wins 내림차순
+                                    else -> {
+                                        val la = a.homeAwayStats.loses.home
+                                        val lb = b.homeAwayStats.loses.home
 
-                                    when {
-                                        la != lb -> la.compareTo(lb) // 3) loses 오름차순
-                                        else -> 0
+                                        when {
+                                            la != lb -> la.compareTo(lb) // 3) loses 오름차순
+                                            else -> 0
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-                standings.assignCompetitionRankBy { getRecordString(it.homeAwayStats) }
+                _standings.update { current ->
+                    current.withCompetitionRankBy { getRecordString(it.homeAwayStats) }
+                }
             }
             9 -> {
-                standings.sortWith { a, b ->
-                    val pa = calculateAwayPoints(a.homeAwayStats)
-                    val pb = calculateAwayPoints(b.homeAwayStats)
+                _standings.update { list ->
+                    list.sortedWith { a, b ->
+                        val pa = calculateAwayPoints(a.homeAwayStats)
+                        val pb = calculateAwayPoints(b.homeAwayStats)
 
-                    when {
-                        pa != pb -> pb.compareTo(pa) // 1) points 내림차순
-                        else -> {
-                            val wa = a.homeAwayStats.wins.away
-                            val wb = b.homeAwayStats.wins.away
+                        when {
+                            pa != pb -> pb.compareTo(pa) // 1) points 내림차순
+                            else -> {
+                                val wa = a.homeAwayStats.wins.away
+                                val wb = b.homeAwayStats.wins.away
 
-                            when {
-                                wa != wb -> wb.compareTo(wa) // 2) wins 내림차순
-                                else -> {
-                                    val la = a.homeAwayStats.loses.away
-                                    val lb = b.homeAwayStats.loses.away
+                                when {
+                                    wa != wb -> wb.compareTo(wa) // 2) wins 내림차순
+                                    else -> {
+                                        val la = a.homeAwayStats.loses.away
+                                        val lb = b.homeAwayStats.loses.away
 
-                                    when {
-                                        la != lb -> la.compareTo(lb) // 3) loses 오름차순
-                                        else -> 0
+                                        when {
+                                            la != lb -> la.compareTo(lb) // 3) loses 오름차순
+                                            else -> 0
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-                standings.assignCompetitionRankBy { getRecordString(it.homeAwayStats, false) }
+                _standings.update { current ->
+                    current.withCompetitionRankBy { getRecordString(it.homeAwayStats, false) }
+                }
             }
         }
-
-        _standings.value = standings
     }
 
     private fun showTeamStats(id: Int) {
@@ -278,5 +274,22 @@ class FBTeamStandingsStore @AssistedInject constructor(
 
     private fun calculateAwayPoints(data: FBTeamStatsFixtures): Int {
         return ((data.wins.away) * 3 + (data.draws.away))
+    }
+
+    private fun updateStandings(
+        isDescending: Boolean,
+        value: (FBTeamStandingsDisplay) -> Float?
+    ) {
+        _standings.update { list ->
+            if (isDescending) {
+                list.sortedByDescending(value)
+            } else {
+                list.sortedBy(value)
+            }
+        }
+
+        _standings.update { current ->
+            current.withCompetitionRankBy(value)
+        }
     }
 }

@@ -28,5 +28,9 @@ data class FBTeamStandingsDisplay(
     val goalsAgainst: FBHomeAwayIntStats,
     val rank: Int,
     val points: Int,
-    override var displayRank: Int = 0 // 화면에서 순위 표시에 쓰이는 값
-) : Rankable
+    override val displayRank: Int = 0 // 화면에서 순위 표시에 쓰이는 값
+) : Rankable<FBTeamStandingsDisplay> {
+    override fun withDisplayRank(rank: Int): FBTeamStandingsDisplay {
+        return copy(displayRank = rank)
+    }
+}

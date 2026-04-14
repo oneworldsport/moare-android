@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.moare.android.core.constants.Constants
+import com.moare.android.features.search.display.common.container.component.RoundDirection
 import com.moare.android.features.search.display.common.container.component.TournamentSeriesFinalGameItem
 import com.moare.android.features.search.display.common.container.component.TournamentSeriesLeftGameItem
 import com.moare.android.features.search.display.common.container.component.TournamentSeriesRightGameItem
@@ -120,33 +121,28 @@ fun <T> TournamentBracketViewContainer(
     }
 
     // function
-    fun h(r: Int, s: Int, isLeft: Boolean): Dp {
+    fun h(r: Int, s: Int, direction: RoundDirection): Dp {
         val key = RoundSeriesKey(r, s)
-        return if (isLeft) {
-            leftItemHeights[key] ?: 0.dp
-        } else {
-            rightItemHeights[key] ?: 0.dp
+        return when (direction) {
+            RoundDirection.LEFT -> leftItemHeights[key] ?: 0.dp
+            RoundDirection.RIGHT -> rightItemHeights[key] ?: 0.dp
         }
     }
 
-    fun bottomPadding(r: Int, s: Int, isLeft: Boolean): Dp {
-        return if (isLeft) {
-            when (r to s) {
-                1 to 1 -> h(2, 1, isLeft)
-                1 to 2 -> h(3, 1, isLeft)
-                1 to 3 -> h(2, 2, isLeft)
-                2 to 1 -> h(3, 1, isLeft)
-                else -> 0.dp
-            }
-        } else {
-            when (r to s) {
-                7 to 1 -> h(6, 1, isLeft)
-                7 to 2 -> h(5, 1, isLeft)
-                7 to 3 -> h(6, 2, isLeft)
-                6 to 1 -> h(5, 1, isLeft)
-                else -> 0.dp
-            }
+    fun bottomPadding(r: Int, s: Int, direction: RoundDirection): Dp {
+        require(r >= 1) { "round must be >= 1" }
+        require(s >= 1) { "series must be >= 1" }
+
+        val k = Integer.numberOfTrailingZeros(s)
+
+        val newRound = when (direction) {
+            RoundDirection.LEFT -> r + k + 1
+            RoundDirection.RIGHT -> r - k - 1
         }
+
+        val newSeries = ((s shr k) + 1) / 2
+
+        return h(newRound, newSeries, direction)
     }
 
     Box(
@@ -167,6 +163,7 @@ fun <T> TournamentBracketViewContainer(
                 }
         ) {
             state.gameListTuple.forEachIndexed { roundIndex, item ->
+                val maxRound = state.gameListTuple.size
                 val roundIndexForPosition = roundIndex + 1
                 val title = item.title
                 val gameList = item.gameList
@@ -202,12 +199,13 @@ fun <T> TournamentBracketViewContainer(
 
                         gameList.forEachIndexed { seriesIndex, games ->
                             val seriesIndexForPosition = seriesIndex + 1
-                            val bottom = bottomPadding(roundIndexForPosition, seriesIndexForPosition, true)
+                            val bottom = bottomPadding(roundIndexForPosition, seriesIndexForPosition, RoundDirection.LEFT)
 
                             if (isSeries) {
                                 TournamentSeriesLeftGameItem(
                                     leagueId = state.leagueId,
                                     teamNameDic = state.teamNameDic,
+                                    maxRound = maxRound,
                                     games = games,
                                     itemPosition = RoundSeriesKey(
                                         roundIndexForPosition,
@@ -294,12 +292,13 @@ fun <T> TournamentBracketViewContainer(
                             gameList.forEachIndexed { seriesIndex, games ->
                                 val seriesIndexForPosition = seriesIndex + 1
                                 val bottom =
-                                    bottomPadding(roundIndexForPosition, seriesIndexForPosition, false)
+                                    bottomPadding(roundIndexForPosition, seriesIndexForPosition, RoundDirection.RIGHT)
 
                                 if (isSeries) {
                                     TournamentSeriesRightGameItem(
                                         leagueId = state.leagueId,
                                         teamNameDic = state.teamNameDic,
+                                        maxRound = maxRound,
                                         games = games,
                                         itemPosition = RoundSeriesKey(
                                             roundIndexForPosition,
