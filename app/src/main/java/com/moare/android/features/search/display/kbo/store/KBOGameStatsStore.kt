@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.collections.withIndex
 
 sealed interface KBOGameStatsAction {
     data object InitData : KBOGameStatsAction
@@ -208,39 +209,26 @@ class KBOGameStatsStore @AssistedInject constructor(
 //        _teamHitters.update { it.toMutableList().apply { sortBy { it.battingNumber } } }
 
         // 대타가 들어가면 battingNumber 가 0이 되는 듯...
-        val hitterOrderMap = teamLineup.value?.hitters
-            ?.withIndex()
-            ?.associate { it.value.name to it.index }
-            ?: emptyMap()
+        val hittersOrder = teamLineup.value?.hitters.orEmpty()
+
+        val hitterOrderMap = hittersOrder.withIndex().associate { it.value to it.index }
 
         _teamHitters.value = _teamHitters.value
-            .sortedBy { player ->
-                val name = player.name
-                if (name.isNotEmpty()) {
-                    hitterOrderMap[name] ?: Int.MAX_VALUE
-                } else {
-                    Int.MAX_VALUE
-                }
+            .sortedBy { id ->
+                hitterOrderMap[id] ?: Int.MAX_VALUE
             }
 
         selectFirstCategory(-1)
     }
 
     private fun sortByPitcherOrder() {
-        // id 가 null 인 경우가 너무 많아서 불가피하게 이름 사용. 리팩토링 해야됨
-        val pitcherOrderMap = teamLineup.value?.pitchers
-            ?.withIndex()
-            ?.associate { it.value.name to it.index }
-            ?: emptyMap()
+        val pitchersOrder = teamLineup.value?.pitchers.orEmpty()
+
+        val pitcherOrderMap = pitchersOrder.withIndex().associate { it.value to it.index }
 
         _teamPitchers.value = _teamPitchers.value
-            .sortedBy { player ->
-                val name = player.name
-                if (name.isNotEmpty()) {
-                    pitcherOrderMap[name] ?: Int.MAX_VALUE
-                } else {
-                    Int.MAX_VALUE
-                }
+            .sortedBy { id ->
+                pitcherOrderMap[id] ?: Int.MAX_VALUE
             }
 
         selectSecondCategory(-1)
