@@ -39,6 +39,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
@@ -208,7 +209,9 @@ fun TennisGameStatsScoreInfoContainer(
                 Text(
                     text = teamNameDic["short_${homeTeam?.id}"] ?: homeTeamDefaultName,
                     fontSize = 13.sp,
-                    maxLines = 2
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
 
                 if (gameInfo.isGameFinished && gameInfo.isHomeWinner) {
@@ -242,7 +245,9 @@ fun TennisGameStatsScoreInfoContainer(
                 Text(
                     text = teamNameDic["short_${awayTeam?.id}"] ?: awayTeamDefaultName,
                     fontSize = 13.sp,
-                    maxLines = 2
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
 
                 if (gameInfo.isGameFinished && !gameInfo.isHomeWinner) {
@@ -265,74 +270,15 @@ fun TennisGameStatsScoreInfoContainer(
 fun RowScope.TennisGameStatsSetScoreContainer(
     store: TennisGameStatsStore
 ) {
-    val displayModel by store.displayModel.collectAsState()
-
-    val gameInfo = displayModel.game.gameInfo
-    val homeScore = gameInfo.homeScore?.display
-    val awayScore = gameInfo.awayScore?.display
-
     Row(
         modifier = Modifier
             .height(127.dp) // 25 + 1 + 50 + 1 + 50
             .weight(1f)
     ) {
         Column(
-            verticalArrangement = Arrangement.Bottom,
-            modifier = Modifier.fillMaxHeight()
-        ) {
-            Text(
-                text = homeScore.displayOrDash,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Medium,
-                lineHeight = 50.sp,
-                modifier = Modifier
-                    .padding(start = 4.dp, end = 8.dp)
-                    .width(30.dp),
-                color = homeScore?.let { homeScore ->
-                    awayScore?.let { awayScore ->
-                        if (homeScore >= awayScore) Moare else Color.Black
-                    }
-                } ?: Color.Black
-            )
-
-            Box(
-                Modifier
-                    .width(42.dp) // 30 + 8 + 4
-                    .height(1.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.Gray)
-                    .alpha(0.5f)
-            )
-
-            Text(
-                text = awayScore.displayOrDash,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Medium,
-                lineHeight = 50.sp,
-                modifier = Modifier
-                    .padding(start = 4.dp, end = 8.dp)
-                    .width(30.dp),
-                color = homeScore?.let { homeScore ->
-                    awayScore?.let { awayScore ->
-                        if (awayScore >= homeScore) Moare else Color.Black
-                    }
-                } ?: Color.Black
-            )
-        }
-
-        Column(
             modifier = Modifier.weight(1f)
         ) {
             TennisGameStatsSetScoreTitle(store)
-
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.Gray)
-                    .alpha(0.5f)
-            )
 
             TennisGameStatsSetScoreItem(store)
         }
@@ -347,20 +293,54 @@ fun TennisGameStatsSetScoreTitle(
 
     val gameInfo = displayModel.game.gameInfo
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(25.dp)
-    ) {
-        for (index in 1 .. gameInfo.defaultPeriodCount) {
-            VCapsuleBar(modifier = Modifier.alpha(0.5f))
-            Text(
-                text = "${index}세트",
-                textAlign = TextAlign.Center,
-                fontSize = 15.sp,
-                modifier = Modifier.weight(1f)
-            )
+    Box {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Gray)
+                .alpha(0.5f)
+                .align(Alignment.BottomStart)
+        )
+
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(25.dp)
+        ) {
+            for (index in 0 .. gameInfo.defaultPeriodCount) {
+                if (index == 0) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(MaterialTheme.colors.background)
+                                .align(Alignment.BottomCenter) // 1회 왼쪽으로 그어지는 하단 선 가리는 박스
+                        )
+                    }
+                } else {
+                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${index}세트",
+                            textAlign = TextAlign.Center,
+                            fontSize = 15.sp
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -374,17 +354,19 @@ fun TennisGameStatsSetScoreItem(
     val gameInfo = displayModel.game.gameInfo
     val homeSetScore = gameInfo.homeScore
     val awaySetScore = gameInfo.awayScore
+    val homeScore = gameInfo.homeScore?.display
+    val awayScore = gameInfo.awayScore?.display
 
-    CenterColumn() {
-        CenterRow(
+    Column() {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
         ) {
-            for (index in 0 until gameInfo.defaultPeriodCount) {
-                val homePeriodScore = homeSetScore?.periods?.getOrNull(index)
-                val awayPeriodScore = awaySetScore?.periods?.getOrNull(index)
-                val homeTieBreakScore = homeSetScore?.periodsTieBreak?.getOrNull(index)
+            for (index in 0 .. gameInfo.defaultPeriodCount) {
+                val homePeriodScore = homeSetScore?.periods?.getOrNull(index - 1)
+                val awayPeriodScore = awaySetScore?.periods?.getOrNull(index - 1)
+                val homeTieBreakScore = homeSetScore?.periodsTieBreak?.getOrNull(index - 1)
                 val isWinner = if (homePeriodScore == 7) {
                     true
                 } else {
@@ -395,31 +377,58 @@ fun TennisGameStatsSetScoreItem(
                     }
                 }
 
-                VCapsuleBar(modifier = Modifier.alpha(0.5f))
+                if (index != 0) {
+                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
+                }
 
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(
-                        text = homePeriodScore.displayOrDash,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        color = if (isWinner) Moare else Color.Black
-                    )
-
-                    homeTieBreakScore?.let {
-                        Text(
-                            text = homeTieBreakScore.toString(),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.End,
-                            color = if (isWinner) Moare else Color.Black,
+                    if (index == 0) {
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .fillMaxSize()
-                                .padding(top = 4.dp, end = 4.dp)
-                        )
+                                .fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = homeScore.displayOrDash,
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Medium,
+                                color = if (homeScore != null && awayScore != null && homeScore >= awayScore) {
+                                    Moare
+                                } else {
+                                    Color.Black
+                                }
+                            )
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = homePeriodScore.displayOrDash,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center,
+                                color = if (isWinner) Moare else Color.Black
+                            )
+
+                            homeTieBreakScore?.let {
+                                Text(
+                                    text = homeTieBreakScore.toString(),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.End,
+                                    color = if (isWinner) Moare else Color.Black,
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .fillMaxSize()
+                                        .padding(top = 4.dp, end = 4.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -434,15 +443,15 @@ fun TennisGameStatsSetScoreItem(
                 .alpha(0.5f)
         )
 
-        CenterRow(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
         ) {
-            for (index in 0 until gameInfo.defaultPeriodCount) {
-                val homePeriodScore = homeSetScore?.periods?.getOrNull(index)
-                val awayPeriodScore = awaySetScore?.periods?.getOrNull(index)
-                val awayTieBreakScore = awaySetScore?.periodsTieBreak?.getOrNull(index)
+            for (index in 0 .. gameInfo.defaultPeriodCount) {
+                val homePeriodScore = homeSetScore?.periods?.getOrNull(index - 1)
+                val awayPeriodScore = awaySetScore?.periods?.getOrNull(index - 1)
+                val awayTieBreakScore = awaySetScore?.periodsTieBreak?.getOrNull(index - 1)
                 val isWinner = if (awayPeriodScore == 7) {
                     true
                 } else {
@@ -453,32 +462,59 @@ fun TennisGameStatsSetScoreItem(
                     }
                 }
 
-                VCapsuleBar(modifier = Modifier.alpha(0.5f))
+                if (index != 0) {
+                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
+                }
 
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(
-                        text = homePeriodScore.displayOrDash,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center,
-                        color = if (isWinner) Moare else Color.Black
-                    )
-
-                    awayTieBreakScore?.let {
-                        Text(
-                            text = awayTieBreakScore.toString(),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.End,
-                            color = if (isWinner) Moare else Color.Black,
+                    if (index == 0) {
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .align(Alignment.TopEnd)
-                                .fillMaxSize()
-                                .padding(top = 4.dp, end = 4.dp)
-                        )
+                                .fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = awayScore.displayOrDash,
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Medium,
+                                color = homeScore?.let { homeScore ->
+                                    awayScore?.let { awayScore ->
+                                        if (awayScore >= homeScore) Moare else Color.Black
+                                    }
+                                } ?: Color.Black
+                            )
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = awayPeriodScore.displayOrDash,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center,
+                                color = if (isWinner) Moare else Color.Black
+                            )
+
+                            awayTieBreakScore?.let {
+                                Text(
+                                    text = awayTieBreakScore.toString(),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.End,
+                                    color = if (isWinner) Moare else Color.Black,
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .align(Alignment.TopEnd)
+                                        .fillMaxSize()
+                                        .padding(top = 4.dp, end = 4.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
