@@ -136,13 +136,6 @@ object StringConstants {
     }
 
     object MLB {
-        const val GAME_SCHEDULED = "Scheduled"
-        const val GAME_LIVE = "In Progress"
-        const val GAME_POSTPONED = "Postponed"
-        const val GAME_RAIN = "Completed Early: Rain"
-        const val GAME_FINAL = "Final"
-        val GAME_FINISHED_LIST = listOf(GAME_RAIN, GAME_FINAL)
-
         val CONFERENCE_CATEGORY = listOf("내셔널리그", "아메리칸리그")
 
         val DIVISION_CATEGORY = listOf("내셔널 서부", "내셔널 동부", "내셔널 중부", "아메리칸 서부", "아메리칸 동부", "아메리칸 중부")

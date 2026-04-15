@@ -128,7 +128,10 @@ fun GameStatsViewContainer(
     )
 
     val secondStatsCategoryBarOffset by animateDpAsState(
-        targetValue = if (secondStatsColumnWidthList.isNotEmpty()) {
+        targetValue = if (state.secondStatsCategorySelectedIndex < 0) {
+            val secondColumnWidth = state.secondColumnWidth ?: 132.dp
+            -(secondColumnWidth / 2) - 10.dp
+        } else if (secondStatsColumnWidthList.isNotEmpty()) {
             getOffsetOfAniCapsuleBar(itemWidths = secondStatsColumnWidthList, index = state.secondStatsCategorySelectedIndex)
         } else {
             getOffsetOfAniCapsuleBar(itemWidth = defaultColumnWidth, index = state.secondStatsCategorySelectedIndex)
@@ -147,6 +150,7 @@ fun GameStatsViewContainer(
         )
     )
 
+    // TODO: stats화면을 스크롤 올릴때 spacedBy때문에 생기는 빈공간을 없애야함. 그렇다고 spacedBy을 없애면 너무 많은걸 수정해야해서, -padding을 주는걸 해봐야할듯
     CenterColumn(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.fillMaxSize()
@@ -329,7 +333,9 @@ fun GameStatsViewContainer(
                                --------------------- */
                             state.firstStatsTitle?.let {
                                 item {
-                                    Row {
+                                    Row(
+                                        modifier = Modifier.padding(top = 8.dp)
+                                    ) {
                                         Column(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = Modifier.width(132.dp)
@@ -477,7 +483,16 @@ fun GameStatsViewContainer(
                                     Row(
                                         modifier = Modifier.background(Color.White)
                                     ) {
-                                        StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY)
+                                        Box(
+                                            contentAlignment = Alignment.BottomCenter
+
+                                        ) {
+                                            StandingsFirstCategoryItem(text = StringConstants.GAME_STATS_FIRST_CATEGORY, width = state.secondColumnWidth, onClick = actions.secondStatsTitleCategoryAction)
+
+                                            HCapsuleBar(
+                                                modifier = Modifier.alpha(if (state.secondStatsCategorySelectedIndex < 0) 1f else 0f)
+                                            )
+                                        }
 
                                         Row(
                                             Modifier.horizontalScroll(secondStatsHorizontalScrollState)

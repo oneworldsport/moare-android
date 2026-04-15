@@ -56,6 +56,7 @@ import com.moare.android.ui.util.nullableMaxHeight
 fun <T> TournamentSeriesLeftGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
+    maxRound: Int,
     games: List<GameForSchedule<T>>?,
     itemPosition: RoundSeriesKey, // ui상에서 시리즈의 위치 ex) 1라운드의 첫번째 시리즈면 1_1
     shouldRemoveBar: Boolean = false, // NOTE: MLB의 경우 이전 라운드에 시리즈가 하나 없으면 하단에 HBar가 필요없는 경우가 있음. KBO는 그냥 필요없음.
@@ -64,64 +65,23 @@ fun <T> TournamentSeriesLeftGameItem(
     onItemHeightChange: (RoundSeriesKey, Dp) -> Unit,
     selectSeries: ((List<GameForSchedule<T>>) -> Unit)? = null
 ) {
+    val scoreTitleHeight = 16.dp
+
     val density = LocalDensity.current
     var itemHeight by remember { mutableStateOf(0.dp) }
     var isScoreOpened by remember { mutableStateOf(false) }
 
-    // function
-    fun h(r: Int, s: Int): Dp {
-        return itemHeights[RoundSeriesKey(r, s)] ?: 0.dp
-    }
-
-    fun topPadding(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            2 to 1 -> h(1, 1) / 2
-            2 to 2 -> h(1, 3) / 2
-            3 to 1 -> h(1, 1) + h(2, 1) / 2
-            4 to 1 -> h(1, 1) + h(2, 1) + h(3, 1) / 2
-            else -> 0.dp
-        }
-    }
-
-    fun topHeight(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            2 to 1 -> h(1, 1) / 2
-            2 to 2 -> h(1, 3) / 2
-            3 to 1 -> h(1, 2) + h(2, 1) / 2
-            4 to 1 -> h(3, 1) / 2 // NOTE: 일단은 KBO의 경우만 고려
-            else -> 0.dp
-        }
-    }
-
-    fun bottomPadding(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            2 to 1 -> h(1, 2) / 2
-            2 to 2 -> h(1, 4) / 2
-            3 to 1 -> h(1, 4) + h(2, 2) / 2
-            else -> 0.dp
-        }
-    }
-
-    fun bottomHeight(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            2 to 1 -> h(1, 2) / 2
-            2 to 2 -> h(1, 4) / 2
-            3 to 1 -> h(1, 3) + h(2, 2) / 2
-            else -> 0.dp
-        }
-    }
-
     // ui
     if (games != null) {
-        val game = games.first()
-        val topSeedTeamId = if (game.isHomeTopSeed == true) game.homeTeamId else game.awayTeamId
-        val bottomSeedTeamId = if (game.isHomeTopSeed == true) game.awayTeamId else game.homeTeamId
+        val game = games.firstOrNull()
+        val topSeedTeamId = if (game?.isHomeTopSeed == true) game.homeTeamIdOrNull else game?.awayTeamIdOrNull
+        val bottomSeedTeamId = if (game?.isHomeTopSeed == true) game.awayTeamIdOrNull else game?.homeTeamIdOrNull
         val isUEFALeague = leagueId in Constants.Ids.FOOTBALL_UEFA_LEAGUES
         val isSeriesStarted = if (isUEFALeague) {
             // UEFA리그(합산 스코어 방식)는 경기중이어도 isSeriesStarted = true
-            !Constants.GameStatus.isBeforeGame(leagueId = leagueId, status = game.gameStatus)
+            !Constants.GameStatus.isBeforeGame(leagueId = leagueId, status = game?.gameStatus ?: "")
         } else {
-            Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)
+            Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game?.gameStatus ?: "")
         }
 
         val (topSeedTeamSeriesScore, bottomSeedTeamSeriesScore) = games.fold(0 to 0) { partial, game ->
@@ -184,10 +144,26 @@ fun <T> TournamentSeriesLeftGameItem(
                 Row {
                     Column(
                         horizontalAlignment = Alignment.End,
-                        modifier = Modifier.padding(top = topPadding())
+                        modifier = Modifier.padding(top = verticalMetric(
+                            leagueId = leagueId,
+                            itemHeights = itemHeights,
+                            round = itemPosition.round,
+                            series = itemPosition.series,
+                            maxRound = maxRound,
+                            metric = VerticalMetric.TOP_PADDING,
+                            direction = RoundDirection.LEFT
+                        ))
                     ) {
                         TournamentHBar(75.dp)
-                        TournamentVBar(topHeight())
+                        TournamentVBar(verticalMetric(
+                            leagueId = leagueId,
+                            itemHeights = itemHeights,
+                            round = itemPosition.round,
+                            series = itemPosition.series,
+                            maxRound = maxRound,
+                            metric = VerticalMetric.TOP_HEIGHT,
+                            direction = RoundDirection.LEFT
+                        ))
                     }
 
                     Spacer(Modifier.weight(1f))
@@ -203,7 +179,7 @@ fun <T> TournamentSeriesLeftGameItem(
                         color = Color.Gray,
                         fontSize = 12.sp,
                         textAlign = TextAlign.End,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().height(scoreTitleHeight)
                     )
                 }
 
@@ -418,9 +394,25 @@ fun <T> TournamentSeriesLeftGameItem(
                 Row {
                     Column(
                         horizontalAlignment = Alignment.End,
-                        modifier = Modifier.padding(bottom = bottomPadding())
+                        modifier = Modifier.padding(bottom = verticalMetric(
+                            leagueId = leagueId,
+                            itemHeights = itemHeights,
+                            round = itemPosition.round,
+                            series = itemPosition.series,
+                            maxRound = maxRound,
+                            metric = VerticalMetric.BOTTOM_PADDING,
+                            direction = RoundDirection.LEFT
+                        ))
                     ) {
-                        TournamentVBar(bottomHeight())
+                        TournamentVBar(verticalMetric(
+                            leagueId = leagueId,
+                            itemHeights = itemHeights,
+                            round = itemPosition.round,
+                            series = itemPosition.series,
+                            maxRound = maxRound,
+                            metric = VerticalMetric.BOTTOM_HEIGHT,
+                            direction = RoundDirection.LEFT
+                        ))
                         if (!shouldRemoveBar) {
                             TournamentHBar(75.dp)
                         }
@@ -440,6 +432,7 @@ fun <T> TournamentSeriesLeftGameItem(
 fun <T> TournamentSeriesRightGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
+    maxRound: Int,
     games: List<GameForSchedule<T>>?,
     itemPosition: RoundSeriesKey, // ui상에서 시리즈의 위치 ex) 1라운드의 첫번째 시리즈면 1_1
     shouldRemoveBar: Boolean = false, // NOTE: MLB의 경우 이전 라운드에 시리즈가 하나 없으면 하단에 HBar가 필요없는 경우가 있음. KBO는 그냥 필요없음.
@@ -452,53 +445,12 @@ fun <T> TournamentSeriesRightGameItem(
     var itemHeight by remember { mutableStateOf(0.dp) }
     var isScoreOpened by remember { mutableStateOf(false) }
 
-    // function
-    fun h(r: Int, s: Int): Dp {
-        return itemHeights[RoundSeriesKey(r, s)] ?: 0.dp
-    }
-
-    fun topPadding(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            6 to 1 -> h(7, 1) / 2
-            6 to 2 -> h(7, 3) / 2
-            5 to 1 -> h(7, 1) + h(6, 1) / 2
-            else -> 0.dp
-        }
-    }
-
-    fun topHeight(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            6 to 1 -> h(7, 1) / 2
-            6 to 2 -> h(7, 3) / 2
-            5 to 1 -> h(7, 2) + h(6, 1) / 2
-            else -> 0.dp
-        }
-    }
-
-    fun bottomPadding(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            6 to 1 -> h(7, 2) / 2
-            6 to 2 -> h(7, 4) / 2
-            5 to 1 -> h(7, 4) + h(6, 2) / 2
-            else -> 0.dp
-        }
-    }
-
-    fun bottomHeight(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            6 to 1 -> h(7, 2) / 2
-            6 to 2 -> h(7, 4) / 2
-            5 to 1 -> h(7, 3) + h(6, 2) / 2
-            else -> 0.dp
-        }
-    }
-
     // ui
     if (games != null) {
-        val game = games.first()
-        val topSeedTeamId = if (game.isHomeTopSeed == true) game.homeTeamId else game.awayTeamId
-        val bottomSeedTeamId = if (game.isHomeTopSeed == true) game.awayTeamId else game.homeTeamId
-        val isSeriesStarted = Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)
+        val game = games.firstOrNull()
+        val topSeedTeamId = if (game?.isHomeTopSeed == true) game.homeTeamIdOrNull else game?.awayTeamIdOrNull
+        val bottomSeedTeamId = if (game?.isHomeTopSeed == true) game.awayTeamIdOrNull else game?.homeTeamIdOrNull
+        val isSeriesStarted = Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game?.gameStatus ?: "")
 
         val (topSeedTeamSeriesScore, bottomSeedTeamSeriesScore) = games.fold(0 to 0) { partial, game ->
             var (top, bottom) = partial
@@ -551,10 +503,26 @@ fun <T> TournamentSeriesRightGameItem(
 
                     Column(
                         horizontalAlignment = Alignment.Start,
-                        modifier = Modifier.padding(top = topPadding())
+                        modifier = Modifier.padding(top = verticalMetric(
+                            leagueId = leagueId,
+                            itemHeights = itemHeights,
+                            round = itemPosition.round,
+                            series = itemPosition.series,
+                            maxRound = maxRound,
+                            metric = VerticalMetric.TOP_PADDING,
+                            direction = RoundDirection.RIGHT
+                        ))
                     ) {
                         TournamentHBar(75.dp)
-                        TournamentVBar(topHeight())
+                        TournamentVBar(verticalMetric(
+                            leagueId = leagueId,
+                            itemHeights = itemHeights,
+                            round = itemPosition.round,
+                            series = itemPosition.series,
+                            maxRound = maxRound,
+                            metric = VerticalMetric.TOP_HEIGHT,
+                            direction = RoundDirection.RIGHT
+                        ))
                     }
                 }
             }
@@ -762,9 +730,25 @@ fun <T> TournamentSeriesRightGameItem(
 
                     Column(
                         horizontalAlignment = Alignment.Start,
-                        modifier = Modifier.padding(bottom = bottomPadding())
+                        modifier = Modifier.padding(bottom = verticalMetric(
+                            leagueId = leagueId,
+                            itemHeights = itemHeights,
+                            round = itemPosition.round,
+                            series = itemPosition.series,
+                            maxRound = maxRound,
+                            metric = VerticalMetric.BOTTOM_PADDING,
+                            direction = RoundDirection.RIGHT
+                        ))
                     ) {
-                        TournamentVBar(bottomHeight())
+                        TournamentVBar(verticalMetric(
+                            leagueId = leagueId,
+                            itemHeights = itemHeights,
+                            round = itemPosition.round,
+                            series = itemPosition.series,
+                            maxRound = maxRound,
+                            metric = VerticalMetric.BOTTOM_HEIGHT,
+                            direction = RoundDirection.RIGHT
+                        ))
                         if (!shouldRemoveBar) {
                             TournamentHBar(75.dp)
                         }
@@ -786,10 +770,10 @@ fun <T> TournamentSeriesFinalGameItem(
     itemHeights: Map<RoundSeriesKey, Dp>,
     selectSeries: ((List<GameForSchedule<T>>) -> Unit)? = null
 ) {
-    val game = games.first()
-    val topSeedTeamId = if (game.isHomeTopSeed == true) game.homeTeamId else game.awayTeamId
-    val bottomSeedTeamId = if (game.isHomeTopSeed == true) game.awayTeamId else game.homeTeamId
-    val isSeriesStarted = Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)
+    val game = games.firstOrNull()
+    val topSeedTeamId = if (game?.isHomeTopSeed == true) game.homeTeamIdOrNull else game?.awayTeamIdOrNull
+    val bottomSeedTeamId = if (game?.isHomeTopSeed == true) game.awayTeamIdOrNull else game?.homeTeamIdOrNull
+    val isSeriesStarted = Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game?.gameStatus ?: "")
 
     var isScoreOpened by remember { mutableStateOf(false) }
     var itemTopPadding by remember { mutableStateOf(0.dp) } // 아이템 Y 위치
@@ -1007,7 +991,109 @@ fun TournamentVBar(height: Dp? = null, modifier: Modifier = Modifier) {
     )
 }
 
+enum class VerticalMetric {
+    TOP_PADDING, // ⏋or ⎾ 위 패딩
+    BOTTOM_PADDING, // ⏌ or ⎿ 아래 패딩
+    TOP_HEIGHT, // ⏋or ⎾ 에서 | 부분 높이
+    BOTTOM_HEIGHT // ⏌ or ⎿ 에서 | 부분 높이
+}
 
+enum class RoundDirection {
+    LEFT, RIGHT
+}
+
+fun verticalMetric(
+    leagueId: Int,
+    itemHeights: Map<RoundSeriesKey, Dp>,
+    round: Int,
+    series: Int,
+    maxRound: Int,
+    metric: VerticalMetric,
+    direction: RoundDirection
+): Dp {
+    val isUEFALeague = Constants.Ids.FOOTBALL_UEFA_LEAGUES.contains(leagueId)
+
+    fun h(r: Int, s: Int): Dp {
+        return itemHeights[RoundSeriesKey(round = r, series = s)] ?: 0.dp
+    }
+
+    require(series >= 1) { "series must be >= 1" }
+    require(maxRound >= 2) { "maxRound must be >= 2" }
+
+    when (direction) {
+        RoundDirection.LEFT -> {
+            require(round >= 2) { "round must be >= 2" }
+            require(round <= maxRound) { "round must be <= maxRound" }
+        }
+        RoundDirection.RIGHT -> {
+            require(round >= 1) { "round must be < maxRound" }
+            require(round < maxRound) { "round must be < maxRound" }
+        }
+    }
+
+    val depth: Int
+    val halfRound: Int
+    val roundsToSum: List<Int>
+
+    when (direction) {
+        RoundDirection.LEFT -> {
+            depth = round
+            halfRound = round - 1
+            roundsToSum = if (round > 2) {
+                (1..(round - 2)).toList()
+            } else {
+                emptyList()
+            }
+        }
+        RoundDirection.RIGHT -> {
+            depth = maxRound - round + 1
+            halfRound = round + 1
+            roundsToSum = if (depth > 2) {
+                (maxRound downTo (round + 2)).toList()
+            } else {
+                emptyList()
+            }
+        }
+    }
+
+    val quarterIndex = when (metric) {
+        VerticalMetric.TOP_PADDING -> 0
+        VerticalMetric.TOP_HEIGHT -> 1
+        VerticalMetric.BOTTOM_HEIGHT -> 2
+        VerticalMetric.BOTTOM_PADDING -> 3
+    }
+
+    var result = 0.dp
+
+    for ((index, a) in roundsToSum.withIndex()) {
+        val count = 1 shl (depth - index - 3)
+        val blockSize = 1 shl (depth - index - 1)
+        val blockStart = 1 + (series - 1) * blockSize
+        val startB = blockStart + quarterIndex * count
+
+        for (offset in 0 until count) {
+            result += h(a, startB + offset)
+        }
+    }
+
+    val halfB = when (metric) {
+        VerticalMetric.TOP_PADDING,
+        VerticalMetric.TOP_HEIGHT -> 2 * series - 1
+
+        VerticalMetric.BOTTOM_PADDING,
+        VerticalMetric.BOTTOM_HEIGHT -> 2 * series
+    }
+
+    result += h(halfRound, halfB) / 2
+
+    if (isUEFALeague &&
+        direction == RoundDirection.LEFT &&
+        metric == VerticalMetric.TOP_PADDING) {
+        result += 16.dp
+    }
+
+    return result
+}
 
 
 

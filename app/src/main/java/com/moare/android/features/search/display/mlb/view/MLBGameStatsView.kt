@@ -1,5 +1,7 @@
 package com.moare.android.features.search.display.mlb.view
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -151,10 +154,47 @@ fun MLBGameStatsView(
         }
     }
 
+    /* ---------------------
+   etc
+   --------------------- */
+    val firstSelectedCategoryPosition = with(LocalDensity.current) {
+        (store.itemWidth * firstCategorySelectedIndex).toPx()
+    }.toInt()
+
+    val secondSelectedCategoryPosition = with(LocalDensity.current) {
+        (store.itemWidth * secondCategorySelectedIndex).toPx()
+    }.toInt()
+
+    // scroll to category that matches with the keyword,
+    // and when first category list's item is selected by click
+    LaunchedEffect(firstCategorySelectedIndex) {
+        if (store.shouldScrollCategory) {
+            horizontalScrollState.animateScrollTo(
+                value = firstSelectedCategoryPosition,
+                animationSpec = tween(
+                    durationMillis = 500,
+                    easing = LinearOutSlowInEasing
+                )
+            )
+        }
+    }
+
+    LaunchedEffect(secondCategorySelectedIndex) {
+        if (store.shouldScrollCategory) {
+            horizontalScrollState.animateScrollTo(
+                value = secondSelectedCategoryPosition,
+                animationSpec = tween(
+                    durationMillis = 500,
+                    easing = LinearOutSlowInEasing
+                )
+            )
+        }
+    }
+
     GameStatsViewContainer(
         state = GameStatsContainerState(
-            shouldShowStats = game.status.detailedState != StringConstants.MLB.GAME_SCHEDULED,
-            shouldShowRefreshButton = game.status.detailedState == StringConstants.MLB.GAME_LIVE,
+            shouldShowStats = game.status.abstractGameState != Constants.GameStatus.MLB.PREVIEW,
+            shouldShowRefreshButton = game.status.abstractGameState == Constants.GameStatus.MLB.LIVE,
             teamCategories = teamCategories,
             teamCategorySelectedIndex = selectedTeamIndex,
             gameDetailTitle = gameDetailTitle,
@@ -179,6 +219,9 @@ fun MLBGameStatsView(
             },
             firstStatsCategoryButtonAction = { index ->
                 store.send(MLBGameStatsAction.SelectFirstCategory(index))
+            },
+            secondStatsTitleCategoryAction = {
+                store.send(MLBGameStatsAction.SortByPitcherOrder)
             },
             secondStatsCategoryButtonAction = { index ->
                 store.send(MLBGameStatsAction.SelectSecondCategory(index))
@@ -236,7 +279,7 @@ fun MLBGameStatsScoreInfoItem(
     val game = displayModel.game
     val homeTeamId = Constants.Ids.checkTeamId(Constants.Ids.MLB, game.teams.home.id)
     val awayTeamId = Constants.Ids.checkTeamId(Constants.Ids.MLB, game.teams.away.id)
-    val gameStatus = game.status.detailedState
+    val gameStatus = game.status.abstractGameState
     val teamNameDic by store.teamNameDic.collectAsState()
 
     /* ---------------------
@@ -325,10 +368,7 @@ fun RowScope.MLBGameStatsLineScoreContainer(
     val displayModel by store.displayModel.collectAsState()
 
     val game = displayModel.game
-    val isGameScheduled = game.status.detailedState == StringConstants.MLB.GAME_SCHEDULED
     val lineScore = game.linescore
-    val homeTeamLineScore = lineScore?.teams?.home?.runs ?: 0
-    val awayTeamLineScore = lineScore?.teams?.away?.runs ?: 0
 
     Row(
         modifier = Modifier
@@ -336,80 +376,9 @@ fun RowScope.MLBGameStatsLineScoreContainer(
             .weight(1f)
     ) {
         Column(
-            verticalArrangement = Arrangement.Bottom,
-            modifier = Modifier.fillMaxHeight()
-        ) {
-            if (!isGameScheduled) {
-                Text(
-                    text = awayTeamLineScore.toString(),
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 50.sp,
-                    modifier = Modifier
-                        .padding(start = 4.dp, end = 8.dp)
-                        .width(30.dp),
-                    color = if (awayTeamLineScore >= homeTeamLineScore) MaterialTheme.colors.primary else Color.Black
-                )
-            } else {
-                Text(
-                    text = "-",
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 50.sp,
-                    modifier = Modifier
-                        .padding(start = 4.dp, end = 8.dp)
-                        .width(30.dp),
-                    color = Color.Black
-                )
-            }
-
-            Box(
-                Modifier
-                    .width(42.dp) // 30 + 8 + 4
-                    .height(1.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.Gray)
-                    .alpha(0.5f)
-            )
-
-            if (!isGameScheduled) {
-                Text(
-                    text = homeTeamLineScore.toString(),
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 50.sp,
-                    modifier = Modifier
-                        .padding(start = 4.dp, end = 8.dp)
-                        .width(30.dp),
-                    color = if (homeTeamLineScore >= awayTeamLineScore) MaterialTheme.colors.primary else Color.Black
-                )
-            } else {
-                Text(
-                    text = "-",
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 50.sp,
-                    modifier = Modifier
-                        .padding(start = 4.dp, end = 8.dp)
-                        .width(30.dp),
-                    color = Color.Black
-                )
-            }
-        }
-
-        Column(
             Modifier.weight(1f)
         ) {
             MLBGameStatsLineScoreTitle(lineScore?.innings ?: emptyList())
-
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.Gray)
-                    .alpha(0.5f)
-            )
 
             MLBGameStatsLineScoreItem(
                 store = store,
@@ -439,22 +408,56 @@ fun RowScope.MLBGameStatsLineScoreContainer(
 fun MLBGameStatsLineScoreTitle(
     lineScoreInnings: List<MLBGameLineScoreInning>
 ) {
-    val inningsCount = if (lineScoreInnings.isEmpty()) 9 else lineScoreInnings.size
+    val maxInnings = maxOf(9, lineScoreInnings.size) // 둘 중 더 큰 값 선택
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(25.dp)
-    ) {
-        for (index in 1..inningsCount) {
-            VCapsuleBar(modifier = Modifier.alpha(0.5f))
-            Text(
-                text = "$index",
-                textAlign = TextAlign.Center,
-                fontSize = 15.sp,
-                modifier = Modifier.weight(1f)
-            )
+    Box {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Gray)
+                .alpha(0.5f)
+                .align(Alignment.BottomStart)
+        )
+
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(25.dp)
+        ) {
+            for (index in 0..maxInnings) {
+                if (index == 0) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(MaterialTheme.colors.background)
+                                .align(Alignment.BottomCenter) // 1회 왼쪽으로 그어지는 하단 선 가리는 박스
+                        )
+                    }
+                } else {
+                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "$index",
+                            textAlign = TextAlign.Center,
+                            fontSize = 15.sp
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -465,6 +468,16 @@ fun MLBGameStatsLineScoreItem(
     isHome: Boolean,
     lineScoreInnings: List<MLBGameLineScoreInning>
 ) {
+    val displayModel by store.displayModel.collectAsState()
+
+    val game = displayModel.game
+    val isGameScheduled = game.status.abstractGameState == Constants.GameStatus.MLB.PREVIEW
+    val lineScore = game.linescore
+    val homeTeamLineScore = lineScore?.teams?.home?.runs ?: 0
+    val awayTeamLineScore = lineScore?.teams?.away?.runs ?: 0
+
+    val maxInnings = maxOf(9, lineScoreInnings.size)
+
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
@@ -472,26 +485,53 @@ fun MLBGameStatsLineScoreItem(
             .fillMaxWidth()
             .height(store.lineScoreItemHeight)
     ) {
-        if (lineScoreInnings.isNotEmpty()) {
-            for ((_, item) in lineScoreInnings.withIndex()) {
+        for (index in 0..maxInnings) {
+
+            val text: String
+            val color: Color
+
+            if (index == 0) {
+                text = if (!isGameScheduled) {
+                    if (isHome) homeTeamLineScore.toString()
+                    else awayTeamLineScore.toString()
+                } else {
+                    "-"
+                }
+
+                color = if (!isGameScheduled) {
+                    if (isHome) {
+                        if (homeTeamLineScore >= awayTeamLineScore)
+                            MaterialTheme.colors.primary else Color.Black
+                    } else {
+                        if (awayTeamLineScore >= homeTeamLineScore)
+                            MaterialTheme.colors.primary else Color.Black
+                    }
+                } else {
+                    Color.Black
+                }
+
+            } else {
                 VCapsuleBar(modifier = Modifier.alpha(0.5f))
-                Text(
-                    text = "${if (isHome) item.home.runs else item.away.runs}",
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f)
-                )
+
+                val item = lineScoreInnings.getOrNull(index - 1)
+
+                text = if (item != null && !isGameScheduled) {
+                    if (isHome) item.home.runs.toString()
+                    else item.away.runs.toString()
+                } else {
+                    "-"
+                }
+
+                color = Color.Black
             }
-        } else {
-            for (index in 0 until 9) {
-                VCapsuleBar(modifier = Modifier.alpha(0.5f))
-                Text(
-                    text = "-",
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f)
-                )
-            }
+
+            Text(
+                text = text,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium,
+                color = color,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }

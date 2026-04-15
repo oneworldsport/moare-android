@@ -1,5 +1,7 @@
 package com.moare.android.features.search.display.kbo.view
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,7 +96,7 @@ fun KBOGameStatsView(
     val hitterList: List<StandingsItemState> = teamHitters.map {
         StandingsItemState(
             numInfo = it.battingNumber,
-            imageUrl = KBOUtil.playerPhotoUrl(it.id),
+            imageUrl = KBOUtil.playerPhotoUrl(displayModel.season, it.id),
             name = it.name,
             extraInfo = it.position
                 .replace("#", "•")
@@ -114,10 +117,10 @@ fun KBOGameStatsView(
     }
     val pitcherList: List<StandingsItemState> = teamPitchers.map {
         StandingsItemState(
-            imageUrl = KBOUtil.playerPhotoUrl(it.id),
+            imageUrl = KBOUtil.playerPhotoUrl(displayModel.season, it.id),
             name = it.name,
             dataList = listOf(
-                it.inningsPitched.toString(), it.r, it.er, it.bb, it.so, it.h
+                it.ip, it.r, it.er, it.bb, it.so, it.h
             )
         )
     }
@@ -129,6 +132,40 @@ fun KBOGameStatsView(
         append("${CalendarUtil.formatDate(displayModel.game.gameInfo?.date).split(" ").firstOrNull() ?: ""}\n")
         append("${CalendarUtil.formatDate(displayModel.game.gameInfo?.date, outputFormatType = OutputTimeFormatType.AMPM)}\n")
         append(teamNameDic["venue_${displayModel.game.gameInfo?.homeTeamId}"] ?: "")
+    }
+
+    val firstSelectedCategoryPosition = with(LocalDensity.current) {
+        (store.itemWidth * firstCategorySelectedIndex).toPx()
+    }.toInt()
+
+    val secondSelectedCategoryPosition = with(LocalDensity.current) {
+        (store.itemWidth * secondCategorySelectedIndex).toPx()
+    }.toInt()
+
+    // scroll to category that matches with the keyword,
+    // and when first category list's item is selected by click
+    LaunchedEffect(firstCategorySelectedIndex) {
+        if (store.shouldScrollCategory) {
+            horizontalScrollState.animateScrollTo(
+                value = firstSelectedCategoryPosition,
+                animationSpec = tween(
+                    durationMillis = 500,
+                    easing = LinearOutSlowInEasing
+                )
+            )
+        }
+    }
+
+    LaunchedEffect(secondCategorySelectedIndex) {
+        if (store.shouldScrollCategory) {
+            horizontalScrollState.animateScrollTo(
+                value = secondSelectedCategoryPosition,
+                animationSpec = tween(
+                    durationMillis = 500,
+                    easing = LinearOutSlowInEasing
+                )
+            )
+        }
     }
 
     GameStatsViewContainer(
@@ -161,6 +198,9 @@ fun KBOGameStatsView(
             },
             firstStatsCategoryButtonAction = { index ->
                 store.send(KBOGameStatsAction.SelectFirstCategory(index))
+            },
+            secondStatsTitleCategoryAction = {
+                store.send(KBOGameStatsAction.SortByPitcherOrder)
             },
             secondStatsCategoryButtonAction = { index ->
                 store.send(KBOGameStatsAction.SelectSecondCategory(index))
@@ -303,65 +343,17 @@ fun RowScope.KBOGameStatsLineScoreContainer(
     val game = displayModel.game
 
     game.lineScore?.let { lineScore ->
-        val homeTeamLineScore = lineScore.home.r.toIntOrNull() ?: 0
-        val awayTeamLineScore = lineScore.away.r.toIntOrNull() ?: 0
-
         Row(
             modifier = Modifier
                 .height(127.dp) // 25 + 1 + 50 + 1 + 50
                 .weight(1f)
         ) {
             Column(
-                verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                Text(
-                    text = awayTeamLineScore.toString(),
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 50.sp,
-                    modifier = Modifier
-                        .padding(start = 4.dp, end = 8.dp)
-                        .width(30.dp),
-                    color = if (awayTeamLineScore >= homeTeamLineScore) MaterialTheme.colors.primary else Color.Black
-                )
-
-                Box(
-                    Modifier
-                        .width(42.dp) // 30 + 8 + 4
-                        .height(1.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.Gray)
-                        .alpha(0.5f)
-                )
-
-                Text(
-                    text = homeTeamLineScore.toString(),
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 50.sp,
-                    modifier = Modifier
-                        .padding(start = 4.dp, end = 8.dp)
-                        .width(30.dp),
-                    color = if (homeTeamLineScore >= awayTeamLineScore) MaterialTheme.colors.primary else Color.Black
-                )
-            }
-
-            Column(
                 Modifier.weight(1f)
             ) {
                 KBOGameStatsLineScoreTitle(lineScore.away)
 
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.Gray)
-                        .alpha(0.5f)
-                )
-
-                KBOGameStatsLineScoreItem(store = store, lineScore = lineScore.away)
+                KBOGameStatsLineScoreItem(store = store, lineScore = lineScore.away, isHome = false)
 
                 Box(
                     Modifier
@@ -372,7 +364,7 @@ fun RowScope.KBOGameStatsLineScoreContainer(
                         .alpha(0.5f)
                 )
 
-                KBOGameStatsLineScoreItem(store = store, lineScore = lineScore.home)
+                KBOGameStatsLineScoreItem(store = store, lineScore = lineScore.home, isHome = true)
             }
         }
     }
@@ -382,24 +374,56 @@ fun RowScope.KBOGameStatsLineScoreContainer(
 fun KBOGameStatsLineScoreTitle(
     lineScore: KBOGameLineScore
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(25.dp)
-    ) {
-        for (index in 1..12) {
-            if (index < 10 ||
-                (index == 10 && lineScore.inning10 != "-") ||
-                (index == 11 && lineScore.inning11 != "-")
-            ) {
-                VCapsuleBar(modifier = Modifier.alpha(0.5f))
-                Text(
-                    text = "$index",
-                    textAlign = TextAlign.Center,
-                    fontSize = 15.sp,
-                    modifier = Modifier.weight(1f)
-                )
+    Box {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Gray)
+                .alpha(0.5f)
+                .align(Alignment.BottomStart)
+        )
+
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(25.dp)
+        ) {
+            for (index in 0..12) {
+                if (index == 0) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(MaterialTheme.colors.background)
+                                .align(Alignment.BottomCenter) // 1회 왼쪽으로 그어지는 하단 선 가리는 박스
+                        )
+                    }
+                } else if (index < 10 ||
+                    (index == 10 && lineScore.inning10 != "-") ||
+                    (index == 11 && lineScore.inning11 != "-") ||
+                    (index == 12 && lineScore.inning12 != "-")
+                ) {
+                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "$index",
+                            textAlign = TextAlign.Center,
+                            fontSize = 15.sp
+                        )
+                    }
+                }
             }
         }
     }
@@ -408,27 +432,65 @@ fun KBOGameStatsLineScoreTitle(
 @Composable
 fun KBOGameStatsLineScoreItem(
     store: KBOGameStatsStore,
-    lineScore: KBOGameLineScore
+    lineScore: KBOGameLineScore,
+    isHome: Boolean
 ) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(store.lineScoreItemHeight)
-    ) {
-        for (index in 0 until 11) {
-            if (index < 9 ||
-                (index == 9 && lineScore.inning10 != "-") ||
-                (index == 10 && lineScore.inning11 != "-")
-            ) {
-                VCapsuleBar(modifier = Modifier.alpha(0.5f))
-                Text(
-                    text = lineScore.innings[index],
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f)
-                )
+    val displayModel by store.displayModel.collectAsState()
+
+    val game = displayModel.game
+
+    game.lineScore?.let { gameLineScore ->
+        val homeTeamLineScore = gameLineScore.home.r.toIntOrNull() ?: 0
+        val awayTeamLineScore = gameLineScore.away.r.toIntOrNull() ?: 0
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(store.lineScoreItemHeight)
+        ) {
+            for (index in 0 .. 12) {
+                val text: String
+                val color: Color
+
+                if (index == 0) {
+                    text = if (isHome) {
+                        homeTeamLineScore.toString()
+                    } else {
+                        awayTeamLineScore.toString()
+                    }
+
+                    color = if (isHome) {
+                        if (homeTeamLineScore >= awayTeamLineScore)
+                            MaterialTheme.colors.primary else Color.Black
+                    } else {
+                        if (awayTeamLineScore >= homeTeamLineScore)
+                            MaterialTheme.colors.primary else Color.Black
+                    }
+
+                    Text(
+                        text = text,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Medium,
+                        color = color,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                } else if (index < 10 ||
+                    (index == 10 && lineScore.inning10 != "-") ||
+                    (index == 11 && lineScore.inning11 != "-") ||
+                    (index == 12 && lineScore.inning12 != "-")
+                ) {
+                    VCapsuleBar(modifier = Modifier.alpha(0.5f))
+
+                    Text(
+                        text = lineScore.innings[index - 1],
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }

@@ -159,6 +159,9 @@ data class NBAGameSummary(
     @SerialName("period") private val _period: Int? = null,
     @SerialName("gameClock") private val _gameClock: String? = null,
     @SerialName("attendance") private val _attendance: Int? = null,
+    @SerialName("isPlayoffs") private val _isPlayoffs: Boolean? = null,
+    @SerialName("gameLabelKr") private val _gameLabelKr: String? = null,
+    @SerialName("seriesTextKr") private val _seriesTextKr: String? = null
 ) {
     val gameId: String get() = _gameId ?: ""
     val gameDate: String get() = _gameDate ?: ""
@@ -178,6 +181,9 @@ data class NBAGameSummary(
     val period: Int get() = _period ?: 0
     val gameClock: String get() = _gameClock ?: ""
     val attendance: Int get() = _attendance ?: 0
+    val isPlayoffs: Boolean get() = _isPlayoffs ?: false
+    val gameLabelKr: String get() = _gameLabelKr ?: ""
+    val seriesTextKr: String get() = _seriesTextKr ?: ""
 }
 
 @Serializable
@@ -273,6 +279,8 @@ data class NBALineScore(
     val teamId: Int get() = _teamId ?: 0
     val teamNickname: String get() = _teamNickname ?: ""
     val teamWinsLosses: String get() = _teamWinsLosses ?: ""
+    val ptsList: List<Int?> get() = listOf(ptsQtr1, ptsQtr2, ptsQtr3, ptsQtr4, ptsOt1, ptsOt2, ptsOt3, ptsOt4, ptsOt5, ptsOt6, ptsOt7, ptsOt8, ptsOt9, ptsOt10)
+    val ptsOtList: List<Int?> get() = listOf(ptsOt1, ptsOt2, ptsOt3, ptsOt4, ptsOt5, ptsOt6, ptsOt7, ptsOt8, ptsOt9, ptsOt10)
 }
 
 @Serializable

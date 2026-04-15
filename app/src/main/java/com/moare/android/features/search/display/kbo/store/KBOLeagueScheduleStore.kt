@@ -319,7 +319,7 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
                 )
             )
 
-            val result = searchClient.fetchDataByKeyword(keywordInfo)
+            val result = searchClient.fetchDataByKeyword(keywordInfo, displayModel.value.season)
 
             if (result.data is SportDecodableModel.KBOTournament) {
                 emitToParent(KBOLeagueScheduleDelegate.ShowTournament(result.data))
@@ -344,7 +344,7 @@ class KBOLeagueScheduleStore @AssistedInject constructor(
                 )
             )
 
-            val result = searchClient.fetchDataByKeyword(keywordInfo)
+            val result = searchClient.fetchDataByKeyword(keywordInfo, displayModel.value.season)
 
             if (result.data is SportDecodableModel.KBOTeamStandings) {
                 emitToParent(KBOLeagueScheduleDelegate.ShowTeamStandings(result.data))

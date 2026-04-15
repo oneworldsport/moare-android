@@ -21,7 +21,8 @@ interface SearchApi {
 
     @POST("search/keyword")
     suspend fun searchByKeyword(
-        @Body request: KeywordInfo
+        @Body request: KeywordInfo,
+        @Query("season") season: Int?
     ): ResponseBody
 
     @POST("search/schedule")

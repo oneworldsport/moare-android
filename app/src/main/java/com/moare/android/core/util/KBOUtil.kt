@@ -17,8 +17,8 @@ object KBOUtil {
     )
     val kboLogoUrl = "https://6ptotvmi5753.edge.naverncp.com/KBO_IMAGE/KBOHome/resources/images/common/h1_logo.png"
 
-    fun playerPhotoUrl(id: Int?): String? {
-        return id?.let { "https://6ptotvmi5753.edge.naverncp.com/KBO_IMAGE/person/middle/2025/$id.jpg" }
+    fun playerPhotoUrl(season: Int, id: Int?): String? {
+        return id?.let { "https://6ptotvmi5753.edge.naverncp.com/KBO_IMAGE/person/middle/$season/$id.jpg" }
     }
 
     fun teamLogoUrl(id: Int?): String? {

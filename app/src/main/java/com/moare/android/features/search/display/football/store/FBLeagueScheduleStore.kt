@@ -383,7 +383,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                 )
             }
 
-            val result = searchClient.fetchDataByKeyword(keywordInfo)
+            val result = searchClient.fetchDataByKeyword(keywordInfo, displayModel.value.season)
 
             if (result.data is SportDecodableModel.FBTournament) {
                 emitToParent(FBLeagueScheduleDelegate.ShowTournament(result.data))
@@ -410,7 +410,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                 )
             )
 
-            val result = searchClient.fetchDataByKeyword(keywordInfo)
+            val result = searchClient.fetchDataByKeyword(keywordInfo, displayModel.value.season)
 
             if (result.data is SportDecodableModel.FBTeamStandings) {
                 emitToParent(FBLeagueScheduleDelegate.ShowTeamStandings(result.data))
