@@ -205,6 +205,14 @@ fun NBALeagueScheduleListItem(
 ) {
     val itemKey = data.itemKey
     val gameStatus = data.gameStatus.toIntOrNull() ?: 1
+    val gameInfo = data.gameInfo
+    val gameType = gameInfo?.let {
+        if (gameInfo.isPlayoffs) {
+            "${gameInfo.gameLabelKr}\n${gameInfo.seriesGameNumber}\n${gameInfo.seriesTextKr}"
+        } else {
+            gameInfo.weekName
+        }
+    } ?: ""
 
     /* ---------------------
        ui state
@@ -241,9 +249,9 @@ fun NBALeagueScheduleListItem(
             game = data,
             teamNameDic = teamNameDic,
             isResultOpened = isResultOpened,
-            gameStatusContext = GameStatusContext.Nba(status = gameStatus, period = data.gameInfo?.period, isResultOpened = isResultOpened),
+            gameStatusContext = GameStatusContext.Nba(status = gameStatus, period = gameInfo?.period, isResultOpened = isResultOpened),
             isCapsuleButtonDisabled = gameStatus != Constants.GameStatus.NBA.FINISHED,
-            gameType = NBAUtil.gameType(data.gameInfo), // TODO: 아래 playoffs info 주석 참고해서 ScheduleGameItem에 만들어야함
+            gameType = gameType,
             shouldShowOnlyDateTime = displayModel.scheduleType != ScheduleType.TEAM_FLAT, // (리그, 팀)일정 화면에서만 true
         ),
         actions = ScheduleGameItemActions(
@@ -255,42 +263,6 @@ fun NBALeagueScheduleListItem(
             }
         )
     )
-
-    // playoffs info
-//            if (data.gameSummary != null && data.gameSummary.seriesText.isNotEmpty()) {
-//                val gameSummary = data.gameSummary
-//                Text(
-//                    text = NBAUtil.gameType(gameSummary, true),
-//                    fontSize = 11.sp
-//                )
-//
-//                if (data.seasonSeries != null && gameSummary.seriesGameNumber.isNotEmpty()) {
-//                    val seasonSeries = data.seasonSeries
-//                    CenterRow {
-//                        Text(
-//                            text = "시리즈 스코어: ",
-//                            fontSize = 11.sp
-//                        )
-//
-//                        Text(
-//                            text = "${seasonSeries.homeTeamWins}",
-//                            fontSize = 11.sp,
-//                            color = if (seasonSeries.homeTeamWins >= seasonSeries.homeTeamLosses) Moare else Color.Black
-//                        )
-//
-//                        Text(
-//                            text = " - ",
-//                            fontSize = 11.sp
-//                        )
-//
-//                        Text(
-//                            text = "${seasonSeries.homeTeamLosses}",
-//                            fontSize = 11.sp,
-//                            color = if (seasonSeries.homeTeamLosses >= seasonSeries.homeTeamWins) Moare else Color.Black
-//                        )
-//                    }
-//                }
-//            }
 }
 
 
