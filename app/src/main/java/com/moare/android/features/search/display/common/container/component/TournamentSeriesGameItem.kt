@@ -73,15 +73,15 @@ fun <T> TournamentSeriesLeftGameItem(
 
     // ui
     if (games != null) {
-        val game = games.first()
-        val topSeedTeamId = if (game.isHomeTopSeed == true) game.homeTeamId else game.awayTeamId
-        val bottomSeedTeamId = if (game.isHomeTopSeed == true) game.awayTeamId else game.homeTeamId
+        val game = games.firstOrNull()
+        val topSeedTeamId = if (game?.isHomeTopSeed == true) game.homeTeamIdOrNull else game?.awayTeamIdOrNull
+        val bottomSeedTeamId = if (game?.isHomeTopSeed == true) game.awayTeamIdOrNull else game?.homeTeamIdOrNull
         val isUEFALeague = leagueId in Constants.Ids.FOOTBALL_UEFA_LEAGUES
         val isSeriesStarted = if (isUEFALeague) {
             // UEFA리그(합산 스코어 방식)는 경기중이어도 isSeriesStarted = true
-            !Constants.GameStatus.isBeforeGame(leagueId = leagueId, status = game.gameStatus)
+            !Constants.GameStatus.isBeforeGame(leagueId = leagueId, status = game?.gameStatus ?: "")
         } else {
-            Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)
+            Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game?.gameStatus ?: "")
         }
 
         val (topSeedTeamSeriesScore, bottomSeedTeamSeriesScore) = games.fold(0 to 0) { partial, game ->
@@ -447,10 +447,10 @@ fun <T> TournamentSeriesRightGameItem(
 
     // ui
     if (games != null) {
-        val game = games.first()
-        val topSeedTeamId = if (game.isHomeTopSeed == true) game.homeTeamId else game.awayTeamId
-        val bottomSeedTeamId = if (game.isHomeTopSeed == true) game.awayTeamId else game.homeTeamId
-        val isSeriesStarted = Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)
+        val game = games.firstOrNull()
+        val topSeedTeamId = if (game?.isHomeTopSeed == true) game.homeTeamIdOrNull else game?.awayTeamIdOrNull
+        val bottomSeedTeamId = if (game?.isHomeTopSeed == true) game.awayTeamIdOrNull else game?.homeTeamIdOrNull
+        val isSeriesStarted = Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game?.gameStatus ?: "")
 
         val (topSeedTeamSeriesScore, bottomSeedTeamSeriesScore) = games.fold(0 to 0) { partial, game ->
             var (top, bottom) = partial
@@ -770,10 +770,10 @@ fun <T> TournamentSeriesFinalGameItem(
     itemHeights: Map<RoundSeriesKey, Dp>,
     selectSeries: ((List<GameForSchedule<T>>) -> Unit)? = null
 ) {
-    val game = games.first()
-    val topSeedTeamId = if (game.isHomeTopSeed == true) game.homeTeamId else game.awayTeamId
-    val bottomSeedTeamId = if (game.isHomeTopSeed == true) game.awayTeamId else game.homeTeamId
-    val isSeriesStarted = Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game.gameStatus)
+    val game = games.firstOrNull()
+    val topSeedTeamId = if (game?.isHomeTopSeed == true) game.homeTeamIdOrNull else game?.awayTeamIdOrNull
+    val bottomSeedTeamId = if (game?.isHomeTopSeed == true) game.awayTeamIdOrNull else game?.homeTeamIdOrNull
+    val isSeriesStarted = Constants.GameStatus.isGameFinished(leagueId = leagueId, status = game?.gameStatus ?: "")
 
     var isScoreOpened by remember { mutableStateOf(false) }
     var itemTopPadding by remember { mutableStateOf(0.dp) } // 아이템 Y 위치

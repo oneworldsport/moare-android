@@ -22,6 +22,11 @@ data class GameForSchedule<T>(
     val awayTeamScore: Int get() = _awayTeamScore ?: 0
     val gameStatus: String get() = _gameStatus ?: ""
 
+    // NOTE: null 값이 필요한 프로퍼티는 따로 nullable getter를 추가. private을 제거하고 _property를 그대로 사용하는건 비추.
+    // TODO: 다른곳도 해당 방식으로 리팩토링 필요
+    val homeTeamIdOrNull: Int? get() = _homeTeamId
+    val awayTeamIdOrNull: Int? get() = _awayTeamId
+
     val gameId: String get() = _itemKey?.split("#")?.lastOrNull() ?: ""
     val date: String get() = (_itemKey?.split("#")?.firstOrNull() ?: "") + "+09:00"
     val parsedDate get() = OffsetDateTime.parse(date).toInstant()

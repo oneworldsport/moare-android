@@ -204,9 +204,15 @@ fun NBAGameStatsView(
             isRefreshing = isRefreshing
         ),
         titleContent = {
-            /* ---------------------
-               game title, info
-               --------------------- */
+            val gameSummary = displayModel.game.gameSummary
+            val gameType = gameSummary?.let {
+                if (gameSummary.isPlayoffs) {
+                    "${gameSummary.gameLabelKr} | ${gameSummary.seriesGameNumber}"
+                } else {
+                    gameSummary.weekName
+                }
+            } ?: ""
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
@@ -217,18 +223,17 @@ fun NBAGameStatsView(
                 )
 
                 Text(
-                    text = " | ${NBAUtil.gameType(displayModel.game.gameSummary)}",
+                    text = " | $gameType",
                     fontSize = 14.sp
                 )
 
                 Spacer(Modifier.weight(1f))
             }
 
-            /* ---------------------
-               playoffs series text
-               --------------------- */
-            if (displayModel.game.gameSummary?.seriesGameNumber?.isNotEmpty() == true) {
-                NBAGameStatsPlayoffsSeriesTextContainer(store)
+            gameSummary?.let {
+                if (it.isPlayoffs) {
+                    NBAGameStatsPlayoffsSeriesText(it.seriesTextKr)
+                }
             }
         },
         gameContent = {
@@ -518,44 +523,44 @@ fun NBAGameStatsLineScoreItem(
 }
 
 @Composable
-fun NBAGameStatsPlayoffsSeriesTextContainer(
-    store: NBAGameStatsStore
+fun NBAGameStatsPlayoffsSeriesText(
+    seriesTextKr: String
 ) {
-    val displayModel by store.displayModel.collectAsState()
-    val teamNameDic by store.teamNameDic.collectAsState()
+    val result = Regex("""^(.*?)\s+(\d+)\s*-\s*(\d+)\s+(.*)$""")
+        .find(seriesTextKr)
 
-    displayModel.game.seasonSeries?.let {
+    if (result != null) {
+        // ex) "시리즈 스코어: LA 레이커스 1 - 2 휴스턴"
+        val before = result.groupValues[1].trim() // "시리즈 스코어: LA 레이커스"
+        val score1 = result.groupValues[2].toInt() // 1
+        val score2 = result.groupValues[3].toInt() // 2
+        val after = result.groupValues[4].trim() // "휴스턴"
+
         CenterRow(
             modifier = Modifier.padding(horizontal = UIConstants.Padding.DEFAULT_H_PADDING)
         ) {
-            // NOTE: 게임별 시리즈 스코어 정보를 가져올 방법을 찾지 못해서 일단은 현재 시리즈 스코어로 표시
             Text(
-                text = "현재 시리즈 스코어: ",
+                text = before,
                 fontSize = 14.sp
             )
 
             Text(
-                text = teamNameDic["short_${it.homeTeamId}"] ?: "",
+                text = " $score1",
+                color = if (score1 >= score2) Moare else Color.Black
+            )
+
+            Text(
+                text = " - ",
                 fontSize = 14.sp
             )
 
             Text(
-                text = " ${it.homeTeamWins} ",
-                color = if (it.homeTeamWins >= it.homeTeamLosses) Moare else Color.Black
+                text = "$score2 ",
+                color = if (score2 >= score1) Moare else Color.Black
             )
 
             Text(
-                text = "-",
-                fontSize = 14.sp
-            )
-
-            Text(
-                text = " ${it.homeTeamLosses} ",
-                color = if (it.homeTeamLosses >= it.homeTeamWins) Moare else Color.Black
-            )
-
-            Text(
-                text = teamNameDic["short_${it.visitorTeamId}"] ?: "",
+                text = after,
                 fontSize = 14.sp
             )
 

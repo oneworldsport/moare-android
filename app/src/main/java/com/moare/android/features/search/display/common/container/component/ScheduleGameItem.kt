@@ -204,9 +204,9 @@ fun <T> ScheduleGameItem(
             if (!state.gameType.isNullOrEmpty() &&state.shouldShowGameType) {
                 Text(
                     text = state.gameType,
+                    textAlign = TextAlign.Center,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Light,
-                    maxLines = 1,
+                    fontWeight = FontWeight.Light
                 )
             }
 
