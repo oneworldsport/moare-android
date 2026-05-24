@@ -6,17 +6,16 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import com.moare.android.core.util.Trie
 import com.moare.android.features.search.display.search.store.SearchStore.SearchType
+import com.moare.android.features.search.domain.repository.AutoCompleteRepository
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.LeagueKeywords
 import com.moare.android.features.search.models.NoticeModel
-import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.TrendingKeywords
-import com.moare.android.features.search.data.networking.KeywordsClient
-import com.moare.android.features.search.data.networking.SearchClient
-import com.moare.android.features.search.data.repository.KeywordsRepository
-import com.moare.android.features.search.data.repository.SearchRepository
+import com.moare.android.features.search.domain.repository.KeywordsRepository
+import com.moare.android.features.search.domain.repository.SearchRepository
+import com.moare.android.features.search.domain.repository.TrendingKeywordsRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -54,9 +53,9 @@ class SearchStore @AssistedInject constructor(
     @ApplicationContext private val context: Context,
     private val searchRepository: SearchRepository,
     private val keywordsRepository: KeywordsRepository,
-    private val trieDeferred: CompletableDeferred<Pair<Trie, List<KeywordInfo>>>,
+    private val autoCompleteRepository: AutoCompleteRepository,
+    private val trendingKeywordsRepository: TrendingKeywordsRepository,
     private val noticeDeferred: CompletableDeferred<List<NoticeModel>>,
-    private val trendingKeywordsDeferred: CompletableDeferred<TrendingKeywords>,
     @Assisted val emitToParent: (SearchDelegate) -> Unit
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -104,21 +103,6 @@ class SearchStore @AssistedInject constructor(
     val autoCompleteListVisibleState: StateFlow<Boolean> = _autoCompleteListVisibleState
 
     /* ---------------------
-       etc
-       --------------------- */
-    private val trie: Trie by lazy {
-        runBlocking { trieDeferred.await().first }
-    }
-
-    private val autoCompleteDataMap: Map<String, KeywordInfo> by lazy {
-        runBlocking {
-            trieDeferred.await().second.associateBy { it.keyword }
-        }
-    }
-
-    private var trendingKeywords: Map<String, KeywordInfo> = emptyMap()
-
-    /* ---------------------
        init
        --------------------- */
     init {
@@ -130,9 +114,8 @@ class SearchStore @AssistedInject constructor(
 //            val data = DataModel.fromJson(jsonContent).data as SportDecodableModel.FBPlayerStandings
 //            _fbPlayerStandingsData.emit(data.displayModel)
 //            delay(5000)
-            val keywords = trendingKeywordsDeferred.await().keywords
-            trendingKeywords = keywords.associateBy { it.keyword }
-            _trendingKeywordList.emit(keywords.map { it.keyword })
+            val keywords = trendingKeywordsRepository.keywords()
+            _trendingKeywordList.emit(keywords)
 
             val noticeData = noticeDeferred.await()
             _searchExample.value = noticeData.find { it.title == "검색 예시" }?.content ?: ""
@@ -200,19 +183,19 @@ class SearchStore @AssistedInject constructor(
                 when (searchType) {
                     SearchType.Query -> searchRepository.fetchDataByQuery(query.value.text)
                     SearchType.TrendingKeyword -> {
-                        val keyword = trendingKeywords[query.value.text]
+                        val keyword = trendingKeywordsRepository.keywordInfo(query.value.text)
                         keyword?.let {
-                            searchRepository.fetchDataByKeyword(keyword)
+                            searchRepository.fetchDataByKeyword(it)
                         }
                     }
                     is SearchType.LeagueKeyword -> {
                         searchRepository.fetchDataByKeyword(searchType.keyword)
                     }
                     SearchType.AutoComplete -> {
-                        val keywordInfo = autoCompleteDataMap[query.value.text]
+                        val keywordInfo = autoCompleteRepository.keywordInfo(query.value.text)
                         keywordInfo?.let {
                             keywordInfo.weight = null // To exclude field "weight" in the request body
-                            searchRepository.fetchDataByKeyword(keywordInfo)
+                            searchRepository.fetchDataByKeyword(it)
                         }
                     }
                 }
@@ -287,7 +270,7 @@ class SearchStore @AssistedInject constructor(
                 _autoCompleteList.value = emptyList()
                 _autoCompleteListVisibleState.value = false
             } else {
-                val result = trie.search(newValue.text)
+                val result = autoCompleteRepository.search(newValue.text)
 
                 _autoCompleteList.value = result
                 _autoCompleteListVisibleState.value = true

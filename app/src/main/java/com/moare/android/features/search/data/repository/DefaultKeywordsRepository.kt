@@ -1,7 +1,7 @@
-package com.moare.android.features.search.domain.repository
+package com.moare.android.features.search.data.repository
 
 import com.moare.android.features.search.data.networking.KeywordsClient
-import com.moare.android.features.search.data.repository.KeywordsRepository
+import com.moare.android.features.search.domain.repository.KeywordsRepository
 import com.moare.android.features.search.models.LeagueKeywords
 import javax.inject.Inject
 

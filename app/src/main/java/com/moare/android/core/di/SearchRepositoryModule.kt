@@ -1,9 +1,13 @@
 package com.moare.android.core.di
 
-import com.moare.android.features.search.data.repository.KeywordsRepository
-import com.moare.android.features.search.data.repository.SearchRepository
-import com.moare.android.features.search.domain.repository.DefaultKeywordsRepository
-import com.moare.android.features.search.domain.repository.DefaultSearchRepository
+import com.moare.android.features.search.data.repository.DefaultAutoCompleteRepository
+import com.moare.android.features.search.domain.repository.KeywordsRepository
+import com.moare.android.features.search.domain.repository.SearchRepository
+import com.moare.android.features.search.data.repository.DefaultKeywordsRepository
+import com.moare.android.features.search.data.repository.DefaultSearchRepository
+import com.moare.android.features.search.data.repository.DefaultTrendingKeywordsRepository
+import com.moare.android.features.search.domain.repository.AutoCompleteRepository
+import com.moare.android.features.search.domain.repository.TrendingKeywordsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -26,4 +30,16 @@ abstract class SearchRepositoryModule {
     abstract fun bindKeywordsRepository(
         impl: DefaultKeywordsRepository
     ): KeywordsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAutoCompleteRepository(
+        impl: DefaultAutoCompleteRepository
+    ): AutoCompleteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTrendingKeywordsRepository(
+        impl: DefaultTrendingKeywordsRepository
+    ): TrendingKeywordsRepository
 }

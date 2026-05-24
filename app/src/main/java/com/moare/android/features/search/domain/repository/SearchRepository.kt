@@ -1,4 +1,4 @@
-package com.moare.android.features.search.data.repository
+package com.moare.android.features.search.domain.repository
 
 import com.moare.android.features.search.models.DataModel
 import com.moare.android.features.search.models.EntityInfo

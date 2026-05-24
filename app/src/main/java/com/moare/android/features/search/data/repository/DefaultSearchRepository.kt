@@ -1,7 +1,7 @@
-package com.moare.android.features.search.domain.repository
+package com.moare.android.features.search.data.repository
 
 import com.moare.android.features.search.data.networking.SearchClient
-import com.moare.android.features.search.data.repository.SearchRepository
+import com.moare.android.features.search.domain.repository.SearchRepository
 import com.moare.android.features.search.models.DataModel
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.KeywordInfo
