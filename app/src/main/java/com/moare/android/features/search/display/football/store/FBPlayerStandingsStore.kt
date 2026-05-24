@@ -12,7 +12,7 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplay
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.data.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

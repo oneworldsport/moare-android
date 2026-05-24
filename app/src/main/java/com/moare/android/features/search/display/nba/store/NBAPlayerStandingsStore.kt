@@ -15,7 +15,7 @@ import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStand
 import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerStandingsResponseModel
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.data.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

@@ -15,7 +15,7 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.nba.NBALeagueScheduleDisplayModel
 import com.moare.android.features.search.models.models.nba.NBAGameForSchedule
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.data.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

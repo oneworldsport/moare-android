@@ -13,8 +13,10 @@ import com.moare.android.features.search.models.LeagueKeywords
 import com.moare.android.features.search.models.NoticeModel
 import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.TrendingKeywords
-import com.moare.android.features.search.networking.KeywordsClient
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.data.networking.KeywordsClient
+import com.moare.android.features.search.data.networking.SearchClient
+import com.moare.android.features.search.data.repository.KeywordsRepository
+import com.moare.android.features.search.data.repository.SearchRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -42,8 +44,6 @@ sealed interface SearchAction {
     data class PopView(val isEmpty: Boolean, val lastQuery: String) : SearchAction
 
     data object GetLeagueKeywords : SearchAction
-
-    data class TestSearch(val viewForTest: SportDisplayType) : SearchAction
 }
 
 sealed interface SearchDelegate {
@@ -52,8 +52,8 @@ sealed interface SearchDelegate {
 
 class SearchStore @AssistedInject constructor(
     @ApplicationContext private val context: Context,
-    private val searchClient: SearchClient,
-    private val keywordsClient: KeywordsClient,
+    private val searchRepository: SearchRepository,
+    private val keywordsRepository: KeywordsRepository,
     private val trieDeferred: CompletableDeferred<Pair<Trie, List<KeywordInfo>>>,
     private val noticeDeferred: CompletableDeferred<List<NoticeModel>>,
     private val trendingKeywordsDeferred: CompletableDeferred<TrendingKeywords>,
@@ -176,8 +176,6 @@ class SearchStore @AssistedInject constructor(
                 is SearchAction.ToggleSearchBar -> toggleSearchBar()
                 is SearchAction.PopView -> popView(action.isEmpty, action.lastQuery)
                 is SearchAction.GetLeagueKeywords -> getLeagueKeywords()
-
-                is SearchAction.TestSearch -> testSearch(action.viewForTest)
             }
         }
     }
@@ -200,21 +198,21 @@ class SearchStore @AssistedInject constructor(
             val dataFetchDeferred = scope.async {
 //                delay(5000) // test for fetching delay
                 when (searchType) {
-                    SearchType.Query -> searchClient.fetchDataByQuery(query.value.text)
+                    SearchType.Query -> searchRepository.fetchDataByQuery(query.value.text)
                     SearchType.TrendingKeyword -> {
                         val keyword = trendingKeywords[query.value.text]
                         keyword?.let {
-                            searchClient.fetchDataByKeyword(keyword)
+                            searchRepository.fetchDataByKeyword(keyword)
                         }
                     }
                     is SearchType.LeagueKeyword -> {
-                        searchClient.fetchDataByKeyword(searchType.keyword)
+                        searchRepository.fetchDataByKeyword(searchType.keyword)
                     }
                     SearchType.AutoComplete -> {
                         val keywordInfo = autoCompleteDataMap[query.value.text]
                         keywordInfo?.let {
                             keywordInfo.weight = null // To exclude field "weight" in the request body
-                            searchClient.fetchDataByKeyword(keywordInfo)
+                            searchRepository.fetchDataByKeyword(keywordInfo)
                         }
                     }
                 }
@@ -334,29 +332,12 @@ class SearchStore @AssistedInject constructor(
 
     private suspend fun getLeagueKeywords() {
         try {
-            val leagueKeywords = keywordsClient.fetchLeagueKeywords()
+            val leagueKeywords = keywordsRepository.fetchLeagueKeywords()
             // 로고가 사라지면서 검색 아이콘이 나타나는 시간 (1 + 0.2) + BarFirstOpen 애니메이션 시간 1 + trendingKeyowrds 나타나는 시간 0.4(AnimatedVisibility의 enter 애니메이션 기본 값) + 추가 0.1
             // 1.2 + 1 + 0.4 + 0.1 = 2.7초 지연
             delay(2700)
             _leagueKeywords.value = leagueKeywords
         } catch (e: Exception) {
-        }
-    }
-
-    // test code
-    private suspend fun testSearch(viewForTest: SportDisplayType) {
-        try {
-            _searchState.emit(true)
-            toggleFocusState(false)
-
-            val result = searchClient.fetchFromJson(context, viewForTest)
-
-            _resultVisibleState.emit(true)
-
-            emitToParent(SearchDelegate.Push(model = result.data))
-        } catch (e: Exception) {
-            _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
-            Log.e("dsdf", e.localizedMessage ?: "data type error")
         }
     }
 }

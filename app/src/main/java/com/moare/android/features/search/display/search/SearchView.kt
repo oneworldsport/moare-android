@@ -99,8 +99,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SearchView(
     viewModel: AppViewModel,
-    searchStore: SearchStore,
-    viewForTest: SportDisplayType? = null
+    searchStore: SearchStore
 ) {
     val density = LocalDensity.current
 
@@ -166,15 +165,6 @@ fun SearchView(
     val keyboardVisibleState by rememberKeyboardVisibility()
     val noRippleInteractionSource = remember { MutableInteractionSource() }
     val activity = LocalActivity.current
-
-    /* ---------------------
-       LaunchedEffect
-       --------------------- */
-    LaunchedEffect(viewForTest) {
-        viewForTest?.let {
-            searchStore.send(SearchAction.TestSearch(viewForTest))
-        }
-    }
 
     LaunchedEffect(searchState, autoCompleteList) {
         if (searchState) {

@@ -17,7 +17,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBLeagueS
 import com.moare.android.features.search.models.models.football.FBGameForSchedule
 import com.moare.android.features.search.models.models.football.FBLeague
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.data.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

@@ -10,13 +10,12 @@ import com.moare.android.features.search.models.models.kbo.KBOGameHitterStats
 import com.moare.android.features.search.models.models.kbo.KBOGameLineup
 import com.moare.android.features.search.models.models.kbo.KBOGamePitcherStats
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.data.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.collections.withIndex
 
