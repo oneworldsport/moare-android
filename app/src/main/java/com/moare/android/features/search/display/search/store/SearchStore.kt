@@ -241,7 +241,8 @@ class SearchStore @AssistedInject constructor(
             emitToParent(SearchDelegate.Push(model = data.data))
         } catch (e: Exception) {
             _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
-            Log.e("dsdf", e.localizedMessage ?: "data type error")
+            // TODO: 테스트 코드때문에 나중에 Logger추상화 필요
+//            Log.e("dsdf", e.localizedMessage ?: "data type error")
         }
     }
 

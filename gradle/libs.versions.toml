@@ -20,6 +20,9 @@ serialization = "1.8.0" # https://github.com/Kotlin/kotlinx.serialization
 datastore = "1.1.2" # https://developer.android.com/jetpack/androidx/releases/datastore?hl=ko
 ksp = "2.1.10-1.0.29" # https://github.com/google/ksp
 
+coroutines-test = "1.11.0" # https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/
+mockk = "1.14.9" # https://mockk.io/
+
 app-version-code = "21" # Should be start from 1
 app-version-name = "1.0.13"
 
@@ -75,6 +78,8 @@ serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-jso
 
 # Testing
 junit = { module = "junit:junit", version = "4.13.2" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines-test" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version = "1.2.1" }
 espresso-core = { module = "androidx.test.espresso:espresso-core", version = "3.6.1" }
 
