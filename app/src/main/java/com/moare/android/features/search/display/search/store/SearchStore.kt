@@ -6,15 +6,16 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import com.moare.android.core.util.Trie
 import com.moare.android.features.search.display.search.store.SearchStore.SearchType
+import com.moare.android.features.search.domain.repository.AutoCompleteRepository
 import com.moare.android.features.search.models.ApiFetchState
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.LeagueKeywords
 import com.moare.android.features.search.models.NoticeModel
-import com.moare.android.features.search.models.SportDisplayType
 import com.moare.android.features.search.models.TrendingKeywords
-import com.moare.android.features.search.networking.KeywordsClient
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.domain.repository.KeywordsRepository
+import com.moare.android.features.search.domain.repository.SearchRepository
+import com.moare.android.features.search.domain.repository.TrendingKeywordsRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -42,8 +43,6 @@ sealed interface SearchAction {
     data class PopView(val isEmpty: Boolean, val lastQuery: String) : SearchAction
 
     data object GetLeagueKeywords : SearchAction
-
-    data class TestSearch(val viewForTest: SportDisplayType) : SearchAction
 }
 
 sealed interface SearchDelegate {
@@ -52,11 +51,11 @@ sealed interface SearchDelegate {
 
 class SearchStore @AssistedInject constructor(
     @ApplicationContext private val context: Context,
-    private val searchClient: SearchClient,
-    private val keywordsClient: KeywordsClient,
-    private val trieDeferred: CompletableDeferred<Pair<Trie, List<KeywordInfo>>>,
+    private val searchRepository: SearchRepository,
+    private val keywordsRepository: KeywordsRepository,
+    private val autoCompleteRepository: AutoCompleteRepository,
+    private val trendingKeywordsRepository: TrendingKeywordsRepository,
     private val noticeDeferred: CompletableDeferred<List<NoticeModel>>,
-    private val trendingKeywordsDeferred: CompletableDeferred<TrendingKeywords>,
     @Assisted val emitToParent: (SearchDelegate) -> Unit
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -104,21 +103,6 @@ class SearchStore @AssistedInject constructor(
     val autoCompleteListVisibleState: StateFlow<Boolean> = _autoCompleteListVisibleState
 
     /* ---------------------
-       etc
-       --------------------- */
-    private val trie: Trie by lazy {
-        runBlocking { trieDeferred.await().first }
-    }
-
-    private val autoCompleteDataMap: Map<String, KeywordInfo> by lazy {
-        runBlocking {
-            trieDeferred.await().second.associateBy { it.keyword }
-        }
-    }
-
-    private var trendingKeywords: Map<String, KeywordInfo> = emptyMap()
-
-    /* ---------------------
        init
        --------------------- */
     init {
@@ -130,9 +114,8 @@ class SearchStore @AssistedInject constructor(
 //            val data = DataModel.fromJson(jsonContent).data as SportDecodableModel.FBPlayerStandings
 //            _fbPlayerStandingsData.emit(data.displayModel)
 //            delay(5000)
-            val keywords = trendingKeywordsDeferred.await().keywords
-            trendingKeywords = keywords.associateBy { it.keyword }
-            _trendingKeywordList.emit(keywords.map { it.keyword })
+            val keywords = trendingKeywordsRepository.keywords()
+            _trendingKeywordList.emit(keywords)
 
             val noticeData = noticeDeferred.await()
             _searchExample.value = noticeData.find { it.title == "검색 예시" }?.content ?: ""
@@ -176,8 +159,6 @@ class SearchStore @AssistedInject constructor(
                 is SearchAction.ToggleSearchBar -> toggleSearchBar()
                 is SearchAction.PopView -> popView(action.isEmpty, action.lastQuery)
                 is SearchAction.GetLeagueKeywords -> getLeagueKeywords()
-
-                is SearchAction.TestSearch -> testSearch(action.viewForTest)
             }
         }
     }
@@ -200,21 +181,21 @@ class SearchStore @AssistedInject constructor(
             val dataFetchDeferred = scope.async {
 //                delay(5000) // test for fetching delay
                 when (searchType) {
-                    SearchType.Query -> searchClient.fetchDataByQuery(query.value.text)
+                    SearchType.Query -> searchRepository.fetchDataByQuery(query.value.text)
                     SearchType.TrendingKeyword -> {
-                        val keyword = trendingKeywords[query.value.text]
+                        val keyword = trendingKeywordsRepository.keywordInfo(query.value.text)
                         keyword?.let {
-                            searchClient.fetchDataByKeyword(keyword)
+                            searchRepository.fetchDataByKeyword(it)
                         }
                     }
                     is SearchType.LeagueKeyword -> {
-                        searchClient.fetchDataByKeyword(searchType.keyword)
+                        searchRepository.fetchDataByKeyword(searchType.keyword)
                     }
                     SearchType.AutoComplete -> {
-                        val keywordInfo = autoCompleteDataMap[query.value.text]
+                        val keywordInfo = autoCompleteRepository.keywordInfo(query.value.text)
                         keywordInfo?.let {
                             keywordInfo.weight = null // To exclude field "weight" in the request body
-                            searchClient.fetchDataByKeyword(keywordInfo)
+                            searchRepository.fetchDataByKeyword(it)
                         }
                     }
                 }
@@ -260,7 +241,8 @@ class SearchStore @AssistedInject constructor(
             emitToParent(SearchDelegate.Push(model = data.data))
         } catch (e: Exception) {
             _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
-            Log.e("dsdf", e.localizedMessage ?: "data type error")
+            // TODO: 테스트 코드때문에 나중에 Logger추상화 필요
+//            Log.e("dsdf", e.localizedMessage ?: "data type error")
         }
     }
 
@@ -289,7 +271,7 @@ class SearchStore @AssistedInject constructor(
                 _autoCompleteList.value = emptyList()
                 _autoCompleteListVisibleState.value = false
             } else {
-                val result = trie.search(newValue.text)
+                val result = autoCompleteRepository.search(newValue.text)
 
                 _autoCompleteList.value = result
                 _autoCompleteListVisibleState.value = true
@@ -334,29 +316,12 @@ class SearchStore @AssistedInject constructor(
 
     private suspend fun getLeagueKeywords() {
         try {
-            val leagueKeywords = keywordsClient.fetchLeagueKeywords()
+            val leagueKeywords = keywordsRepository.fetchLeagueKeywords()
             // 로고가 사라지면서 검색 아이콘이 나타나는 시간 (1 + 0.2) + BarFirstOpen 애니메이션 시간 1 + trendingKeyowrds 나타나는 시간 0.4(AnimatedVisibility의 enter 애니메이션 기본 값) + 추가 0.1
             // 1.2 + 1 + 0.4 + 0.1 = 2.7초 지연
             delay(2700)
             _leagueKeywords.value = leagueKeywords
         } catch (e: Exception) {
-        }
-    }
-
-    // test code
-    private suspend fun testSearch(viewForTest: SportDisplayType) {
-        try {
-            _searchState.emit(true)
-            toggleFocusState(false)
-
-            val result = searchClient.fetchFromJson(context, viewForTest)
-
-            _resultVisibleState.emit(true)
-
-            emitToParent(SearchDelegate.Push(model = result.data))
-        } catch (e: Exception) {
-            _searchDataState.emit(ApiFetchState.Error("검색 결과가 없습니다."))
-            Log.e("dsdf", e.localizedMessage ?: "data type error")
         }
     }
 }

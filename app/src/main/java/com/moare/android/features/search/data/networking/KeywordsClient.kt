@@ -1,10 +1,11 @@
-package com.moare.android.features.search.networking
+package com.moare.android.features.search.data.networking
 
 import com.moare.android.core.networking.ApiHelper
 import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.LeagueKeywords
+import javax.inject.Inject
 
-class KeywordsClient(
+class KeywordsClient @Inject constructor(
     private val apiHelper: ApiHelper
 ) {
     suspend fun fetchTrendingKeywords(): List<KeywordInfo> {

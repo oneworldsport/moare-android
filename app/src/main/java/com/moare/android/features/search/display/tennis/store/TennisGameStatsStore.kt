@@ -1,28 +1,14 @@
 package com.moare.android.features.search.display.tennis.store
 
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.moare.android.core.constants.Constants
 import com.moare.android.core.di.TranslatedNameProvider
-import com.moare.android.core.util.rounded
 import com.moare.android.features.search.display.common.store.BaseGameStatsStore
-import com.moare.android.features.search.display.nba.store.NBAGameStatsAction
-import com.moare.android.features.search.display.nba.store.NBAGameStatsDelegate
-import com.moare.android.features.search.display.nba.store.NBAGameStatsStore
 import com.moare.android.features.search.models.SportDecodableModel
-import com.moare.android.features.search.models.displaymodels.nba.NBAGameStatsDisplayModel
 import com.moare.android.features.search.models.displaymodels.tennis.TennisGameStatsDisplayModel
-import com.moare.android.features.search.models.models.nba.NBABoxScoreTeamPlayer
-import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
-import com.moare.android.features.search.models.models.nba.NBALineScore
-import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.models.responsemodels.tennis.TennisGameStatsResponseModel
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.data.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 sealed interface TennisGameStatsAction {

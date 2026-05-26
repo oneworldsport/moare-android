@@ -2,8 +2,8 @@ package com.moare.android.core.di
 
 import android.content.Context
 import com.moare.android.core.networking.ApiHelper
-import com.moare.android.features.search.networking.KeywordsClient
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.data.networking.KeywordsClient
+import com.moare.android.features.search.data.networking.SearchClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,14 +18,14 @@ object NetworkModule {
     @Singleton
     fun provideApiHelper(): ApiHelper = ApiHelper()
 
-    @Provides
-    @Singleton
-    fun provideSearchClient(
-        @ApplicationContext context: Context,
-        apiHelper: ApiHelper
-    ): SearchClient = SearchClient(context, apiHelper)
-
-    @Provides
-    @Singleton
-    fun provideKeywordsClient(apiHelper: ApiHelper): KeywordsClient = KeywordsClient(apiHelper)
+//    @Provides
+//    @Singleton
+//    fun provideSearchClient(
+//        @ApplicationContext context: Context,
+//        apiHelper: ApiHelper
+//    ): SearchClient = SearchClient(context, apiHelper)
+//
+//    @Provides
+//    @Singleton
+//    fun provideKeywordsClient(apiHelper: ApiHelper): KeywordsClient = KeywordsClient(apiHelper)
 }

@@ -42,31 +42,20 @@ class MainActivity : ComponentActivity() {
 fun AppRoot(viewModel: AppViewModel = hiltViewModel()) {
     var isSplashFinished by remember { mutableStateOf(false) }
 
-//    val viewForTest: SportDisplayType = SportDisplayType.TENNIS_GAME_STATS
-    val viewForTest: SportDisplayType? = null
-
     Surface(
         modifier = Modifier
             .systemBarsPadding()
             .fillMaxSize(),
         color = MaterialTheme.colors.background
     ) {
-        if (viewForTest != null) {
-            SearchView(
-                viewModel = viewModel,
-                searchStore = viewModel.searchStore,
-                viewForTest = viewForTest
-            )
-        } else {
-            SearchView(
-                viewModel = viewModel,
-                searchStore = viewModel.searchStore
-            )
+        SearchView(
+            viewModel = viewModel,
+            searchStore = viewModel.searchStore
+        )
 
-            if (!isSplashFinished) {
-                SplashView {
-                    isSplashFinished = true
-                }
+        if (!isSplashFinished) {
+            SplashView {
+                isSplashFinished = true
             }
         }
     }

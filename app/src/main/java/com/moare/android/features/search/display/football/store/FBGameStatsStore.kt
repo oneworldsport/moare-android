@@ -21,7 +21,7 @@ import com.moare.android.features.search.models.models.football.FBPlayerStatsPen
 import com.moare.android.features.search.models.models.football.FBPlayerStatsShots
 import com.moare.android.features.search.models.models.football.FBPlayerStatsTackles
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.data.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

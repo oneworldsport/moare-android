@@ -9,7 +9,7 @@ import com.moare.android.features.search.models.displaymodels.mlb.MLBGameStatsDi
 import com.moare.android.features.search.models.models.mlb.MLBGameBoxscoreTeamData
 import com.moare.android.features.search.models.models.mlb.MLBGameBoxscoreTeamPlayer
 import com.moare.android.features.search.models.responsemodels.mlb.MLBGameStatsResponseModel
-import com.moare.android.features.search.networking.SearchClient
+import com.moare.android.features.search.data.networking.SearchClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

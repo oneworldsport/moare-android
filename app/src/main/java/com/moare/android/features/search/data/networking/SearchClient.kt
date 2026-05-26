@@ -1,4 +1,4 @@
-package com.moare.android.features.search.networking
+package com.moare.android.features.search.data.networking
 
 import android.content.Context
 import com.moare.android.core.networking.ApiHelper
@@ -9,11 +9,11 @@ import com.moare.android.features.search.models.KeywordInfo
 import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.SportDisplayType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 //import com.moare.android.features.search.models.DataModelDeserializer
 
-class SearchClient(
-    private val context: Context,
+class SearchClient @Inject constructor(
     private val apiHelper: ApiHelper
 ) {
     suspend fun fetchDataByQuery(query: String): DataModel {
