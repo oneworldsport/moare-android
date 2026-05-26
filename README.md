@@ -28,6 +28,7 @@
 - MVI
 - Hilt
 - DataStore
+- Retrofit
 - Firebase(FCM, Crashlytics, Analytics), AWS SDK
 
 ## 구조
