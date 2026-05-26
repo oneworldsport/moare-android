@@ -28,13 +28,44 @@
 - MVI
 - Hilt
 - DataStore
-- Retrofit
+- Retrofit, Kotlinx Serialization
 - Firebase(FCM, Crashlytics, Analytics), AWS SDK
+- JUnit4, MockK, Kotlinx Coroutines Test
 
 ## 구조
+Jetpack Compose와 MVI 패턴을 기반으로 프로젝트를 구성하였으며,  
+화면 UI, 상태 관리, 데이터 모델, 네트워크 통신 로직, 공통 화면 로직을 역할별로 분리했습니다.
+
+- AppViewModel - 앱 전역 상태와 검색 화면 진입 흐름을 관리하며, 검색 결과에 따른 종목별 상세 화면 라우팅 처리
+
+- SearchStore - 검색어 입력, 자동완성, 인기 검색어, 리그별 키워드, 검색 결과의 상태 및 액션 관리
+
+- Feature Stores - 축구, NBA, KBO, MLB, 테니스 등 종목별 화면의 상태와 액션을 관리
+
+- Base Stores - 정보, 일정, 스탯, 순위 등 유사한 화면에서 반복되는 상태 관리 로직을 공통화하여 재사용
+
+- View - Jetpack Compose 기반 화면 구성 및 사용자 인터랙션 처리
+
+- ViewContainer - 유사한 화면 구조를 공통화하여 종목별 UI 구현 중복을 줄이고 재사용성 관리
+
+- DataModel - 다양한 형태의 스포츠 API 응답을 공통 데이터 모델로 수신하고, 종목과 데이터 타입에 따라 화면별 모델로 변환
+
+- Repository - 검색, 키워드, 자동완성, 인기 검색어 등 데이터 요청 및 가공 로직을 추상화
+
+- Network - Retrofit 기반으로 검색, 일정, 키워드, ID 기반 조회 등 스포츠 데이터 API 요청 처리
+
+- Utilities - 자동완성 Trie, 날짜·시즌 계산, 공통 포맷팅 등 앱 전반에서 사용하는 유틸리티 관리
+
+- Tests - JUnit4, MockK, Kotlinx Coroutines Test를 활용해 Store의 Action 처리, State 변경, 비동기 로직 흐름을 검증
 
 ## Unit Test
+JUnit4, MockK, Kotlinx Coroutines Test를 활용해 주요 Store의 상태 변화와 비동기 로직 흐름을 검증
 
+- Store의 Action 실행에 따른 State 변경 검증
+- MockK를 사용해 테스트 환경에서 외부 의존성을 대체하고 네트워크 요청 없이 로직 검증
+- Kotlinx Coroutines Test를 활용해 Coroutine 기반 비동기 처리 흐름 검증
+- Mock 데이터를 활용해 API 응답 모델 변환 및 화면 표시 모델 생성 흐름 검증
+- 검색, 일정, 상세 화면 등 주요 사용자 흐름에서 필요한 상태 처리 테스트
 
 
 
