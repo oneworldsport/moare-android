@@ -66,8 +66,8 @@ JUnit4, MockK, Kotlinx Coroutines Test를 활용해 주요 Store의 상태 변�
 - Mock 데이터를 활용해 API 응답 모델 변환 및 화면 표시 모델 생성 흐름 검증
 - 검색, 일정, 상세 화면 등 주요 사용자 흐름에서 필요한 상태 처리 테스트
 
-
-
+## 아키텍처 개선
+Unit Test 적용 과정에서 테스트 가능한 구조를 만들기 위해 Repository 레이어를 도입하고, Data / Domain 계층 분리를 기반으로 Clean Architecture 방향의 구조 개선을 점진적으로 적용중
 
 
 
