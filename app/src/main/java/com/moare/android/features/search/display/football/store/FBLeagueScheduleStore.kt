@@ -18,6 +18,7 @@ import com.moare.android.features.search.models.models.football.FBGameForSchedul
 import com.moare.android.features.search.models.models.football.FBLeague
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.data.networking.SearchClient
+import com.moare.android.features.search.domain.repository.SearchRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -51,7 +52,7 @@ sealed interface FBLeagueScheduleDelegate {
 }
 
 class FBLeagueScheduleStore @AssistedInject constructor(
-    private val searchClient: SearchClient,
+    private val searchRepository: SearchRepository,
     private val nameProvider: TranslatedNameProvider,
     @Assisted val model: FBLeagueScheduleDisplayModel,
     @Assisted val emitToParent: (FBLeagueScheduleDelegate) -> Unit
@@ -254,7 +255,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                     leagueId = Constants.Ids.EPL
                 )
 
-                val result = searchClient.fetchLeagueSchedule(entity, displayModel.value.season, yearMonth)
+                val result = searchRepository.fetchLeagueSchedule(entity, displayModel.value.season, yearMonth)
 
                 if (result.data is SportDecodableModel.FBLeagueSchedule) {
                     val data = result.data
@@ -284,7 +285,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
 
         scope.launch {
             try {
-                val result = searchClient.fetchById(
+                val result = searchRepository.fetchById(
                     season = displayModel.value.season,
                     category = "football",
                     date = game.date,
@@ -383,7 +384,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                 )
             }
 
-            val result = searchClient.fetchDataByKeyword(keywordInfo, displayModel.value.season)
+            val result = searchRepository.fetchDataByKeyword(keywordInfo, displayModel.value.season)
 
             if (result.data is SportDecodableModel.FBTournament) {
                 emitToParent(FBLeagueScheduleDelegate.ShowTournament(result.data))
@@ -410,7 +411,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                 )
             )
 
-            val result = searchClient.fetchDataByKeyword(keywordInfo, displayModel.value.season)
+            val result = searchRepository.fetchDataByKeyword(keywordInfo, displayModel.value.season)
 
             if (result.data is SportDecodableModel.FBTeamStandings) {
                 emitToParent(FBLeagueScheduleDelegate.ShowTeamStandings(result.data))
@@ -441,7 +442,7 @@ class FBLeagueScheduleStore @AssistedInject constructor(
                 }
 
                 if (hasLive) {
-                    val result = searchClient.fetchLeagueSchedule(
+                    val result = searchRepository.fetchLeagueSchedule(
                         entity,
                         displayModel.value.season,
                         yearMonth,

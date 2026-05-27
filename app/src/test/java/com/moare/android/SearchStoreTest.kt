@@ -44,7 +44,7 @@ class SearchStoreTest {
     private val trendingKeywordsRepository: TrendingKeywordsRepository = mockk(relaxed = true)
 
     @Test
-    fun barFirstOpen_setsBarFirstOpenedTrue() = runTest {
+    fun `barFirstOpen sets barFirstOpened true`() = runTest {
         val store = makeStore()
 
         store.send(SearchAction.BarFirstOpen)
@@ -54,7 +54,8 @@ class SearchStoreTest {
     }
 
     @Test
-    fun updateTextField_updatesQuery_withoutAutoComplete() = runTest {
+
+    fun `updateTextField updates query`() = runTest {
         val store = makeStore()
 
         store.send(
@@ -69,7 +70,7 @@ class SearchStoreTest {
     }
 
     @Test
-    fun updateTextField_empty_clearsAutoCompleteList() = runTest {
+    fun `updateTextField with blank text clears autoCompleteList`() = runTest {
         val store = makeStore()
 
         coEvery {
@@ -105,7 +106,7 @@ class SearchStoreTest {
     }
 
     @Test
-    fun getLeagueKeywords_success_updatesLeagueKeyowrdsAfterDelay() = runTest {
+    fun `getLeagueKeywords success updates leagueKeywords after delay`() = runTest {
         val expected = LeagueKeywords(
             live = listOf(
                 KeywordInfo(keyword = "NBA", keywords = null, entities = emptyList())
@@ -130,7 +131,7 @@ class SearchStoreTest {
     }
 
     @Test
-    fun getLeagueKeywords_failure_doesNotUpdateLeagueKeywords() = runTest {
+    fun `getLeagueKeywords failure keeps leagueKeywords unchanged`() = runTest {
         coEvery {
             keywordsRepository.fetchLeagueKeywords()
         } throws RuntimeException("failed")
@@ -146,7 +147,7 @@ class SearchStoreTest {
     }
 
     @Test
-    fun updateTextField_updatesAutoCompleteList() = runTest {
+    fun `updateTextField updates autoCompleteList`() = runTest {
         coEvery {
             autoCompleteRepository.search("손")
         } returns listOf("손흥민", "손흥민 경기")
@@ -174,7 +175,7 @@ class SearchStoreTest {
     }
 
     @Test
-    fun performSearch_query_failure_updatesSearchDataStateFailure() = runTest {
+    fun `performSearch query failure updates searchDataState Error`() = runTest {
         coEvery {
             searchRepository.fetchDataByQuery("NBA")
         } throws RuntimeException("failed")
@@ -212,7 +213,7 @@ class SearchStoreTest {
     }
 
     @Test
-    fun performSearch_query_success_emitsDelegatePush() = runTest {
+    fun `performSearch query success emits delegate push`() = runTest {
         val sportModel = mockk<SportDecodableModel.NBALeagueSchedule>(relaxed = true)
         val dataModel = mockk<DataModel>()
 
@@ -263,7 +264,7 @@ class SearchStoreTest {
     }
 
     @Test
-    fun performSearch_trendingKeywords_success_emitsDelegatePush() = runTest {
+    fun `performSearch trendingKeywords success emits delegate push`() = runTest {
         val keywordInfo = KeywordInfo(
             keyword = "NBA 일정",
             weight = 100,
@@ -323,7 +324,7 @@ class SearchStoreTest {
     }
 
     @Test
-    fun performSearch_autoComplete_success_emitsDelegatePush() = runTest {
+    fun `performSearch autoComplete success emits delegate push`() = runTest {
         val keywordInfo = KeywordInfo(
             keyword = "NBA 일정",
             weight = 100,

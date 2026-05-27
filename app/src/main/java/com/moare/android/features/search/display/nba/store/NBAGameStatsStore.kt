@@ -13,6 +13,7 @@ import com.moare.android.features.search.models.models.nba.NBAGameBoxScoreStats
 import com.moare.android.features.search.models.models.nba.NBALineScore
 import com.moare.android.features.search.models.responsemodels.nba.NBAGameStatsResponseModel
 import com.moare.android.features.search.data.networking.SearchClient
+import com.moare.android.features.search.domain.repository.SearchRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -33,7 +34,7 @@ sealed interface NBAGameStatsDelegate {
 }
 
 class NBAGameStatsStore @AssistedInject constructor(
-    private val searchClient: SearchClient,
+    private val searchRepository: SearchRepository,
     private val nameProvider: TranslatedNameProvider,
     @Assisted val model: NBAGameStatsDisplayModel,
     @Assisted val emitToParent: (NBAGameStatsDelegate) -> Unit
@@ -231,7 +232,7 @@ class NBAGameStatsStore @AssistedInject constructor(
 
                 gameSummary?.let {
                     // TODO: Has to add loading
-                    val result = searchClient.fetchById(
+                    val result = searchRepository.fetchById(
                         season = displayModel.value.season,
                         category = "basketball",
                         date = gameSummary.gameDate,

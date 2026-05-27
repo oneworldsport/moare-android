@@ -16,6 +16,7 @@ import com.moare.android.features.search.models.displaymodels.nba.NBAPlayerStand
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerInfoResponseModel
 import com.moare.android.features.search.models.responsemodels.nba.NBAPlayerStandingsResponseModel
 import com.moare.android.features.search.data.networking.SearchClient
+import com.moare.android.features.search.domain.repository.SearchRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -35,7 +36,7 @@ sealed interface NBAPlayerStandingsDelegate {
 }
 
 class NBAPlayerStandingsStore @AssistedInject constructor(
-    private val searchClient: SearchClient,
+    private val searchRepository: SearchRepository,
     private val nameProvider: TranslatedNameProvider,
     @Assisted val model: SportDecodableModel.NBAPlayerStandings,
     @Assisted val emitToParent: (NBAPlayerStandingsDelegate) -> Unit
@@ -205,7 +206,7 @@ class NBAPlayerStandingsStore @AssistedInject constructor(
                     entities = entities
                 )
 
-                val result = searchClient.fetchDataByKeyword(keywordInfo, displayModel.value.season)
+                val result = searchRepository.fetchDataByKeyword(keywordInfo, displayModel.value.season)
 
                 if (result.data is SportDecodableModel.NBAPlayerStandings) {
                     _displayModel.value = result.data.displayModel

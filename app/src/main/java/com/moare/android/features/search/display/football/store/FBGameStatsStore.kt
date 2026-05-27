@@ -22,6 +22,7 @@ import com.moare.android.features.search.models.models.football.FBPlayerStatsSho
 import com.moare.android.features.search.models.models.football.FBPlayerStatsTackles
 import com.moare.android.features.search.models.responsemodels.football.FBGameStatsResponseModel
 import com.moare.android.features.search.data.networking.SearchClient
+import com.moare.android.features.search.domain.repository.SearchRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -42,7 +43,7 @@ sealed interface FBGameStatsDelegate {
 }
 
 class FBGameStatsStore @AssistedInject constructor(
-    private val searchClient: SearchClient,
+    private val searchRepository: SearchRepository,
     private val nameProvider: TranslatedNameProvider,
     @Assisted val model: FBGameStatsDisplayModel,
     @Assisted val emitToParent: (FBGameStatsDelegate) -> Unit
@@ -284,7 +285,7 @@ class FBGameStatsStore @AssistedInject constructor(
                 val game = displayModel.value.game
 
                 // TODO: Has to add loading
-                val result = searchClient.fetchById(
+                val result = searchRepository.fetchById(
                     season = displayModel.value.season,
                     category = "football",
                     date = game.fixture.date,

@@ -13,6 +13,7 @@ import com.moare.android.features.search.models.displaymodels.football.FBPlayerS
 import com.moare.android.features.search.models.displaymodels.football.FBPlayerStandingsDisplayModel
 import com.moare.android.features.search.models.responsemodels.football.FBPlayerStandingsResponseModel
 import com.moare.android.features.search.data.networking.SearchClient
+import com.moare.android.features.search.domain.repository.SearchRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -32,7 +33,7 @@ sealed interface FBPlayerStandingsDelegate {
 }
 
 class FBPlayerStandingsStore @AssistedInject constructor(
-    private val searchClient: SearchClient,
+    private val searchRepository: SearchRepository,
     private val nameProvider: TranslatedNameProvider,
     @Assisted val model: SportDecodableModel.FBPlayerStandings,
     @Assisted val emitToParent: (FBPlayerStandingsDelegate) -> Unit
@@ -161,7 +162,7 @@ class FBPlayerStandingsStore @AssistedInject constructor(
                     entities = entities
                 )
 
-                val result = searchClient.fetchDataByKeyword(keywordInfo, displayModel.value.season)
+                val result = searchRepository.fetchDataByKeyword(keywordInfo, displayModel.value.season)
 
                 if (result.data is SportDecodableModel.FBPlayerStandings) {
                     _displayModel.value = result.data.displayModel
@@ -178,7 +179,7 @@ class FBPlayerStandingsStore @AssistedInject constructor(
     private fun showPlayerStats(id: Int) {
         scope.launch {
             // TODO: Has to add loading
-            val result = searchClient.fetchById(
+            val result = searchRepository.fetchById(
                 season = displayModel.value.season,
                 category = "football",
                 dataType = "football_player_stats",

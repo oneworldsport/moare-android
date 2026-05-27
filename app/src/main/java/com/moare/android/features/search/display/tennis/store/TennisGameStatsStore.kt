@@ -6,6 +6,7 @@ import com.moare.android.features.search.models.SportDecodableModel
 import com.moare.android.features.search.models.displaymodels.tennis.TennisGameStatsDisplayModel
 import com.moare.android.features.search.models.responsemodels.tennis.TennisGameStatsResponseModel
 import com.moare.android.features.search.data.networking.SearchClient
+import com.moare.android.features.search.domain.repository.SearchRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -23,7 +24,7 @@ sealed interface TennisGameStatsDelegate {
 }
 
 class TennisGameStatsStore @AssistedInject constructor(
-    private val searchClient: SearchClient,
+    private val searchRepository: SearchRepository,
     private val nameProvider: TranslatedNameProvider,
     @Assisted val model: TennisGameStatsDisplayModel,
     @Assisted val emitToParent: (TennisGameStatsDelegate) -> Unit
@@ -66,7 +67,7 @@ class TennisGameStatsStore @AssistedInject constructor(
 
                 val displayModel = displayModel.value
                 val gameInfo = displayModel.game.gameInfo
-                val result = searchClient.fetchById(
+                val result = searchRepository.fetchById(
                     season = displayModel.season,
                     category = "tennis",
                     date = gameInfo.gameDate,
