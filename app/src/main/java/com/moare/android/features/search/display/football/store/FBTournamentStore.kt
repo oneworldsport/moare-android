@@ -13,6 +13,7 @@ import com.moare.android.features.search.models.models.football.FBGameInfoForSch
 import com.moare.android.features.search.models.responsemodels.football.FBGameScheduleResponseModel
 import com.moare.android.features.search.models.responsemodels.football.ScheduleType
 import com.moare.android.features.search.data.networking.SearchClient
+import com.moare.android.features.search.domain.repository.SearchRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -33,7 +34,7 @@ sealed interface FBTournamentDelegate {
 }
 
 class FBTournamentStore @AssistedInject constructor(
-    private val searchClient: SearchClient,
+    private val searchRepository: SearchRepository,
     private val nameProvider: TranslatedNameProvider,
     private val tournamentTeamsDeferred: CompletableDeferred<Map<String, List<Int?>>>,
     @Assisted val model: FBTournamentDisplayModel,
@@ -165,7 +166,7 @@ class FBTournamentStore @AssistedInject constructor(
 
     private fun selectGame(game: FBGameForSchedule) {
         scope.launch {
-            val result = searchClient.fetchById(
+            val result = searchRepository.fetchById(
                 season = displayModel.value.season,
                 category = "football",
                 date = game.date,

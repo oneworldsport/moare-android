@@ -11,6 +11,7 @@ import com.moare.android.features.search.models.models.kbo.KBOGameLineup
 import com.moare.android.features.search.models.models.kbo.KBOGamePitcherStats
 import com.moare.android.features.search.models.responsemodels.kbo.KBOGameStatsResponseModel
 import com.moare.android.features.search.data.networking.SearchClient
+import com.moare.android.features.search.domain.repository.SearchRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -34,7 +35,7 @@ sealed interface KBOGameStatsDelegate {
 }
 
 class KBOGameStatsStore @AssistedInject constructor(
-    private val searchClient: SearchClient,
+    private val searchRepository: SearchRepository,
     private val nameProvider: TranslatedNameProvider,
     @Assisted val model: KBOGameStatsDisplayModel,
     @Assisted val emitToParent: (KBOGameStatsDelegate) -> Unit
@@ -178,7 +179,7 @@ class KBOGameStatsStore @AssistedInject constructor(
 
                 gameInfo?.let {
                     // TODO: Has to add loading
-                    val result = searchClient.fetchById(
+                    val result = searchRepository.fetchById(
                         season = displayModel.value.season,
                         category = "baseball",
                         date = gameInfo.date,
