@@ -28,7 +28,7 @@
 - Hilt
 - DataStore
 - Retrofit, Kotlinx Serialization
-- Firebase(FCM, Crashlytics, Analytics), AWS SDK
+- Firebase Analytics, AWS SDK
 - JUnit4, MockK, Kotlinx Coroutines Test
 
 ## 구조
