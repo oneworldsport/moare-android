@@ -21,15 +21,15 @@
 <img width="19%" alt="app_store_v1 0 9_5" src="https://github.com/user-attachments/assets/bb5bb6b9-73f6-432d-8d24-ba0b65b8c793" />
 
 ## 기술 스택
-- Kotlin
-- Kotlin Coroutines, Flow, StateFlow
-- Jetpack Compose
-- MVI
-- Hilt
-- DataStore
-- Retrofit, Kotlinx Serialization
-- Firebase Analytics, AWS SDK
-- JUnit4, MockK, Kotlinx Coroutines Test
+- **Language & UI**: Kotlin, Jetpack Compose
+- **Architecture**: MVI
+- **Dependency Injection**: Hilt
+- **Async & State Management**: Kotlin Coroutines, Flow, StateFlow
+- **Networking & Serialization**: Retrofit, Kotlinx Serialization
+- **Local Storage**: DataStore
+- **Cloud Integration**: AWS SDK
+- **Analytics**: Firebase Analytics
+- **Testing**: JUnit4, MockK, Kotlinx Coroutines Test
 
 ## 구조
 Jetpack Compose와 MVI 패턴을 기반으로 프로젝트를 구성하였으며,  
