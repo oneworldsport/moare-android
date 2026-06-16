@@ -23,8 +23,8 @@ ksp = "2.1.10-1.0.29" # https://github.com/google/ksp
 coroutines-test = "1.11.0" # https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/
 mockk = "1.14.9" # https://mockk.io/
 
-app-version-code = "21" # Should be start from 1
-app-version-name = "1.0.13"
+app-version-code = "22" # Should be start from 1
+app-version-name = "1.0.14"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
