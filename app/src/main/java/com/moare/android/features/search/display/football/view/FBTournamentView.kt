@@ -32,7 +32,7 @@ fun FBTournamentView(
                 teamNameDic = teamNameDic,
                 gameListTuple = gameListTuple,
                 isConference = leagueId == Constants.Ids.MLS,
-                isSeries = leagueId != Constants.Ids.MLS
+                isSeries = leagueId != Constants.Ids.MLS && leagueId != Constants.Ids.WORLD_CUP
             ),
             action = TournamentContainerAction(
                 selectSeries = { gameList ->

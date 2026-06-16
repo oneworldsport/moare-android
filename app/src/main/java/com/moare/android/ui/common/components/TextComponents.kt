@@ -48,11 +48,17 @@ fun FBLeagueTitle(
             modifier = Modifier.padding(horizontal = 4.dp)
         )
 
-        Text(
-//            text = leagueName + " " + leagueSeason.toString().takeLast(2) + "/25",
-            text = "${leagueName} ${leagueSeason}-${(leagueSeason + 1).toString().takeLast(2)}",
-            fontWeight = FontWeight.Medium
-        )
+        if (leagueName == "Major League Soccer" || leagueName == "World Cup") {
+            Text(
+                text = "${leagueName} ${leagueSeason}",
+                fontWeight = FontWeight.Medium
+            )
+        } else {
+            Text(
+                text = "${leagueName} ${leagueSeason}-${(leagueSeason + 1).toString().takeLast(2)}",
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
 
@@ -74,7 +80,7 @@ fun FBLeagueTitleForGameStats(
                 modifier = Modifier.padding(end = 4.dp)
             )
 
-            if (leagueName == "Major League Soccer") {
+            if (leagueName == "Major League Soccer" || leagueName == "World Cup") {
                 Text(
                     text = "${leagueName} ${leagueSeason}",
                     fontWeight = FontWeight.Medium

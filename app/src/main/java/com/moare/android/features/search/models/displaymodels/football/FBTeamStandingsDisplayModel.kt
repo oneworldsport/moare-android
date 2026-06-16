@@ -1,5 +1,6 @@
 package com.moare.android.features.search.models.displaymodels.football
 
+import com.moare.android.core.constants.Constants
 import com.moare.android.features.search.models.EntityInfo
 import com.moare.android.features.search.models.Keyword
 import com.moare.android.features.search.models.displaymodels.Rankable
@@ -18,7 +19,16 @@ data class FBTeamStandingsDisplayModel(
     override val season: Int,
     val league: FBLeague?,
     val standings: List<FBTeamStandingsDisplay>
-) : SportDisplayModel
+) : SportDisplayModel {
+    val groupStandings: Map<String, List<FBTeamStandingsDisplay>>
+        get() = if (leagueId == Constants.Ids.WORLD_CUP) {
+            standings.groupBy { standing ->
+                standing.group.replace("Group ", "")
+            }
+        } else {
+            emptyMap()
+        }
+}
 
 @Serializable
 data class FBTeamStandingsDisplay(
@@ -28,6 +38,7 @@ data class FBTeamStandingsDisplay(
     val goalsAgainst: FBHomeAwayIntStats,
     val rank: Int,
     val points: Int,
+    val group: String,
     override val displayRank: Int = 0 // 화면에서 순위 표시에 쓰이는 값
 ) : Rankable<FBTeamStandingsDisplay> {
     override fun withDisplayRank(rank: Int): FBTeamStandingsDisplay {

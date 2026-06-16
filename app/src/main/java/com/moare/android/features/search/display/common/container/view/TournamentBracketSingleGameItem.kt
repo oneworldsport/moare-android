@@ -31,8 +31,11 @@ import com.moare.android.core.constants.Constants
 import com.moare.android.core.util.CalendarUtil
 import com.moare.android.core.util.OutputTimeFormatType
 import com.moare.android.core.util.Util
+import com.moare.android.features.search.display.common.container.component.RoundDirection
 import com.moare.android.features.search.display.common.container.component.TournamentHBar
 import com.moare.android.features.search.display.common.container.component.TournamentVBar
+import com.moare.android.features.search.display.common.container.component.VerticalMetric
+import com.moare.android.features.search.display.common.container.component.verticalMetric
 import com.moare.android.features.search.models.models.common.GameForSchedule
 import com.moare.android.features.search.models.models.football.FBGameInfoForSchedule
 import com.moare.android.ui.common.components.CapsuleButton
@@ -49,6 +52,7 @@ import com.moare.android.ui.util.CenterRow
 fun <T> TournamentBracketSingleLeftGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
+    maxRound: Int,
     game: GameForSchedule<T>?,
     itemPosition: RoundSeriesKey, // ui상에서 시리즈의 위치 ex) 1라운드의 첫번째 시리즈면 1_1
     itemHeights: Map<RoundSeriesKey, Dp>,
@@ -93,62 +97,37 @@ fun <T> TournamentBracketSingleLeftGameItem(
         homeTeamPenaltyScore
     }
 
-    // function
-    fun h(r: Int, s: Int): Dp {
-        return itemHeights[RoundSeriesKey(r, s)] ?: 0.dp
-    }
-
-    fun topPadding(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            2 to 1 -> h(1, 1) / 2
-            2 to 2 -> h(1, 3) / 2
-            3 to 1 -> h(1, 1) + h(2, 1) / 2
-            4 to 1 -> h(1, 1) + h(2, 1) + h(3, 1) / 2
-            else -> 0.dp
-        }
-    }
-
-    fun topHeight(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            2 to 1 -> h(1, 1) / 2
-            2 to 2 -> h(1, 3) / 2
-            3 to 1 -> h(1, 2) + h(2, 1) / 2
-            4 to 1 -> h(3, 1) / 2 // NOTE: 일단은 KBO의 경우만 고려
-            else -> 0.dp
-        }
-    }
-
-    fun bottomPadding(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            2 to 1 -> h(1, 2) / 2
-            2 to 2 -> h(1, 4) / 2
-            3 to 1 -> h(1, 4) + h(2, 2) / 2
-            else -> 0.dp
-        }
-    }
-
-    fun bottomHeight(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            2 to 1 -> h(1, 2) / 2
-            2 to 2 -> h(1, 4) / 2
-            3 to 1 -> h(1, 3) + h(2, 2) / 2
-            else -> 0.dp
-        }
-    }
-
     CenterColumn(
         modifier = modifier.width(170.dp)
     ) {
-        Row {
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(top = topPadding())
-            ) {
-                TournamentHBar(75.dp)
-                TournamentVBar(topHeight())
-            }
+        if (itemPosition.round > 1) {
+            Row {
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.padding(top = verticalMetric(
+                        leagueId = leagueId,
+                        itemHeights = itemHeights,
+                        round = itemPosition.round,
+                        series = itemPosition.series,
+                        maxRound = maxRound,
+                        metric = VerticalMetric.TOP_PADDING,
+                        direction = RoundDirection.LEFT
+                    ))
+                ) {
+                    TournamentHBar(75.dp)
+                    TournamentVBar(verticalMetric(
+                        leagueId = leagueId,
+                        itemHeights = itemHeights,
+                        round = itemPosition.round,
+                        series = itemPosition.series,
+                        maxRound = maxRound,
+                        metric = VerticalMetric.TOP_HEIGHT,
+                        direction = RoundDirection.LEFT
+                    ))
+                }
 
-            Spacer(Modifier.weight(1f))
+                Spacer(Modifier.weight(1f))
+            }
         }
 
         CenterRow {
@@ -287,16 +266,34 @@ fun <T> TournamentBracketSingleLeftGameItem(
             }
         }
 
-        Row {
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(bottom = bottomPadding())
-            ) {
-                TournamentVBar(bottomHeight())
-                TournamentHBar(75.dp)
-            }
+        if (itemPosition.round > 1) {
+            Row {
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.padding(bottom = verticalMetric(
+                        leagueId = leagueId,
+                        itemHeights = itemHeights,
+                        round = itemPosition.round,
+                        series = itemPosition.series,
+                        maxRound = maxRound,
+                        metric = VerticalMetric.BOTTOM_PADDING,
+                        direction = RoundDirection.LEFT
+                    ))
+                ) {
+                    TournamentVBar(verticalMetric(
+                        leagueId = leagueId,
+                        itemHeights = itemHeights,
+                        round = itemPosition.round,
+                        series = itemPosition.series,
+                        maxRound = maxRound,
+                        metric = VerticalMetric.BOTTOM_HEIGHT,
+                        direction = RoundDirection.LEFT
+                    ))
+                    TournamentHBar(75.dp)
+                }
 
-            Spacer(Modifier.weight(1f))
+                Spacer(Modifier.weight(1f))
+            }
         }
     }
 }
@@ -305,6 +302,7 @@ fun <T> TournamentBracketSingleLeftGameItem(
 fun <T> TournamentBracketSingleRightGameItem(
     leagueId: Int,
     teamNameDic: Map<String, String>,
+    maxRound: Int,
     game: GameForSchedule<T>?,
     itemPosition: RoundSeriesKey, // ui상에서 시리즈의 위치 ex) 1라운드의 첫번째 시리즈면 1_1
     itemHeights: Map<RoundSeriesKey, Dp>,
@@ -349,47 +347,6 @@ fun <T> TournamentBracketSingleRightGameItem(
         homeTeamPenaltyScore
     }
 
-    // function
-    fun h(r: Int, s: Int): Dp {
-        return itemHeights[RoundSeriesKey(r, s)] ?: 0.dp
-    }
-
-    fun topPadding(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            6 to 1 -> h(7, 1) / 2
-            6 to 2 -> h(7, 3) / 2
-            5 to 1 -> h(7, 1) + h(6, 1) / 2
-            else -> 0.dp
-        }
-    }
-
-    fun topHeight(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            6 to 1 -> h(7, 1) / 2
-            6 to 2 -> h(7, 3) / 2
-            5 to 1 -> h(7, 2) + h(6, 1) / 2
-            else -> 0.dp
-        }
-    }
-
-    fun bottomPadding(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            6 to 1 -> h(7, 2) / 2
-            6 to 2 -> h(7, 4) / 2
-            5 to 1 -> h(7, 4) + h(6, 2) / 2
-            else -> 0.dp
-        }
-    }
-
-    fun bottomHeight(): Dp {
-        return when (itemPosition.round to itemPosition.series) {
-            6 to 1 -> h(7, 2) / 2
-            6 to 2 -> h(7, 4) / 2
-            5 to 1 -> h(7, 3) + h(6, 2) / 2
-            else -> 0.dp
-        }
-    }
-
     CenterColumn(
         modifier = modifier.width(170.dp)
     ) {
@@ -398,10 +355,26 @@ fun <T> TournamentBracketSingleRightGameItem(
 
             Column(
                 horizontalAlignment = Alignment.Start,
-                modifier = Modifier.padding(top = topPadding())
+                modifier = Modifier.padding(top = verticalMetric(
+                    leagueId = leagueId,
+                    itemHeights = itemHeights,
+                    round = itemPosition.round,
+                    series = itemPosition.series,
+                    maxRound = maxRound,
+                    metric = VerticalMetric.TOP_PADDING,
+                    direction = RoundDirection.RIGHT
+                ))
             ) {
                 TournamentHBar(75.dp)
-                TournamentVBar(topHeight())
+                TournamentVBar(verticalMetric(
+                    leagueId = leagueId,
+                    itemHeights = itemHeights,
+                    round = itemPosition.round,
+                    series = itemPosition.series,
+                    maxRound = maxRound,
+                    metric = VerticalMetric.TOP_HEIGHT,
+                    direction = RoundDirection.RIGHT
+                ))
             }
         }
 
@@ -546,9 +519,25 @@ fun <T> TournamentBracketSingleRightGameItem(
 
             Column(
                 horizontalAlignment = Alignment.Start,
-                modifier = Modifier.padding(bottom = bottomPadding())
+                modifier = Modifier.padding(bottom = verticalMetric(
+                    leagueId = leagueId,
+                    itemHeights = itemHeights,
+                    round = itemPosition.round,
+                    series = itemPosition.series,
+                    maxRound = maxRound,
+                    metric = VerticalMetric.BOTTOM_PADDING,
+                    direction = RoundDirection.RIGHT
+                ))
             ) {
-                TournamentVBar(bottomHeight())
+                TournamentVBar(verticalMetric(
+                    leagueId = leagueId,
+                    itemHeights = itemHeights,
+                    round = itemPosition.round,
+                    series = itemPosition.series,
+                    maxRound = maxRound,
+                    metric = VerticalMetric.BOTTOM_HEIGHT,
+                    direction = RoundDirection.RIGHT
+                ))
                 TournamentHBar(75.dp)
             }
         }

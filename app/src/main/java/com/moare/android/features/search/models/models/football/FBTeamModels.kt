@@ -23,10 +23,12 @@ data class FBTeamStats(
     val penalty: FBTeamStatsPenalty,
     @SerialName("rank") val _rank: Int? = null,
     @SerialName("points") val _points: Int? = null,
+    @SerialName("group") val _group: String? = null,
 ) {
     val form: String get() = _form ?: ""
     val rank: Int get() = _rank ?: 0
     val points: Int get() = _points ?: 0
+    val group: String get() = _group ?: ""
 }
 
 @Serializable
