@@ -54,8 +54,14 @@ class FBTeamStandingsStore @AssistedInject constructor(
     private var _standings = MutableStateFlow<List<FBTeamStandingsDisplay>>(emptyList())
     val standings: StateFlow<List<FBTeamStandingsDisplay>> = _standings
 
+    private var _groupStandings = MutableStateFlow<Map<String, List<FBTeamStandingsDisplay>>>(emptyMap())
+    val groupStandings: StateFlow<Map<String, List<FBTeamStandingsDisplay>>> = _groupStandings
+
     private var _isMLS = MutableStateFlow(false)
     val isMLS: StateFlow<Boolean> = _isMLS
+
+    private var _isGroupStandings = MutableStateFlow(false)
+    val isGroupStandings: StateFlow<Boolean> = _isGroupStandings
 
     @AssistedFactory
     interface Factory {
@@ -82,57 +88,82 @@ class FBTeamStandingsStore @AssistedInject constructor(
         // init data
         _standings.value = displayModel.value.standings
         _isMLS.value = displayModel.value.leagueId == Constants.Ids.MLS
+        _isGroupStandings.value = displayModel.value.leagueId == Constants.Ids.WORLD_CUP
+        _groupStandings.value = displayModel.value.groupStandings
 
-        if (isMLS.value) {
+        if (isMLS.value || isGroupStandings.value) {
             selectHeaderCategory(index = 0, isInit = true)
         } else {
-            sortStandings()
+            if (isGroupStandings.value) {
+                sortGroupStandings()
+            } else {
+                sortStandings()
+            }
         }
     }
 
     override fun selectHeaderCategory(index: Int, isInit: Boolean) {
         super.selectHeaderCategory(index, isInit)
 
-        val standings = if (isInit) {
-            val entityTeam = displayModel.value.standings.firstOrNull { team ->
-                // Any first team that matches with any team in entityInfo
-                displayModel.value.entityInfo.firstOrNull { it.teamId == team.team.id } != null
-            }
+        if (isGroupStandings.value) {
+            val firstGroup = listOf("A", "B", "C", "D", "E", "F")
+            val secondGroup = listOf("G", "H", "I", "J", "K", "L")
 
-            // When init, if entity's conference is east, set index 1.
-            // Otherwise do nothing, which would be set as default(0).
-            if (Constants.Ids.MLSTeam.eastConference.contains(entityTeam?.team?.id)) {
-                _headerCategorySelectedIndex.value = 1
-            }
-
-            displayModel.value.standings.filter {
-                if (entityTeam != null) {
-                    Constants.Ids.MLSTeam.eastConference.contains(it.team.id)
-                } else {
-                    Constants.Ids.MLSTeam.westConference.contains(it.team.id)
-                }
-            }
-        } else {
-            _headerCategorySelectedIndex.value = index
-
-            displayModel.value.standings.filter {
+            _groupStandings.value = displayModel.value.groupStandings.filter { (key, _) ->
                 if (index == 0) {
-                    Constants.Ids.MLSTeam.westConference.contains(it.team.id)
+                    firstGroup.contains(key)
                 } else {
-                    Constants.Ids.MLSTeam.eastConference.contains(it.team.id)
+                    secondGroup.contains(key)
                 }
             }
+
+            sortGroupStandings()
+        } else {
+            val standings = if (isInit) {
+                val entityTeam = displayModel.value.standings.firstOrNull { team ->
+                    // Any first team that matches with any team in entityInfo
+                    displayModel.value.entityInfo.firstOrNull { it.teamId == team.team.id } != null
+                }
+
+                // When init, if entity's conference is east, set index 1.
+                // Otherwise do nothing, which would be set as default(0).
+                if (Constants.Ids.MLSTeam.eastConference.contains(entityTeam?.team?.id)) {
+                    _headerCategorySelectedIndex.value = 1
+                }
+
+                displayModel.value.standings.filter {
+                    if (entityTeam != null) {
+                        Constants.Ids.MLSTeam.eastConference.contains(it.team.id)
+                    } else {
+                        Constants.Ids.MLSTeam.westConference.contains(it.team.id)
+                    }
+                }
+            } else {
+                _headerCategorySelectedIndex.value = index
+
+                displayModel.value.standings.filter {
+                    if (index == 0) {
+                        Constants.Ids.MLSTeam.westConference.contains(it.team.id)
+                    } else {
+                        Constants.Ids.MLSTeam.eastConference.contains(it.team.id)
+                    }
+                }
+            }
+
+            _standings.value = standings
+
+            sortStandings()
         }
-
-        _standings.value = standings
-
-        sortStandings()
     }
 
     override fun selectCategory(index: Int) {
         super.selectCategory(index)
 
-        sortStandings()
+        if (isGroupStandings.value) {
+            sortGroupStandings()
+        } else {
+            sortStandings()
+        }
     }
 
     private fun sortStandings() {
@@ -228,6 +259,35 @@ class FBTeamStandingsStore @AssistedInject constructor(
         }
     }
 
+    private fun sortGroupStandings() {
+        when (categorySelectedIndex.value) {
+            0 -> {
+                updateGroupStandings(false) { it.rank.toFloat() }
+            }
+            1 -> {
+                updateGroupStandings(true) { it.homeAwayStats.wins.total.toFloat() }
+            }
+            2 -> {
+                updateGroupStandings(true) { it.homeAwayStats.draws.total.toFloat() }
+            }
+            3 -> {
+                updateGroupStandings(false) { it.homeAwayStats.loses.total.toFloat() }
+            }
+            4 -> {
+                updateGroupStandings(true) { it.homeAwayStats.played.total.toFloat() }
+            }
+            5 -> {
+                updateGroupStandings(true) { it.goalsFor.total.toFloat() }
+            }
+            6 -> {
+                updateGroupStandings(false) { it.goalsAgainst.total.toFloat() }
+            }
+            7 -> {
+                updateGroupStandings(true) { (it.goalsFor.total - it.goalsAgainst.total).toFloat() }
+            }
+        }
+    }
+
     private fun showTeamStats(id: Int) {
         if (responseModel.standings is FBTeamStandingsSource.Db) {
             val team = responseModel.standings.teams.find { team ->
@@ -290,6 +350,28 @@ class FBTeamStandingsStore @AssistedInject constructor(
 
         _standings.update { current ->
             current.withCompetitionRankBy(value)
+        }
+    }
+
+    private fun updateGroupStandings(
+        isDescending: Boolean,
+        value: (FBTeamStandingsDisplay) -> Float?
+    ) {
+        _groupStandings.update {
+            if (isDescending) {
+                it.mapValues { (_, standings) ->
+                    standings.sortedByDescending(value)
+                }
+            } else {
+                it.mapValues { (_, standings) ->
+                    standings.sortedBy(value)
+                }
+            }
+        }
+        _groupStandings.update {
+            it.mapValues { (_, standings) ->
+                standings.withCompetitionRankBy(value)
+            }
         }
     }
 }

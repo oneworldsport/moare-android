@@ -223,6 +223,7 @@ fun <T> TournamentBracketViewContainer(
                                 TournamentBracketSingleLeftGameItem(
                                     leagueId = state.leagueId,
                                     teamNameDic = state.teamNameDic,
+                                    maxRound = maxRound,
                                     game = games?.firstOrNull(),
                                     itemPosition = RoundSeriesKey(
                                         roundIndexForPosition,
@@ -316,6 +317,7 @@ fun <T> TournamentBracketViewContainer(
                                     TournamentBracketSingleRightGameItem(
                                         leagueId = state.leagueId,
                                         teamNameDic = state.teamNameDic,
+                                        maxRound = maxRound,
                                         game = games?.firstOrNull(),
                                         itemPosition = RoundSeriesKey(
                                             roundIndexForPosition,
