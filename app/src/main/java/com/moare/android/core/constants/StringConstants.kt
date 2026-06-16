@@ -47,6 +47,7 @@ object StringConstants {
         val GAME_FINISHED_LIST = listOf(GAME_FINISHED, GAME_FINISHED_AFTER_EXTRA_TIME, GAME_FINISHED_AFTER_PENALTY_SHOOTOUT)
 
         val TEAM_STANDINGS_CATEGORIES = listOf("승점", "승", "무", "패", "경기수", "득점", "실점", "득실차", "홈성적", "원정성적")
+        val TEAM_GROUP_STANDINGS_CATEGORIES = listOf("승점", "승", "무", "패", "경기수", "득점", "실점", "득실차")
 
         val PLAYER_STANDINGS_ATTACK_CATEGORIES = listOf("득점", "도움", "공격포인트", "슈팅", "유효슈팅", "키패스", "드리블 성공", "pk골")
         val PLAYER_STANDINGS_DEFEND_CATEGORIES = listOf("태클 시도", "볼 경합 성공")
