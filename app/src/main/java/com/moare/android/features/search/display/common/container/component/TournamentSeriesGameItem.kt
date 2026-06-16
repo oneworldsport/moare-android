@@ -193,7 +193,8 @@ fun <T> TournamentSeriesLeftGameItem(
 
                                 with(density) {
                                     itemHeight = size.height.toDp()
-                                    onItemHeightChange(itemPosition, size.height.toDp())
+                                    // UEFALeague는 itemHeights에 scoreTitleHeight를 더한 값을 넣는다.
+                                    onItemHeightChange(itemPosition, if (isUEFALeague) (size.height.toDp() + 16.dp) else size.height.toDp())
                                 }
                             }
                     ) {
@@ -390,7 +391,7 @@ fun <T> TournamentSeriesLeftGameItem(
                 }
             }
 
-            if (itemPosition.round == 2 || itemPosition.round == 3) {
+            if (itemPosition.round > 1) {
                 Row {
                     Column(
                         horizontalAlignment = Alignment.End,
@@ -1011,7 +1012,8 @@ fun verticalMetric(
     metric: VerticalMetric,
     direction: RoundDirection
 ): Dp {
-    val isUEFALeague = Constants.Ids.FOOTBALL_UEFA_LEAGUES.contains(leagueId)
+    // TODO: UEFALeague의 경우 합산 스코어 까지 합한 itemHeight의 절반 높이로 topPadding, bottomHeight가 측정돼서 약간 어긋남.
+//    val isUEFALeague = Constants.Ids.FOOTBALL_UEFA_LEAGUES.contains(leagueId)
 
     fun h(r: Int, s: Int): Dp {
         return itemHeights[RoundSeriesKey(round = r, series = s)] ?: 0.dp
@@ -1085,12 +1087,6 @@ fun verticalMetric(
     }
 
     result += h(halfRound, halfB) / 2
-
-    if (isUEFALeague &&
-        direction == RoundDirection.LEFT &&
-        metric == VerticalMetric.TOP_PADDING) {
-        result += 16.dp
-    }
 
     return result
 }
